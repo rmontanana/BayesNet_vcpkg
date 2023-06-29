@@ -17,7 +17,14 @@ namespace bayesnet {
     {
         parents.push_back(parent);
     }
-
+    void Node::removeParent(Node* parent)
+    {
+        parents.erase(std::remove(parents.begin(), parents.end(), parent), parents.end());
+    }
+    void Node::removeChild(Node* child)
+    {
+        children.erase(std::remove(children.begin(), children.end(), child), children.end());
+    }
     void Node::addChild(Node* child)
     {
         children.push_back(child);

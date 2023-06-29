@@ -15,14 +15,16 @@ namespace bayesnet {
         int numStates;
         torch::Tensor cpt;
     public:
-        Node(const std::string& name, int numStates);
-        void addParent(Node* parent);
-        void addChild(Node* child);
+        Node(const std::string&, int);
+        void addParent(Node*);        
+        void addChild(Node*);
+        void removeParent(Node*);
+        void removeChild(Node*);
         string getName() const;
         vector<Node*>& getParents();
         vector<Node*>& getChildren();
         torch::Tensor& getCPT();
-        void setCPT(const torch::Tensor& cpt);
+        void setCPT(const torch::Tensor&);
         int getNumStates() const;
         int getId() const { return id; }
         string getCPDKey(const Node*) const;

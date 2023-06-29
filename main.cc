@@ -26,6 +26,13 @@ int main()
     }
     cout << "Hello, Bayesian Networks!" << endl;
     torch::Tensor tensor = torch::eye(3);
+    cout << "Now I'll add a cycle" << endl;
+    try {
+        network.addEdge("petallength", className);
+    }
+    catch (invalid_argument& e) {
+        cout << e.what() << endl;
+    }
     cout << tensor << std::endl;
     cout << "Nodes:" << endl;
     for (auto [name, item] : network.getNodes()) {
@@ -39,5 +46,9 @@ int main()
             cout << " " << child->getName() << endl;
         }
     }
+    cout << "Root: " << network.getRoot()->getName() << endl;
+    network.setRoot(className);
+    cout << "Now Root should be class: " << network.getRoot()->getName() << endl;
+
     return 0;
 }
