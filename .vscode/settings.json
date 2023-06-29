@@ -82,5 +82,7 @@
         "utility": "cpp",
         "__verbose_abort": "cpp",
         "bit": "cpp"
-    }
+    },
+    "cmake.configureOnOpen": false,
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
 }

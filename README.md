@@ -1,3 +1,3 @@
 # BayesNet
 
-Trying to implement Bayesian Network inference with Torchlib from scratch
+Trying to implement Bayesian Network inference with libtorch from scratch
