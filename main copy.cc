@@ -3,44 +3,40 @@
 #include <torch/torch.h>
 #include "ArffFiles.h"
 #include "Network.h"
-#include "CPPFImdlp.h"
-
 
 using namespace std;
-
-vector<mdlp::labels_t> discretize(vector<mdlp::samples_t>& X, mdlp::labels_t& y)
-{
-    vector<mdlp::labels_t>Xd;
-    auto fimdlp = mdlp::CPPFImdlp();
-    for (int i = 0; i < X.size(); i++) {
-        fimdlp.fit(X[i], y);
-        Xd.push_back(fimdlp.transform(X[i]));
-    }
-    return Xd;
-}
 
 int main()
 {
     auto handler = ArffFiles();
     handler.load("iris.arff");
-    // Get Dataset X, y
-    vector<mdlp::samples_t>& X = handler.getX();
-    mdlp::labels_t& y = handler.getY();
-    // Get className & Features
+    auto X = handler.getX();
+    auto y = handler.getY();
     auto className = handler.getClassName();
-    vector<string> features;
-    for (auto feature : handler.getAttributes()) {
-        features.push_back(feature.first);
-    }
-    // Discretize Dataset
-    vector<mdlp::labels_t> Xd = discretize(X, y);;
-    // Build Network    
+    vector<pair<string, string>> edges = { {className, "sepallength"}, {className, "sepalwidth"}, {className, "petallength"}, {className, "petalwidth"} };
     auto network = bayesnet::Network();
-    network.fit(Xd, y, features, className);
+    // Add nodes to the network
+    for (auto feature : handler.getAttributes()) {
+        cout << "Adding feature: " << feature.first << endl;
+        network.addNode(feature.first, 7);
+    }
+    network.addNode(className, 3);
+    for (auto item : edges) {
+        network.addEdge(item.first, item.second);
+    }
     cout << "Hello, Bayesian Networks!" << endl;
+    torch::Tensor tensor = torch::eye(3);
+    cout << "Now I'll add a cycle" << endl;
+    try {
+        network.addEdge("petallength", className);
+    }
+    catch (invalid_argument& e) {
+        cout << e.what() << endl;
+    }
+    cout << tensor << std::endl;
     cout << "Nodes:" << endl;
     for (auto [name, item] : network.getNodes()) {
-        cout << "*" << item->getName() << " -> " << item->getNumStates() << endl;
+        cout << "*" << item->getName() << endl;
         cout << "-Parents:" << endl;
         for (auto parent : item->getParents()) {
             cout << " " << parent->getName() << endl;

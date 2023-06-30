@@ -81,7 +81,12 @@
         "*.toml": "toml",
         "utility": "cpp",
         "__verbose_abort": "cpp",
-        "bit": "cpp"
+        "bit": "cpp",
+        "random": "cpp",
+        "*.tcc": "cpp",
+        "functional": "cpp",
+        "iterator": "cpp",
+        "memory_resource": "cpp"
     },
     "cmake.configureOnOpen": false,
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
