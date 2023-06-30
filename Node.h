@@ -12,11 +12,12 @@ namespace bayesnet {
         string name;
         vector<Node*> parents;
         vector<Node*> children;
+        torch::Tensor cpTable;
         int numStates;
         torch::Tensor cpt;
     public:
         Node(const std::string&, int);
-        void addParent(Node*);        
+        void addParent(Node*);
         void addChild(Node*);
         void removeParent(Node*);
         void removeChild(Node*);
@@ -27,7 +28,6 @@ namespace bayesnet {
         void setCPT(const torch::Tensor&);
         int getNumStates() const;
         int getId() const { return id; }
-        string getCPDKey(const Node*) const;
     };
 }
 #endif

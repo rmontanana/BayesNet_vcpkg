@@ -37,6 +37,7 @@ namespace mdlp {
         y = y_;
         num_cut_points = compute_max_num_cut_points();
         depth = 0;
+        discretizedData.clear();
         cutPoints.clear();
         if (X.size() != y.size()) {
             throw invalid_argument("X and y must have the same size");

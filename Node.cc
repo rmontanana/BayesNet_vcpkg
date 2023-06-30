@@ -41,8 +41,12 @@ namespace bayesnet {
     {
         return numStates;
     }
-    string Node::getCPDKey(const Node* child) const
+    torch::Tensor& Node::getCPT()
     {
-        return name + "-" + child->getName();
+        return cpt;
+    }
+    void Node::setCPT(const torch::Tensor& cpt)
+    {
+        this->cpt = cpt;
     }
 }
