@@ -24,30 +24,37 @@
 
 int main()
 {
-    torch::Tensor t = torch::rand({ 5, 4, 3 }); // 3D tensor for this example
-    int i = 3, j = 1, k = 2; // Indices for the cell you want to update
+    //torch::Tensor t = torch::rand({ 5, 4, 3 }); // 3D tensor for this example
+    //int i = 3, j = 1, k = 2; // Indices for the cell you want to update
     // Print original tensor
+    torch::Tensor t = torch::tensor({ {1, 2, 3}, {4, 5, 6} }); // 3D tensor for this example
     std::cout << t << std::endl;
+    std::cout << "sum(0)" << std::endl;
+    std::cout << t.sum(0) << std::endl;
+    std::cout << "sum(1)" << std::endl;
+    std::cout << t.sum(1) << std::endl;
+    std::cout << "Normalized" << std::endl;
+    std::cout << t / t.sum(0) << std::endl;
 
     // New value
-    torch::Tensor new_val = torch::tensor(10.0f);
+    // torch::Tensor new_val = torch::tensor(10.0f);
 
-    // Indices for the cell you want to update
-    std::vector<torch::Tensor> indices;
-    indices.push_back(torch::tensor(i)); // Replace i with your index for the 1st dimension
-    indices.push_back(torch::tensor(j)); // Replace j with your index for the 2nd dimension
-    indices.push_back(torch::tensor(k)); // Replace k with your index for the 3rd dimension
-    //torch::ArrayRef<at::indexing::TensorIndex> indices_ref(indices);
-    // Update cell
-    //torch::Tensor result = torch::stack(indices);
-    //torch::List<c10::optional<torch::Tensor>> indices_list = { torch::tensor(i), torch::tensor(j), torch::tensor(k) };
-    torch::List<c10::optional<torch::Tensor>> indices_list;
-    indices_list.push_back(torch::tensor(i));
-    indices_list.push_back(torch::tensor(j));
-    indices_list.push_back(torch::tensor(k));
-    //t.index_put_({ torch::tensor(i), torch::tensor(j), torch::tensor(k) }, new_val);
-    t.index_put_(indices_list, new_val);
+    // // Indices for the cell you want to update
+    // std::vector<torch::Tensor> indices;
+    // indices.push_back(torch::tensor(i)); // Replace i with your index for the 1st dimension
+    // indices.push_back(torch::tensor(j)); // Replace j with your index for the 2nd dimension
+    // indices.push_back(torch::tensor(k)); // Replace k with your index for the 3rd dimension
+    // //torch::ArrayRef<at::indexing::TensorIndex> indices_ref(indices);
+    // // Update cell
+    // //torch::Tensor result = torch::stack(indices);
+    // //torch::List<c10::optional<torch::Tensor>> indices_list = { torch::tensor(i), torch::tensor(j), torch::tensor(k) };
+    // torch::List<c10::optional<torch::Tensor>> indices_list;
+    // indices_list.push_back(torch::tensor(i));
+    // indices_list.push_back(torch::tensor(j));
+    // indices_list.push_back(torch::tensor(k));
+    // //t.index_put_({ torch::tensor(i), torch::tensor(j), torch::tensor(k) }, new_val);
+    // t.index_put_(indices_list, new_val);
 
-    // Print updated tensor
-    std::cout << t << std::endl;
+    // // Print updated tensor
+    // std::cout << t << std::endl;
 }
