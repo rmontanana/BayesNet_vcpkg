@@ -174,6 +174,9 @@ void build_network(bayesnet::Network& network, string network_name, map<string, 
     ifstream file(network_name);
     string line;
     while (getline(file, line)) {
+        if (line[0] == '#') {
+            continue;
+        }
         istringstream iss(line);
         string parent, child;
         if (!(iss >> parent >> child)) {
@@ -214,8 +217,8 @@ int main(int argc, char** argv)
     network.fit(Xd, y, features, className);
     cout << "Hello, Bayesian Networks!" << endl;
     showNodesInfo(network, className);
-    // showCPDS(network);
-    cout << "Score: " << network.score(Xd, y) << endl;
+    showCPDS(network);
+    //cout << "Score: " << network.score(Xd, y) << endl;
     cout << "PyTorch version: " << TORCH_VERSION << endl;
     return 0;
 }
