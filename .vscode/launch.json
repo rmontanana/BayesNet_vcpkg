@@ -6,7 +6,10 @@
             "request": "launch",
             "name": "bayesnet",
             "program": "${workspaceFolder}/build/sample/main",
-            "args": [],
+            "args": [
+                "-f",
+                "iris"
+            ],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "CMake: build"
         },

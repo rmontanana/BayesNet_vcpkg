@@ -27,6 +27,7 @@ namespace bayesnet {
         torch::Tensor& getCPT();
         void setCPT(const torch::Tensor&);
         int getNumStates() const;
+        void setNumStates(int);
         int getId() const { return id; }
     };
 }

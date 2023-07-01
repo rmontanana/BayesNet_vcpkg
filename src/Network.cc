@@ -11,7 +11,9 @@ namespace bayesnet {
     void Network::addNode(string name, int numStates)
     {
         if (nodes.find(name) != nodes.end()) {
-            throw invalid_argument("Node " + name + " already exists");
+            // if node exists update its number of states
+            nodes[name]->setNumStates(numStates);
+            return;
         }
         nodes[name] = new Node(name, numStates);
         if (root == nullptr) {
@@ -63,6 +65,7 @@ namespace bayesnet {
         {
             // remove problematic edge
             nodes[parent]->removeChild(nodes[child]);
+
             nodes[child]->removeParent(nodes[parent]);
             throw invalid_argument("Adding this edge forms a cycle in the graph.");
         }
@@ -71,20 +74,6 @@ namespace bayesnet {
     map<string, Node*>& Network::getNodes()
     {
         return nodes;
-    }
-    void Network::buildNetwork()
-    {
-        // Add features as nodes to the network
-        for (int i = 0; i < features.size(); ++i) {
-            addNode(features[i], *max_element(dataset[features[i]].begin(), dataset[features[i]].end()) + 1);
-        }
-        // Add class as node to the network
-        addNode(className, *max_element(dataset[className].begin(), dataset[className].end()) + 1);
-        // Add edges from class to features => naive Bayes
-        for (auto feature : features) {
-            addEdge(className, feature);
-        }
-        addEdge("petalwidth", "petallength");
     }
     void Network::fit(const vector<vector<int>>& dataset, const vector<int>& labels, const vector<string>& featureNames, const string& className)
     {
@@ -95,7 +84,6 @@ namespace bayesnet {
             this->dataset[featureNames[i]] = dataset[i];
         }
         this->dataset[className] = labels;
-        buildNetwork();
         estimateParameters();
     }
 
@@ -127,5 +115,83 @@ namespace bayesnet {
             // store thre resulting cpt in the node
             node->setCPT(cpt);
         }
+    }
+    pair<int, double> Network::predict_sample(const vector<int>& sample)
+    {
+        // Ensure the sample size is equal to the number of features
+        if (sample.size() != features.size()) {
+            throw std::invalid_argument("Sample size (" + to_string(sample.size()) +
+                ") does not match the number of features (" + to_string(features.size()) + ")");
+        }
+
+        // Map the feature values to their corresponding nodes
+        map<string, int> featureValues;
+        for (int i = 0; i < features.size(); ++i) {
+            featureValues[features[i]] = sample[i];
+        }
+
+        // For each possible class, calculate the posterior probability
+        Node* classNode = nodes[className];
+        int numClassStates = classNode->getNumStates();
+        std::vector<double> classProbabilities(numClassStates, 0.0);
+        for (int classState = 0; classState < numClassStates; ++classState) {
+            // Start with the prior probability of the class
+            classProbabilities[classState] = classNode->getCPT()[classState].item<double>();
+
+            // Multiply by the likelihood of each feature given the class
+            for (auto& pair : nodes) {
+                if (pair.first != className) {
+                    Node* node = pair.second;
+                    int featureValue = featureValues[pair.first];
+
+                    // We use the class as the parent state to index into the CPT
+                    classProbabilities[classState] *= node->getCPT()[classState][featureValue].item<double>();
+                }
+            }
+        }
+
+        // Find the class with the maximum posterior probability
+        auto maxElem = std::max_element(classProbabilities.begin(), classProbabilities.end());
+        int predictedClass = std::distance(classProbabilities.begin(), maxElem);
+        double maxProbability = *maxElem;
+
+        return std::make_pair(predictedClass, maxProbability);
+    }
+    vector<int> Network::predict(const vector<vector<int>>& samples)
+    {
+        vector<int> predictions;
+        vector<int> sample;
+        for (int row = 0; row < samples[0].size(); ++row) {
+            sample.clear();
+            for (int col = 0; col < samples.size(); ++col) {
+                sample.push_back(samples[col][row]);
+            }
+            predictions.push_back(predict_sample(sample).first);
+        }
+        return predictions;
+    }
+    vector<pair<int, double>> Network::predict_proba(const vector<vector<int>>& samples)
+    {
+        vector<pair<int, double>> predictions;
+        vector<int> sample;
+        for (int row = 0; row < samples[0].size(); ++row) {
+            sample.clear();
+            for (int col = 0; col < samples.size(); ++col) {
+                sample.push_back(samples[col][row]);
+            }
+            predictions.push_back(predict_sample(sample));
+        }
+        return predictions;
+    }
+    double Network::score(const vector<vector<int>>& samples, const vector<int>& labels)
+    {
+        vector<int> y_pred = predict(samples);
+        int correct = 0;
+        for (int i = 0; i < y_pred.size(); ++i) {
+            if (y_pred[i] == labels[i]) {
+                correct++;
+            }
+        }
+        return (double)correct / y_pred.size();
     }
 }

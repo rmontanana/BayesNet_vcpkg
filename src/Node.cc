@@ -41,6 +41,10 @@ namespace bayesnet {
     {
         return numStates;
     }
+    void Node::setNumStates(int numStates)
+    {
+        this->numStates = numStates;
+    }
     torch::Tensor& Node::getCPT()
     {
         return cpt;

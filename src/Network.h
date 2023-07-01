@@ -15,6 +15,7 @@ namespace bayesnet {
         string className;
         int laplaceSmoothing;
         bool isCyclic(const std::string&, std::unordered_set<std::string>&, std::unordered_set<std::string>&);
+        pair<int, double> predict_sample(const vector<int>&);
     public:
         Network();
         Network(int);
@@ -24,9 +25,11 @@ namespace bayesnet {
         map<string, Node*>& getNodes();
         void fit(const vector<vector<int>>&, const vector<int>&, const vector<string>&, const string&);
         void estimateParameters();
-        void buildNetwork();
         void setRoot(string);
         Node* getRoot();
+        vector<int> predict(const vector<vector<int>>&);
+        vector<pair<int, double>> predict_proba(const vector<vector<int>>&);
+        double score(const vector<vector<int>>&, const vector<int>&);
     };
 }
 #endif
