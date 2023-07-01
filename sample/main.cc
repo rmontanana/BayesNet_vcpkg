@@ -27,7 +27,7 @@ vector<mdlp::labels_t> discretize(vector<mdlp::samples_t>& X, mdlp::labels_t& y)
 int main()
 {
     auto handler = ArffFiles();
-    handler.load("iris.arff");
+    handler.load("data/iris.arff");
     // Get Dataset X, y
     vector<mdlp::samples_t>& X = handler.getX();
     mdlp::labels_t& y = handler.getY();

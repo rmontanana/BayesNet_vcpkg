@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(bayesnet)
+project(BayesNet)
 find_package(Torch REQUIRED)
 
 if (POLICY CMP0135)
@@ -10,8 +10,5 @@ endif ()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
-# add_library(BayesNet Node.cc Network.cc)
-add_executable(BayesNet main.cc ArffFiles.cc Node.cc Network.cc CPPFImdlp.cpp Metrics.cpp)
-add_executable(test test.cc)
-target_link_libraries(BayesNet "${TORCH_LIBRARIES}")
-target_link_libraries(test "${TORCH_LIBRARIES}")
+add_subdirectory(src)
+add_subdirectory(sample)

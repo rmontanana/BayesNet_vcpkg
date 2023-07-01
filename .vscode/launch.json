@@ -5,7 +5,7 @@
             "type": "lldb",
             "request": "launch",
             "name": "bayesnet",
-            "program": "${workspaceFolder}/build/bayesnet",
+            "program": "${workspaceFolder}/build/sample/main",
             "args": [],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "CMake: build"
