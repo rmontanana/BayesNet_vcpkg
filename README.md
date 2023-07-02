@@ -25,6 +25,7 @@ The process is repeated until there are no more variables to eliminate.
 
 ## Code for combination
 
+```cpp
 // Combinations of length 2
 vector<string> combinations(vector<string> source)
 {
@@ -37,3 +38,75 @@ vector<string> combinations(vector<string> source)
     }
     return result;
 }
+```
+
+## Code for Variable Elimination
+
+```cpp
+// Variable Elimination
+vector<string> variableElimination(vector<string> source, map<string, vector<string>> graph)
+{
+    vector<string> variables = source;
+    vector<string> factors = source;
+    while (variables.size() > 0) {
+        string variable = minFill(variables, graph);
+        vector<string> neighbors = graph[variable];
+        vector<string> combinations = combinations(neighbors);
+        vector<string> factorsToMultiply;
+        for (int i = 0; i < factors.size(); ++i) {
+            string factor = factors[i];
+            for (int j = 0; j < combinations.size(); ++j) {
+                string combination = combinations[j];
+                if (factor.find(combination) != string::npos) {
+                    factorsToMultiply.push_back(factor);
+                    break;
+                }
+            }
+        }
+        string newFactor = multiplyFactors(factorsToMultiply);
+        factors.push_back(newFactor);
+        variables.erase(remove(variables.begin(), variables.end(), variable), variables.end());
+    }
+    return factors;
+}
+```
+
+## Network copy constructor
+
+```cpp
+// Network copy constructor
+Network::Network(const Network& network)
+{
+    this->variables = network.variables;
+    this->factors = network.factors;
+    this->graph = network.graph;
+}
+```
+
+## Code for MinFill
+
+```cpp
+// MinFill
+string minFill(vector<string> source, map<string, vector<string>> graph)
+{
+    string result;
+    int min = INT_MAX;
+    for (int i = 0; i < source.size(); ++i) {
+        string temp = source[i];
+        int count = 0;
+        vector<string> neighbors = graph[temp];
+        vector<string> combinations = combinations(neighbors);
+        for (int j = 0; j < combinations.size(); ++j) {
+            string combination = combinations[j];
+            if (graph[combination].size() == 0) {
+                count++;
+            }
+        }
+        if (count < min) {
+            min = count;
+            result = temp;
+        }
+    }
+    return result;
+}
+```

@@ -2,6 +2,12 @@
 namespace bayesnet {
     Network::Network() : laplaceSmoothing(1), root(nullptr), features(vector<string>()), className("") {}
     Network::Network(int smoothing) : laplaceSmoothing(smoothing), root(nullptr), features(vector<string>()), className("") {}
+    Network::Network(Network& other) : laplaceSmoothing(other.laplaceSmoothing), root(other.root), features(other.features), className(other.className)
+    {
+        for (auto& pair : other.nodes) {
+            nodes[pair.first] = new Node(*pair.second);
+        }
+    }
     Network::~Network()
     {
         for (auto& pair : nodes) {
