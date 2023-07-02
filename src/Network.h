@@ -19,6 +19,7 @@ namespace bayesnet {
     public:
         Network();
         Network(int);
+        Network(Network&);
         ~Network();
         void addNode(string, int);
         void addEdge(const string, const string);
