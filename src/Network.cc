@@ -1,4 +1,5 @@
 #include "Network.h"
+#include "ExactInference.h"
 namespace bayesnet {
     Network::Network() : laplaceSmoothing(1), root(nullptr), features(vector<string>()), className("") {}
     Network::Network(int smoothing) : laplaceSmoothing(smoothing), root(nullptr), features(vector<string>()), className("") {}
@@ -25,6 +26,10 @@ namespace bayesnet {
         if (root == nullptr) {
             root = nodes[name];
         }
+    }
+    vector<string> Network::getFeatures()
+    {
+        return features;
     }
     void Network::setRoot(string name)
     {
@@ -120,37 +125,7 @@ namespace bayesnet {
             node->setCPT(cpt);
         }
     }
-    // pair<int, double> Network::predict_sample(const vector<int>& sample)
-    // {
 
-
-    //     // For each possible class, calculate the posterior probability
-    //     Node* classNode = nodes[className];
-    //     int numClassStates = classNode->getNumStates();
-    //     vector<double> classProbabilities(numClassStates, 0.0);
-    //     for (int classState = 0; classState < numClassStates; ++classState) {
-    //         // Start with the prior probability of the class
-    //         classProbabilities[classState] = classNode->getCPT()[classState].item<double>();
-
-    //         // Multiply by the likelihood of each feature given the class
-    //         for (auto& pair : nodes) {
-    //             if (pair.first != className) {
-    //                 Node* node = pair.second;
-    //                 int featureValue = featureValues[pair.first];
-
-    //                 // We use the class as the parent state to index into the CPT
-    //                 classProbabilities[classState] *= node->getCPT()[classState][featureValue].item<double>();
-    //             }
-    //         }
-    //     }
-
-    //     // Find the class with the maximum posterior probability
-    //     auto maxElem = max_element(classProbabilities.begin(), classProbabilities.end());
-    //     int predictedClass = distance(classProbabilities.begin(), maxElem);
-    //     double maxProbability = *maxElem;
-
-    //     return make_pair(predictedClass, maxProbability);
-    // }
     vector<int> Network::predict(const vector<vector<int>>& samples)
     {
         vector<int> predictions;
@@ -195,15 +170,13 @@ namespace bayesnet {
             throw invalid_argument("Sample size (" + to_string(sample.size()) +
                 ") does not match the number of features (" + to_string(features.size()) + ")");
         }
-        // Map the feature values to their corresponding nodes
-        map<string, int> featureValues;
-        for (int i = 0; i < features.size(); ++i) {
-            featureValues[features[i]] = sample[i];
+        auto inference = ExactInference(*this);
+        map<string, int> evidence;
+        for (int i = 0; i < sample.size(); ++i) {
+            evidence[features[i]] = sample[i];
         }
-
-        // For each possible class, calculate the posterior probability
-        Network network = *this;
-        vector<double> classProbabilities = eliminateVariables(network, featureValues);
+        inference.setEvidence(evidence);
+        vector<double> classProbabilities = inference.variableElimination();
 
         // Normalize the probabilities to sum to 1
         double sum = accumulate(classProbabilities.begin(), classProbabilities.end(), 0.0);
@@ -216,9 +189,5 @@ namespace bayesnet {
         double maxProbability = *maxElem;
 
         return make_pair(predictedClass, maxProbability);
-    }
-    vector<double> eliminateVariables(network, featureValues)
-    {
-        
     }
 }

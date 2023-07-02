@@ -1,6 +1,7 @@
 #ifndef NODE_H
 #define NODE_H
 #include <torch/torch.h>
+#include "Factor.h"
 #include <vector>
 #include <string>
 namespace bayesnet {
@@ -15,6 +16,7 @@ namespace bayesnet {
         torch::Tensor cpTable;
         int numStates;
         torch::Tensor cpt;
+        vector<string> combinations(const set<string>&);
     public:
         Node(const std::string&, int);
         void addParent(Node*);
@@ -28,7 +30,9 @@ namespace bayesnet {
         void setCPT(const torch::Tensor&);
         int getNumStates() const;
         void setNumStates(int);
+        unsigned minFill();
         int getId() const { return id; }
+        Factor* toFactor();
     };
 }
 #endif
