@@ -23,7 +23,7 @@ namespace bayesnet {
         vector<int>& getCardinalities();
         bool contains(string&);
         torch::Tensor& getValues();
-        static Factor* product(vector<Factor>&);
+        static Factor* product(vector<Factor*>&);
         Factor* sumOut(string&);
 
     };

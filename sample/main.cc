@@ -218,7 +218,7 @@ int main(int argc, char** argv)
     cout << "Hello, Bayesian Networks!" << endl;
     showNodesInfo(network, className);
     showCPDS(network);
-    //cout << "Score: " << network.score(Xd, y) << endl;
+    cout << "Score: " << network.score(Xd, y) << endl;
     cout << "PyTorch version: " << TORCH_VERSION << endl;
     return 0;
 }

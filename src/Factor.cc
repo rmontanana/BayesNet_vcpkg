@@ -63,21 +63,23 @@ namespace bayesnet {
         torch::Tensor newValues = values.sum(0);
         return new Factor(newVariables, newCardinalities, newValues);
     }
-    Factor* Factor::product(vector<Factor>& factors)
+    Factor* Factor::product(vector<Factor*>& factors)
     {
         vector<string> newVariables;
         vector<int> newCardinalities;
         for (auto factor : factors) {
-            for (auto variable : factor.getVariables()) {
+            vector<string> variables = factor->getVariables();
+            for (auto idx = 0; idx < variables.size(); ++idx) {
+                string variable = variables[idx];
                 if (find(newVariables.begin(), newVariables.end(), variable) == newVariables.end()) {
                     newVariables.push_back(variable);
-                    newCardinalities.push_back(factor.getCardinalities()[factor.getVariables().index(variable)]);
+                    newCardinalities.push_back(factor->getCardinalities()[idx]);
                 }
             }
         }
-        torch::Tensor newValues = factors[0].getValues();
+        torch::Tensor newValues = factors[0]->getValues();
         for (int i = 1; i < factors.size(); i++) {
-            newValues = newValues.matmul(factors[i].getValues());
+            newValues = newValues.matmul(factors[i]->getValues());
         }
         return new Factor(newVariables, newCardinalities, newValues);
     }
