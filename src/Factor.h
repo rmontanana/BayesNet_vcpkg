@@ -21,7 +21,11 @@ namespace bayesnet {
         void setValues(torch::Tensor&);
         vector<string>& getVariables();
         vector<int>& getCardinalities();
+        bool contains(string&);
         torch::Tensor& getValues();
+        static Factor* product(vector<Factor>&);
+        Factor* sumOut(string&);
+
     };
 }
 #endif
