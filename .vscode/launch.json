@@ -8,7 +8,7 @@
             "program": "${workspaceFolder}/build/sample/main",
             "args": [
                 "-f",
-                "iris"
+                "glass"
             ],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "CMake: build"

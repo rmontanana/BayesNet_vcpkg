@@ -213,7 +213,13 @@ int main(int argc, char** argv)
     map<string, int> maxes;
     tie(Xd, maxes) = discretize(X, y, features);
     maxes[className] = *max_element(y.begin(), y.end()) + 1;
-    // Build Network    
+    cout << "Features: ";
+    for (auto feature : features) {
+        cout << "[" << feature << "] ";
+    }
+    cout << endl;
+    cout << "Class name: " << className << endl;
+    // Build Network
     auto network = bayesnet::Network();
     build_network(network, network_name, maxes);
     network.fit(Xd, y, features, className);
