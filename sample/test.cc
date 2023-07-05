@@ -21,20 +21,47 @@
 //     std::cout << t << std::endl;
 // }
 #include <torch/torch.h>
-
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
 int main()
 {
-    //torch::Tensor t = torch::rand({ 5, 4, 3 }); // 3D tensor for this example
     //int i = 3, j = 1, k = 2; // Indices for the cell you want to update
     // Print original tensor
-    torch::Tensor t = torch::tensor({ {1, 2, 3}, {4, 5, 6} }); // 3D tensor for this example
-    std::cout << t << std::endl;
-    std::cout << "sum(0)" << std::endl;
-    std::cout << t.sum(0) << std::endl;
-    std::cout << "sum(1)" << std::endl;
-    std::cout << t.sum(1) << std::endl;
-    std::cout << "Normalized" << std::endl;
-    std::cout << t / t.sum(0) << std::endl;
+    // torch::Tensor t = torch::tensor({ {1, 2, 3}, {4, 5, 6} }); // 3D tensor for this example
+    auto variables = vector<string>{ "A", "B" };
+    auto cardinalities = vector<int>{ 5, 4 };
+    torch::Tensor values = torch::rand({ 5, 4 });
+    auto candidate = "B";
+    vector<string> newVariables;
+    vector<int> newCardinalities;
+    for (int i = 0; i < variables.size(); i++) {
+        if (variables[i] != candidate) {
+            newVariables.push_back(variables[i]);
+            newCardinalities.push_back(cardinalities[i]);
+        }
+    }
+    torch::Tensor newValues = values.sum(1);
+    cout << "original values" << endl;
+    cout << values << endl;
+    cout << "newValues" << endl;
+    cout << newValues << endl;
+    cout << "newVariables" << endl;
+    for (auto& variable : newVariables) {
+        cout << variable << endl;
+    }
+    cout << "newCardinalities" << endl;
+    for (auto& cardinality : newCardinalities) {
+        cout << cardinality << endl;
+    }
+    // std::cout << t << std::endl;
+    // std::cout << "sum(0)" << std::endl;
+    // std::cout << t.sum(0) << std::endl;
+    // std::cout << "sum(1)" << std::endl;
+    // std::cout << t.sum(1) << std::endl;
+    // std::cout << "Normalized" << std::endl;
+    // std::cout << t / t.sum(0) << std::endl;
 
     // New value
     // torch::Tensor new_val = torch::tensor(10.0f);

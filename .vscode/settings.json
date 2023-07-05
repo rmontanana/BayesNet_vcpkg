@@ -86,7 +86,9 @@
         "*.tcc": "cpp",
         "functional": "cpp",
         "iterator": "cpp",
-        "memory_resource": "cpp"
+        "memory_resource": "cpp",
+        "format": "cpp",
+        "valarray": "cpp"
     },
     "cmake.configureOnOpen": false,
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"

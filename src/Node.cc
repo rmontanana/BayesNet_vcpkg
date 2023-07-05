@@ -1,10 +1,9 @@
 #include "Node.h"
 
 namespace bayesnet {
-    int Node::next_id = 0;
 
     Node::Node(const std::string& name, int numStates)
-        : id(next_id++), name(name), numStates(numStates), cpt(torch::Tensor()), parents(vector<Node*>()), children(vector<Node*>())
+        : name(name), numStates(numStates), cpTable(torch::Tensor()), parents(vector<Node*>()), children(vector<Node*>())
     {
     }
 
@@ -47,11 +46,7 @@ namespace bayesnet {
     }
     torch::Tensor& Node::getCPT()
     {
-        return cpt;
-    }
-    void Node::setCPT(const torch::Tensor& cpt)
-    {
-        this->cpt = cpt;
+        return cpTable;
     }
     /*
      The MinFill criterion is a heuristic for variable elimination.
@@ -83,17 +78,37 @@ namespace bayesnet {
         }
         return result;
     }
-    Factor* Node::toFactor()
+    void Node::computeCPT(map<string, vector<int>>& dataset, const int laplaceSmoothing)
     {
-        vector<string> variables;
-        vector<int> cardinalities;
-        variables.push_back(name);
-        cardinalities.push_back(numStates);
-        for (auto parent : parents) {
-            variables.push_back(parent->getName());
-            cardinalities.push_back(parent->getNumStates());
+        // Get dimensions of the CPT
+        dimensions.push_back(numStates);
+        for (auto father : getParents()) {
+            dimensions.push_back(father->getNumStates());
         }
-        return new Factor(variables, cardinalities, cpt);
-
+        auto length = dimensions.size();
+        // Create a tensor of zeros with the dimensions of the CPT
+        cpTable = torch::zeros(dimensions, torch::kFloat) + laplaceSmoothing;
+        // Fill table with counts
+        for (int n_sample = 0; n_sample < dataset[name].size(); ++n_sample) {
+            torch::List<c10::optional<torch::Tensor>> coordinates;
+            coordinates.push_back(torch::tensor(dataset[name][n_sample]));
+            for (auto father : getParents()) {
+                coordinates.push_back(torch::tensor(dataset[father->getName()][n_sample]));
+            }
+            // Increment the count of the corresponding coordinate
+            cpTable.index_put_({ coordinates }, cpTable.index({ coordinates }) + 1);
+        }
+        // Normalize the counts
+        cpTable = cpTable / cpTable.sum(0);
+    }
+    float Node::getFactorValue(map<string, int>& evidence)
+    {
+        torch::List<c10::optional<torch::Tensor>> coordinates;
+        // following predetermined order of indices in the cpTable (see Node.h)
+        coordinates.push_back(torch::tensor(evidence[name]));
+        for (auto parent : getParents()) {
+            coordinates.push_back(torch::tensor(evidence[parent->getName()]));
+        }
+        return cpTable.index({ coordinates }).item<float>();
     }
 }

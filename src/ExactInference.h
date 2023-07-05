@@ -1,7 +1,6 @@
 #ifndef EXACTINFERENCE_H
 #define EXACTINFERENCE_H
 #include "Network.h"
-#include "Factor.h"
 #include "Node.h"
 #include <map>
 #include <vector>
@@ -12,16 +11,10 @@ namespace bayesnet {
     class ExactInference {
     private:
         Network network;
-        map<string, int> evidence;
-        vector<Factor*> factors;
-        vector<string> candidates; // variables to be removed
-        void buildFactors();
-        string nextCandidate(); // Return the next variable to eliminate using MinFill criterion
+        double computeFactor(map<string, int>&);
     public:
         ExactInference(Network&);
-        ~ExactInference();
-        void setEvidence(const map<string, int>&);
-        vector<double> variableElimination();
+        vector<double> variableElimination(map<string, int>&);
     };
 }
 #endif

@@ -11,6 +11,7 @@ namespace bayesnet {
         map<string, Node*> nodes;
         map<string, vector<int>> dataset;
         Node* root;
+        int classNumStates;
         vector<string> features;
         string className;
         int laplaceSmoothing;
@@ -25,6 +26,8 @@ namespace bayesnet {
         void addEdge(const string, const string);
         map<string, Node*>& getNodes();
         vector<string> getFeatures();
+        int getClassNumStates();
+        string getClassName();
         void fit(const vector<vector<int>>&, const vector<int>&, const vector<string>&, const string&);
         void estimateParameters();
         void setRoot(string);
