@@ -94,15 +94,17 @@ void showNodesInfo(bayesnet::Network& network, string className)
 {
     cout << "Nodes:" << endl;
     for (auto [name, item] : network.getNodes()) {
-        cout << "*" << item->getName() << " -> " << item->getNumStates() << endl;
-        cout << "-Parents:" << endl;
+        cout << "*" << item->getName() << " States -> " << item->getNumStates() << endl;
+        cout << "-Parents:";
         for (auto parent : item->getParents()) {
-            cout << " " << parent->getName() << endl;
+            cout << " " << parent->getName();
         }
-        cout << "-Children:" << endl;
+        cout << endl;
+        cout << "-Children:";
         for (auto child : item->getChildren()) {
-            cout << " " << child->getName() << endl;
+            cout << " " << child->getName();
         }
+        cout << endl;
     }
     cout << "Root: " << network.getRoot()->getName() << endl;
     network.setRoot(className);
@@ -149,7 +151,7 @@ pair<string, string> get_options(int argc, char** argv)
     string path;
     string network_name;
     tie(file_name, path, network_name) = parse_arguments(argc, argv);
-    if (datasets.find(file_name) == datasets.end() && file_name != "all") {
+    if (datasets.find(file_name) == datasets.end()) {
         cout << "Invalid file name: " << file_name << endl;
         usage(argv[0]);
         exit(1);
