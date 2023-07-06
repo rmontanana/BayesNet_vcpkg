@@ -180,7 +180,6 @@ namespace bayesnet {
     vector<double> Network::exactInference(map<string, int>& evidence)
     {
         vector<double> result;
-        int classNumStates = getClassNumStates();
         for (int i = 0; i < classNumStates; ++i) {
             result.push_back(1.0);
             auto complete_evidence = map<string, int>(evidence);
