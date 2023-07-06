@@ -10,7 +10,6 @@ namespace bayesnet {
     private:
         map<string, Node*> nodes;
         map<string, vector<int>> dataset;
-        Node* root;
         float maxThreads;
         int classNumStates;
         vector<string> features;
@@ -34,8 +33,6 @@ namespace bayesnet {
         int getClassNumStates();
         string getClassName();
         void fit(const vector<vector<int>>&, const vector<int>&, const vector<string>&, const string&);
-        void setRoot(string);
-        Node* getRoot();
         vector<int> predict(const vector<vector<int>>&);
         vector<pair<int, double>> predict_proba(const vector<vector<int>>&);
         double score(const vector<vector<int>>&, const vector<int>&);

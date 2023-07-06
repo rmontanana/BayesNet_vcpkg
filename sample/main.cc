@@ -107,9 +107,6 @@ void showNodesInfo(bayesnet::Network& network, string className)
         }
         cout << endl;
     }
-    cout << "Root: " << network.getRoot()->getName() << endl;
-    network.setRoot(className);
-    cout << "Now Root should be class: " << network.getRoot()->getName() << endl;
 }
 void showCPDS(bayesnet::Network& network)
 {

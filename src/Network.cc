@@ -2,10 +2,10 @@
 #include <mutex>
 #include "Network.h"
 namespace bayesnet {
-    Network::Network() : laplaceSmoothing(1), root(nullptr), features(vector<string>()), className(""), classNumStates(0), maxThreads(0.8) {}
-    Network::Network(float maxT) : laplaceSmoothing(1), root(nullptr), features(vector<string>()), className(""), classNumStates(0), maxThreads(maxT) {}
-    Network::Network(float maxT, int smoothing) : laplaceSmoothing(smoothing), root(nullptr), features(vector<string>()), className(""), classNumStates(0), maxThreads(maxT) {}
-    Network::Network(Network& other) : laplaceSmoothing(other.laplaceSmoothing), root(other.root), features(other.features), className(other.className), classNumStates(other.getClassNumStates()), maxThreads(other.getmaxThreads())
+    Network::Network() : laplaceSmoothing(1), features(vector<string>()), className(""), classNumStates(0), maxThreads(0.8) {}
+    Network::Network(float maxT) : laplaceSmoothing(1), features(vector<string>()), className(""), classNumStates(0), maxThreads(maxT) {}
+    Network::Network(float maxT, int smoothing) : laplaceSmoothing(smoothing), features(vector<string>()), className(""), classNumStates(0), maxThreads(maxT) {}
+    Network::Network(Network& other) : laplaceSmoothing(other.laplaceSmoothing), features(other.features), className(other.className), classNumStates(other.getClassNumStates()), maxThreads(other.getmaxThreads())
     {
         for (auto& pair : other.nodes) {
             nodes[pair.first] = new Node(*pair.second);
@@ -29,9 +29,6 @@ namespace bayesnet {
             return;
         }
         nodes[name] = new Node(name, numStates);
-        if (root == nullptr) {
-            root = nodes[name];
-        }
     }
     vector<string> Network::getFeatures()
     {
@@ -44,17 +41,6 @@ namespace bayesnet {
     string Network::getClassName()
     {
         return className;
-    }
-    void Network::setRoot(string name)
-    {
-        if (nodes.find(name) == nodes.end()) {
-            throw invalid_argument("Node " + name + " does not exist");
-        }
-        root = nodes[name];
-    }
-    Node* Network::getRoot()
-    {
-        return root;
     }
     bool Network::isCyclic(const string& nodeId, unordered_set<string>& visited, unordered_set<string>& recStack)
     {
@@ -227,18 +213,15 @@ namespace bayesnet {
         vector<double> result(classNumStates, 0.0);
         vector<thread> threads;
         mutex mtx;
-
         for (int i = 0; i < classNumStates; ++i) {
             threads.emplace_back([this, &result, &evidence, i, &mtx]() {
                 auto completeEvidence = map<string, int>(evidence);
                 completeEvidence[getClassName()] = i;
                 double factor = computeFactor(completeEvidence);
-
                 lock_guard<mutex> lock(mtx);
                 result[i] = factor;
                 });
         }
-
         for (auto& thread : threads) {
             thread.join();
         }
