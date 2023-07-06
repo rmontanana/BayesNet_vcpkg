@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <torch/torch.h>
+#include <thread>
 #include <getopt.h>
 #include "ArffFiles.h"
 #include "Network.h"
@@ -228,5 +229,7 @@ int main(int argc, char** argv)
     //showCPDS(network);
     cout << "Score: " << network.score(Xd, y) << endl;
     cout << "PyTorch version: " << TORCH_VERSION << endl;
+    unsigned int nthreads = std::thread::hardware_concurrency();
+    cout << "Computer has " << nthreads << " cores." << endl;
     return 0;
 }

@@ -1,3 +1,5 @@
+#include <thread>
+#include <mutex>
 #include "Network.h"
 namespace bayesnet {
     Network::Network() : laplaceSmoothing(1), root(nullptr), features(vector<string>()), className(""), classNumStates(0) {}
@@ -179,18 +181,31 @@ namespace bayesnet {
     }
     vector<double> Network::exactInference(map<string, int>& evidence)
     {
-        vector<double> result;
+        vector<double> result(classNumStates, 0.0);
+        vector<thread> threads;
+        mutex mtx;
+
         for (int i = 0; i < classNumStates; ++i) {
-            result.push_back(1.0);
-            auto complete_evidence = map<string, int>(evidence);
-            complete_evidence[getClassName()] = i;
-            result[i] = computeFactor(complete_evidence);
+            threads.emplace_back([this, &result, &evidence, i, &mtx]() {
+                auto completeEvidence = map<string, int>(evidence);
+                completeEvidence[getClassName()] = i;
+                double factor = computeFactor(completeEvidence);
+
+                lock_guard<mutex> lock(mtx);
+                result[i] = factor;
+            });
         }
+
+        for (auto& thread : threads) {
+            thread.join();
+        }
+
         // Normalize result
-        auto sum = accumulate(result.begin(), result.end(), 0.0);
-        for (int i = 0; i < result.size(); ++i) {
-            result[i] /= sum;
+        double sum = accumulate(result.begin(), result.end(), 0.0);
+        for (double& value : result) {
+            value /= sum;
         }
+
         return result;
     }
 }
