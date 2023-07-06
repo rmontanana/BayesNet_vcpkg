@@ -100,7 +100,6 @@ namespace bayesnet {
         if (maxThreadsRunning < 1) {
             maxThreadsRunning = 1;
         }
-        cout << "Using " << maxThreadsRunning << " threads" << " maxThreads: " << maxThreads << endl;
         vector<thread> threads;
         mutex mtx;
         condition_variable cv;

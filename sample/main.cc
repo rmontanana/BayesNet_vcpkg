@@ -226,6 +226,7 @@ int main(int argc, char** argv)
     //showCPDS(network);
     cout << "Score: " << network.score(Xd, y) << endl;
     cout << "PyTorch version: " << TORCH_VERSION << endl;
+    cout << "BayesNet version: " << network.version() << endl;
     unsigned int nthreads = std::thread::hardware_concurrency();
     cout << "Computer has " << nthreads << " cores." << endl;
     return 0;

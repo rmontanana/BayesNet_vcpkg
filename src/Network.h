@@ -36,6 +36,7 @@ namespace bayesnet {
         vector<int> predict(const vector<vector<int>>&);
         vector<pair<int, double>> predict_proba(const vector<vector<int>>&);
         double score(const vector<vector<int>>&, const vector<int>&);
+        inline string version() { return "0.1.0"; }
     };
 }
 #endif
