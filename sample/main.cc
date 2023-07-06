@@ -221,7 +221,7 @@ int main(int argc, char** argv)
     cout << endl;
     cout << "Class name: " << className << endl;
     // Build Network
-    auto network = bayesnet::Network();
+    auto network = bayesnet::Network(1.0);
     build_network(network, network_name, maxes);
     network.fit(Xd, y, features, className);
     cout << "Hello, Bayesian Networks!" << endl;

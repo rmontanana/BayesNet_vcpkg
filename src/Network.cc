@@ -2,9 +2,10 @@
 #include <mutex>
 #include "Network.h"
 namespace bayesnet {
-    Network::Network() : laplaceSmoothing(1), root(nullptr), features(vector<string>()), className(""), classNumStates(0) {}
-    Network::Network(int smoothing) : laplaceSmoothing(smoothing), root(nullptr), features(vector<string>()), className(""), classNumStates(0) {}
-    Network::Network(Network& other) : laplaceSmoothing(other.laplaceSmoothing), root(other.root), features(other.features), className(other.className), classNumStates(other.getClassNumStates())
+    Network::Network() : laplaceSmoothing(1), root(nullptr), features(vector<string>()), className(""), classNumStates(0), maxThreads(0.8) {}
+    Network::Network(float maxT) : laplaceSmoothing(1), root(nullptr), features(vector<string>()), className(""), classNumStates(0), maxThreads(maxT) {}
+    Network::Network(float maxT, int smoothing) : laplaceSmoothing(smoothing), root(nullptr), features(vector<string>()), className(""), classNumStates(0), maxThreads(maxT) {}
+    Network::Network(Network& other) : laplaceSmoothing(other.laplaceSmoothing), root(other.root), features(other.features), className(other.className), classNumStates(other.getClassNumStates()), maxThreads(other.getmaxThreads())
     {
         for (auto& pair : other.nodes) {
             nodes[pair.first] = new Node(*pair.second);
@@ -15,6 +16,10 @@ namespace bayesnet {
         for (auto& pair : nodes) {
             delete pair.second;
         }
+    }
+    float Network::getmaxThreads()
+    {
+        return maxThreads;
     }
     void Network::addNode(string name, int numStates)
     {
@@ -93,24 +98,62 @@ namespace bayesnet {
     {
         return nodes;
     }
-    void Network::fit(const vector<vector<int>>& dataset, const vector<int>& labels, const vector<string>& featureNames, const string& className)
+    void Network::fit(const vector<vector<int>>& input_data, const vector<int>& labels, const vector<string>& featureNames, const string& className)
     {
         features = featureNames;
         this->className = className;
+        dataset.clear();
+
         // Build dataset
         for (int i = 0; i < featureNames.size(); ++i) {
-            this->dataset[featureNames[i]] = dataset[i];
+            dataset[featureNames[i]] = input_data[i];
         }
-        this->dataset[className] = labels;
-        this->classNumStates = *max_element(labels.begin(), labels.end()) + 1;
-        estimateParameters();
-    }
+        dataset[className] = labels;
+        classNumStates = *max_element(labels.begin(), labels.end()) + 1;
+        int maxThreadsRunning = static_cast<int>(std::thread::hardware_concurrency() * maxThreads);
+        if (maxThreadsRunning < 1) {
+            maxThreadsRunning = 1;
+        }
+        cout << "Using " << maxThreadsRunning << " threads" << " maxThreads: " << maxThreads << endl;
+        vector<thread> threads;
+        mutex mtx;
+        condition_variable cv;
+        int activeThreads = 0;
+        int nextNodeIndex = 0;
 
-    void Network::estimateParameters()
-    {
-        auto dimensions = vector<int64_t>();
-        for (auto [name, node] : nodes) {
-            node->computeCPT(dataset, laplaceSmoothing);
+        while (nextNodeIndex < nodes.size()) {
+            unique_lock<mutex> lock(mtx);
+            cv.wait(lock, [&activeThreads, &maxThreadsRunning]() { return activeThreads < maxThreadsRunning; });
+
+            if (nextNodeIndex >= nodes.size()) {
+                break;  // No more work remaining
+            }
+
+            threads.emplace_back([this, &nextNodeIndex, &mtx, &cv, &activeThreads]() {
+                while (true) {
+                    unique_lock<mutex> lock(mtx);
+                    if (nextNodeIndex >= nodes.size()) {
+                        break;  // No more work remaining
+                    }
+                    auto& pair = *std::next(nodes.begin(), nextNodeIndex);
+                    ++nextNodeIndex;
+                    lock.unlock();
+
+                    pair.second->computeCPT(dataset, laplaceSmoothing);
+
+                    lock.lock();
+                    nodes[pair.first] = pair.second;
+                    lock.unlock();
+                }
+                lock_guard<mutex> lock(mtx);
+                --activeThreads;
+                cv.notify_one();
+                });
+
+            ++activeThreads;
+        }
+        for (auto& thread : threads) {
+            thread.join();
         }
     }
 
@@ -193,7 +236,7 @@ namespace bayesnet {
 
                 lock_guard<mutex> lock(mtx);
                 result[i] = factor;
-            });
+                });
         }
 
         for (auto& thread : threads) {
@@ -205,7 +248,6 @@ namespace bayesnet {
         for (double& value : result) {
             value /= sum;
         }
-
         return result;
     }
 }

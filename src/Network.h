@@ -11,6 +11,7 @@ namespace bayesnet {
         map<string, Node*> nodes;
         map<string, vector<int>> dataset;
         Node* root;
+        float maxThreads;
         int classNumStates;
         vector<string> features;
         string className;
@@ -21,9 +22,11 @@ namespace bayesnet {
         double computeFactor(map<string, int>&);
     public:
         Network();
-        Network(int);
+        Network(float, int);
+        Network(float);
         Network(Network&);
         ~Network();
+        float getmaxThreads();
         void addNode(string, int);
         void addEdge(const string, const string);
         map<string, Node*>& getNodes();
@@ -31,7 +34,6 @@ namespace bayesnet {
         int getClassNumStates();
         string getClassName();
         void fit(const vector<vector<int>>&, const vector<int>&, const vector<string>&, const string&);
-        void estimateParameters();
         void setRoot(string);
         Node* getRoot();
         vector<int> predict(const vector<vector<int>>&);
