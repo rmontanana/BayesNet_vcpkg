@@ -1,0 +1,23 @@
+#ifndef BAYESNET_METRICS_H
+#define BAYESNET_METRICS_H
+#include <torch/torch.h>
+#include <vector>
+#include <string>
+using namespace std;
+namespace bayesnet {
+    class Metrics {
+    private:
+        torch::Tensor& samples;
+        vector<string>& features;
+        string& className;
+        int classNumStates;
+        vector<pair<string, string>> doCombinations(const vector<string>&);
+        double entropy(torch::Tensor&);
+        double conditionalEntropy(torch::Tensor&, torch::Tensor&);
+        double mutualInformation(torch::Tensor&, torch::Tensor&);
+    public:
+        Metrics(torch::Tensor&, vector<string>&, string&, int);
+        torch::Tensor conditionalEdgeWeight();
+    };
+}
+#endif

@@ -5,6 +5,7 @@
 #include <getopt.h>
 #include "ArffFiles.h"
 #include "Network.h"
+#include "Metrics.hpp"
 #include "CPPFImdlp.h"
 
 
@@ -230,6 +231,7 @@ int main(int argc, char** argv)
     cout << "BayesNet version: " << network.version() << endl;
     unsigned int nthreads = std::thread::hardware_concurrency();
     cout << "Computer has " << nthreads << " cores." << endl;
-    cout << "conditionalEdgeWeight " << endl << network.conditionalEdgeWeight() << endl;
+    auto metrics = bayesnet::Metrics(network.getSamples(), features, className, network.getClassNumStates());
+    cout << "conditionalEdgeWeight " << endl << metrics.conditionalEdgeWeight() << endl;
     return 0;
 }
