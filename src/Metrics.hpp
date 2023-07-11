@@ -7,7 +7,7 @@ using namespace std;
 namespace bayesnet {
     class Metrics {
     private:
-        torch::Tensor& samples;
+        torch::Tensor samples;
         vector<string>& features;
         string& className;
         int classNumStates;
@@ -17,7 +17,8 @@ namespace bayesnet {
         double mutualInformation(torch::Tensor&, torch::Tensor&);
     public:
         Metrics(torch::Tensor&, vector<string>&, string&, int);
-        torch::Tensor conditionalEdgeWeight();
+        Metrics(vector<vector<int>>&, int, int, vector<string>&, string&, int);
+        vector<float> conditionalEdgeWeights();
     };
 }
 #endif

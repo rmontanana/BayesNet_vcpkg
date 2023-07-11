@@ -232,6 +232,11 @@ int main(int argc, char** argv)
     unsigned int nthreads = std::thread::hardware_concurrency();
     cout << "Computer has " << nthreads << " cores." << endl;
     auto metrics = bayesnet::Metrics(network.getSamples(), features, className, network.getClassNumStates());
-    cout << "conditionalEdgeWeight " << endl << metrics.conditionalEdgeWeight() << endl;
+    cout << "conditionalEdgeWeight " << endl;
+    auto conditional = metrics.conditionalEdgeWeights();
+    cout << conditional << endl;
+    long m = features.size() + 1;
+    auto matrix = torch::from_blob(conditional.data(), { m, m });
+    cout << matrix << endl;
     return 0;
 }

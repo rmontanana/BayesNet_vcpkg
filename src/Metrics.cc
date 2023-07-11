@@ -1,12 +1,30 @@
 #include "Metrics.hpp"
 using namespace std;
 namespace bayesnet {
+    vector<int> linearize(const vector<vector<int>>& vec_vec)
+    {
+        vector<int> vec;
+        for (const auto& v : vec_vec) {
+            for (auto d : v) {
+                vec.push_back(d);
+            }
+        }
+        return vec;
+    }
     Metrics::Metrics(torch::Tensor& samples, vector<string>& features, string& className, int classNumStates)
         : samples(samples)
         , features(features)
         , className(className)
         , classNumStates(classNumStates)
     {
+
+    }
+    Metrics::Metrics(vector<vector<int>>& vsamples, int m, int n, vector<string>& features, string& className, int classNumStates)
+        : features(features)
+        , className(className)
+        , classNumStates(classNumStates)
+    {
+        samples = torch::from_blob(linearize(vsamples).data(), { m, n });
     }
     vector<pair<string, string>> Metrics::doCombinations(const vector<string>& source)
     {
@@ -19,7 +37,7 @@ namespace bayesnet {
         }
         return result;
     }
-    torch::Tensor Metrics::conditionalEdgeWeight()
+    vector<float> Metrics::conditionalEdgeWeights()
     {
         auto result = vector<double>();
         auto source = vector<string>(features);
@@ -54,7 +72,8 @@ namespace bayesnet {
             matrix[x][y] = result[i];
             matrix[y][x] = result[i];
         }
-        return matrix;
+        std::vector<float> v(matrix.data_ptr<float>(), matrix.data_ptr<float>() + matrix.numel());
+        return v;
     }
     double Metrics::entropy(torch::Tensor& feature)
     {

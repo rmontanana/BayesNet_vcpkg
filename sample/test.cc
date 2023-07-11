@@ -167,6 +167,9 @@ int main()
     }
     // Print the resulting 3x3 tensor
     std::cout << tensor_3x3 << std::endl;
+    vector<int> v = { 1,2,3,4,5 };
+    torch::Tensor t = torch::tensor(v);
+    cout << t << endl;
 
 
 
