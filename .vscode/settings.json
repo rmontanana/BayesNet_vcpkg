@@ -88,7 +88,9 @@
         "iterator": "cpp",
         "memory_resource": "cpp",
         "format": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "regex": "cpp",
+        "span": "cpp"
     },
     "cmake.configureOnOpen": false,
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"

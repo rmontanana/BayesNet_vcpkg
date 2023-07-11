@@ -138,6 +138,7 @@ pair<string, string> get_options(int argc, char** argv)
 {
     map<string, bool> datasets = {
             {"diabetes",           true},
+            {"ecoli",              true},
             {"glass",              true},
             {"iris",               true},
             {"kdd_JapaneseVowels", false},
@@ -229,5 +230,6 @@ int main(int argc, char** argv)
     cout << "BayesNet version: " << network.version() << endl;
     unsigned int nthreads = std::thread::hardware_concurrency();
     cout << "Computer has " << nthreads << " cores." << endl;
+    cout << "conditionalEdgeWeight " << endl << network.conditionalEdgeWeight() << endl;
     return 0;
 }
