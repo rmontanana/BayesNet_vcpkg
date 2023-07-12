@@ -8,7 +8,7 @@ namespace bayesnet {
         , classNumStates(classNumStates)
     {
     }
-    Metrics::Metrics(vector<vector<int>>& vsamples, vector<int>& labels, vector<string>& features, string& className, int classNumStates)
+    Metrics::Metrics(const vector<vector<int>>& vsamples, const vector<int>& labels, const vector<string>& features, const string& className, const int classNumStates)
         : features(features)
         , className(className)
         , classNumStates(classNumStates)
