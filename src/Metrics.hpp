@@ -17,7 +17,7 @@ namespace bayesnet {
         double mutualInformation(torch::Tensor&, torch::Tensor&);
     public:
         Metrics(torch::Tensor&, vector<string>&, string&, int);
-        Metrics(vector<vector<int>>&, int, int, vector<string>&, string&, int);
+        Metrics(vector<vector<int>>&, vector<int>&, vector<string>&, string&, int);
         vector<float> conditionalEdgeWeights();
     };
 }

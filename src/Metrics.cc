@@ -1,30 +1,23 @@
 #include "Metrics.hpp"
 using namespace std;
 namespace bayesnet {
-    vector<int> linearize(const vector<vector<int>>& vec_vec)
-    {
-        vector<int> vec;
-        for (const auto& v : vec_vec) {
-            for (auto d : v) {
-                vec.push_back(d);
-            }
-        }
-        return vec;
-    }
     Metrics::Metrics(torch::Tensor& samples, vector<string>& features, string& className, int classNumStates)
         : samples(samples)
         , features(features)
         , className(className)
         , classNumStates(classNumStates)
     {
-
     }
-    Metrics::Metrics(vector<vector<int>>& vsamples, int m, int n, vector<string>& features, string& className, int classNumStates)
+    Metrics::Metrics(vector<vector<int>>& vsamples, vector<int>& labels, vector<string>& features, string& className, int classNumStates)
         : features(features)
         , className(className)
         , classNumStates(classNumStates)
     {
-        samples = torch::from_blob(linearize(vsamples).data(), { m, n });
+        samples = torch::zeros({ static_cast<int64_t>(vsamples[0].size()), static_cast<int64_t>(vsamples.size() + 1) }, torch::kInt64);
+        for (int i = 0; i < vsamples.size(); ++i) {
+            samples.index_put_({ "...", i }, torch::tensor(vsamples[i], torch::kInt64));
+        }
+        samples.index_put_({ "...", -1 }, torch::tensor(labels, torch::kInt64));
     }
     vector<pair<string, string>> Metrics::doCombinations(const vector<string>& source)
     {
