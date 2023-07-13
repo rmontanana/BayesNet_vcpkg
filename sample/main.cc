@@ -221,41 +221,44 @@ int main(int argc, char** argv)
     cout << endl;
     cout << "Class name: " << className << endl;
     // Build Network
-    auto network = bayesnet::Network(1.0);
-    build_network(network, network_name, maxes);
-    network.fit(Xd, y, features, className);
-    cout << "Hello, Bayesian Networks!" << endl;
-    showNodesInfo(network, className);
-    //showCPDS(network);
-    cout << "Score: " << network.score(Xd, y) << endl;
-    cout << "PyTorch version: " << TORCH_VERSION << endl;
-    cout << "BayesNet version: " << network.version() << endl;
-    unsigned int nthreads = std::thread::hardware_concurrency();
-    cout << "Computer has " << nthreads << " cores." << endl;
-    cout << "****************** First ******************" << endl;
-    auto metrics = bayesnet::Metrics(network.getSamples(), features, className, network.getClassNumStates());
-    cout << "conditionalEdgeWeight " << endl;
-    auto conditional = metrics.conditionalEdgeWeights();
-    cout << conditional << endl;
-    long m = features.size() + 1;
-    auto matrix = torch::from_blob(conditional.data(), { m, m });
-    cout << matrix << endl;
-    cout << "****************** Second ******************" << endl;
-    auto metrics2 = bayesnet::Metrics(Xd, y, features, className, network.getClassNumStates());
-    cout << "conditionalEdgeWeight " << endl;
-    auto conditional2 = metrics2.conditionalEdgeWeights();
-    cout << conditional2 << endl;
-    long m2 = features.size() + 1;
-    auto matrix2 = torch::from_blob(conditional2.data(), { m, m });
-    cout << matrix2 << endl;
+    // auto network = bayesnet::Network(1.0);
+    // build_network(network, network_name, maxes);
+    // network.fit(Xd, y, features, className);
+    // cout << "Hello, Bayesian Networks!" << endl;
+    // showNodesInfo(network, className);
+    // //showCPDS(network);
+    // cout << "Score: " << network.score(Xd, y) << endl;
+    // cout << "PyTorch version: " << TORCH_VERSION << endl;
+    // cout << "BayesNet version: " << network.version() << endl;
+    // unsigned int nthreads = std::thread::hardware_concurrency();
+    // cout << "Computer has " << nthreads << " cores." << endl;
+    // cout << "****************** First ******************" << endl;
+    // auto metrics = bayesnet::Metrics(network.getSamples(), features, className, network.getClassNumStates());
+    // cout << "conditionalEdgeWeight " << endl;
+    // auto conditional = metrics.conditionalEdgeWeights();
+    // cout << conditional << endl;
+    // long m = features.size() + 1;
+    // auto matrix = torch::from_blob(conditional.data(), { m, m });
+    // cout << matrix << endl;
+    // cout << "****************** Second ******************" << endl;
+    // auto metrics2 = bayesnet::Metrics(Xd, y, features, className, network.getClassNumStates());
+    // cout << "conditionalEdgeWeight " << endl;
+    // auto conditional2 = metrics2.conditionalEdgeWeights();
+    // cout << conditional2 << endl;
+    // long m2 = features.size() + 1;
+    // auto matrix2 = torch::from_blob(conditional2.data(), { m, m });
+    // cout << matrix2 << endl;
     cout << "****************** KDB ******************" << endl;
     map<string, vector<int>> states;
     for (auto feature : features) {
         states[feature] = vector<int>(maxes[feature]);
     }
     states[className] = vector<int>(maxes[className]);
-    auto kdb = bayesnet::KDB(1);
+    auto kdb = bayesnet::KDB(2);
     kdb.fit(Xd, y, features, className, states);
+    for (auto line : kdb.show()) {
+        cout << line << endl;
+    }
     cout << "****************** KDB ******************" << endl;
     return 0;
 }

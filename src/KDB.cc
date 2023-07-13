@@ -12,7 +12,7 @@ namespace bayesnet {
         sort(indices.begin(), indices.end(), [&nums](int i, int j) {return nums[i] > nums[j];});
         return indices;
     }
-    KDB::KDB(int k, float theta = 0.03) : BaseClassifier(Network()), k(k), theta(theta) {}
+    KDB::KDB(int k, float theta) : BaseClassifier(Network()), k(k), theta(theta) {}
     void KDB::train()
     {
         /*
@@ -76,23 +76,39 @@ namespace bayesnet {
     {
         auto n_edges = min(k, static_cast<int>(S.size()));
         auto cond_w = clone(weights);
+        cout << "Conditional edge weights cloned for idx " << idx << endl;
+        cout << cond_w << endl;
         bool exit_cond = k == 0;
         int num = 0;
         while (!exit_cond) {
-            auto max_minfo = argmax(cond_w.index({ "...", idx })).item<int>();
+            auto max_minfo = argmax(cond_w.index({ idx, "..." })).item<int>();
             auto belongs = find(S.begin(), S.end(), max_minfo) != S.end();
             if (belongs && cond_w.index({ idx, max_minfo }).item<float>() > theta) {
                 try {
-                    model.addEdge(features[idx], features[max_minfo]);
+                    model.addEdge(features[max_minfo], features[idx]);
                     num++;
                 }
                 catch (const invalid_argument& e) {
                     // Loops are not allowed
                 }
             }
-            cond_w.index_put_({ "...", max_minfo }, -1);
-            auto candidates = cond_w.gt(theta);
+            cond_w.index_put_({ idx, max_minfo }, -1);
+            cout << "Conditional edge weights cloned for idx " << idx << " After -1" << endl;
+            cout << cond_w << endl;
+            cout << "cond_w.index({ idx, '...'})" << endl;
+            cout << cond_w.index({ idx, "..." }) << endl;
+            auto candidates_mask = cond_w.index({ idx, "..." }).gt(theta);
+            auto candidates = candidates_mask.nonzero();
+            cout << "Candidates mask" << endl;
+            cout << candidates_mask << endl;
+            cout << "Candidates: " << endl;
+            cout << candidates << endl;
+            cout << "Candidates size: " << candidates.size(0) << endl;
             exit_cond = num == n_edges || candidates.size(0) == 0;
         }
+    }
+    vector<string> KDB::show()
+    {
+        return model.show();
     }
 }

@@ -8,7 +8,7 @@ namespace bayesnet {
     BaseClassifier& BaseClassifier::build(vector<string>& features, string className, map<string, vector<int>>& states)
     {
 
-        dataset = torch::cat({ X, y.view({150, 1}) }, 1);
+        dataset = torch::cat({ X, y.view({y.size(0), 1}) }, 1);
         this->features = features;
         this->className = className;
         this->states = states;
@@ -85,5 +85,9 @@ namespace bayesnet {
     {
         Tensor y_pred = predict(X);
         return (y_pred == y).sum().item<float>() / y.size(0);
+    }
+    void BaseClassifier::show()
+    {
+        model.show();
     }
 }

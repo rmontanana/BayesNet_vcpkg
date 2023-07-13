@@ -245,5 +245,18 @@ namespace bayesnet {
         }
         return result;
     }
+    vector<string> Network::show()
+    {
+        vector<string> result;
+        // Draw the network
+        for (auto node : nodes) {
+            string line = node.first + " -> ";
+            for (auto child : node.second->getChildren()) {
+                line += child->getName() + ", ";
+            }
+            result.push_back(line);
+        }
+        return result;
+    }
 
 }
