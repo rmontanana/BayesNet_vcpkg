@@ -13,7 +13,6 @@ namespace bayesnet {
         void train() override;
     public:
         KDB(int k, float theta = 0.03);
-        vector<string> show();
     };
 }
 #endif

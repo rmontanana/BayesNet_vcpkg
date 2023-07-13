@@ -116,4 +116,12 @@ namespace bayesnet {
     {
         return entropy(firstFeature) - conditionalEntropy(firstFeature, secondFeature);
     }
+    vector<pair<int, int>> Metrics::maximumSpanningTree(Tensor& weights)
+    {
+        auto result = vector<pair<int, int>>();
+        // Compute the maximum spanning tree considering the weights as distances
+        // and the indices of the weights as nodes of this square matrix
+
+        return result;
+    }
 }
