@@ -19,6 +19,7 @@ namespace bayesnet {
         Metrics(torch::Tensor&, vector<string>&, string&, int);
         Metrics(const vector<vector<int>>&, const vector<int>&, const vector<string>&, const string&, const int);
         vector<float> conditionalEdgeWeights();
+        torch::Tensor conditionalEdge();
     };
 }
 #endif

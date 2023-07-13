@@ -12,7 +12,6 @@ namespace bayesnet {
         this->features = features;
         this->className = className;
         this->states = states;
-        cout << "Checking fit parameters" << endl;
         checkFitParameters();
         train();
         return *this;

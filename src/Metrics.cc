@@ -30,7 +30,7 @@ namespace bayesnet {
         }
         return result;
     }
-    vector<float> Metrics::conditionalEdgeWeights()
+    torch::Tensor Metrics::conditionalEdge()
     {
         auto result = vector<double>();
         auto source = vector<string>(features);
@@ -65,6 +65,11 @@ namespace bayesnet {
             matrix[x][y] = result[i];
             matrix[y][x] = result[i];
         }
+        return matrix;
+    }
+    vector<float> Metrics::conditionalEdgeWeights()
+    {
+        auto matrix = conditionalEdge();
         std::vector<float> v(matrix.data_ptr<float>(), matrix.data_ptr<float>() + matrix.numel());
         return v;
     }
