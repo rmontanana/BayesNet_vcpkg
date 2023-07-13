@@ -7,10 +7,12 @@ namespace bayesnet {
     class KDB : public BaseClassifier {
     private:
         int k;
+        float theta;
+        void add_m_edges(int idx, vector<int>& S, Tensor& weights);
     protected:
         void train();
     public:
-        KDB(int k);
+        KDB(int k, float theta);
     };
 }
 #endif
