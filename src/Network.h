@@ -4,7 +4,6 @@
 #include <map>
 #include <vector>
 
-
 namespace bayesnet {
     class Network {
     private:

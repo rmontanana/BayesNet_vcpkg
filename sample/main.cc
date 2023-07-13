@@ -7,6 +7,7 @@
 #include "Network.h"
 #include "Metrics.hpp"
 #include "CPPFImdlp.h"
+#include "KDB.h"
 
 
 using namespace std;
@@ -247,5 +248,14 @@ int main(int argc, char** argv)
     long m2 = features.size() + 1;
     auto matrix2 = torch::from_blob(conditional2.data(), { m, m });
     cout << matrix2 << endl;
+    cout << "****************** KDB ******************" << endl;
+    map<string, vector<int>> states;
+    for (auto feature : features) {
+        states[feature] = vector<int>(maxes[feature]);
+    }
+    states[className] = vector<int>(maxes[className]);
+    auto kdb = bayesnet::KDB(1);
+    kdb.fit(Xd, y, features, className, states);
+    cout << "****************** KDB ******************" << endl;
     return 0;
 }
