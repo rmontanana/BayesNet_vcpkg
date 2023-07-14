@@ -1,4 +1,5 @@
 #ifndef CLASSIFIERS_H
+#define CLASSIFIERS_H
 #include <torch/torch.h>
 #include "Network.h"
 #include "Metrics.hpp"

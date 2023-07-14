@@ -80,16 +80,22 @@ namespace bayesnet {
     }
     Tensor BaseClassifier::predict(Tensor& X)
     {
-        auto m_ = X.size(0);
-        auto n_ = X.size(1);
-        vector<vector<int>> Xd(n_, vector<int>(m_, 0));
-        for (auto i = 0; i < n_; i++) {
-            auto temp = X.index({ "...", i });
-            Xd[i] = vector<int>(temp.data_ptr<int>(), temp.data_ptr<int>() + m_);
+        auto n_models = models.size();
+        Tensor y_pred = torch::zeros({ X.size(0), n_models }, torch::kInt64);
+        for (auto i = 0; i < n_models; ++i) {
+            y_pred.index_put_({ "...", i }, models[i].predict(X));
         }
-        auto yp = model.predict(Xd);
-        auto ypred = torch::tensor(yp, torch::kInt64);
-        return ypred;
+        auto y_pred_ = y_pred.accessor<int64_t, 2>();
+        vector<int> y_pred_final;
+        for (int i = 0; i < y_pred.size(0); ++i) {
+            vector<float> votes(states[className].size(), 0);
+            for (int j = 0; j < y_pred.size(1); ++j) {
+                votes[y_pred_[i][j]] += 1;
+            }
+            auto indices = argsort(votes);
+            y_pred_final.push_back(indices[0]);
+        }
+        return torch::tensor(y_pred_final, torch::kInt64);
     }
     float BaseClassifier::score(Tensor& X, Tensor& y)
     {
