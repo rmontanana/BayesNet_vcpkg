@@ -90,7 +90,13 @@
         "format": "cpp",
         "valarray": "cpp",
         "regex": "cpp",
-        "span": "cpp"
+        "span": "cpp",
+        "cfenv": "cpp",
+        "cinttypes": "cpp",
+        "csetjmp": "cpp",
+        "future": "cpp",
+        "queue": "cpp",
+        "typeindex": "cpp"
     },
     "cmake.configureOnOpen": false,
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"

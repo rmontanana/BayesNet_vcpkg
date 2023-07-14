@@ -121,7 +121,7 @@ namespace bayesnet {
     and the indices of the weights as nodes of this square matrix using
     Kruskal algorithm
     */
-    vector<pair<int, int>> Metrics::maximumSpanningTree(Tensor& weights)
+    vector<pair<int, int>> Metrics::maximumSpanningTree(int root, Tensor& weights)
     {
         auto result = vector<pair<int, int>>();
 

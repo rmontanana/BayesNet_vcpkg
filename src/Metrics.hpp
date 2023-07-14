@@ -22,7 +22,7 @@ namespace bayesnet {
         vector<float> conditionalEdgeWeights();
         Tensor conditionalEdge();
         vector<pair<string, string>> doCombinations(const vector<string>&);
-        vector<pair<int, int>> maximumSpanningTree(Tensor& weights);
+        vector<pair<int, int>> maximumSpanningTree(int root, Tensor& weights);
     };
 }
 #endif
