@@ -96,7 +96,8 @@
         "csetjmp": "cpp",
         "future": "cpp",
         "queue": "cpp",
-        "typeindex": "cpp"
+        "typeindex": "cpp",
+        "shared_mutex": "cpp"
     },
     "cmake.configureOnOpen": false,
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"

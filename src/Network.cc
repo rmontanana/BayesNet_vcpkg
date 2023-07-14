@@ -2,19 +2,13 @@
 #include <mutex>
 #include "Network.h"
 namespace bayesnet {
-    Network::Network() : laplaceSmoothing(1), features(vector<string>()), className(""), classNumStates(0), maxThreads(0.8) {}
-    Network::Network(float maxT) : laplaceSmoothing(1), features(vector<string>()), className(""), classNumStates(0), maxThreads(maxT) {}
-    Network::Network(float maxT, int smoothing) : laplaceSmoothing(smoothing), features(vector<string>()), className(""), classNumStates(0), maxThreads(maxT) {}
-    Network::Network(Network& other) : laplaceSmoothing(other.laplaceSmoothing), features(other.features), className(other.className), classNumStates(other.getClassNumStates()), maxThreads(other.getmaxThreads())
+    Network::Network() : laplaceSmoothing(1), features(vector<string>()), className(""), classNumStates(0), maxThreads(0.8), fitted(false) {}
+    Network::Network(float maxT) : laplaceSmoothing(1), features(vector<string>()), className(""), classNumStates(0), maxThreads(maxT), fitted(false) {}
+    Network::Network(float maxT, int smoothing) : laplaceSmoothing(smoothing), features(vector<string>()), className(""), classNumStates(0), maxThreads(maxT), fitted(false) {}
+    Network::Network(Network& other) : laplaceSmoothing(other.laplaceSmoothing), features(other.features), className(other.className), classNumStates(other.getClassNumStates()), maxThreads(other.getmaxThreads()), fitted(other.fitted)
     {
         for (auto& pair : other.nodes) {
-            nodes[pair.first] = new Node(*pair.second);
-        }
-    }
-    Network::~Network()
-    {
-        for (auto& pair : nodes) {
-            delete pair.second;
+            nodes[pair.first] = make_unique<Node>(*pair.second);
         }
     }
     float Network::getmaxThreads()
@@ -32,7 +26,7 @@ namespace bayesnet {
             nodes[name]->setNumStates(numStates);
             return;
         }
-        nodes[name] = new Node(name, numStates);
+        nodes[name] = make_unique<Node>(name, numStates);
     }
     vector<string> Network::getFeatures()
     {
@@ -45,7 +39,7 @@ namespace bayesnet {
     int Network::getStates()
     {
         int result = 0;
-        for (auto node : nodes) {
+        for (auto& node : nodes) {
             result += node.second->getNumStates();
         }
         return result;
@@ -79,20 +73,20 @@ namespace bayesnet {
             throw invalid_argument("Child node " + child + " does not exist");
         }
         // Temporarily add edge to check for cycles
-        nodes[parent]->addChild(nodes[child]);
-        nodes[child]->addParent(nodes[parent]);
+        nodes[parent]->addChild(nodes[child].get());
+        nodes[child]->addParent(nodes[parent].get());
         unordered_set<string> visited;
         unordered_set<string> recStack;
         if (isCyclic(nodes[child]->getName(), visited, recStack)) // if adding this edge forms a cycle
         {
             // remove problematic edge
-            nodes[parent]->removeChild(nodes[child]);
-            nodes[child]->removeParent(nodes[parent]);
+            nodes[parent]->removeChild(nodes[child].get());
+            nodes[child]->removeParent(nodes[parent].get());
             throw invalid_argument("Adding this edge forms a cycle in the graph.");
         }
 
     }
-    map<string, Node*>& Network::getNodes()
+    map<string, std::unique_ptr<Node>>& Network::getNodes()
     {
         return nodes;
     }
@@ -140,9 +134,8 @@ namespace bayesnet {
                     lock.unlock();
 
                     pair.second->computeCPT(dataset, laplaceSmoothing);
-
                     lock.lock();
-                    nodes[pair.first] = pair.second;
+                    nodes[pair.first] = std::move(pair.second);
                     lock.unlock();
                 }
                 lock_guard<mutex> lock(mtx);
@@ -155,10 +148,14 @@ namespace bayesnet {
         for (auto& thread : threads) {
             thread.join();
         }
+        fitted = true;
     }
 
     vector<int> Network::predict(const vector<vector<int>>& tsamples)
     {
+        if (!fitted) {
+            throw logic_error("You must call fit() before calling predict()");
+        }
         vector<int> predictions;
         vector<int> sample;
         for (int row = 0; row < tsamples[0].size(); ++row) {
@@ -176,6 +173,9 @@ namespace bayesnet {
     }
     vector<vector<double>> Network::predict_proba(const vector<vector<int>>& tsamples)
     {
+        if (!fitted) {
+            throw logic_error("You must call fit() before calling predict_proba()");
+        }
         vector<vector<double>> predictions;
         vector<int> sample;
         for (int row = 0; row < tsamples[0].size(); ++row) {
@@ -215,7 +215,7 @@ namespace bayesnet {
     double Network::computeFactor(map<string, int>& completeEvidence)
     {
         double result = 1.0;
-        for (auto node : getNodes()) {
+        for (auto& node : getNodes()) {
             result *= node.second->getFactorValue(completeEvidence);
         }
         return result;
@@ -249,7 +249,7 @@ namespace bayesnet {
     {
         vector<string> result;
         // Draw the network
-        for (auto node : nodes) {
+        for (auto& node : nodes) {
             string line = node.first + " -> ";
             for (auto child : node.second->getChildren()) {
                 line += child->getName() + ", ";

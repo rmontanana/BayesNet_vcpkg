@@ -1,10 +1,11 @@
 #include "BaseClassifier.h"
+#include "utils.h"
 
 namespace bayesnet {
     using namespace std;
     using namespace torch;
 
-    BaseClassifier::BaseClassifier(Network model) : model(model), m(0), n(0), metrics(Metrics()) {}
+    BaseClassifier::BaseClassifier(Network model) : model(model), m(0), n(0), metrics(Metrics()), fitted(false) {}
     BaseClassifier& BaseClassifier::build(vector<string>& features, string className, map<string, vector<int>>& states)
     {
 
@@ -16,21 +17,19 @@ namespace bayesnet {
         auto n_classes = states[className].size();
         metrics = Metrics(dataset, features, className, n_classes);
         train();
+        model.fit(Xv, yv, features, className);
+        fitted = true;
         return *this;
-    }
-    BaseClassifier& BaseClassifier::fit(Tensor& X, Tensor& y, vector<string>& features, string className, map<string, vector<int>>& states)
-    {
-        this->X = X;
-        this->y = y;
-        return build(features, className, states);
     }
     BaseClassifier& BaseClassifier::fit(vector<vector<int>>& X, vector<int>& y, vector<string>& features, string className, map<string, vector<int>>& states)
     {
         this->X = torch::zeros({ static_cast<int64_t>(X[0].size()), static_cast<int64_t>(X.size()) }, kInt64);
+        Xv = X;
         for (int i = 0; i < X.size(); ++i) {
             this->X.index_put_({ "...", i }, torch::tensor(X[i], kInt64));
         }
         this->y = torch::tensor(y, kInt64);
+        yv = y;
         return build(features, className, states);
     }
     void BaseClassifier::checkFitParameters()
@@ -53,54 +52,43 @@ namespace bayesnet {
             }
         }
     }
-    vector<int> BaseClassifier::argsort(vector<float>& nums)
-    {
-        int n = nums.size();
-        vector<int> indices(n);
-        iota(indices.begin(), indices.end(), 0);
-        sort(indices.begin(), indices.end(), [&nums](int i, int j) {return nums[i] > nums[j];});
-        return indices;
-    }
-    vector<vector<int>> tensorToVector(const torch::Tensor& tensor)
-    {
-        // convert mxn tensor to nxm vector
-        vector<vector<int>> result;
-        auto tensor_accessor = tensor.accessor<int, 2>();
 
-        // Iterate over columns and rows of the tensor
-        for (int j = 0; j < tensor.size(1); ++j) {
-            vector<int> column;
-            for (int i = 0; i < tensor.size(0); ++i) {
-                column.push_back(tensor_accessor[i][j]);
-            }
-            result.push_back(column);
-        }
-
-        return result;
-    }
     Tensor BaseClassifier::predict(Tensor& X)
     {
-        auto n_models = models.size();
-        Tensor y_pred = torch::zeros({ X.size(0), n_models }, torch::kInt64);
-        for (auto i = 0; i < n_models; ++i) {
-            y_pred.index_put_({ "...", i }, models[i].predict(X));
+        if (!fitted) {
+            throw logic_error("Classifier has not been fitted");
         }
-        auto y_pred_ = y_pred.accessor<int64_t, 2>();
-        vector<int> y_pred_final;
-        for (int i = 0; i < y_pred.size(0); ++i) {
-            vector<float> votes(states[className].size(), 0);
-            for (int j = 0; j < y_pred.size(1); ++j) {
-                votes[y_pred_[i][j]] += 1;
-            }
-            auto indices = argsort(votes);
-            y_pred_final.push_back(indices[0]);
+        auto m_ = X.size(0);
+        auto n_ = X.size(1);
+        vector<vector<int>> Xd(n_, vector<int>(m_, 0));
+        for (auto i = 0; i < n_; i++) {
+            auto temp = X.index({ "...", i });
+            Xd[i] = vector<int>(temp.data_ptr<int>(), temp.data_ptr<int>() + m_);
         }
-        return torch::tensor(y_pred_final, torch::kInt64);
+        auto yp = model.predict(Xd);
+        auto ypred = torch::tensor(yp, torch::kInt64);
+        return ypred;
     }
     float BaseClassifier::score(Tensor& X, Tensor& y)
     {
+        if (!fitted) {
+            throw logic_error("Classifier has not been fitted");
+        }
         Tensor y_pred = predict(X);
         return (y_pred == y).sum().item<float>() / y.size(0);
+    }
+    float BaseClassifier::score(vector<vector<int>>& X, vector<int>& y)
+    {
+        if (!fitted) {
+            throw logic_error("Classifier has not been fitted");
+        }
+        auto m_ = X[0].size();
+        auto n_ = X.size();
+        vector<vector<int>> Xd(n_, vector<int>(m_, 0));
+        for (auto i = 0; i < n_; i++) {
+            Xd[i] = vector<int>(X[i].begin(), X[i].end());
+        }
+        return model.score(Xd, y);
     }
     vector<string> BaseClassifier::show()
     {

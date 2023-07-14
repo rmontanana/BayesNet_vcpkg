@@ -6,12 +6,10 @@ namespace bayesnet {
         : name(name), numStates(numStates), cpTable(torch::Tensor()), parents(vector<Node*>()), children(vector<Node*>())
     {
     }
-
     string Node::getName() const
     {
         return name;
     }
-
     void Node::addParent(Node* parent)
     {
         parents.push_back(parent);

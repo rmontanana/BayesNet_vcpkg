@@ -7,8 +7,9 @@
 namespace bayesnet {
     class Network {
     private:
-        map<string, Node*> nodes;
+        map<string, std::unique_ptr<Node>> nodes;
         map<string, vector<int>> dataset;
+        bool fitted;
         float maxThreads;
         int classNumStates;
         vector<string> features;
@@ -28,12 +29,11 @@ namespace bayesnet {
         Network(float, int);
         Network(float);
         Network(Network&);
-        ~Network();
         torch::Tensor& getSamples();
         float getmaxThreads();
         void addNode(string, int);
         void addEdge(const string, const string);
-        map<string, Node*>& getNodes();
+        map<string, std::unique_ptr<Node>>& getNodes();
         vector<string> getFeatures();
         int getStates();
         int getClassNumStates();

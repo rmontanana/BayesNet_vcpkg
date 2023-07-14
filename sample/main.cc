@@ -96,15 +96,16 @@ pair<vector<mdlp::labels_t>, map<string, int>> discretize(vector<mdlp::samples_t
 void showNodesInfo(bayesnet::Network& network, string className)
 {
     cout << "Nodes:" << endl;
-    for (auto [name, item] : network.getNodes()) {
-        cout << "*" << item->getName() << " States -> " << item->getNumStates() << endl;
+    for (auto& node : network.getNodes()) {
+        auto name = node.first;
+        cout << "*" << node.second->getName() << " States -> " << node.second->getNumStates() << endl;
         cout << "-Parents:";
-        for (auto parent : item->getParents()) {
+        for (auto parent : node.second->getParents()) {
             cout << " " << parent->getName();
         }
         cout << endl;
         cout << "-Children:";
-        for (auto child : item->getChildren()) {
+        for (auto child : node.second->getChildren()) {
             cout << " " << child->getName();
         }
         cout << endl;
@@ -113,7 +114,7 @@ void showNodesInfo(bayesnet::Network& network, string className)
 void showCPDS(bayesnet::Network& network)
 {
     cout << "CPDs:" << endl;
-    auto nodes = network.getNodes();
+    auto& nodes = network.getNodes();
     for (auto it = nodes.begin(); it != nodes.end(); it++) {
         cout << "* Name: " << it->first << " " << it->second->getName() << " -> " << it->second->getNumStates() << endl;
         cout << "Parents: ";
@@ -253,12 +254,14 @@ int main(int argc, char** argv)
     for (auto feature : features) {
         states[feature] = vector<int>(maxes[feature]);
     }
-    states[className] = vector<int>(maxes[className]);
+    states[className] = vector<int>(
+        maxes[className]);
     auto kdb = bayesnet::KDB(2);
     kdb.fit(Xd, y, features, className, states);
     for (auto line : kdb.show()) {
         cout << line << endl;
     }
+    cout << "Score: " << kdb.score(Xd, y) << endl;
     cout << "****************** KDB ******************" << endl;
     return 0;
 }
