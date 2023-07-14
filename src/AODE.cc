@@ -1,16 +1,12 @@
 #include "AODE.h"
 
 namespace bayesnet {
-
-    AODE::AODE() : Ensemble()
-    {
-        models = vector<SPODE>();
-    }
+    AODE::AODE() : Ensemble() {}
     void AODE::train()
     {
+        models.clear();
         for (int i = 0; i < features.size(); ++i) {
-            SPODE model = SPODE(i);
-            models.push_back(model);
+            models.push_back(std::make_unique<SPODE>(i));
         }
     }
 }

@@ -8,6 +8,8 @@
 #include "Metrics.hpp"
 #include "CPPFImdlp.h"
 #include "KDB.h"
+#include "SPODE.h"
+#include "AODE.h"
 
 
 using namespace std;
@@ -249,13 +251,14 @@ int main(int argc, char** argv)
     // long m2 = features.size() + 1;
     // auto matrix2 = torch::from_blob(conditional2.data(), { m, m });
     // cout << matrix2 << endl;
-    cout << "****************** KDB ******************" << endl;
+    cout << "****************** Preparing ******************" << endl;
     map<string, vector<int>> states;
     for (auto feature : features) {
         states[feature] = vector<int>(maxes[feature]);
     }
     states[className] = vector<int>(
         maxes[className]);
+    cout << "****************** KDB ******************" << endl;
     auto kdb = bayesnet::KDB(2);
     kdb.fit(Xd, y, features, className, states);
     for (auto line : kdb.show()) {
@@ -263,5 +266,21 @@ int main(int argc, char** argv)
     }
     cout << "Score: " << kdb.score(Xd, y) << endl;
     cout << "****************** KDB ******************" << endl;
+    cout << "****************** SPODE ******************" << endl;
+    auto spode = bayesnet::SPODE(2);
+    spode.fit(Xd, y, features, className, states);
+    for (auto line : spode.show()) {
+        cout << line << endl;
+    }
+    cout << "Score: " << spode.score(Xd, y) << endl;
+    cout << "****************** SPODE ******************" << endl;
+    cout << "****************** AODE ******************" << endl;
+    auto aode = bayesnet::AODE();
+    aode.fit(Xd, y, features, className, states);
+    for (auto line : aode.show()) {
+        cout << line << endl;
+    }
+    cout << "Score: " << aode.score(Xd, y) << endl;
+    cout << "****************** AODE ******************" << endl;
     return 0;
 }
