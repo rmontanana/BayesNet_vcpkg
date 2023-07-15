@@ -127,6 +127,5 @@ namespace bayesnet {
         auto result = vector<pair<int, int>>();
         auto mst = MST(features, weights, root);
         return mst.maximumSpanningTree();
-
     }
 }
