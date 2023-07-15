@@ -258,5 +258,19 @@ namespace bayesnet {
         }
         return result;
     }
+    vector<string> Network::graph(string title)
+    {
+        auto output = vector<string>();
+        auto prefix = "digraph BayesNet {\nlabel=<BayesNet ";
+        auto suffix = ">\nfontsize=30\nfontcolor=blue\nlabelloc=t\nlayout=circo\n";
+        string header = prefix + title + suffix;
+        output.push_back(header);
+        for (auto& node : nodes) {
+            auto result = node.second->graph(className);
+            output.insert(output.end(), result.begin(), result.end());
+        }
+        output.push_back("}\n");
+        return output;
+    }
 
 }

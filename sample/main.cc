@@ -259,30 +259,40 @@ int main(int argc, char** argv)
     }
     states[className] = vector<int>(
         maxes[className]);
-    // cout << "****************** KDB ******************" << endl;
-    // auto kdb = bayesnet::KDB(2);
-    // kdb.fit(Xd, y, features, className, states);
-    // for (auto line : kdb.show()) {
-    //     cout << line << endl;
-    // }
-    // cout << "Score: " << kdb.score(Xd, y) << endl;
-    // cout << "****************** KDB ******************" << endl;
-    // cout << "****************** SPODE ******************" << endl;
-    // auto spode = bayesnet::SPODE(2);
-    // spode.fit(Xd, y, features, className, states);
-    // for (auto line : spode.show()) {
-    //     cout << line << endl;
-    // }
-    // cout << "Score: " << spode.score(Xd, y) << endl;
-    // cout << "****************** SPODE ******************" << endl;
-    // cout << "****************** AODE ******************" << endl;
-    // auto aode = bayesnet::AODE();
-    // aode.fit(Xd, y, features, className, states);
-    // for (auto line : aode.show()) {
-    //     cout << line << endl;
-    // }
-    // cout << "Score: " << aode.score(Xd, y) << endl;
-    // cout << "****************** AODE ******************" << endl;
+    cout << "****************** KDB ******************" << endl;
+    auto kdb = bayesnet::KDB(2);
+    kdb.fit(Xd, y, features, className, states);
+    for (auto line : kdb.show()) {
+        cout << line << endl;
+    }
+    cout << "Score: " << kdb.score(Xd, y) << endl;
+    ofstream file("kdb.dot");
+    file << kdb.graph();
+    file.close();
+    cout << "****************** KDB ******************" << endl;
+    cout << "****************** SPODE ******************" << endl;
+    auto spode = bayesnet::SPODE(2);
+    spode.fit(Xd, y, features, className, states);
+    for (auto line : spode.show()) {
+        cout << line << endl;
+    }
+    cout << "Score: " << spode.score(Xd, y) << endl;
+    file.open("spode.dot");
+    file << spode.graph();
+    file.close();
+    cout << "****************** SPODE ******************" << endl;
+    cout << "****************** AODE ******************" << endl;
+    auto aode = bayesnet::AODE();
+    aode.fit(Xd, y, features, className, states);
+    for (auto line : aode.show()) {
+        cout << line << endl;
+    }
+    cout << "Score: " << aode.score(Xd, y) << endl;
+    file.open("aode.dot");
+    for (auto line : aode.graph())
+        file << line;
+    file.close();
+    cout << "****************** AODE ******************" << endl;
     cout << "****************** TAN ******************" << endl;
     auto tan = bayesnet::TAN();
     tan.fit(Xd, y, features, className, states);
@@ -290,6 +300,9 @@ int main(int argc, char** argv)
         cout << line << endl;
     }
     cout << "Score: " << tan.score(Xd, y) << endl;
+    file.open("tan.dot");
+    file << tan.graph();
+    file.close();
     cout << "****************** TAN ******************" << endl;
     return 0;
 }

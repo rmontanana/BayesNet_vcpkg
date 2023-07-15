@@ -93,9 +93,18 @@ namespace bayesnet {
     }
     vector<string> Ensemble::show()
     {
-        vector<string> result;
+        auto result = vector<string>();
         for (auto i = 0; i < n_models; ++i) {
             auto res = models[i]->show();
+            result.insert(result.end(), res.begin(), res.end());
+        }
+        return result;
+    }
+    vector<string> Ensemble::graph(string title)
+    {
+        auto result = vector<string>();
+        for (auto i = 0; i < n_models; ++i) {
+            auto res = models[i]->graph(title + "_" + to_string(i));
             result.insert(result.end(), res.begin(), res.end());
         }
         return result;

@@ -10,6 +10,7 @@ namespace bayesnet {
         void train() override;
     public:
         TAN();
+        vector<string> graph(string name = "TAN") override;
     };
 }
 #endif

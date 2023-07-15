@@ -80,4 +80,11 @@ namespace bayesnet {
             exit_cond = num == n_edges || candidates.size(0) == 0;
         }
     }
+    vector<string> KDB::graph(string title)
+    {
+        if (title == "KDB") {
+            title += " (k=" + to_string(k) + ", theta=" + to_string(theta) + ")";
+        }
+        return model.graph(title);
+    }
 }

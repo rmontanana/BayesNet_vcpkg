@@ -45,6 +45,7 @@ namespace bayesnet {
         vector<vector<double>> predict_proba(const vector<vector<int>>&);
         double score(const vector<vector<int>>&, const vector<int>&);
         vector<string> show();
+        vector<string> graph(string title); // Returns a vector of strings representing the graph in graphviz format
         inline string version() { return "0.1.0"; }
     };
 }

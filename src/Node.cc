@@ -109,4 +109,14 @@ namespace bayesnet {
         }
         return cpTable.index({ coordinates }).item<float>();
     }
+    vector<string> Node::graph(string className)
+    {
+        auto output = vector<string>();
+        auto suffix = name == className ? ", fontcolor=red, fillcolor=lightblue, style=filled " : "";
+        output.push_back(name + " [shape=circle" + suffix + "] \n");
+        for (auto& child : children) {
+            output.push_back(name + " -> " + child->getName());
+        }
+        return output;
+    }
 }

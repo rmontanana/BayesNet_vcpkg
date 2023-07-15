@@ -36,6 +36,7 @@ namespace bayesnet {
         float score(Tensor& X, Tensor& y);
         float score(vector<vector<int>>& X, vector<int>& y);
         vector<string> show();
+        vector<string> graph(string title);
     };
 }
 #endif

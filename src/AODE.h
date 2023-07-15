@@ -8,6 +8,7 @@ namespace bayesnet {
         void train() override;
     public:
         AODE();
+        vector<string> graph(string title = "AODE");
     };
 }
 #endif
