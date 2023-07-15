@@ -10,6 +10,7 @@
 #include "KDB.h"
 #include "SPODE.h"
 #include "AODE.h"
+#include "TAN.h"
 
 
 using namespace std;
@@ -282,5 +283,13 @@ int main(int argc, char** argv)
     }
     cout << "Score: " << aode.score(Xd, y) << endl;
     cout << "****************** AODE ******************" << endl;
+    cout << "****************** TAN ******************" << endl;
+    auto tan = bayesnet::TAN();
+    tan.fit(Xd, y, features, className, states);
+    for (auto line : tan.show()) {
+        cout << line << endl;
+    }
+    cout << "Score: " << tan.score(Xd, y) << endl;
+    cout << "****************** TAN ******************" << endl;
     return 0;
 }
