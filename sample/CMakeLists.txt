@@ -1,6 +1,4 @@
 include_directories(${BayesNet_SOURCE_DIR}/src)
 link_directories(${MyProject_SOURCE_DIR}/src)
 add_executable(main main.cc ArffFiles.cc CPPFImdlp.cpp Metrics.cpp)
-add_executable(test test.cc)
 target_link_libraries(main BayesNet "${TORCH_LIBRARIES}")
-target_link_libraries(test "${TORCH_LIBRARIES}")
