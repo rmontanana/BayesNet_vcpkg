@@ -21,6 +21,9 @@ namespace bayesnet {
     }
     void Network::addNode(string name, int numStates)
     {
+        if (find(features.begin(), features.end(), name) == features.end()) {
+            features.push_back(name);
+        }
         if (nodes.find(name) != nodes.end()) {
             // if node exists update its number of states
             nodes[name]->setNumStates(numStates);
