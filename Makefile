@@ -37,6 +37,8 @@ coverage: ## Run tests and generate coverage report (build/index.html)
 	find . -name "*.gcda" -print0 | xargs -0 rm
 	@cd build; \
 	cmake --build . --target unit_tests ;
+	@cd build/tests; \
+	./unit_tests;
 	gcovr ;
 
 help: ## Show help message

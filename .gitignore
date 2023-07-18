@@ -33,4 +33,5 @@
 *.app
 build/
 *.dSYM/**
-
+cmake-build*/**
+.idea
