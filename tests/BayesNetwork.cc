@@ -7,7 +7,7 @@
 
 TEST_CASE("Test Bayesian Network")
 {
-    auto[Xd, y, features, className, states] = loadFile("iris");
+    auto [Xd, y, features, className, states] = loadFile("iris");
 
     SECTION("Test Update Nodes")
     {
@@ -25,5 +25,17 @@ TEST_CASE("Test Bayesian Network")
         REQUIRE(net.getFeatures() == vector<string>{"A", "B"});
         net.addNode("C", 2);
         REQUIRE(net.getFeatures() == vector<string>{"A", "B", "C"});
+    }
+    SECTION("Test get edges")
+    {
+        auto net = bayesnet::Network();
+        net.addNode("A", 3);
+        net.addNode("B", 5);
+        net.addNode("C", 2);
+        net.addEdge("A", "B");
+        net.addEdge("B", "C");
+        REQUIRE(net.getEdges() == vector<pair<string, string>>{ {"A", "B"}, { "B", "C" } });
+        net.addEdge("A", "C");
+        REQUIRE(net.getEdges() == vector<pair<string, string>>{ {"A", "B"}, { "A", "C" }, { "B", "C" } });
     }
 }

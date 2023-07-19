@@ -21,7 +21,7 @@ TEST_CASE("Test Bayesian Classifiers score", "[BayesNet]")
     };
 
     string file_name = GENERATE("glass", "iris", "ecoli", "diabetes");
-    auto[Xd, y, features, className, states] = loadFile(file_name);
+    auto [Xd, y, features, className, states] = loadFile(file_name);
 
     SECTION("Test TAN classifier (" + file_name + ")")
     {
@@ -59,4 +59,30 @@ TEST_CASE("Test Bayesian Classifiers score", "[BayesNet]")
     // for (auto scores : scores) {
     //     cout << "{{\"" << scores.first.first << "\", \"" << scores.first.second << "\"}, " << scores.second << "}, ";
     // }
+}
+TEST_CASE("Models features")
+{
+    auto graph = vector<string>({ "digraph BayesNet {\nlabel=<BayesNet Test>\nfontsize=30\nfontcolor=blue\nlabelloc=t\nlayout=circo\n",
+        "class [shape=circle, fontcolor=red, fillcolor=lightblue, style=filled ] \n",
+        "class -> sepallength", "class -> sepalwidth", "class -> petallength", "class -> petalwidth", "petallength [shape=circle] \n",
+        "petallength -> sepallength", "petalwidth [shape=circle] \n", "sepallength [shape=circle] \n",
+        "sepallength -> sepalwidth", "sepalwidth [shape=circle] \n", "sepalwidth -> petalwidth", "}\n"
+        }
+    );
+
+    auto clf = bayesnet::TAN();
+    auto [Xd, y, features, className, states] = loadFile("iris");
+    clf.fit(Xd, y, features, className, states);
+    REQUIRE(clf.getNumberOfNodes() == 5);
+    REQUIRE(clf.getNumberOfEdges() == 7);
+    REQUIRE(clf.show() == vector<string>{"class -> sepallength, sepalwidth, petallength, petalwidth, ", "petallength -> sepallength, ", "petalwidth -> ", "sepallength -> sepalwidth, ", "sepalwidth -> petalwidth, "});
+    REQUIRE(clf.graph("Test") == graph);
+}
+TEST_CASE("Get num features & num edges")
+{
+    auto [Xd, y, features, className, states] = loadFile("iris");
+    auto clf = bayesnet::KDB(2);
+    clf.fit(Xd, y, features, className, states);
+    REQUIRE(clf.getNumberOfNodes() == 5);
+    REQUIRE(clf.getNumberOfEdges() == 8);
 }
