@@ -3,7 +3,7 @@
 #include <torch/torch.h>
 #include "BaseClassifier.h"
 #include "Metrics.hpp"
-#include "utils.h"
+#include "bayesnetUtils.h"
 using namespace std;
 using namespace torch;
 

@@ -5,11 +5,11 @@
 #include <vector>
 #include <map>
 #include <string>
-#include "../src/KDB.h"
-#include "../src/TAN.h"
-#include "../src/SPODE.h"
-#include "../src/AODE.h"
-#include "utils.h"
+#include "KDB.h"
+#include "TAN.h"
+#include "SPODE.h"
+#include "AODE.h"
+#include "platformUtils.h"
 
 TEST_CASE("Test Bayesian Classifiers score", "[BayesNet]")
 {

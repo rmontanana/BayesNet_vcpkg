@@ -1,5 +1,5 @@
 #include "BaseClassifier.h"
-#include "utils.h"
+#include "bayesnetUtils.h"
 
 namespace bayesnet {
     using namespace std;

@@ -1,5 +1,5 @@
-#include <torch/torch.h>
-#include <vector>
+
+#include "bayesnetUtils.h"
 namespace bayesnet {
     using namespace std;
     using namespace torch;

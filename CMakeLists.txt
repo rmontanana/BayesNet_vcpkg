@@ -37,8 +37,13 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_P
 # Subdirectories
 # --------------
 add_subdirectory(config)
-add_subdirectory(src)
+add_subdirectory(${BayesNet_SOURCE_DIR}/src/BayesNet)
+add_subdirectory(${BayesNet_SOURCE_DIR}/src/Platform)
 add_subdirectory(sample)
+
+file(GLOB BayesNet_HEADERS CONFIGURE_DEPENDS ${BayesNet_SOURCE_DIR}/src/BayesNet/*.h ${BayesNet_SOURCE_DIR}/BayesNet/*.hpp)
+file(GLOB BayesNet_SOURCES CONFIGURE_DEPENDS ${BayesNet_SOURCE_DIR}/src/BayesNet/*.cc ${BayesNet_SOURCE_DIR}/src/BayesNet/*.cpp)
+file(GLOB Platform_SOURCES CONFIGURE_DEPENDS ${BayesNet_SOURCE_DIR}/src/Platform/*.cc ${BayesNet_SOURCE_DIR}/src/Platform/*.cpp)
 
 # Testing
 # -------
