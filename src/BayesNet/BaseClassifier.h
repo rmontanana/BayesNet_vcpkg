@@ -2,7 +2,7 @@
 #define CLASSIFIERS_H
 #include <torch/torch.h>
 #include "Network.h"
-#include "Metrics.hpp"
+#include "BayesMetrics.h"
 using namespace std;
 using namespace torch;
 

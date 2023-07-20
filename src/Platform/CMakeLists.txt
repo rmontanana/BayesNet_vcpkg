@@ -1,4 +1,6 @@
 include_directories(${BayesNet_SOURCE_DIR}/src/BayesNet)
 include_directories(${BayesNet_SOURCE_DIR}/src/Platform)
-add_executable(main Experiment.cc ArffFiles.cc CPPFImdlp.cpp Metrics.cpp platformUtils.cc)
-target_link_libraries(main BayesNet "${TORCH_LIBRARIES}")
+include_directories(${BayesNet_SOURCE_DIR}/lib/Files)
+include_directories(${BayesNet_SOURCE_DIR}/lib/mdlp)
+add_executable(main Experiment.cc platformUtils.cc)
+target_link_libraries(main BayesNet ArffFiles mdlp "${TORCH_LIBRARIES}")

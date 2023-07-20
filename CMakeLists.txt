@@ -33,12 +33,22 @@ set(CMAKE_BUILD_TYPE "Debug")
 # --------------
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
 
+include(AddGitSubmodule)
+include(StaticAnalyzers) # clang-tidy
+include(CodeCoverage)
+
+# External libraries - dependencies of BayesNet
+# ---------------------------------------------
+# include(FetchContent)
+add_git_submodule("lib/mdlp")
+add_git_submodule("lib/catch2")
 
 # Subdirectories
 # --------------
 add_subdirectory(config)
-add_subdirectory(${BayesNet_SOURCE_DIR}/src/BayesNet)
-add_subdirectory(${BayesNet_SOURCE_DIR}/src/Platform)
+add_subdirectory(lib/Files)
+add_subdirectory(src/BayesNet)
+add_subdirectory(src/Platform)
 add_subdirectory(sample)
 
 file(GLOB BayesNet_HEADERS CONFIGURE_DEPENDS ${BayesNet_SOURCE_DIR}/src/BayesNet/*.h ${BayesNet_SOURCE_DIR}/BayesNet/*.hpp)
@@ -51,14 +61,14 @@ if (ENABLE_TESTING)
   MESSAGE("Testing enabled")
   enable_testing()
   if (CODE_COVERAGE)
-    include(CodeCoverage)
+    #include(CodeCoverage)
     MESSAGE("Code coverage enabled")
     set(CMAKE_C_FLAGS " ${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage")
     set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
     SET(GCC_COVERAGE_LINK_FLAGS " ${GCC_COVERAGE_LINK_FLAGS} -lgcov --coverage")
   endif (CODE_COVERAGE)
-  find_package(Catch2 3 REQUIRED)
+  #find_package(Catch2 3 REQUIRED)
   include(CTest)
-  include(Catch)
+  #include(Catch)
   add_subdirectory(tests)
 endif (ENABLE_TESTING)

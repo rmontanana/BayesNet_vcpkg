@@ -1,4 +1,4 @@
-#include "Metrics.hpp"
+#include "BayesMetrics.h"
 #include "Mst.h"
 using namespace std;
 namespace bayesnet {

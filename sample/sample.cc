@@ -5,7 +5,7 @@
 #include <getopt.h>
 #include "ArffFiles.h"
 #include "Network.h"
-#include "Metrics.hpp"
+#include "BayesMetrics.h"
 #include "CPPFImdlp.h"
 #include "KDB.h"
 #include "SPODE.h"

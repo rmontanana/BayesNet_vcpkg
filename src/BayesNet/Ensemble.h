@@ -2,7 +2,7 @@
 #define ENSEMBLE_H
 #include <torch/torch.h>
 #include "BaseClassifier.h"
-#include "Metrics.hpp"
+#include "BayesMetrics.h"
 #include "bayesnetUtils.h"
 using namespace std;
 using namespace torch;
