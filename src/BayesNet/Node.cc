@@ -83,7 +83,6 @@ namespace bayesnet {
         for (auto father : getParents()) {
             dimensions.push_back(father->getNumStates());
         }
-        auto length = dimensions.size();
         // Create a tensor of zeros with the dimensions of the CPT
         cpTable = torch::zeros(dimensions, torch::kFloat) + laplaceSmoothing;
         // Fill table with counts
