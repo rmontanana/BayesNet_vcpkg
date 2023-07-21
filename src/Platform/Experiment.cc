@@ -2,7 +2,7 @@
 #include <string>
 #include <torch/torch.h>
 #include <thread>
-#include <getopt.h>
+#include <argparse/argparse.hpp>
 #include "ArffFiles.h"
 #include "Network.h"
 #include "BayesMetrics.h"
@@ -11,71 +11,11 @@
 #include "SPODE.h"
 #include "AODE.h"
 #include "TAN.h"
-#include "platformUtils.h"
 
 
 using namespace std;
 
-/* print a description of all supported options */
-void usage(const char* path)
-{
-    /* take only the last portion of the path */
-    const char* basename = strrchr(path, '/');
-    basename = basename ? basename + 1 : path;
-
-    cout << "usage: " << basename << "[OPTION]" << endl;
-    cout << "  -h, --help\t\t Print this help and exit." << endl;
-    cout
-        << "  -f, --file[=FILENAME]\t {diabetes, glass, iris, kdd_JapaneseVowels, letter, liver-disorders, mfeat-factors}."
-        << endl;
-    cout << "  -p, --path[=FILENAME]\t folder where the data files are located, default " << PATH << endl;
-    cout << "  -m, --model={AODE, KDB, SPODE, TAN}\t " << endl;
-}
-
-tuple<string, string, string> parse_arguments(int argc, char** argv)
-{
-    string file_name;
-    string model_name;
-    string path = PATH;
-    const vector<struct option> long_options = {
-            {"help",          no_argument,       nullptr, 'h'},
-            {"file",          required_argument, nullptr, 'f'},
-            {"path",          required_argument, nullptr, 'p'},
-            {"model",         required_argument, nullptr, 'm'},
-            {nullptr,         no_argument,       nullptr, 0}
-    };
-    while (true) {
-        const auto c = getopt_long(argc, argv, "hf:p:m:", long_options.data(), nullptr);
-        if (c == -1)
-            break;
-        switch (c) {
-            case 'h':
-                usage(argv[0]);
-                exit(0);
-            case 'f':
-                file_name = string(optarg);
-                break;
-            case 'm':
-                model_name = string(optarg);
-                break;
-            case 'p':
-                path = optarg;
-                if (path.back() != '/')
-                    path += '/';
-                break;
-            case '?':
-                usage(argv[0]);
-                exit(1);
-            default:
-                abort();
-        }
-    }
-    if (file_name.empty()) {
-        usage(argv[0]);
-        exit(1);
-    }
-    return make_tuple(file_name, path, model_name);
-}
+const string PATH = "../../data/";
 
 inline constexpr auto hash_conv(const std::string_view sv)
 {
@@ -91,9 +31,32 @@ inline constexpr auto operator"" _sh(const char* str, size_t len)
     return hash_conv(std::string_view{ str, len });
 }
 
+pair<vector<mdlp::labels_t>, map<string, int>> discretize(vector<mdlp::samples_t>& X, mdlp::labels_t& y, vector<string> features)
+{
+    vector<mdlp::labels_t>Xd;
+    map<string, int> maxes;
 
+    auto fimdlp = mdlp::CPPFImdlp();
+    for (int i = 0; i < X.size(); i++) {
+        fimdlp.fit(X[i], y);
+        mdlp::labels_t& xd = fimdlp.transform(X[i]);
+        maxes[features[i]] = *max_element(xd.begin(), xd.end()) + 1;
+        Xd.push_back(xd);
+    }
+    return { Xd, maxes };
+}
 
-tuple<string, string, string> get_options(int argc, char** argv)
+bool file_exists(const std::string& name)
+{
+    if (FILE* file = fopen(name.c_str(), "r")) {
+        fclose(file);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+int main(int argc, char** argv)
 {
     map<string, bool> datasets = {
             {"diabetes",           true},
@@ -105,35 +68,60 @@ tuple<string, string, string> get_options(int argc, char** argv)
             {"liver-disorders",    true},
             {"mfeat-factors",      true},
     };
-    vector <string> models = { "AODE", "KDB", "SPODE", "TAN" };
-    string file_name;
-    string path;
-    string model_name;
-    tie(file_name, path, model_name) = parse_arguments(argc, argv);
-    if (datasets.find(file_name) == datasets.end()) {
-        cout << "Invalid file name: " << file_name << endl;
-        usage(argv[0]);
+    auto valid_datasets = vector<string>();
+    for (auto dataset : datasets) {
+        valid_datasets.push_back(dataset.first);
+    }
+    argparse::ArgumentParser program("BayesNetSample");
+    program.add_argument("-f", "--file")
+        .help("Dataset file name")
+        .action([valid_datasets](const std::string& value) {
+        if (find(valid_datasets.begin(), valid_datasets.end(), value) != valid_datasets.end()) {
+            return value;
+        }
+        throw runtime_error("file must be one of {diabetes, ecoli, glass, iris, kdd_JapaneseVowels, letter, liver-disorders, mfeat-factors}");
+            }
+    );
+    program.add_argument("-p", "--path")
+        .help(" folder where the data files are located, default")
+        .default_value(string{ PATH }
+    );
+    program.add_argument("-m", "--model")
+        .help("Model to use {AODE, KDB, SPODE, TAN}")
+        .action([](const std::string& value) {
+        static const vector<string> choices = { "AODE", "KDB", "SPODE", "TAN" };
+        if (find(choices.begin(), choices.end(), value) != choices.end()) {
+            return value;
+        }
+        throw runtime_error("Model must be one of {AODE, KDB, SPODE, TAN}");
+            }
+    );
+    program.add_argument("--discretize").default_value(false).implicit_value(true);
+    bool class_last, discretize_dataset;
+    string model_name, file_name, path, complete_file_name;
+    try {
+        program.parse_args(argc, argv);
+        file_name = program.get<string>("file");
+        path = program.get<string>("path");
+        model_name = program.get<string>("model");
+        discretize_dataset = program.get<bool>("discretize");
+        complete_file_name = path + file_name + ".arff";
+        class_last = datasets[file_name];
+        if (!file_exists(complete_file_name)) {
+            throw runtime_error("Data File " + path + file_name + ".arff" + " does not exist");
+        }
+    }
+    catch (const exception& err) {
+        cerr << err.what() << endl;
+        cerr << program;
         exit(1);
     }
-    if (!file_exists(path + file_name + ".arff")) {
-        cout << "Data File " << path + file_name + ".arff" << " does not exist" << endl;
-        usage(argv[0]);
-        exit(1);
-    }
-    if (find(models.begin(), models.end(), model_name) == models.end()) {
-        cout << "Invalid model name: " << model_name << endl;
-        usage(argv[0]);
-        exit(1);
-    }
-    return { file_name, path, model_name };
-}
 
-int main(int argc, char** argv)
-{
-    string file_name, path, model_name;
-    tie(file_name, path, model_name) = get_options(argc, argv);
+    /*
+    * Begin Processing
+    */
     auto handler = ArffFiles();
-    handler.load(path + file_name + ".arff");
+    handler.load(complete_file_name, class_last);
     // Get Dataset X, y
     vector<mdlp::samples_t>& X = handler.getX();
     mdlp::labels_t& y = handler.getY();
