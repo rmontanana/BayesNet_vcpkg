@@ -4,3 +4,6 @@
 [submodule "lib/catch2"]
 	path = lib/catch2
 	url = https://github.com/catchorg/Catch2.git
+[submodule "lib/argparse"]
+	path = lib/argparse
+	url = https://github.com/p-ranav/argparse

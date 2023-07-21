@@ -42,6 +42,7 @@ include(CodeCoverage)
 # include(FetchContent)
 add_git_submodule("lib/mdlp")
 add_git_submodule("lib/catch2")
+add_git_submodule("lib/argparse")
 
 # Subdirectories
 # --------------
