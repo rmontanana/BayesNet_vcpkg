@@ -1,11 +1,11 @@
 #ifndef KDB_H
 #define KDB_H
-#include "BaseClassifier.h"
+#include "Classifier.h"
 #include "bayesnetUtils.h"
 namespace bayesnet {
     using namespace std;
     using namespace torch;
-    class KDB : public BaseClassifier {
+    class KDB : public Classifier {
     private:
         int k;
         float theta;

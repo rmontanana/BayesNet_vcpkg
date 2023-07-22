@@ -2,7 +2,7 @@
 
 namespace bayesnet {
 
-    SPODE::SPODE(int root) : BaseClassifier(Network()), root(root) {}
+    SPODE::SPODE(int root) : Classifier(Network()), root(root) {}
 
     void SPODE::train()
     {

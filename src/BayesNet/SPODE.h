@@ -1,8 +1,8 @@
 #ifndef SPODE_H
 #define SPODE_H
-#include "BaseClassifier.h"
+#include "Classifier.h"
 namespace bayesnet {
-    class SPODE : public BaseClassifier {
+    class SPODE : public Classifier {
     private:
         int root;
     protected:

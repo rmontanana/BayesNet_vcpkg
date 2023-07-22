@@ -1,10 +1,10 @@
 #ifndef TAN_H
 #define TAN_H
-#include "BaseClassifier.h"
+#include "Classifier.h"
 namespace bayesnet {
     using namespace std;
     using namespace torch;
-    class TAN : public BaseClassifier {
+    class TAN : public Classifier {
     private:
     protected:
         void train() override;

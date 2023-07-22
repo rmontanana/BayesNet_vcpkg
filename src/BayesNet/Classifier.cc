@@ -1,12 +1,12 @@
-#include "BaseClassifier.h"
+#include "Classifier.h"
 #include "bayesnetUtils.h"
 
 namespace bayesnet {
     using namespace std;
     using namespace torch;
 
-    BaseClassifier::BaseClassifier(Network model) : model(model), m(0), n(0), metrics(Metrics()), fitted(false) {}
-    BaseClassifier& BaseClassifier::build(vector<string>& features, string className, map<string, vector<int>>& states)
+    Classifier::Classifier(Network model) : model(model), m(0), n(0), metrics(Metrics()), fitted(false) {}
+    Classifier& Classifier::build(vector<string>& features, string className, map<string, vector<int>>& states)
     {
         dataset = torch::cat({ X, y.view({y.size(0), 1}) }, 1);
         this->features = features;
@@ -20,7 +20,7 @@ namespace bayesnet {
         fitted = true;
         return *this;
     }
-    BaseClassifier& BaseClassifier::fit(vector<vector<int>>& X, vector<int>& y, vector<string>& features, string className, map<string, vector<int>>& states)
+    Classifier& Classifier::fit(vector<vector<int>>& X, vector<int>& y, vector<string>& features, string className, map<string, vector<int>>& states)
     {
         this->X = torch::zeros({ static_cast<int64_t>(X[0].size()), static_cast<int64_t>(X.size()) }, kInt64);
         Xv = X;
@@ -31,7 +31,7 @@ namespace bayesnet {
         yv = y;
         return build(features, className, states);
     }
-    void BaseClassifier::checkFitParameters()
+    void Classifier::checkFitParameters()
     {
         auto sizes = X.sizes();
         m = sizes[0];
@@ -52,7 +52,7 @@ namespace bayesnet {
         }
     }
 
-    Tensor BaseClassifier::predict(Tensor& X)
+    Tensor Classifier::predict(Tensor& X)
     {
         if (!fitted) {
             throw logic_error("Classifier has not been fitted");
@@ -68,7 +68,7 @@ namespace bayesnet {
         auto ypred = torch::tensor(yp, torch::kInt64);
         return ypred;
     }
-    vector<int> BaseClassifier::predict(vector<vector<int>>& X)
+    vector<int> Classifier::predict(vector<vector<int>>& X)
     {
         if (!fitted) {
             throw logic_error("Classifier has not been fitted");
@@ -82,7 +82,7 @@ namespace bayesnet {
         auto yp = model.predict(Xd);
         return yp;
     }
-    float BaseClassifier::score(Tensor& X, Tensor& y)
+    float Classifier::score(Tensor& X, Tensor& y)
     {
         if (!fitted) {
             throw logic_error("Classifier has not been fitted");
@@ -90,7 +90,7 @@ namespace bayesnet {
         Tensor y_pred = predict(X);
         return (y_pred == y).sum().item<float>() / y.size(0);
     }
-    float BaseClassifier::score(vector<vector<int>>& X, vector<int>& y)
+    float Classifier::score(vector<vector<int>>& X, vector<int>& y)
     {
         if (!fitted) {
             throw logic_error("Classifier has not been fitted");
@@ -103,11 +103,11 @@ namespace bayesnet {
         }
         return model.score(Xd, y);
     }
-    vector<string> BaseClassifier::show()
+    vector<string> Classifier::show()
     {
         return model.show();
     }
-    void BaseClassifier::addNodes()
+    void Classifier::addNodes()
     {
         // Add all nodes to the network
         for (auto feature : features) {
@@ -115,12 +115,12 @@ namespace bayesnet {
         }
         model.addNode(className, states[className].size());
     }
-    int BaseClassifier::getNumberOfNodes()
+    int Classifier::getNumberOfNodes()
     {
         // Features does not include class
         return fitted ? model.getFeatures().size() + 1 : 0;
     }
-    int BaseClassifier::getNumberOfEdges()
+    int Classifier::getNumberOfEdges()
     {
         return fitted ? model.getEdges().size() : 0;
     }

@@ -63,7 +63,7 @@ StratifiedKFold::StratifiedKFold(int k, const vector<int>& y, int seed) :
             class_indices[label].erase(class_indices[label].begin(), it);
         }
         while (remainder_samples_to_take > 0) {
-            int fold = (rand() % static_cast<int>(k));
+            int fold = (arc4random() % static_cast<int>(k));
             if (stratified_indices[fold].size() == fold_size) {
                 continue;
             }

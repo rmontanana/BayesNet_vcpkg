@@ -11,11 +11,10 @@
 #include "SPODE.h"
 #include "AODE.h"
 #include "TAN.h"
+#include "platformUtils.h"
 
 
 using namespace std;
-
-const string PATH = "../../data/";
 
 inline constexpr auto hash_conv(const std::string_view sv)
 {
@@ -29,31 +28,6 @@ inline constexpr auto hash_conv(const std::string_view sv)
 inline constexpr auto operator"" _sh(const char* str, size_t len)
 {
     return hash_conv(std::string_view{ str, len });
-}
-
-pair<vector<mdlp::labels_t>, map<string, int>> discretize(vector<mdlp::samples_t>& X, mdlp::labels_t& y, vector<string> features)
-{
-    vector<mdlp::labels_t>Xd;
-    map<string, int> maxes;
-
-    auto fimdlp = mdlp::CPPFImdlp();
-    for (int i = 0; i < X.size(); i++) {
-        fimdlp.fit(X[i], y);
-        mdlp::labels_t& xd = fimdlp.transform(X[i]);
-        maxes[features[i]] = *max_element(xd.begin(), xd.end()) + 1;
-        Xd.push_back(xd);
-    }
-    return { Xd, maxes };
-}
-
-bool file_exists(const std::string& name)
-{
-    if (FILE* file = fopen(name.c_str(), "r")) {
-        fclose(file);
-        return true;
-    } else {
-        return false;
-    }
 }
 
 int main(int argc, char** argv)

@@ -4,7 +4,7 @@ namespace bayesnet {
     using namespace std;
     using namespace torch;
 
-    TAN::TAN() : BaseClassifier(Network()) {}
+    TAN::TAN() : Classifier(Network()) {}
 
     void TAN::train()
     {
