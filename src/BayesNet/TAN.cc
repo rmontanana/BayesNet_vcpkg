@@ -1,7 +1,6 @@
 #include "TAN.h"
 
 namespace bayesnet {
-    using namespace std;
     using namespace torch;
 
     TAN::TAN() : Classifier(Network()) {}

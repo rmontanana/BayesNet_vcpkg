@@ -2,7 +2,6 @@
 #include "bayesnetUtils.h"
 
 namespace bayesnet {
-    using namespace std;
     using namespace torch;
 
     Classifier::Classifier(Network model) : model(model), m(0), n(0), metrics(Metrics()), fitted(false) {}

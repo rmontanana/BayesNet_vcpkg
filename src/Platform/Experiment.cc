@@ -12,22 +12,25 @@
 #include "AODE.h"
 #include "TAN.h"
 #include "platformUtils.h"
+#include "Folding.h"
 
 
 using namespace std;
 
-inline constexpr auto hash_conv(const std::string_view sv)
+pair<float, float> cross_validation(Fold* fold, bayesnet::BaseClassifier* model, Tensor& X, Tensor& y, int k)
 {
-    unsigned long hash{ 5381 };
-    for (unsigned char c : sv) {
-        hash = ((hash << 5) + hash) ^ c;
+    float accuracy = 0.0;
+    for (int i = 0; i < k; i++) {
+        auto [train, test] = fold->getFold(i);
+        auto X_train = X.indices{ train };
+        auto y_train = y.indices{ train };
+        auto X_test = X.indices{ test };
+        auto y_test = y.indices{ test };
+        model->fit(X_train, y_train);
+        auto acc = model->score(X_test, y_test);
+        accuracy += acc;
     }
-    return hash;
-}
-
-inline constexpr auto operator"" _sh(const char* str, size_t len)
-{
-    return hash_conv(std::string_view{ str, len });
+    return { accuracy / k, 0 };
 }
 
 int main(int argc, char** argv)
@@ -94,70 +97,18 @@ int main(int argc, char** argv)
     /*
     * Begin Processing
     */
-    auto handler = ArffFiles();
-    handler.load(complete_file_name, class_last);
-    // Get Dataset X, y
-    vector<mdlp::samples_t>& X = handler.getX();
-    mdlp::labels_t& y = handler.getY();
-    // Get className & Features
-    auto className = handler.getClassName();
-    vector<string> features;
-    for (auto feature : handler.getAttributes()) {
-        features.push_back(feature.first);
+    auto [X, y, features] = loadDataset(file_name, discretize_dataset);
+    if (discretize_dataset) {
+        auto [discretized, maxes] = discretize(X, y, features);
     }
-    // Discretize Dataset
-    vector<mdlp::labels_t> Xd;
-    map<string, int> maxes;
-    tie(Xd, maxes) = discretize(X, y, features);
-    maxes[className] = *max_element(y.begin(), y.end()) + 1;
-    map<string, vector<int>> states;
-    for (auto feature : features) {
-        states[feature] = vector<int>(maxes[feature]);
-    }
-    states[className] = vector<int>(
-        maxes[className]);
-    double score;
-    vector<string> lines;
-    vector<string> graph;
-    auto kdb = bayesnet::KDB(2);
-    auto aode = bayesnet::AODE();
-    auto spode = bayesnet::SPODE(2);
-    auto tan = bayesnet::TAN();
-    switch (hash_conv(model_name)) {
-        case "AODE"_sh:
-            aode.fit(Xd, y, features, className, states);
-            lines = aode.show();
-            score = aode.score(Xd, y);
-            graph = aode.graph();
-            break;
-        case "KDB"_sh:
-            kdb.fit(Xd, y, features, className, states);
-            lines = kdb.show();
-            score = kdb.score(Xd, y);
-            graph = kdb.graph();
-            break;
-        case "SPODE"_sh:
-            spode.fit(Xd, y, features, className, states);
-            lines = spode.show();
-            score = spode.score(Xd, y);
-            graph = spode.graph();
-            break;
-        case "TAN"_sh:
-            tan.fit(Xd, y, features, className, states);
-            lines = tan.show();
-            score = tan.score(Xd, y);
-            graph = tan.graph();
-            break;
-    }
-    for (auto line : lines) {
-        cout << line << endl;
-    }
-    cout << "Score: " << score << endl;
-    auto dot_file = model_name + "_" + file_name;
-    ofstream file(dot_file + ".dot");
-    file << graph;
-    file.close();
-    cout << "Graph saved in " << model_name << "_" << file_name << ".dot" << endl;
-    cout << "dot -Tpng -o " + dot_file + ".png " + dot_file + ".dot " << endl;
+    auto fold = StratifiedKFold(5, y, -1);
+    auto classifiers = map<string, bayesnet::BaseClassifier*>({
+        { "AODE", new bayesnet::AODE() }, { "KDB", new bayesnet::KDB(2) },
+        { "SPODE",  new bayesnet::SPODE(2) }, { "TAN",  new bayesnet::TAN() }
+        }
+    );
+    bayesnet::BaseClassifier* model = classifiers[model_name];
+    auto results = cross_validation(model, X, y, fold, 5);
+    cout << "Accuracy: " << results.first << endl;
     return 0;
 }

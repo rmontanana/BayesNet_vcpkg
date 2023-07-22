@@ -2,10 +2,7 @@
 #include <algorithm>
 #include <map>
 #include <random>
-
-using namespace std;
-
-KFold::KFold(int k, int n, int seed) : k(k), n(n), seed(seed)
+KFold::KFold(int k, int n, int seed) : Fold(k, n, seed)
 {
     indices = vector<int>(n);
     iota(begin(indices), end(indices), 0); // fill with 0, 1, ..., n - 1
@@ -31,8 +28,8 @@ pair<vector<int>, vector<int>> KFold::getFold(int nFold)
     }
     return { train, test };
 }
-StratifiedKFold::StratifiedKFold(int k, const vector<int>& y, int seed) :
-    k(k), seed(seed)
+StratifiedKFold::StratifiedKFold(int k, const vector<int>& y, int seed)
+    : Fold(k, y.size(), seed)
 {
     n = y.size();
     stratified_indices = vector<vector<int>>(k);

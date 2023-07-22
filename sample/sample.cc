@@ -1,6 +1,5 @@
 #include <iostream>
 #include <string>
-#include <torch/torch.h>
 #include <thread>
 #include <map>
 #include <argparse/argparse.hpp>
@@ -18,20 +17,6 @@
 using namespace std;
 
 const string PATH = "../../data/";
-
-inline constexpr auto hash_conv(const std::string_view sv)
-{
-    unsigned long hash{ 5381 };
-    for (unsigned char c : sv) {
-        hash = ((hash << 5) + hash) ^ c;
-    }
-    return hash;
-}
-
-inline constexpr auto operator"" _sh(const char* str, size_t len)
-{
-    return hash_conv(std::string_view{ str, len });
-}
 
 pair<vector<mdlp::labels_t>, map<string, int>> discretize(vector<mdlp::samples_t>& X, mdlp::labels_t& y, vector<string> features)
 {
@@ -98,15 +83,13 @@ int main(int argc, char** argv)
         throw runtime_error("Model must be one of {AODE, KDB, SPODE, TAN}");
             }
     );
-    program.add_argument("--discretize").default_value(false).implicit_value(true);
-    bool class_last, discretize_dataset;
+    bool class_last;
     string model_name, file_name, path, complete_file_name;
     try {
         program.parse_args(argc, argv);
         file_name = program.get<string>("file");
         path = program.get<string>("path");
         model_name = program.get<string>("model");
-        discretize_dataset = program.get<bool>("discretize");
         complete_file_name = path + file_name + ".arff";
         class_last = datasets[file_name];
         if (!file_exists(complete_file_name)) {
@@ -134,21 +117,21 @@ int main(int argc, char** argv)
         features.push_back(feature.first);
     }
     // Discretize Dataset
-    vector<mdlp::labels_t> Xd;
-    map<string, int> maxes;
-    tie(Xd, maxes) = discretize(X, y, features);
+    auto [Xd, maxes] = discretize(X, y, features);
     maxes[className] = *max_element(y.begin(), y.end()) + 1;
     map<string, vector<int>> states;
     for (auto feature : features) {
         states[feature] = vector<int>(maxes[feature]);
     }
-    states[className] = vector<int>(
-        maxes[className]);
-    double score;
-    auto classifiers = map<string, bayesnet::BaseClassifier*>({ { "AODE", new bayesnet::AODE() }, { "KDB", new bayesnet::KDB(2) }, { "SPODE",  new bayesnet::SPODE(2) }, { "TAN",  new bayesnet::TAN() } });
+    states[className] = vector<int>(maxes[className]);
+    auto classifiers = map<string, bayesnet::BaseClassifier*>({
+        { "AODE", new bayesnet::AODE() }, { "KDB", new bayesnet::KDB(2) },
+        { "SPODE",  new bayesnet::SPODE(2) }, { "TAN",  new bayesnet::TAN() }
+        }
+    );
     bayesnet::BaseClassifier* clf = classifiers[model_name];
     clf->fit(Xd, y, features, className, states);
-    score = clf->score(Xd, y);
+    auto score = clf->score(Xd, y);
     auto lines = clf->show();
     auto graph = clf->graph();
     for (auto line : lines) {

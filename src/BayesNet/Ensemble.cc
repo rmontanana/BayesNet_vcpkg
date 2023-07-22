@@ -1,7 +1,6 @@
 #include "Ensemble.h"
 
 namespace bayesnet {
-    using namespace std;
     using namespace torch;
 
     Ensemble::Ensemble() : m(0), n(0), n_models(0), metrics(Metrics()), fitted(false) {}

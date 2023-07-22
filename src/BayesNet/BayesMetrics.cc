@@ -1,6 +1,5 @@
 #include "BayesMetrics.h"
 #include "Mst.h"
-using namespace std;
 namespace bayesnet {
     Metrics::Metrics(torch::Tensor& samples, vector<string>& features, string& className, int classNumStates)
         : samples(samples)

@@ -1,7 +1,6 @@
 #include "KDB.h"
 
 namespace bayesnet {
-    using namespace std;
     using namespace torch;
 
     KDB::KDB(int k, float theta) : Classifier(Network()), k(k), theta(theta) {}
