@@ -15,22 +15,6 @@ pair<vector<mdlp::labels_t>, map<string, int>> discretize(vector<mdlp::samples_t
     }
     return { Xd, maxes };
 }
-pair<Tensor, map<string, int>> discretizeTorch(Tensor& X, Tensor& y, vector<string> features)
-{
-    map<string, int> maxes;
-    auto fimdlp = mdlp::CPPFImdlp();
-    auto Xd = torch::zeros_like(X, torch::kInt64);
-    auto yv = vector<int>(y.data_ptr<int>(), y.data_ptr<int>() + y.size(0));
-    for (int i = 0; i < X.size(1); i++) {
-        auto xv = vector<float>(X.select(1, i).data_ptr<float>(), X.select(1, i).data_ptr<float>() + X.size(0));
-        fimdlp.fit(xv, yv);
-        auto xdv = fimdlp.transform(xv);
-        auto xd = torch::tensor(xdv, torch::kInt64);
-        maxes[features[i]] = xd.max().item<int>() + 1;
-        Xd.index_put_({ "...", i }, xd);
-    }
-    return { Xd, maxes };
-}
 
 vector<mdlp::labels_t> discretizeDataset(vector<mdlp::samples_t>& X, mdlp::labels_t& y)
 {
@@ -54,10 +38,10 @@ bool file_exists(const std::string& name)
     }
 }
 
-tuple < Tensor, Tensor, vector<string>, string> loadDataset(string name, bool discretize, bool class_last)
+tuple<Tensor, Tensor, vector<string>, string, map<string, vector<int>>> loadDataset(string path, string name, bool class_last, bool discretize_dataset)
 {
     auto handler = ArffFiles();
-    handler.load(PATH + static_cast<string>(name) + ".arff", class_last);
+    handler.load(path + static_cast<string>(name) + ".arff", class_last);
     // Get Dataset X, y
     vector<mdlp::samples_t>& X = handler.getX();
     mdlp::labels_t& y = handler.getY();
@@ -68,32 +52,24 @@ tuple < Tensor, Tensor, vector<string>, string> loadDataset(string name, bool di
         features.push_back(feature.first);
     }
     Tensor Xd;
-    if (discretize) {
+    auto states = map<string, vector<int>>();
+    if (discretize_dataset) {
         auto Xr = discretizeDataset(X, y);
         Xd = torch::zeros({ static_cast<int64_t>(Xr[0].size()), static_cast<int64_t>(Xr.size()) }, torch::kInt64);
         for (int i = 0; i < features.size(); ++i) {
+            states[features[i]] = vector<int>(*max_element(Xr[i].begin(), Xr[i].end()) + 1);
+            iota(begin(states[features[i]]), end(states[features[i]]), 0);
             Xd.index_put_({ "...", i }, torch::tensor(Xr[i], torch::kInt64));
         }
+        states[className] = vector<int>(*max_element(y.begin(), y.end()) + 1);
+        iota(begin(states[className]), end(states[className]), 0);
     } else {
-        Xd = torch::zeros({ static_cast<int64_t>(X[0].size()), static_cast<int64_t>(X.size()) }, torch::kFloat64);
+        Xd = torch::zeros({ static_cast<int64_t>(X[0].size()), static_cast<int64_t>(X.size()) }, torch::kFloat32);
         for (int i = 0; i < features.size(); ++i) {
-            Xd.index_put_({ "...", i }, torch::tensor(X[i], torch::kFloat64));
+            Xd.index_put_({ "...", i }, torch::tensor(X[i]));
         }
     }
-    return { Xd, torch::tensor(y, torch::kInt64), features, className };
-}
-
-map<string, vector<int>> get_states(Tensor& X, Tensor& y, vector<string> features, string className)
-{
-    int max;
-    map<string, vector<int>> states;
-    for (int i = 0; i < X.size(1); i++) {
-        max = X.select(1, i).max().item<int>() + 1;
-        states[features[i]] = vector<int>(max);
-    }
-    max = y.max().item<int>() + 1;
-    states[className] = vector<int>(max);
-    return states;
+    return { Xd, torch::tensor(y, torch::kInt32), features, className, states };
 }
 
 tuple<vector<vector<int>>, vector<int>, vector<string>, string, map<string, vector<int>>> loadFile(string name)

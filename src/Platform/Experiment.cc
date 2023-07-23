@@ -12,16 +12,22 @@
 #include "AODE.h"
 #include "TAN.h"
 #include "platformUtils.h"
+#include "Result.h"
 #include "Folding.h"
 
 
 using namespace std;
 
-pair<float, float> cross_validation(Fold* fold, bayesnet::BaseClassifier* model, Tensor& X, Tensor& y, vector<string> features, string className, map<string, vector<int>> states)
+Result cross_validation(Fold* fold, bayesnet::BaseClassifier* model, Tensor& X, Tensor& y, vector<string> features, string className, map<string, vector<int>> states)
 {
+    auto result = Result();
     auto k = fold->getNumberOfFolds();
-    float accuracy = 0.0;
+    auto accuracy = torch::zeros({ k }, kFloat64);
+    auto train_time = torch::zeros({ k }, kFloat64);
+    auto test_time = torch::zeros({ k }, kFloat64);
+    Timer train_timer, test_timer;
     for (int i = 0; i < k; i++) {
+        train_timer.start();
         auto [train, test] = fold->getFold(i);
         auto train_t = torch::tensor(train);
         auto test_t = torch::tensor(test);
@@ -30,10 +36,15 @@ pair<float, float> cross_validation(Fold* fold, bayesnet::BaseClassifier* model,
         auto X_test = X.index({ test_t });
         auto y_test = y.index({ test_t });
         model->fit(X_train, y_train, features, className, states);
+        train_time[i] = train_timer.getDuration();
+        test_timer.start();
         auto acc = model->score(X_test, y_test);
-        accuracy += acc;
+        test_time[i] = test_timer.getDuration();
+        accuracy[i] = acc;
     }
-    return { accuracy / k, 0 };
+    result.setScore(torch::mean(accuracy).item<double>());
+    result.setTrainTime(torch::mean(train_time).item<double>()).setTestTime(torch::mean(test_time).item<double>());
+    return result;
 }
 
 int main(int argc, char** argv)
@@ -96,25 +107,23 @@ int main(int argc, char** argv)
         cerr << program;
         exit(1);
     }
-
     /*
     * Begin Processing
     */
-    auto [X, y, features, className] = loadDataset(file_name, discretize_dataset, class_last);
-    auto states = map<string, vector<int>>();
-    if (discretize_dataset) {
-        auto [Xd, maxes] = discretizeTorch(X, y, features);
-        states = get_states(Xd, y, features, className);
-        X = Xd;
-    }
+    auto [X, y, features, className, states] = loadDataset(path, file_name, class_last, discretize_dataset);
     auto fold = StratifiedKFold(5, y, -1);
     auto classifiers = map<string, bayesnet::BaseClassifier*>({
         { "AODE", new bayesnet::AODE() }, { "KDB", new bayesnet::KDB(2) },
         { "SPODE",  new bayesnet::SPODE(2) }, { "TAN",  new bayesnet::TAN() }
         }
     );
+    auto experiment = Experiment();
+    experiment.setDiscretized(discretize_dataset).setModel(model_name).setPlatform("cpp");
+    experiment.setStratified(true).setNFolds(5).addRandomSeed(271).setScoreName("accuracy");
     bayesnet::BaseClassifier* model = classifiers[model_name];
-    auto results = cross_validation(&fold, model, X, y, features, className, states);
-    cout << "Accuracy: " << results.first << endl;
+    auto result = cross_validation(&fold, model, X, y, features, className, states);
+    result.setDataset(file_name);
+    experiment.addResult(result);
+    experiment.save(path);
     return 0;
 }

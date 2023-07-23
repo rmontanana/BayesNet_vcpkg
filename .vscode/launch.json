@@ -16,10 +16,18 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "aout",
-            "program": "${workspaceFolder}/a.out",
-            "args": [],
-            "cwd": "${workspaceFolder}"
+            "name": "experiment",
+            "program": "${workspaceFolder}/build/src/Platform/main",
+            "args": [
+                "-f",
+                "iris",
+                "-m",
+                "TAN",
+                "-p",
+                "../../../data/",
+                "--discretize"
+            ],
+            "cwd": "${workspaceFolder}/build/src/Platform",
         },
         {
             "name": "Build & debug active file",
