@@ -40,6 +40,7 @@ namespace bayesnet {
         int getClassNumStates();
         string getClassName();
         void fit(const vector<vector<int>>&, const vector<int>&, const vector<string>&, const string&);
+        void fit(torch::Tensor&, torch::Tensor&, const vector<string>&, const string&);
         vector<int> predict(const vector<vector<int>>&);
         //Computes the conditional edge weight of variable index u and v conditioned on class_node
         torch::Tensor conditionalEdgeWeight();

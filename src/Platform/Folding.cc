@@ -28,10 +28,21 @@ pair<vector<int>, vector<int>> KFold::getFold(int nFold)
     }
     return { train, test };
 }
+StratifiedKFold::StratifiedKFold(int k, torch::Tensor& y, int seed) : Fold(k, y.numel(), seed)
+{
+    n = y.numel();
+    this->y = vector<int>(y.data_ptr<int>(), y.data_ptr<int>() + n);
+    build();
+}
 StratifiedKFold::StratifiedKFold(int k, const vector<int>& y, int seed)
     : Fold(k, y.size(), seed)
 {
+    this->y = y;
     n = y.size();
+    build();
+}
+void StratifiedKFold::build()
+{
     stratified_indices = vector<vector<int>>(k);
     int fold_size = n / k;
     int remainder = n % k;

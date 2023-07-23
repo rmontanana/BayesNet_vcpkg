@@ -15,10 +15,23 @@ namespace bayesnet {
         auto n_classes = states[className].size();
         metrics = Metrics(dataset, features, className, n_classes);
         train();
-        model.fit(Xv, yv, features, className);
+        if (Xv == vector<vector<int>>()) {
+            model.fit(X, y, features, className);
+        } else {
+            model.fit(Xv, yv, features, className);
+        }
         fitted = true;
         return *this;
     }
+    Classifier& Classifier::fit(torch::Tensor& X, torch::Tensor& y, vector<string>& features, string className, map<string, vector<int>>& states)
+    {
+        this->X = X;
+        this->y = y;
+        Xv = vector<vector<int>>();
+        yv = vector<int>(y.data_ptr<int>(), y.data_ptr<int>() + y.size(0));
+        return build(features, className, states);
+    }
+
     Classifier& Classifier::fit(vector<vector<int>>& X, vector<int>& y, vector<string>& features, string className, map<string, vector<int>>& states)
     {
         this->X = torch::zeros({ static_cast<int64_t>(X[0].size()), static_cast<int64_t>(X.size()) }, kInt64);

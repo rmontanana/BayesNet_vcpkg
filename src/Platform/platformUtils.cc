@@ -15,6 +15,22 @@ pair<vector<mdlp::labels_t>, map<string, int>> discretize(vector<mdlp::samples_t
     }
     return { Xd, maxes };
 }
+pair<Tensor, map<string, int>> discretizeTorch(Tensor& X, Tensor& y, vector<string> features)
+{
+    map<string, int> maxes;
+    auto fimdlp = mdlp::CPPFImdlp();
+    auto Xd = torch::zeros_like(X, torch::kInt64);
+    auto yv = vector<int>(y.data_ptr<int>(), y.data_ptr<int>() + y.size(0));
+    for (int i = 0; i < X.size(1); i++) {
+        auto xv = vector<float>(X.select(1, i).data_ptr<float>(), X.select(1, i).data_ptr<float>() + X.size(0));
+        fimdlp.fit(xv, yv);
+        auto xdv = fimdlp.transform(xv);
+        auto xd = torch::tensor(xdv, torch::kInt64);
+        maxes[features[i]] = xd.max().item<int>() + 1;
+        Xd.index_put_({ "...", i }, xd);
+    }
+    return { Xd, maxes };
+}
 
 vector<mdlp::labels_t> discretizeDataset(vector<mdlp::samples_t>& X, mdlp::labels_t& y)
 {
@@ -38,10 +54,10 @@ bool file_exists(const std::string& name)
     }
 }
 
-tuple < Tensor, Tensor, vector<string>> loadDataset(string name, bool discretize)
+tuple < Tensor, Tensor, vector<string>, string> loadDataset(string name, bool discretize, bool class_last)
 {
     auto handler = ArffFiles();
-    handler.load(PATH + static_cast<string>(name) + ".arff");
+    handler.load(PATH + static_cast<string>(name) + ".arff", class_last);
     // Get Dataset X, y
     vector<mdlp::samples_t>& X = handler.getX();
     mdlp::labels_t& y = handler.getY();
@@ -64,20 +80,20 @@ tuple < Tensor, Tensor, vector<string>> loadDataset(string name, bool discretize
             Xd.index_put_({ "...", i }, torch::tensor(X[i], torch::kFloat64));
         }
     }
-    return { Xd, torch::tensor(y, torch::kInt64), features };
+    return { Xd, torch::tensor(y, torch::kInt64), features, className };
 }
 
-pair <map<string, int>, map<string, vector<int>>> discretize_info(Tensor& X, Tensor& y, vector<string> features, string className)
+map<string, vector<int>> get_states(Tensor& X, Tensor& y, vector<string> features, string className)
 {
-    map<string, int> maxes;
+    int max;
     map<string, vector<int>> states;
     for (int i = 0; i < X.size(1); i++) {
-        maxes[features[i]] = X.select(1, i).max().item<int>() + 1;
-        states[features[i]] = vector<int>(maxes[features[i]]);
+        max = X.select(1, i).max().item<int>() + 1;
+        states[features[i]] = vector<int>(max);
     }
-    maxes[className] = y.max().item<int>() + 1;
-    states[className] = vector<int>(maxes[className]);
-    return { maxes, states };
+    max = y.max().item<int>() + 1;
+    states[className] = vector<int>(max);
+    return states;
 }
 
 tuple<vector<vector<int>>, vector<int>, vector<string>, string, map<string, vector<int>>> loadFile(string name)

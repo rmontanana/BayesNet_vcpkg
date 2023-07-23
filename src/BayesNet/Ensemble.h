@@ -31,9 +31,10 @@ namespace bayesnet {
         Ensemble();
         virtual ~Ensemble() = default;
         Ensemble& fit(vector<vector<int>>& X, vector<int>& y, vector<string>& features, string className, map<string, vector<int>>& states) override;
+        Ensemble& fit(torch::Tensor& X, torch::Tensor& y, vector<string>& features, string className, map<string, vector<int>>& states) override;
         Tensor predict(Tensor& X);
         vector<int> predict(vector<vector<int>>& X) override;
-        float score(Tensor& X, Tensor& y);
+        float score(Tensor& X, Tensor& y) override;
         float score(vector<vector<int>>& X, vector<int>& y) override;
         vector<string> show() override;
         vector<string> graph(string title) override;

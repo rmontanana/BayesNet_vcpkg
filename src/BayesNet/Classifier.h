@@ -29,15 +29,16 @@ namespace bayesnet {
     public:
         Classifier(Network model);
         virtual ~Classifier() = default;
-        Classifier& fit(vector<vector<int>>& X, vector<int>& y, vector<string>& features, string className, map<string, vector<int>>& states);
+        Classifier& fit(vector<vector<int>>& X, vector<int>& y, vector<string>& features, string className, map<string, vector<int>>& states) override;
+        Classifier& fit(torch::Tensor& X, torch::Tensor& y, vector<string>& features, string className, map<string, vector<int>>& states) override;
         void addNodes();
         int getNumberOfNodes();
         int getNumberOfEdges();
         Tensor predict(Tensor& X);
-        vector<int> predict(vector<vector<int>>& X);
-        float score(Tensor& X, Tensor& y);
-        float score(vector<vector<int>>& X, vector<int>& y);
-        vector<string> show();
+        vector<int> predict(vector<vector<int>>& X) override;
+        float score(Tensor& X, Tensor& y) override;
+        float score(vector<vector<int>>& X, vector<int>& y) override;
+        vector<string> show() override;
     };
 }
 #endif

@@ -1,6 +1,7 @@
 #include <thread>
 #include <mutex>
 #include "Network.h"
+#include "bayesnetUtils.h"
 namespace bayesnet {
     Network::Network() : laplaceSmoothing(1), features(vector<string>()), className(""), classNumStates(0), maxThreads(0.8), fitted(false) {}
     Network::Network(float maxT) : laplaceSmoothing(1), features(vector<string>()), className(""), classNumStates(0), maxThreads(maxT), fitted(false) {}
@@ -8,7 +9,7 @@ namespace bayesnet {
     Network::Network(Network& other) : laplaceSmoothing(other.laplaceSmoothing), features(other.features), className(other.className), classNumStates(other.getClassNumStates()), maxThreads(other.getmaxThreads()), fitted(other.fitted)
     {
         for (auto& pair : other.nodes) {
-            nodes[pair.first] = make_unique<Node>(*pair.second);
+            nodes[pair.first] = std::make_unique<Node>(*pair.second);
         }
     }
     float Network::getmaxThreads()
@@ -29,7 +30,7 @@ namespace bayesnet {
             nodes[name]->setNumStates(numStates);
             return;
         }
-        nodes[name] = make_unique<Node>(name, numStates);
+        nodes[name] = std::make_unique<Node>(name, numStates);
     }
     vector<string> Network::getFeatures()
     {
@@ -92,6 +93,10 @@ namespace bayesnet {
     map<string, std::unique_ptr<Node>>& Network::getNodes()
     {
         return nodes;
+    }
+    void Network::fit(torch::Tensor& X, torch::Tensor& y, const vector<string>& featureNames, const string& className)
+    {
+        this->fit(tensorToVector(X), vector<int>(y.data_ptr<int>(), y.data_ptr<int>() + y.size(0)), featureNames, className);
     }
     void Network::fit(const vector<vector<int>>& input_data, const vector<int>& labels, const vector<string>& featureNames, const string& className)
     {

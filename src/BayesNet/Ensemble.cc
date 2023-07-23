@@ -22,6 +22,14 @@ namespace bayesnet {
         fitted = true;
         return *this;
     }
+    Ensemble& Ensemble::fit(torch::Tensor& X, torch::Tensor& y, vector<string>& features, string className, map<string, vector<int>>& states)
+    {
+        this->X = X;
+        this->y = y;
+        Xv = vector<vector<int>>();
+        yv = vector<int>(y.data_ptr<int>(), y.data_ptr<int>() + y.size(0));
+        return build(features, className, states);
+    }
     Ensemble& Ensemble::fit(vector<vector<int>>& X, vector<int>& y, vector<string>& features, string className, map<string, vector<int>>& states)
     {
         this->X = torch::zeros({ static_cast<int64_t>(X[0].size()), static_cast<int64_t>(X.size()) }, kInt64);
@@ -74,6 +82,20 @@ namespace bayesnet {
             y_pred.index_put_({ "...", i }, torch::tensor(models[i]->predict(Xd), kInt64));
         }
         return voting(y_pred);
+    }
+    float Ensemble::score(Tensor& X, Tensor& y)
+    {
+        if (!fitted) {
+            throw logic_error("Ensemble has not been fitted");
+        }
+        auto y_pred = predict(X);
+        int correct = 0;
+        for (int i = 0; i < y_pred.size(0); ++i) {
+            if (y_pred[i].item<int>() == y[i].item<int>()) {
+                correct++;
+            }
+        }
+        return (double)correct / y_pred.size(0);
     }
     float Ensemble::score(vector<vector<int>>& X, vector<int>& y)
     {

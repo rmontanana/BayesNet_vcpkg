@@ -7,8 +7,10 @@ namespace bayesnet {
     class BaseClassifier {
     public:
         virtual BaseClassifier& fit(vector<vector<int>>& X, vector<int>& y, vector<string>& features, string className, map<string, vector<int>>& states) = 0;
+        virtual BaseClassifier& fit(torch::Tensor& X, torch::Tensor& y, vector<string>& features, string className, map<string, vector<int>>& states) = 0;
         vector<int> virtual predict(vector<vector<int>>& X) = 0;
         float virtual score(vector<vector<int>>& X, vector<int>& y) = 0;
+        float virtual score(torch::Tensor& X, torch::Tensor& y) = 0;
         vector<string> virtual show() = 0;
         vector<string> virtual graph(string title = "") = 0;
         virtual ~BaseClassifier() = default;
