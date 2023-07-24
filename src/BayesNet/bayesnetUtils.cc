@@ -11,21 +11,16 @@ namespace bayesnet {
         sort(indices.begin(), indices.end(), [&nums](int i, int j) {return nums[i] > nums[j];});
         return indices;
     }
-    vector<vector<int>> tensorToVector(const Tensor& tensor)
+    vector<vector<int>> tensorToVector(Tensor& tensor)
     {
         // convert mxn tensor to nxm vector
         vector<vector<int>> result;
-        auto tensor_accessor = tensor.accessor<int, 2>();
-
-        // Iterate over columns and rows of the tensor
-        for (int j = 0; j < tensor.size(1); ++j) {
-            vector<int> column;
-            for (int i = 0; i < tensor.size(0); ++i) {
-                column.push_back(tensor_accessor[i][j]);
-            }
-            result.push_back(column);
+        // Iterate over cols
+        for (int i = 0; i < tensor.size(1); ++i) {
+            auto col_tensor = tensor.index({ "...", i });
+            auto col = vector<int>(col_tensor.data_ptr<int64_t>(), col_tensor.data_ptr<int64_t>() + tensor.size(0));
+            result.push_back(col);
         }
-
         return result;
     }
 }

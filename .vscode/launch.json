@@ -19,7 +19,7 @@
             "name": "experiment",
             "program": "${workspaceFolder}/build/src/Platform/main",
             "args": [
-                "-f",
+                "-d",
                 "iris",
                 "-m",
                 "TAN",
