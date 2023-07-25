@@ -17,6 +17,7 @@ namespace bayesnet {
     public:
         vector<pair<string, string>> combinations(const vector<string>&);
         Node(const std::string&, int);
+        void clear();
         void addParent(Node*);
         void addChild(Node*);
         void removeParent(Node*);

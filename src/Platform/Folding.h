@@ -2,6 +2,7 @@
 #define FOLDING_H
 #include <torch/torch.h>
 #include <vector>
+#include <random> 
 using namespace std;
 
 class Fold {
@@ -9,8 +10,9 @@ protected:
     int k;
     int n;
     int seed;
+    default_random_engine random_seed;
 public:
-    Fold(int k, int n, int seed = -1) : k(k), n(n), seed(seed) {}
+    Fold(int k, int n, int seed = -1);
     virtual pair<vector<int>, vector<int>> getFold(int nFold) = 0;
     virtual ~Fold() = default;
     int getNumberOfFolds() { return k; }

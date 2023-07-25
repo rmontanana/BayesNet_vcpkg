@@ -25,7 +25,7 @@ namespace bayesnet {
     }
     Classifier& Classifier::fit(torch::Tensor& X, torch::Tensor& y, vector<string>& features, string className, map<string, vector<int>>& states)
     {
-        this->X = X;
+        this->X = torch::transpose(X, 0, 1);
         this->y = y;
         Xv = vector<vector<int>>();
         yv = vector<int>(y.data_ptr<int>(), y.data_ptr<int>() + y.size(0));
@@ -34,12 +34,12 @@ namespace bayesnet {
 
     Classifier& Classifier::fit(vector<vector<int>>& X, vector<int>& y, vector<string>& features, string className, map<string, vector<int>>& states)
     {
-        this->X = torch::zeros({ static_cast<int64_t>(X[0].size()), static_cast<int64_t>(X.size()) }, kInt64);
+        this->X = torch::zeros({ static_cast<int>(X[0].size()), static_cast<int>(X.size()) }, kInt32);
         Xv = X;
         for (int i = 0; i < X.size(); ++i) {
-            this->X.index_put_({ "...", i }, torch::tensor(X[i], kInt64));
+            this->X.index_put_({ "...", i }, torch::tensor(X[i], kInt32));
         }
-        this->y = torch::tensor(y, kInt64);
+        this->y = torch::tensor(y, kInt32);
         yv = y;
         return build(features, className, states);
     }
@@ -77,7 +77,7 @@ namespace bayesnet {
             Xd[i] = vector<int>(temp.data_ptr<int>(), temp.data_ptr<int>() + m_);
         }
         auto yp = model.predict(Xd);
-        auto ypred = torch::tensor(yp, torch::kInt64);
+        auto ypred = torch::tensor(yp, torch::kInt32);
         return ypred;
     }
     vector<int> Classifier::predict(vector<vector<int>>& X)
@@ -121,6 +121,7 @@ namespace bayesnet {
     }
     void Classifier::addNodes()
     {
+        auto test = model.getEdges();
         // Add all nodes to the network
         for (auto feature : features) {
             model.addNode(feature, states[feature].size());

@@ -24,6 +24,7 @@ namespace bayesnet {
         double entropy(torch::Tensor&);
         double conditionalEntropy(torch::Tensor&, torch::Tensor&);
         double mutualInformation(torch::Tensor&, torch::Tensor&);
+        void completeFit();
     public:
         Network();
         Network(float, int);

@@ -13,11 +13,11 @@ namespace bayesnet {
         , className(className)
         , classNumStates(classNumStates)
     {
-        samples = torch::zeros({ static_cast<int64_t>(vsamples[0].size()), static_cast<int64_t>(vsamples.size() + 1) }, torch::kInt64);
+        samples = torch::zeros({ static_cast<int>(vsamples[0].size()), static_cast<int>(vsamples.size() + 1) }, torch::kInt32);
         for (int i = 0; i < vsamples.size(); ++i) {
-            samples.index_put_({ "...", i }, torch::tensor(vsamples[i], torch::kInt64));
+            samples.index_put_({ "...", i }, torch::tensor(vsamples[i], torch::kInt32));
         }
-        samples.index_put_({ "...", -1 }, torch::tensor(labels, torch::kInt64));
+        samples.index_put_({ "...", -1 }, torch::tensor(labels, torch::kInt32));
     }
     vector<pair<string, string>> Metrics::doCombinations(const vector<string>& source)
     {
@@ -43,8 +43,8 @@ namespace bayesnet {
             margin[value] = mask.sum().item<float>() / samples.sizes()[0];
         }
         for (auto [first, second] : combinations) {
-            int64_t index_first = find(features.begin(), features.end(), first) - features.begin();
-            int64_t index_second = find(features.begin(), features.end(), second) - features.begin();
+            int index_first = find(features.begin(), features.end(), first) - features.begin();
+            int index_second = find(features.begin(), features.end(), second) - features.begin();
             double accumulated = 0;
             for (int value = 0; value < classNumStates; ++value) {
                 auto mask = samples.index({ "...", -1 }) == value;

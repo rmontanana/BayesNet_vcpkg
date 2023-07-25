@@ -32,12 +32,12 @@ namespace bayesnet {
     }
     Ensemble& Ensemble::fit(vector<vector<int>>& X, vector<int>& y, vector<string>& features, string className, map<string, vector<int>>& states)
     {
-        this->X = torch::zeros({ static_cast<int64_t>(X[0].size()), static_cast<int64_t>(X.size()) }, kInt64);
+        this->X = torch::zeros({ static_cast<int>(X[0].size()), static_cast<int>(X.size()) }, kInt32);
         Xv = X;
         for (int i = 0; i < X.size(); ++i) {
-            this->X.index_put_({ "...", i }, torch::tensor(X[i], kInt64));
+            this->X.index_put_({ "...", i }, torch::tensor(X[i], kInt32));
         }
-        this->y = torch::tensor(y, kInt64);
+        this->y = torch::tensor(y, kInt32);
         yv = y;
         return build(features, className, states);
     }
@@ -46,7 +46,7 @@ namespace bayesnet {
         if (!fitted) {
             throw logic_error("Ensemble has not been fitted");
         }
-        Tensor y_pred = torch::zeros({ X.size(0), n_models }, kInt64);
+        Tensor y_pred = torch::zeros({ X.size(0), n_models }, kInt32);
         for (auto i = 0; i < n_models; ++i) {
             y_pred.index_put_({ "...", i }, models[i]->predict(X));
         }
@@ -54,7 +54,7 @@ namespace bayesnet {
     }
     vector<int> Ensemble::voting(Tensor& y_pred)
     {
-        auto y_pred_ = y_pred.accessor<int64_t, 2>();
+        auto y_pred_ = y_pred.accessor<int, 2>();
         vector<int> y_pred_final;
         for (int i = 0; i < y_pred.size(0); ++i) {
             vector<float> votes(states[className].size(), 0);
@@ -77,9 +77,9 @@ namespace bayesnet {
         for (auto i = 0; i < n_; i++) {
             Xd[i] = vector<int>(X[i].begin(), X[i].end());
         }
-        Tensor y_pred = torch::zeros({ m_, n_models }, kInt64);
+        Tensor y_pred = torch::zeros({ m_, n_models }, kInt32);
         for (auto i = 0; i < n_models; ++i) {
-            y_pred.index_put_({ "...", i }, torch::tensor(models[i]->predict(Xd), kInt64));
+            y_pred.index_put_({ "...", i }, torch::tensor(models[i]->predict(Xd), kInt32));
         }
         return voting(y_pred);
     }

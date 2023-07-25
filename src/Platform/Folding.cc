@@ -1,13 +1,16 @@
 #include "Folding.h"
 #include <algorithm>
 #include <map>
-#include <random>
+Fold::Fold(int k, int n, int seed) : k(k), n(n), seed(seed)
+{
+    random_device rd;
+    random_seed = default_random_engine(seed == -1 ? rd() : seed);
+    srand(seed == -1 ? time(0) : seed);
+}
 KFold::KFold(int k, int n, int seed) : Fold(k, n, seed)
 {
     indices = vector<int>(n);
     iota(begin(indices), end(indices), 0); // fill with 0, 1, ..., n - 1
-    random_device rd;
-    default_random_engine random_seed(seed == -1 ? rd() : seed);
     shuffle(indices.begin(), indices.end(), random_seed);
 }
 pair<vector<int>, vector<int>> KFold::getFold(int nFold)
@@ -54,8 +57,6 @@ void StratifiedKFold::build()
         class_indices[y[i]].push_back(i);
     }
     // Shuffle class indices
-    random_device rd;
-    default_random_engine random_seed(seed == -1 ? rd() : seed);
     for (auto& [cls, indices] : class_indices) {
         shuffle(indices.begin(), indices.end(), random_seed);
     }
@@ -71,7 +72,7 @@ void StratifiedKFold::build()
             class_indices[label].erase(class_indices[label].begin(), it);
         }
         while (remainder_samples_to_take > 0) {
-            int fold = (arc4random() % static_cast<int>(k));
+            int fold = (rand() % static_cast<int>(k));
             if (stratified_indices[fold].size() == fold_size) {
                 continue;
             }

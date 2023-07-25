@@ -4,13 +4,19 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "bayesnet",
-            "program": "${workspaceFolder}/build/sample/main",
+            "name": "sample",
+            "program": "${workspaceFolder}/build/sample/BayesNetSample",
             "args": [
-                "-f",
-                "iris"
+                "-d",
+                "iris",
+                "-m",
+                "TAN",
+                "-p",
+                "../../data/",
+                "--stratified",
+                "--tensors"
             ],
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/build/sample/",
             "preLaunchTask": "CMake: build"
         },
         {
@@ -25,7 +31,9 @@
                 "TAN",
                 "-p",
                 "../../../data/",
-                "--discretize"
+                "--discretize",
+                "-f",
+                "2"
             ],
             "cwd": "${workspaceFolder}/build/src/Platform",
         },

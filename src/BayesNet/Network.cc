@@ -26,7 +26,8 @@ namespace bayesnet {
             features.push_back(name);
         }
         if (nodes.find(name) != nodes.end()) {
-            // if node exists update its number of states
+            // if node exists update its number of states and remove parents, children and CPT
+            nodes[name]->clear();
             nodes[name]->setNumStates(numStates);
             return;
         }
@@ -88,7 +89,6 @@ namespace bayesnet {
             nodes[child]->removeParent(nodes[parent].get());
             throw invalid_argument("Adding this edge forms a cycle in the graph.");
         }
-
     }
     map<string, std::unique_ptr<Node>>& Network::getNodes()
     {
@@ -96,23 +96,71 @@ namespace bayesnet {
     }
     void Network::fit(torch::Tensor& X, torch::Tensor& y, const vector<string>& featureNames, const string& className)
     {
-        this->fit(tensorToVector(X), vector<int>(y.data_ptr<int>(), y.data_ptr<int>() + y.size(0)), featureNames, className);
+        features = featureNames;
+        this->className = className;
+        dataset.clear();
+        classNumStates = torch::max(y).item<int>() + 1;
+        samples = torch::cat({ X, y.view({ y.size(0), 1 }) }, 1);
+        for (int i = 0; i < featureNames.size(); ++i) {
+            auto column = torch::flatten(X.index({ "...", i }));
+            auto k = vector<int>();
+            for (auto i = 0; i < X.size(0); ++i) {
+                k.push_back(column[i].item<int>());
+            }
+            dataset[featureNames[i]] = k;
+        }
+        dataset[className] = vector<int>(y.data_ptr<int>(), y.data_ptr<int>() + y.size(0));
+        // //
+        // // Check if data is ok
+        // cout << "******************************************************************" << endl;
+        // cout << "Check samples, sizes: " << samples.sizes() << endl;
+        // for (auto i = 0; i < features.size(); ++i) {
+        //     cout << featureNames[i] << ": " << nodes[featureNames[i]]->getNumStates() << ": torch:max " << torch::max(samples.index({ "...", i })).item<int>() + 1 << " dataset" << *max_element(dataset[featureNames[i]].begin(), dataset[featureNames[i]].end()) + 1 << endl;
+        // }
+        // cout << className << ": " << nodes[className]->getNumStates() << ": torch:max " << torch::max(samples.index({ "...", -1 })) + 1 << endl;
+        // cout << "******************************************************************" << endl;
+        // //
+        // //
+        /*
+
+
+        */
+        for (int i = 0; i < features.size(); ++i) {
+            cout << "Checking " << features[i] << endl;
+            auto column = torch::flatten(X.index({ "...", i }));
+            auto k = vector<int>();
+            for (auto i = 0; i < X.size(0); ++i) {
+                k.push_back(column[i].item<int>());
+            }
+            if (k != dataset[features[i]]) {
+                throw invalid_argument("Dataset and samples do not match");
+            }
+        }
+        /*
+
+
+        */
+        completeFit();
     }
     void Network::fit(const vector<vector<int>>& input_data, const vector<int>& labels, const vector<string>& featureNames, const string& className)
     {
         features = featureNames;
         this->className = className;
         dataset.clear();
-
         // Build dataset & tensor of samples
-        samples = torch::zeros({ static_cast<int64_t>(input_data[0].size()), static_cast<int64_t>(input_data.size() + 1) }, torch::kInt64);
+        samples = torch::zeros({ static_cast<int>(input_data[0].size()), static_cast<int>(input_data.size() + 1) }, torch::kInt32);
         for (int i = 0; i < featureNames.size(); ++i) {
             dataset[featureNames[i]] = input_data[i];
-            samples.index_put_({ "...", i }, torch::tensor(input_data[i], torch::kInt64));
+            samples.index_put_({ "...", i }, torch::tensor(input_data[i], torch::kInt32));
         }
         dataset[className] = labels;
-        samples.index_put_({ "...", -1 }, torch::tensor(labels, torch::kInt64));
+        samples.index_put_({ "...", -1 }, torch::tensor(labels, torch::kInt32));
         classNumStates = *max_element(labels.begin(), labels.end()) + 1;
+        completeFit();
+    }
+    void Network::completeFit()
+    {
+
         int maxThreadsRunning = static_cast<int>(std::thread::hardware_concurrency() * maxThreads);
         if (maxThreadsRunning < 1) {
             maxThreadsRunning = 1;
@@ -122,15 +170,12 @@ namespace bayesnet {
         condition_variable cv;
         int activeThreads = 0;
         int nextNodeIndex = 0;
-
         while (nextNodeIndex < nodes.size()) {
             unique_lock<mutex> lock(mtx);
             cv.wait(lock, [&activeThreads, &maxThreadsRunning]() { return activeThreads < maxThreadsRunning; });
-
             if (nextNodeIndex >= nodes.size()) {
                 break;  // No more work remaining
             }
-
             threads.emplace_back([this, &nextNodeIndex, &mtx, &cv, &activeThreads]() {
                 while (true) {
                     unique_lock<mutex> lock(mtx);
@@ -140,7 +185,6 @@ namespace bayesnet {
                     auto& pair = *std::next(nodes.begin(), nextNodeIndex);
                     ++nextNodeIndex;
                     lock.unlock();
-
                     pair.second->computeCPT(dataset, laplaceSmoothing);
                     lock.lock();
                     nodes[pair.first] = std::move(pair.second);
@@ -150,7 +194,6 @@ namespace bayesnet {
                 --activeThreads;
                 cv.notify_one();
                 });
-
             ++activeThreads;
         }
         for (auto& thread : threads) {
@@ -218,7 +261,6 @@ namespace bayesnet {
             evidence[features[i]] = sample[i];
         }
         return exactInference(evidence);
-
     }
     double Network::computeFactor(map<string, int>& completeEvidence)
     {
@@ -292,5 +334,4 @@ namespace bayesnet {
         }
         return edges;
     }
-
 }

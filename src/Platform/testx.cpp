@@ -62,14 +62,40 @@ int main()
         cout << endl;
         cout << "Test Statistics: " << counts(y, test);
         cout << "==============================================================================" << endl;
+        torch::Tensor a = torch::zeros({ 5, 3 });
+        torch::Tensor b = torch::zeros({ 5 }) + 1;
+        torch::Tensor c = torch::cat({ a,  b.view({5, 1}) }, 1);
+        cout << "a:" << a.sizes() << endl;
+        cout << a << endl;
+        cout << "b:" << b.sizes() << endl;
+        cout << b << endl;
+        cout << "c:" << c.sizes() << endl;
+        cout << c << endl;
+        torch::Tensor d = torch::zeros({ 5, 3 });
+        torch::Tensor e = torch::tensor({ 1,2,3,4,5 }) + 1;
+        torch::Tensor f = torch::cat({ d,  e.view({5, 1}) }, 1);
+        cout << "d:" << d.sizes() << endl;
+        cout << d << endl;
+        cout << "e:" << e.sizes() << endl;
+        cout << e << endl;
+        cout << "f:" << f.sizes() << endl;
+        cout << f << endl;
+        auto indices = torch::tensor({ 0, 2, 4 });
+        auto k = f.index({ indices, "..." });
+        cout << "k:" << k.sizes() << endl;
+        cout << k << endl;
+        auto w = torch::index_select(f, 0, indices);
+        cout << "w:" << w.sizes() << endl;
+        cout << w << endl;
+
         // cout << "Vector poly" << endl;
-        // auto some = vector<A>();
-        // auto cx = C(5, 4);
-        // auto bx = B(7, 6);
-        // some.push_back(cx);
-        // some.push_back(bx);
-        // for (auto& obj : some) {
-        // 	cout << "Obj :" << obj.getA() << endl;
-        // }
+            // auto some = vector<A>();
+            // auto cx = C(5, 4);
+            // auto bx = B(7, 6);
+            // some.push_back(cx);
+            // some.push_back(bx);
+            // for (auto& obj : some) {
+            // 	cout << "Obj :" << obj.getA() << endl;
+            // }
     }
 }

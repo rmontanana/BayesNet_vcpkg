@@ -1,4 +1,5 @@
 #include <iostream>
+#include <torch/torch.h>
 #include <string>
 #include <thread>
 #include <map>
@@ -12,6 +13,7 @@
 #include "SPODE.h"
 #include "AODE.h"
 #include "TAN.h"
+#include "Folding.h"
 
 
 using namespace std;
@@ -42,6 +44,21 @@ bool file_exists(const std::string& name)
         return false;
     }
 }
+pair<vector<vector<int>>, vector<int>> extract_indices(vector<int> indices, vector<vector<int>> X, vector<int> y)
+{
+    vector<vector<int>> Xr;
+    vector<int> yr;
+    for (int col = 0; col < X.size(); ++col) {
+        Xr.push_back(vector<int>());
+    }
+    for (auto index : indices) {
+        for (int col = 0; col < X.size(); ++col) {
+            Xr[col].push_back(X[col][index]);
+        }
+        yr.push_back(y[index]);
+    }
+    return { Xr, yr };
+}
 
 int main(int argc, char** argv)
 {
@@ -60,7 +77,7 @@ int main(int argc, char** argv)
         valid_datasets.push_back(dataset.first);
     }
     argparse::ArgumentParser program("BayesNetSample");
-    program.add_argument("-f", "--file")
+    program.add_argument("-d", "--dataset")
         .help("Dataset file name")
         .action([valid_datasets](const std::string& value) {
         if (find(valid_datasets.begin(), valid_datasets.end(), value) != valid_datasets.end()) {
@@ -83,14 +100,37 @@ int main(int argc, char** argv)
         throw runtime_error("Model must be one of {AODE, KDB, SPODE, TAN}");
             }
     );
-    bool class_last;
+    program.add_argument("--discretize").help("Discretize input dataset").default_value(false).implicit_value(true);
+    program.add_argument("--stratified").help("If Stratified KFold is to be done").default_value(false).implicit_value(true);
+    program.add_argument("--tensors").help("Use tensors to store samples").default_value(false).implicit_value(true);
+    program.add_argument("-f", "--folds").help("Number of folds").default_value(5).scan<'i', int>().action([](const string& value) {
+        try {
+            auto k = stoi(value);
+            if (k < 2) {
+                throw runtime_error("Number of folds must be greater than 1");
+            }
+            return k;
+        }
+        catch (const runtime_error& err) {
+            throw runtime_error(err.what());
+        }
+        catch (...) {
+            throw runtime_error("Number of folds must be an integer");
+        }});
+    program.add_argument("-s", "--seed").help("Random seed").default_value(-1).scan<'i', int>();
+    bool class_last, stratified, tensors;
     string model_name, file_name, path, complete_file_name;
+    int nFolds, seed;
     try {
         program.parse_args(argc, argv);
-        file_name = program.get<string>("file");
+        file_name = program.get<string>("dataset");
         path = program.get<string>("path");
         model_name = program.get<string>("model");
         complete_file_name = path + file_name + ".arff";
+        stratified = program.get<bool>("stratified");
+        tensors = program.get<bool>("tensors");
+        nFolds = program.get<int>("folds");
+        seed = program.get<int>("seed");
         class_last = datasets[file_name];
         if (!file_exists(complete_file_name)) {
             throw runtime_error("Data File " + path + file_name + ".arff" + " does not exist");
@@ -144,5 +184,55 @@ int main(int argc, char** argv)
     file.close();
     cout << "Graph saved in " << model_name << "_" << file_name << ".dot" << endl;
     cout << "dot -Tpng -o " + dot_file + ".png " + dot_file + ".dot " << endl;
+    string stratified_string = stratified ? " Stratified" : "";
+    cout << nFolds << " Folds" << stratified_string << " Cross validation" << endl;
+    cout << "==========================================" << endl;
+    torch::Tensor Xt = torch::zeros({ static_cast<int>(Xd.size()), static_cast<int>(Xd[0].size()) }, torch::kInt32);
+    torch::Tensor yt = torch::tensor(y, torch::kInt32);
+    for (int i = 0; i < features.size(); ++i) {
+        Xt.index_put_({ i, "..." }, torch::tensor(Xd[i], torch::kInt32));
+    }
+    float total_score = 0, total_score_train = 0, score_train, score_test;
+    Fold* fold;
+    if (stratified)
+        fold = new StratifiedKFold(nFolds, y, seed);
+    else
+        fold = new KFold(nFolds, y.size(), seed);
+    for (auto i = 0; i < nFolds; ++i) {
+        auto [train, test] = fold->getFold(i);
+        cout << "Fold: " << i + 1 << endl;
+        if (tensors) {
+            cout << "Xt shape: " << Xt.sizes() << endl;
+            cout << "yt shape: " << yt.sizes() << endl;
+            auto ttrain = torch::tensor(train, torch::kInt64);
+            auto ttest = torch::tensor(test, torch::kInt64);
+            torch::Tensor Xtraint = torch::index_select(Xt, 1, ttrain);
+            torch::Tensor ytraint = yt.index({ ttrain });
+            torch::Tensor Xtestt = torch::index_select(Xt, 1, ttest);
+            torch::Tensor ytestt = yt.index({ ttest });
+            cout << "Train: " << Xtraint.size(0) << " x " << Xtraint.size(1) << " " << ytraint.size(0) << endl;
+            cout << "Test : " << Xtestt.size(0) << " x " << Xtestt.size(1) << " " << ytestt.size(0) << endl;
+            clf->fit(Xtraint, ytraint, features, className, states);
+            score_train = clf->score(Xtraint, ytraint);
+            score_test = clf->score(Xtestt, ytestt);
+        } else {
+            auto [Xtrain, ytrain] = extract_indices(train, Xd, y);
+            auto [Xtest, ytest] = extract_indices(test, Xd, y);
+            cout << "Train: " << Xtrain.size() << " x " << Xtrain[0].size() << " " << ytrain.size() << endl;
+            cout << "Test : " << Xtest.size() << " x " << Xtest[0].size() << " " << ytest.size() << endl;
+            clf->fit(Xtrain, ytrain, features, className, states);
+            score_train = clf->score(Xtrain, ytrain);
+            score_test = clf->score(Xtest, ytest);
+        }
+        total_score_train += score_train;
+        total_score += score_test;
+        cout << "Score Train: " << score_train << endl;
+        cout << "Score Test : " << score_test << endl;
+        // cout << "-------------------------------------------------------------------------------" << endl;
+        // total_score += score_value;
+    }
+    cout << "**********************************************************************************" << endl;
+    cout << "Average Score Train: " << total_score_train / nFolds << endl;
+    cout << "Average Score Test : " << total_score / nFolds << endl;
     return 0;
 }

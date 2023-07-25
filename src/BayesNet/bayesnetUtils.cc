@@ -18,7 +18,7 @@ namespace bayesnet {
         // Iterate over cols
         for (int i = 0; i < tensor.size(1); ++i) {
             auto col_tensor = tensor.index({ "...", i });
-            auto col = vector<int>(col_tensor.data_ptr<int64_t>(), col_tensor.data_ptr<int64_t>() + tensor.size(0));
+            auto col = vector<int>(col_tensor.data_ptr<int>(), col_tensor.data_ptr<int>() + tensor.size(0));
             result.push_back(col);
         }
         return result;
