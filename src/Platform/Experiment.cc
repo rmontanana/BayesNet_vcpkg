@@ -25,9 +25,11 @@ Result cross_validation(Fold* fold, string model_name, Tensor& X, Tensor& y, vec
        { "SPODE",  new bayesnet::SPODE(2) }, { "TAN",  new bayesnet::TAN() }
         }
     );
+    auto Xt = torch::transpose(X, 0, 1);
     auto result = Result();
     auto k = fold->getNumberOfFolds();
-    auto accuracy = torch::zeros({ k }, kFloat64);
+    auto accuracy_test = torch::zeros({ k }, kFloat64);
+    auto accuracy_train = torch::zeros({ k }, kFloat64);
     auto train_time = torch::zeros({ k }, kFloat64);
     auto test_time = torch::zeros({ k }, kFloat64);
     Timer train_timer, test_timer;
@@ -37,9 +39,9 @@ Result cross_validation(Fold* fold, string model_name, Tensor& X, Tensor& y, vec
         auto [train, test] = fold->getFold(i);
         auto train_t = torch::tensor(train);
         auto test_t = torch::tensor(test);
-        auto X_train = X.index({ train_t, "..." });
+        auto X_train = Xt.index({ "...", train_t });
         auto y_train = y.index({ train_t });
-        auto X_test = X.index({ test_t, "..." });
+        auto X_test = Xt.index({ "...", test_t });
         auto y_test = y.index({ test_t });
         model->fit(X_train, y_train, features, className, states);
         cout << "Training Fold " << i + 1 << endl;
@@ -48,12 +50,15 @@ Result cross_validation(Fold* fold, string model_name, Tensor& X, Tensor& y, vec
         cout << "X_test: " << X_test.sizes() << endl;
         cout << "y_test: " << y_test.sizes() << endl;
         train_time[i] = train_timer.getDuration();
+        auto accuracy_train_value = model->score(X_train, y_train);
         test_timer.start();
-        auto acc = model->score(X_test, y_test);
+        auto accuracy_test_value = model->score(X_test, y_test);
         test_time[i] = test_timer.getDuration();
-        accuracy[i] = acc;
+        accuracy_train[i] = accuracy_train_value;
+        accuracy_test[i] = accuracy_test_value;
     }
-    result.setScore(torch::mean(accuracy).item<double>());
+    result.setScoreTest(torch::mean(accuracy_test).item<double>()).setScoreTrain(torch::mean(accuracy_train).item<double>());
+    result.setScoreTestStd(torch::std(accuracy_test).item<double>()).setScoreTrainStd(torch::std(accuracy_train).item<double>());
     result.setTrainTime(torch::mean(train_time).item<double>()).setTestTime(torch::mean(test_time).item<double>());
     return result;
 }
@@ -114,8 +119,9 @@ int main(int argc, char** argv)
         catch (...) {
             throw runtime_error("Number of folds must be an integer");
         }});
+    program.add_argument("-s", "--seed").help("Random seed").default_value(-1).scan<'i', int>();
     bool class_last, discretize_dataset, stratified;
-    int n_folds;
+    int n_folds, seed;
     string model_name, file_name, path, complete_file_name;
     try {
         program.parse_args(argc, argv);
@@ -125,6 +131,7 @@ int main(int argc, char** argv)
         discretize_dataset = program.get<bool>("discretize");
         stratified = program.get<bool>("stratified");
         n_folds = program.get<int>("folds");
+        seed = program.get<int>("seed");
         complete_file_name = path + file_name + ".arff";
         class_last = datasets[file_name];
         if (!file_exists(complete_file_name)) {
@@ -142,18 +149,16 @@ int main(int argc, char** argv)
     auto [X, y, features, className, states] = loadDataset(path, file_name, class_last, discretize_dataset);
     Fold* fold;
     if (stratified)
-        fold = new StratifiedKFold(n_folds, y, -1);
+        fold = new StratifiedKFold(n_folds, y, seed);
     else
-        fold = new KFold(n_folds, y.numel(), -1);
+        fold = new KFold(n_folds, y.numel(), seed);
     auto experiment = Experiment();
     experiment.setDiscretized(discretize_dataset).setModel(model_name).setPlatform("cpp");
-    experiment.setStratified(stratified).setNFolds(5).addRandomSeed(271).setScoreName("accuracy");
+    experiment.setStratified(stratified).setNFolds(n_folds).addRandomSeed(seed).setScoreName("accuracy");
     auto result = cross_validation(fold, model_name, X, y, features, className, states);
     result.setDataset(file_name);
     experiment.addResult(result);
     experiment.save(path);
-    for (auto& item : states) {
-        cout << item.first << ": " << item.second.size() << endl;
-    }
+    experiment.show();
     return 0;
 }
