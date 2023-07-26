@@ -23,7 +23,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
 # Options
 # -------
-option(ENABLE_CLANG_TIDY "Enable to add clang tidy."              ON)
+option(ENABLE_CLANG_TIDY "Enable to add clang tidy."              OFF)
 option(ENABLE_TESTING "Unit testing build"                        ON)
 option(CODE_COVERAGE "Collect coverage from test library"         ON)
 
@@ -43,6 +43,7 @@ include(CodeCoverage)
 add_git_submodule("lib/mdlp")
 add_git_submodule("lib/catch2")
 add_git_submodule("lib/argparse")
+add_git_submodule("lib/json")
 
 # Subdirectories
 # --------------

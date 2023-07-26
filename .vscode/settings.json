@@ -100,7 +100,8 @@
         "shared_mutex": "cpp",
         "*.ipp": "cpp",
         "cassert": "cpp",
-        "charconv": "cpp"
+        "charconv": "cpp",
+        "source_location": "cpp"
     },
     "cmake.configureOnOpen": false,
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"

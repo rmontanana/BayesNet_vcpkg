@@ -1,164 +1,107 @@
-#include <iostream>
-#include <string>
-#include <torch/torch.h>
-#include <thread>
-#include <argparse/argparse.hpp>
-#include "ArffFiles.h"
-#include "Network.h"
-#include "BayesMetrics.h"
-#include "CPPFImdlp.h"
-#include "KDB.h"
-#include "SPODE.h"
-#include "AODE.h"
-#include "TAN.h"
-#include "platformUtils.h"
-#include "Result.h"
-#include "Folding.h"
+#include "Experiment.h"
 
+namespace platform {
+    using json = nlohmann::json;
+    string get_date_time()
+    {
+        time_t rawtime;
+        tm* timeinfo;
+        time(&rawtime);
+        timeinfo = std::localtime(&rawtime);
 
-using namespace std;
-
-Result cross_validation(Fold* fold, string model_name, Tensor& X, Tensor& y, vector<string> features, string className, map<string, vector<int>> states)
-{
-    auto classifiers = map<string, bayesnet::BaseClassifier*>({
-       { "AODE", new bayesnet::AODE() }, { "KDB", new bayesnet::KDB(2) },
-       { "SPODE",  new bayesnet::SPODE(2) }, { "TAN",  new bayesnet::TAN() }
-        }
-    );
-    auto Xt = torch::transpose(X, 0, 1);
-    auto result = Result();
-    auto k = fold->getNumberOfFolds();
-    auto accuracy_test = torch::zeros({ k }, kFloat64);
-    auto accuracy_train = torch::zeros({ k }, kFloat64);
-    auto train_time = torch::zeros({ k }, kFloat64);
-    auto test_time = torch::zeros({ k }, kFloat64);
-    Timer train_timer, test_timer;
-    for (int i = 0; i < k; i++) {
-        bayesnet::BaseClassifier* model = classifiers[model_name];
-        train_timer.start();
-        auto [train, test] = fold->getFold(i);
-        auto train_t = torch::tensor(train);
-        auto test_t = torch::tensor(test);
-        auto X_train = Xt.index({ "...", train_t });
-        auto y_train = y.index({ train_t });
-        auto X_test = Xt.index({ "...", test_t });
-        auto y_test = y.index({ test_t });
-        model->fit(X_train, y_train, features, className, states);
-        cout << "Training Fold " << i + 1 << endl;
-        cout << "X_train: " << X_train.sizes() << endl;
-        cout << "y_train: " << y_train.sizes() << endl;
-        cout << "X_test: " << X_test.sizes() << endl;
-        cout << "y_test: " << y_test.sizes() << endl;
-        train_time[i] = train_timer.getDuration();
-        auto accuracy_train_value = model->score(X_train, y_train);
-        test_timer.start();
-        auto accuracy_test_value = model->score(X_test, y_test);
-        test_time[i] = test_timer.getDuration();
-        accuracy_train[i] = accuracy_train_value;
-        accuracy_test[i] = accuracy_test_value;
+        std::ostringstream oss;
+        oss << std::put_time(timeinfo, "%Y-%m-%d_%H:%M:%S");
+        return oss.str();
     }
-    result.setScoreTest(torch::mean(accuracy_test).item<double>()).setScoreTrain(torch::mean(accuracy_train).item<double>());
-    result.setScoreTestStd(torch::std(accuracy_test).item<double>()).setScoreTrainStd(torch::std(accuracy_train).item<double>());
-    result.setTrainTime(torch::mean(train_time).item<double>()).setTestTime(torch::mean(test_time).item<double>());
-    return result;
-}
-
-int main(int argc, char** argv)
-{
-    map<string, bool> datasets = {
-            {"diabetes",           true},
-            {"ecoli",              true},
-            {"glass",              true},
-            {"iris",               true},
-            {"kdd_JapaneseVowels", false},
-            {"letter",             true},
-            {"liver-disorders",    true},
-            {"mfeat-factors",      true},
-    };
-    auto valid_datasets = vector<string>();
-    for (auto dataset : datasets) {
-        valid_datasets.push_back(dataset.first);
+    string Experiment::get_file_name()
+    {
+        string date_time = get_date_time();
+        string result = "results_" + score_name + "_" + model + "_" + platform + "_" + date_time + "_" + (stratified ? "1" : "0") + ".json";
+        return result;
     }
-    argparse::ArgumentParser program("BayesNetSample");
-    program.add_argument("-d", "--dataset")
-        .help("Dataset file name")
-        .action([valid_datasets](const std::string& value) {
-        if (find(valid_datasets.begin(), valid_datasets.end(), value) != valid_datasets.end()) {
-            return value;
+    json Experiment::build_json()
+    {
+        json result;
+        result["title"] = title;
+        result["model"] = model;
+        result["platform"] = platform;
+        result["score_name"] = score_name;
+        result["model_version"] = model_version;
+        result["language_version"] = language_version;
+        result["discretized"] = discretized;
+        result["stratified"] = stratified;
+        result["nfolds"] = nfolds;
+        result["random_seeds"] = random_seeds;
+        result["duration"] = duration;
+        result["results"] = json::array();
+        for (auto& r : results) {
+            json j;
+            j["dataset"] = r.getDataset();
+            j["hyperparameters"] = r.getHyperparameters();
+            j["samples"] = r.getSamples();
+            j["features"] = r.getFeatures();
+            j["classes"] = r.getClasses();
+            j["score_train"] = r.getScoreTrain();
+            j["score_test"] = r.getScoreTest();
+            j["score_train_std"] = r.getScoreTrainStd();
+            j["score_test_std"] = r.getScoreTestStd();
+            j["train_time"] = r.getTrainTime();
+            j["train_time_std"] = r.getTrainTimeStd();
+            j["test_time"] = r.getTestTime();
+            j["test_time_std"] = r.getTestTimeStd();
+            result["results"].push_back(j);
         }
-        throw runtime_error("file must be one of {diabetes, ecoli, glass, iris, kdd_JapaneseVowels, letter, liver-disorders, mfeat-factors}");
+        return result;
+    }
+    void Experiment::save(string path)
+    {
+        json data = build_json();
+        ofstream file(path + get_file_name());
+        file << data;
+        file.close();
+    }
+    Result cross_validation(Fold* fold, string model_name, torch::Tensor& X, torch::Tensor& y, vector<string> features, string className, map<string, vector<int>> states)
+    {
+        auto classifiers = map<string, bayesnet::BaseClassifier*>({
+           { "AODE", new bayesnet::AODE() }, { "KDB", new bayesnet::KDB(2) },
+           { "SPODE",  new bayesnet::SPODE(2) }, { "TAN",  new bayesnet::TAN() }
             }
-    );
-    program.add_argument("-p", "--path")
-        .help("folder where the data files are located, default")
-        .default_value(string{ PATH }
-    );
-    program.add_argument("-m", "--model")
-        .help("Model to use {AODE, KDB, SPODE, TAN}")
-        .action([](const std::string& value) {
-        static const vector<string> choices = { "AODE", "KDB", "SPODE", "TAN" };
-        if (find(choices.begin(), choices.end(), value) != choices.end()) {
-            return value;
+        );
+        auto Xt = torch::transpose(X, 0, 1);
+        auto result = Result();
+        auto k = fold->getNumberOfFolds();
+        auto accuracy_test = torch::zeros({ k }, torch::kFloat64);
+        auto accuracy_train = torch::zeros({ k }, torch::kFloat64);
+        auto train_time = torch::zeros({ k }, torch::kFloat64);
+        auto test_time = torch::zeros({ k }, torch::kFloat64);
+        Timer train_timer, test_timer;
+        for (int i = 0; i < k; i++) {
+            bayesnet::BaseClassifier* model = classifiers[model_name];
+            train_timer.start();
+            auto [train, test] = fold->getFold(i);
+            auto train_t = torch::tensor(train);
+            auto test_t = torch::tensor(test);
+            auto X_train = Xt.index({ "...", train_t });
+            auto y_train = y.index({ train_t });
+            auto X_test = Xt.index({ "...", test_t });
+            auto y_test = y.index({ test_t });
+            model->fit(X_train, y_train, features, className, states);
+            cout << "Training Fold " << i + 1 << endl;
+            cout << "X_train: " << X_train.sizes() << endl;
+            cout << "y_train: " << y_train.sizes() << endl;
+            cout << "X_test: " << X_test.sizes() << endl;
+            cout << "y_test: " << y_test.sizes() << endl;
+            train_time[i] = train_timer.getDuration();
+            auto accuracy_train_value = model->score(X_train, y_train);
+            test_timer.start();
+            auto accuracy_test_value = model->score(X_test, y_test);
+            test_time[i] = test_timer.getDuration();
+            accuracy_train[i] = accuracy_train_value;
+            accuracy_test[i] = accuracy_test_value;
         }
-        throw runtime_error("Model must be one of {AODE, KDB, SPODE, TAN}");
-            }
-    );
-    program.add_argument("--discretize").help("Discretize input dataset").default_value(false).implicit_value(true);
-    program.add_argument("--stratified").help("If Stratified KFold is to be done").default_value(false).implicit_value(true);
-    program.add_argument("-f", "--folds").help("Number of folds").default_value(5).scan<'i', int>().action([](const string& value) {
-        try {
-            auto k = stoi(value);
-            if (k < 2) {
-                throw runtime_error("Number of folds must be greater than 1");
-            }
-            return k;
-        }
-        catch (const runtime_error& err) {
-            throw runtime_error(err.what());
-        }
-        catch (...) {
-            throw runtime_error("Number of folds must be an integer");
-        }});
-    program.add_argument("-s", "--seed").help("Random seed").default_value(-1).scan<'i', int>();
-    bool class_last, discretize_dataset, stratified;
-    int n_folds, seed;
-    string model_name, file_name, path, complete_file_name;
-    try {
-        program.parse_args(argc, argv);
-        file_name = program.get<string>("dataset");
-        path = program.get<string>("path");
-        model_name = program.get<string>("model");
-        discretize_dataset = program.get<bool>("discretize");
-        stratified = program.get<bool>("stratified");
-        n_folds = program.get<int>("folds");
-        seed = program.get<int>("seed");
-        complete_file_name = path + file_name + ".arff";
-        class_last = datasets[file_name];
-        if (!file_exists(complete_file_name)) {
-            throw runtime_error("Data File " + path + file_name + ".arff" + " does not exist");
-        }
+        result.setScoreTest(torch::mean(accuracy_test).item<double>()).setScoreTrain(torch::mean(accuracy_train).item<double>());
+        result.setScoreTestStd(torch::std(accuracy_test).item<double>()).setScoreTrainStd(torch::std(accuracy_train).item<double>());
+        result.setTrainTime(torch::mean(train_time).item<double>()).setTestTime(torch::mean(test_time).item<double>());
+        return result;
     }
-    catch (const exception& err) {
-        cerr << err.what() << endl;
-        cerr << program;
-        exit(1);
-    }
-    /*
-    * Begin Processing
-    */
-    auto [X, y, features, className, states] = loadDataset(path, file_name, class_last, discretize_dataset);
-    Fold* fold;
-    if (stratified)
-        fold = new StratifiedKFold(n_folds, y, seed);
-    else
-        fold = new KFold(n_folds, y.numel(), seed);
-    auto experiment = Experiment();
-    experiment.setDiscretized(discretize_dataset).setModel(model_name).setPlatform("cpp");
-    experiment.setStratified(stratified).setNFolds(n_folds).addRandomSeed(seed).setScoreName("accuracy");
-    auto result = cross_validation(fold, model_name, X, y, features, className, states);
-    result.setDataset(file_name);
-    experiment.addResult(result);
-    experiment.save(path);
-    experiment.show();
-    return 0;
 }
