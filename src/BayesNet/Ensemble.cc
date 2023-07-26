@@ -130,4 +130,28 @@ namespace bayesnet {
         }
         return result;
     }
+    int Ensemble::getNumberOfNodes()
+    {
+        int nodes = 0;
+        for (auto i = 0; i < n_models; ++i) {
+            nodes += models[i]->getNumberOfNodes();
+        }
+        return nodes;
+    }
+    int Ensemble::getNumberOfEdges()
+    {
+        int edges = 0;
+        for (auto i = 0; i < n_models; ++i) {
+            edges += models[i]->getNumberOfEdges();
+        }
+        return edges;
+    }
+    int Ensemble::getNumberOfStates()
+    {
+        int states = 0;
+        for (auto i = 0; i < n_models; ++i) {
+            states += models[i]->getNumberOfStates();
+        }
+        return states;
+    }
 }

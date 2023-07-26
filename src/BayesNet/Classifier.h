@@ -32,8 +32,9 @@ namespace bayesnet {
         Classifier& fit(vector<vector<int>>& X, vector<int>& y, vector<string>& features, string className, map<string, vector<int>>& states) override;
         Classifier& fit(torch::Tensor& X, torch::Tensor& y, vector<string>& features, string className, map<string, vector<int>>& states) override;
         void addNodes();
-        int getNumberOfNodes();
-        int getNumberOfEdges();
+        int getNumberOfNodes() override;
+        int getNumberOfEdges() override;
+        int getNumberOfStates() override;
         Tensor predict(Tensor& X);
         vector<int> predict(vector<vector<int>>& X) override;
         float score(Tensor& X, Tensor& y) override;

@@ -20,13 +20,14 @@ namespace platform {
         Timer() = default;
         ~Timer() = default;
         void start() { begin = chrono::high_resolution_clock::now(); }
-        float getDuration() { return chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - begin).count(); }
+        float getDuration() { return chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - begin).count() / 1000; }
     };
     class Result {
     private:
         string dataset, hyperparameters;
         int samples, features, classes;
         float score_train, score_test, score_train_std, score_test_std, train_time, train_time_std, test_time, test_time_std;
+        float nodes, leaves, depth;
     public:
         Result() = default;
         Result& setDataset(string dataset) { this->dataset = dataset; return *this; }
@@ -42,6 +43,9 @@ namespace platform {
         Result& setTrainTimeStd(float train_time_std) { this->train_time_std = train_time_std; return *this; }
         Result& setTestTime(float test_time) { this->test_time = test_time; return *this; }
         Result& setTestTimeStd(float test_time_std) { this->test_time_std = test_time_std; return *this; }
+        Result& setNodes(float nodes) { this->nodes = nodes; return *this; }
+        Result& setLeaves(float leaves) { this->leaves = leaves; return *this; }
+        Result& setDepth(float depth) { this->depth = depth; return *this; }
         const float get_score_train() const { return score_train; }
         float get_score_test() { return score_test; }
         const string& getDataset() const { return dataset; }
@@ -57,10 +61,13 @@ namespace platform {
         const float getTrainTimeStd() const { return train_time_std; }
         const float getTestTime() const { return test_time; }
         const float getTestTimeStd() const { return test_time_std; }
+        const float getNodes() const { return nodes; }
+        const float getLeaves() const { return leaves; }
+        const float getDepth() const { return depth; }
     };
     class Experiment {
     private:
-        string title, model, platform, score_name, model_version, language_version;
+        string title, model, platform, score_name, model_version, language_version, language;
         bool discretized, stratified;
         vector<Result> results;
         vector<int> random_seeds;
@@ -74,6 +81,7 @@ namespace platform {
         Experiment& setPlatform(string platform) { this->platform = platform; return *this; }
         Experiment& setScoreName(string score_name) { this->score_name = score_name; return *this; }
         Experiment& setModelVersion(string model_version) { this->model_version = model_version; return *this; }
+        Experiment& setLanguage(string language) { this->language = language; return *this; }
         Experiment& setLanguageVersion(string language_version) { this->language_version = language_version; return *this; }
         Experiment& setDiscretized(bool discretized) { this->discretized = discretized; return *this; }
         Experiment& setStratified(bool stratified) { this->stratified = stratified; return *this; }

@@ -11,6 +11,9 @@ namespace bayesnet {
         vector<int> virtual predict(vector<vector<int>>& X) = 0;
         float virtual score(vector<vector<int>>& X, vector<int>& y) = 0;
         float virtual score(torch::Tensor& X, torch::Tensor& y) = 0;
+        int virtual getNumberOfNodes() = 0;
+        int virtual getNumberOfEdges() = 0;
+        int virtual getNumberOfStates() = 0;
         vector<string> virtual show() = 0;
         vector<string> virtual graph(string title = "") = 0;
         virtual ~BaseClassifier() = default;

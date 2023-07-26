@@ -36,6 +36,9 @@ namespace bayesnet {
         vector<int> predict(vector<vector<int>>& X) override;
         float score(Tensor& X, Tensor& y) override;
         float score(vector<vector<int>>& X, vector<int>& y) override;
+        int getNumberOfNodes() override;
+        int getNumberOfEdges() override;
+        int getNumberOfStates() override;
         vector<string> show() override;
         vector<string> graph(string title) override;
     };

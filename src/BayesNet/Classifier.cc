@@ -141,4 +141,8 @@ namespace bayesnet {
     {
         return fitted ? model.getEdges().size() : 0;
     }
+    int Classifier::getNumberOfStates()
+    {
+        return fitted ? model.getStates() : 0;
+    }
 }

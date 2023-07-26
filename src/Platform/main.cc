@@ -18,8 +18,6 @@
 
 using namespace std;
 
-
-
 int main(int argc, char** argv)
 {
     map<string, bool> datasets = {
@@ -60,6 +58,7 @@ int main(int argc, char** argv)
         throw runtime_error("Model must be one of {AODE, KDB, SPODE, TAN}");
             }
     );
+    program.add_argument("--title").required().help("Experiment title");
     program.add_argument("--discretize").help("Discretize input dataset").default_value(false).implicit_value(true);
     program.add_argument("--stratified").help("If Stratified KFold is to be done").default_value(false).implicit_value(true);
     program.add_argument("-f", "--folds").help("Number of folds").default_value(5).scan<'i', int>().action([](const string& value) {
@@ -79,7 +78,7 @@ int main(int argc, char** argv)
     program.add_argument("-s", "--seed").help("Random seed").default_value(-1).scan<'i', int>();
     bool class_last, discretize_dataset, stratified;
     int n_folds, seed;
-    string model_name, file_name, path, complete_file_name;
+    string model_name, file_name, path, complete_file_name, title;
     try {
         program.parse_args(argc, argv);
         file_name = program.get<string>("dataset");
@@ -91,6 +90,7 @@ int main(int argc, char** argv)
         seed = program.get<int>("seed");
         complete_file_name = path + file_name + ".arff";
         class_last = datasets[file_name];
+        title = program.get<string>("title");
         if (!file_exists(complete_file_name)) {
             throw runtime_error("Data File " + path + file_name + ".arff" + " does not exist");
         }
@@ -110,7 +110,8 @@ int main(int argc, char** argv)
     else
         fold = new KFold(n_folds, y.numel(), seed);
     auto experiment = platform::Experiment();
-    experiment.setDiscretized(discretize_dataset).setModel(model_name).setPlatform("cpp");
+    experiment.setTitle(title).setLanguage("cpp").setLanguageVersion("1.0.0");
+    experiment.setDiscretized(discretize_dataset).setModel(model_name).setModelVersion("1...0").setPlatform("BayesNet");
     experiment.setStratified(stratified).setNFolds(n_folds).addRandomSeed(seed).setScoreName("accuracy");
     platform::Timer timer;
     timer.start();
