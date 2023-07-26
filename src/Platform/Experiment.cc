@@ -145,7 +145,6 @@ int main(int argc, char** argv)
         fold = new StratifiedKFold(n_folds, y, -1);
     else
         fold = new KFold(n_folds, y.numel(), -1);
-
     auto experiment = Experiment();
     experiment.setDiscretized(discretize_dataset).setModel(model_name).setPlatform("cpp");
     experiment.setStratified(stratified).setNFolds(5).addRandomSeed(271).setScoreName("accuracy");

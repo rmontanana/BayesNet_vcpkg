@@ -7,6 +7,11 @@ namespace bayesnet {
     Classifier::Classifier(Network model) : model(model), m(0), n(0), metrics(Metrics()), fitted(false) {}
     Classifier& Classifier::build(vector<string>& features, string className, map<string, vector<int>>& states)
     {
+        cout << "Building classifier..." << endl;
+        cout << "X sizes = " << X.sizes() << endl;
+        cout << "y sizes = " << y.sizes() << endl;
+        cout << "Xv size = " << Xv.size() << endl;
+        cout << "yv size = " << yv.size() << endl;
         dataset = torch::cat({ X, y.view({y.size(0), 1}) }, 1);
         this->features = features;
         this->className = className;
@@ -28,6 +33,10 @@ namespace bayesnet {
         this->X = torch::transpose(X, 0, 1);
         this->y = y;
         Xv = vector<vector<int>>();
+        for (int i = 0; i < X.size(1); ++i) {
+            auto temp = X.index({ "...", i });
+            Xv.push_back(vector<int>(temp.data_ptr<int>(), temp.data_ptr<int>() + temp.numel()));
+        }
         yv = vector<int>(y.data_ptr<int>(), y.data_ptr<int>() + y.size(0));
         return build(features, className, states);
     }
@@ -71,10 +80,11 @@ namespace bayesnet {
         }
         auto m_ = X.size(0);
         auto n_ = X.size(1);
+        //auto Xt = torch::transpose(X, 0, 1);
         vector<vector<int>> Xd(n_, vector<int>(m_, 0));
         for (auto i = 0; i < n_; i++) {
             auto temp = X.index({ "...", i });
-            Xd[i] = vector<int>(temp.data_ptr<int>(), temp.data_ptr<int>() + m_);
+            Xd[i] = vector<int>(temp.data_ptr<int>(), temp.data_ptr<int>() + temp.numel());
         }
         auto yp = model.predict(Xd);
         auto ypred = torch::tensor(yp, torch::kInt32);

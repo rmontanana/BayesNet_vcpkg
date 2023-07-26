@@ -48,7 +48,6 @@ void StratifiedKFold::build()
 {
     stratified_indices = vector<vector<int>>(k);
     int fold_size = n / k;
-    int remainder = n % k;
     // Compute class counts and indices
     auto class_indices = map<int, vector<int>>();
     vector<int> class_counts(*max_element(y.begin(), y.end()) + 1, 0);

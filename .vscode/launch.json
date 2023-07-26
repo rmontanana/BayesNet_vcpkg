@@ -13,11 +13,9 @@
                 "TAN",
                 "-p",
                 "../../data/",
-                "--stratified",
                 "--tensors"
             ],
             "cwd": "${workspaceFolder}/build/sample/",
-            "preLaunchTask": "CMake: build"
         },
         {
             "type": "lldb",

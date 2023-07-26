@@ -228,8 +228,7 @@ int main(int argc, char** argv)
         total_score += score_test;
         cout << "Score Train: " << score_train << endl;
         cout << "Score Test : " << score_test << endl;
-        // cout << "-------------------------------------------------------------------------------" << endl;
-        // total_score += score_value;
+        cout << "-------------------------------------------------------------------------------" << endl;
     }
     cout << "**********************************************************************************" << endl;
     cout << "Average Score Train: " << total_score_train / nFolds << endl;
