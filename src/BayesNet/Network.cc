@@ -99,6 +99,7 @@ namespace bayesnet {
         features = featureNames;
         this->className = className;
         dataset.clear();
+        // Specific part
         classNumStates = torch::max(y).item<int>() + 1;
         samples = torch::cat({ X, y.view({ y.size(0), 1 }) }, 1);
         for (int i = 0; i < featureNames.size(); ++i) {
@@ -110,36 +111,6 @@ namespace bayesnet {
             dataset[featureNames[i]] = k;
         }
         dataset[className] = vector<int>(y.data_ptr<int>(), y.data_ptr<int>() + y.size(0));
-        // //
-        // // Check if data is ok
-        // cout << "******************************************************************" << endl;
-        // cout << "Check samples, sizes: " << samples.sizes() << endl;
-        // for (auto i = 0; i < features.size(); ++i) {
-        //     cout << featureNames[i] << ": " << nodes[featureNames[i]]->getNumStates() << ": torch:max " << torch::max(samples.index({ "...", i })).item<int>() + 1 << " dataset" << *max_element(dataset[featureNames[i]].begin(), dataset[featureNames[i]].end()) + 1 << endl;
-        // }
-        // cout << className << ": " << nodes[className]->getNumStates() << ": torch:max " << torch::max(samples.index({ "...", -1 })) + 1 << endl;
-        // cout << "******************************************************************" << endl;
-        // //
-        // //
-        /*
-
-
-        */
-        for (int i = 0; i < features.size(); ++i) {
-            cout << "Checking " << features[i] << endl;
-            auto column = torch::flatten(X.index({ "...", i }));
-            auto k = vector<int>();
-            for (auto i = 0; i < X.size(0); ++i) {
-                k.push_back(column[i].item<int>());
-            }
-            if (k != dataset[features[i]]) {
-                throw invalid_argument("Dataset and samples do not match");
-            }
-        }
-        /*
-
-
-        */
         completeFit();
     }
     void Network::fit(const vector<vector<int>>& input_data, const vector<int>& labels, const vector<string>& featureNames, const string& className)
@@ -147,6 +118,8 @@ namespace bayesnet {
         features = featureNames;
         this->className = className;
         dataset.clear();
+        // Specific part
+        classNumStates = *max_element(labels.begin(), labels.end()) + 1;
         // Build dataset & tensor of samples
         samples = torch::zeros({ static_cast<int>(input_data[0].size()), static_cast<int>(input_data.size() + 1) }, torch::kInt32);
         for (int i = 0; i < featureNames.size(); ++i) {
@@ -155,7 +128,6 @@ namespace bayesnet {
         }
         dataset[className] = labels;
         samples.index_put_({ "...", -1 }, torch::tensor(labels, torch::kInt32));
-        classNumStates = *max_element(labels.begin(), labels.end()) + 1;
         completeFit();
     }
     void Network::completeFit()

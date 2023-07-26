@@ -7,11 +7,6 @@ namespace bayesnet {
     Classifier::Classifier(Network model) : model(model), m(0), n(0), metrics(Metrics()), fitted(false) {}
     Classifier& Classifier::build(vector<string>& features, string className, map<string, vector<int>>& states)
     {
-        cout << "Building classifier..." << endl;
-        cout << "X sizes = " << X.sizes() << endl;
-        cout << "y sizes = " << y.sizes() << endl;
-        cout << "Xv size = " << Xv.size() << endl;
-        cout << "yv size = " << yv.size() << endl;
         dataset = torch::cat({ X, y.view({y.size(0), 1}) }, 1);
         this->features = features;
         this->className = className;
@@ -21,8 +16,10 @@ namespace bayesnet {
         metrics = Metrics(dataset, features, className, n_classes);
         train();
         if (Xv == vector<vector<int>>()) {
+            // fit with tensors
             model.fit(X, y, features, className);
         } else {
+            // fit with vectors
             model.fit(Xv, yv, features, className);
         }
         fitted = true;
@@ -33,10 +30,6 @@ namespace bayesnet {
         this->X = torch::transpose(X, 0, 1);
         this->y = y;
         Xv = vector<vector<int>>();
-        for (int i = 0; i < X.size(1); ++i) {
-            auto temp = X.index({ "...", i });
-            Xv.push_back(vector<int>(temp.data_ptr<int>(), temp.data_ptr<int>() + temp.numel()));
-        }
         yv = vector<int>(y.data_ptr<int>(), y.data_ptr<int>() + y.size(0));
         return build(features, className, states);
     }
@@ -109,7 +102,8 @@ namespace bayesnet {
         if (!fitted) {
             throw logic_error("Classifier has not been fitted");
         }
-        Tensor y_pred = predict(X);
+        auto Xt = torch::transpose(X, 0, 1);
+        Tensor y_pred = predict(Xt);
         return (y_pred == y).sum().item<float>() / y.size(0);
     }
     float Classifier::score(vector<vector<int>>& X, vector<int>& y)
