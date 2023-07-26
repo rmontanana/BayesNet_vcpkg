@@ -17,6 +17,7 @@ namespace bayesnet {
         vector<string> virtual show() = 0;
         vector<string> virtual graph(string title = "") = 0;
         virtual ~BaseClassifier() = default;
+        const string inline getVersion() const { return "0.1.0"; };
     };
 }
 #endif

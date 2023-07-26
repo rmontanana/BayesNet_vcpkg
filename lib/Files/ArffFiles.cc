@@ -42,7 +42,7 @@ vector<int>& ArffFiles::getY()
     return y;
 }
 
-void ArffFiles::load(const string& fileName, bool classLast)
+void ArffFiles::loadCommon(string fileName)
 {
     ifstream file(fileName);
     if (!file.is_open()) {
@@ -74,24 +74,50 @@ void ArffFiles::load(const string& fileName, bool classLast)
     file.close();
     if (attributes.empty())
         throw invalid_argument("No attributes found");
+}
+
+void ArffFiles::load(const string& fileName, bool classLast)
+{
+    int labelIndex;
+    loadCommon(fileName);
     if (classLast) {
         className = get<0>(attributes.back());
         classType = get<1>(attributes.back());
         attributes.pop_back();
+        labelIndex = static_cast<int>(attributes.size());
     } else {
         className = get<0>(attributes.front());
         classType = get<1>(attributes.front());
         attributes.erase(attributes.begin());
+        labelIndex = 0;
     }
-    generateDataset(classLast);
-
+    generateDataset(labelIndex);
+}
+void ArffFiles::load(const string& fileName, const string& name)
+{
+    int labelIndex;
+    loadCommon(fileName);
+    bool found = false;
+    for (int i = 0; i < attributes.size(); ++i) {
+        if (attributes[i].first == name) {
+            className = get<0>(attributes[i]);
+            classType = get<1>(attributes[i]);
+            attributes.erase(attributes.begin() + i);
+            labelIndex = i;
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        throw invalid_argument("Class name not found");
+    }
+    generateDataset(labelIndex);
 }
 
-void ArffFiles::generateDataset(bool classLast)
+void ArffFiles::generateDataset(int labelIndex)
 {
     X = vector<vector<float>>(attributes.size(), vector<float>(lines.size()));
     auto yy = vector<string>(lines.size(), "");
-    int labelIndex = classLast ? static_cast<int>(attributes.size()) : 0;
     for (size_t i = 0; i < lines.size(); i++) {
         stringstream ss(lines[i]);
         string value;

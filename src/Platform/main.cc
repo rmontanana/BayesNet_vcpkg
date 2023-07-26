@@ -1,49 +1,17 @@
 #include <iostream>
-#include <string>
-#include <torch/torch.h>
-#include <thread>
 #include <argparse/argparse.hpp>
-#include "ArffFiles.h"
-#include "Network.h"
-#include "BayesMetrics.h"
-#include "CPPFImdlp.h"
-#include "KDB.h"
-#include "SPODE.h"
-#include "AODE.h"
-#include "TAN.h"
 #include "platformUtils.h"
 #include "Experiment.h"
-#include "Folding.h"
+#include "Datasets.h"
 
 
 using namespace std;
 
-int main(int argc, char** argv)
+argparse::ArgumentParser manageArguments(int argc, char** argv)
 {
-    map<string, bool> datasets = {
-            {"diabetes",           true},
-            {"ecoli",              true},
-            {"glass",              true},
-            {"iris",               true},
-            {"kdd_JapaneseVowels", false},
-            {"letter",             true},
-            {"liver-disorders",    true},
-            {"mfeat-factors",      true},
-    };
-    auto valid_datasets = vector<string>();
-    for (auto dataset : datasets) {
-        valid_datasets.push_back(dataset.first);
-    }
     argparse::ArgumentParser program("BayesNetSample");
     program.add_argument("-d", "--dataset")
-        .help("Dataset file name")
-        .action([valid_datasets](const std::string& value) {
-        if (find(valid_datasets.begin(), valid_datasets.end(), value) != valid_datasets.end()) {
-            return value;
-        }
-        throw runtime_error("file must be one of {diabetes, ecoli, glass, iris, kdd_JapaneseVowels, letter, liver-disorders, mfeat-factors}");
-            }
-    );
+        .help("Dataset file name");
     program.add_argument("-p", "--path")
         .help("folder where the data files are located, default")
         .default_value(string{ PATH }
@@ -89,7 +57,7 @@ int main(int argc, char** argv)
         n_folds = program.get<int>("folds");
         seed = program.get<int>("seed");
         complete_file_name = path + file_name + ".arff";
-        class_last = datasets[file_name];
+        class_last = false;//datasets[file_name];
         title = program.get<string>("title");
         if (!file_exists(complete_file_name)) {
             throw runtime_error("Data File " + path + file_name + ".arff" + " does not exist");
@@ -100,24 +68,54 @@ int main(int argc, char** argv)
         cerr << program;
         exit(1);
     }
+    return program;
+}
+
+int main(int argc, char** argv)
+{
+    auto program = manageArguments(argc, argv);
+    auto file_name = program.get<string>("dataset");
+    auto path = program.get<string>("path");
+    auto model_name = program.get<string>("model");
+    auto discretize_dataset = program.get<bool>("discretize");
+    auto stratified = program.get<bool>("stratified");
+    auto n_folds = program.get<int>("folds");
+    auto seed = program.get<int>("seed");
+    vector<string> filesToProcess;
+    auto datasets = platform::Datasets(path, true, platform::ARFF);
+    if (file_name != "") {
+        filesToProcess.push_back(file_name);
+    } else {
+        filesToProcess = platform::Datasets(path, true, platform::ARFF).getNames();
+    }
+    auto title = program.get<string>("title");
+
     /*
     * Begin Processing
     */
-    auto [X, y, features, className, states] = loadDataset(path, file_name, class_last, discretize_dataset);
-    Fold* fold;
-    if (stratified)
-        fold = new StratifiedKFold(n_folds, y, seed);
-    else
-        fold = new KFold(n_folds, y.numel(), seed);
     auto experiment = platform::Experiment();
     experiment.setTitle(title).setLanguage("cpp").setLanguageVersion("1.0.0");
-    experiment.setDiscretized(discretize_dataset).setModel(model_name).setModelVersion("1...0").setPlatform("BayesNet");
+    experiment.setDiscretized(discretize_dataset).setModel(model_name).setPlatform("BayesNet");
     experiment.setStratified(stratified).setNFolds(n_folds).addRandomSeed(seed).setScoreName("accuracy");
     platform::Timer timer;
     timer.start();
-    auto result = platform::cross_validation(fold, model_name, X, y, features, className, states);
-    result.setDataset(file_name);
-    experiment.addResult(result);
+    for (auto fileName : filesToProcess) {
+        cout << "Processing " << fileName << endl;
+        auto [X, y] = datasets.getTensors(fileName);
+        // auto states = datasets.getStates(fileName);
+        // auto features = datasets.getFeatures(fileName);
+        // auto className = datasets.getDataset(fileName).getClassName();
+        // Fold* fold;
+        // if (stratified)
+        //     fold = new StratifiedKFold(n_folds, y, seed);
+        // else
+        //     fold = new KFold(n_folds, y.numel(), seed);
+        // auto result = platform::cross_validation(fold, model_name, X, y, features, className, states);
+        // result.setDataset(file_name);
+        // experiment.setModelVersion(result.getModelVersion());
+        // experiment.addResult(result);
+        // delete fold;
+    }
     experiment.setDuration(timer.getDuration());
     experiment.save(path);
     experiment.show();

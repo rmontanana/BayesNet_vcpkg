@@ -101,6 +101,7 @@ namespace platform {
         Timer train_timer, test_timer;
         for (int i = 0; i < k; i++) {
             bayesnet::BaseClassifier* model = classifiers[model_name];
+            result.setModelVersion(model->getVersion());
             train_timer.start();
             auto [train, test] = fold->getFold(i);
             auto train_t = torch::tensor(train);

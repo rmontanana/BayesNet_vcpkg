@@ -14,12 +14,12 @@ private:
     string classType;
     vector<vector<float>> X;
     vector<int> y;
-
-    void generateDataset(bool);
-
+    void generateDataset(int);
+    void loadCommon(string);
 public:
     ArffFiles();
     void load(const string&, bool = true);
+    void load(const string&, const string&);
     vector<string> getLines() const;
     unsigned long int getSize() const;
     string getClassName() const;

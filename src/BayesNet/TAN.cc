@@ -3,7 +3,7 @@
 namespace bayesnet {
     using namespace torch;
 
-    TAN::TAN() : Classifier(Network(0.1)) {}
+    TAN::TAN() : Classifier(Network()) {}
 
     void TAN::train()
     {

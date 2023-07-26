@@ -24,7 +24,7 @@ namespace platform {
     };
     class Result {
     private:
-        string dataset, hyperparameters;
+        string dataset, hyperparameters, model_version;
         int samples, features, classes;
         float score_train, score_test, score_train_std, score_test_std, train_time, train_time_std, test_time, test_time_std;
         float nodes, leaves, depth;
@@ -46,6 +46,7 @@ namespace platform {
         Result& setNodes(float nodes) { this->nodes = nodes; return *this; }
         Result& setLeaves(float leaves) { this->leaves = leaves; return *this; }
         Result& setDepth(float depth) { this->depth = depth; return *this; }
+        Result& setModelVersion(string model_version) { this->model_version = model_version; return *this; }
         const float get_score_train() const { return score_train; }
         float get_score_test() { return score_test; }
         const string& getDataset() const { return dataset; }
@@ -64,6 +65,7 @@ namespace platform {
         const float getNodes() const { return nodes; }
         const float getLeaves() const { return leaves; }
         const float getDepth() const { return depth; }
+        const string& getModelVersion() const { return model_version; }
     };
     class Experiment {
     private:

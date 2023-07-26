@@ -7,7 +7,7 @@
 namespace bayesnet {
     class Network {
     private:
-        map<string, std::unique_ptr<Node>> nodes;
+        map<string, unique_ptr<Node>> nodes;
         map<string, vector<int>> dataset;
         bool fitted;
         float maxThreads;
