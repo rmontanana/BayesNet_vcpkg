@@ -72,7 +72,7 @@ void StratifiedKFold::build()
         }
         while (remainder_samples_to_take > 0) {
             int fold = (rand() % static_cast<int>(k));
-            if (stratified_indices[fold].size() == fold_size) {
+            if (stratified_indices[fold].size() == fold_size + 1) {
                 continue;
             }
             auto it = next(class_indices[label].begin(), 1);

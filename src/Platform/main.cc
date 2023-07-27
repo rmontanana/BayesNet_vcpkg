@@ -81,6 +81,10 @@ int main(int argc, char** argv)
     vector<string> filesToProcess;
     auto datasets = platform::Datasets(path, true, platform::ARFF);
     if (file_name != "") {
+        if (!datasets.isDataset(file_name)) {
+            cerr << "Dataset " << file_name << " not found" << endl;
+            exit(1);
+        }
         filesToProcess.push_back(file_name);
     } else {
         filesToProcess = platform::Datasets(path, true, platform::ARFF).getNames();

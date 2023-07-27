@@ -103,7 +103,7 @@ namespace bayesnet {
 
         // Make a complete graph
         for (int i = 0; i < num_features - 1; ++i) {
-            for (int j = i; j < num_features; ++j) {
+            for (int j = i + 1; j < num_features; ++j) {
                 g.addEdge(i, j, weights[i][j].item<float>());
             }
         }

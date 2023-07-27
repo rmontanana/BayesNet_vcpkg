@@ -58,6 +58,7 @@ namespace platform {
         pair<vector<vector<float>>&, vector<int>&> getVectors(string name);
         pair<vector<vector<int>>&, vector<int>&> getVectorsDiscretized(string name);
         pair<torch::Tensor&, torch::Tensor&> getTensors(string name);
+        bool isDataset(string name);
     };
 };
 

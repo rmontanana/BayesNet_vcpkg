@@ -89,6 +89,10 @@ namespace platform {
         }
         return datasets[name]->getTensors();
     }
+    bool Datasets::isDataset(string name)
+    {
+        return datasets.find(name) != datasets.end();
+    }
     Dataset::Dataset(Dataset& dataset)
     {
         path = dataset.path;

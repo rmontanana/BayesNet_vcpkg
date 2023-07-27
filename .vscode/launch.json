@@ -26,12 +26,13 @@
                 "-m",
                 "TAN",
                 "-p",
-                "datasets",
+                "/Users/rmontanana/Code/discretizbench/datasets",
                 "--discretize",
-                "-f",
-                "5",
+                "--stratified",
                 "--title",
-                "Debug test"
+                "Debug test",
+                "-d",
+                "ionosphere"
             ],
             "cwd": "${workspaceFolder}/build/src/Platform",
         },
