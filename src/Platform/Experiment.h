@@ -15,18 +15,23 @@ namespace platform {
     using json = nlohmann::json;
     class Timer {
     private:
-        chrono::time_point<chrono::steady_clock> begin;
+        chrono::high_resolution_clock::time_point begin;
     public:
         Timer() = default;
         ~Timer() = default;
         void start() { begin = chrono::high_resolution_clock::now(); }
-        float getDuration() { return chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - begin).count() / 1000; }
+        double getDuration()
+        {
+            chrono::high_resolution_clock::time_point end = chrono::high_resolution_clock::now();
+            chrono::duration<double> time_span = chrono::duration_cast<chrono::duration<double>>(end - begin);
+            return time_span.count();
+        }
     };
     class Result {
     private:
         string dataset, hyperparameters, model_version;
         int samples, features, classes;
-        float score_train, score_test, score_train_std, score_test_std, train_time, train_time_std, test_time, test_time_std;
+        double score_train, score_test, score_train_std, score_test_std, train_time, train_time_std, test_time, test_time_std;
         float nodes, leaves, depth;
     public:
         Result() = default;
@@ -35,14 +40,14 @@ namespace platform {
         Result& setSamples(int samples) { this->samples = samples; return *this; }
         Result& setFeatures(int features) { this->features = features; return *this; }
         Result& setClasses(int classes) { this->classes = classes; return *this; }
-        Result& setScoreTrain(float score) { this->score_train = score; return *this; }
-        Result& setScoreTest(float score) { this->score_test = score; return *this; }
-        Result& setScoreTrainStd(float score_std) { this->score_train_std = score_std; return *this; }
-        Result& setScoreTestStd(float score_std) { this->score_test_std = score_std; return *this; }
-        Result& setTrainTime(float train_time) { this->train_time = train_time; return *this; }
-        Result& setTrainTimeStd(float train_time_std) { this->train_time_std = train_time_std; return *this; }
-        Result& setTestTime(float test_time) { this->test_time = test_time; return *this; }
-        Result& setTestTimeStd(float test_time_std) { this->test_time_std = test_time_std; return *this; }
+        Result& setScoreTrain(double score) { this->score_train = score; return *this; }
+        Result& setScoreTest(double score) { this->score_test = score; return *this; }
+        Result& setScoreTrainStd(double score_std) { this->score_train_std = score_std; return *this; }
+        Result& setScoreTestStd(double score_std) { this->score_test_std = score_std; return *this; }
+        Result& setTrainTime(double train_time) { this->train_time = train_time; return *this; }
+        Result& setTrainTimeStd(double train_time_std) { this->train_time_std = train_time_std; return *this; }
+        Result& setTestTime(double test_time) { this->test_time = test_time; return *this; }
+        Result& setTestTimeStd(double test_time_std) { this->test_time_std = test_time_std; return *this; }
         Result& setNodes(float nodes) { this->nodes = nodes; return *this; }
         Result& setLeaves(float leaves) { this->leaves = leaves; return *this; }
         Result& setDepth(float depth) { this->depth = depth; return *this; }
@@ -54,14 +59,14 @@ namespace platform {
         const int getSamples() const { return samples; }
         const int getFeatures() const { return features; }
         const int getClasses() const { return classes; }
-        const float getScoreTrain() const { return score_train; }
-        const float getScoreTest() const { return score_test; }
-        const float getScoreTrainStd() const { return score_train_std; }
-        const float getScoreTestStd() const { return score_test_std; }
-        const float getTrainTime() const { return train_time; }
-        const float getTrainTimeStd() const { return train_time_std; }
-        const float getTestTime() const { return test_time; }
-        const float getTestTimeStd() const { return test_time_std; }
+        const double getScoreTrain() const { return score_train; }
+        const double getScoreTest() const { return score_test; }
+        const double getScoreTrainStd() const { return score_train_std; }
+        const double getScoreTestStd() const { return score_test_std; }
+        const double getTrainTime() const { return train_time; }
+        const double getTrainTimeStd() const { return train_time_std; }
+        const double getTestTime() const { return test_time; }
+        const double getTestTimeStd() const { return test_time_std; }
         const float getNodes() const { return nodes; }
         const float getLeaves() const { return leaves; }
         const float getDepth() const { return depth; }

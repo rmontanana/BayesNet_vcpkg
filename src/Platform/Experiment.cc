@@ -75,7 +75,7 @@ namespace platform {
     void Experiment::save(string path)
     {
         json data = build_json();
-        ofstream file(path + get_file_name());
+        ofstream file(path + "/" + get_file_name());
         file << data;
         file.close();
     }

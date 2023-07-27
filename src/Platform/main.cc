@@ -102,20 +102,20 @@ int main(int argc, char** argv)
     cout << "*** Starting experiment: " << title << " ***" << endl;
     timer.start();
     for (auto fileName : filesToProcess) {
-        cout << "- " << fileName << " ";
+        cout << "- " << setw(20) << left << fileName << " " << right << flush;
         auto [X, y] = datasets.getTensors(fileName);
         auto states = datasets.getStates(fileName);
         auto features = datasets.getFeatures(fileName);
         auto samples = datasets.getNSamples(fileName);
         auto className = datasets.getClassName(fileName);
-        cout << " (" << samples << ", " << features.size() << ") " << flush;
+        cout << " (" << setw(5) << samples << "," << setw(3) << features.size() << ") " << flush;
         Fold* fold;
         if (stratified)
             fold = new StratifiedKFold(n_folds, y, seed);
         else
             fold = new KFold(n_folds, samples, seed);
         auto result = platform::cross_validation(fold, model_name, X, y, features, className, states);
-        result.setDataset(file_name);
+        result.setDataset(fileName);
         experiment.setModelVersion(result.getModelVersion());
         experiment.addResult(result);
         delete fold;

@@ -15,7 +15,6 @@ KFold::KFold(int k, int n, int seed) : Fold(k, n, seed)
 }
 pair<vector<int>, vector<int>> KFold::getFold(int nFold)
 {
-
     if (nFold >= k || nFold < 0) {
         throw out_of_range("nFold (" + to_string(nFold) + ") must be less than k (" + to_string(k) + ")");
     }
