@@ -50,9 +50,10 @@ namespace platform {
         void load(); // Loads the list of datasets
     public:
         Datasets(string path, bool discretize = false, fileType_t fileType = ARFF) : path(path), discretize(discretize), fileType(fileType) { load(); };
-        Dataset& getDataset(string name);
         vector<string> getNames();
         vector<string> getFeatures(string name);
+        int getNSamples(string name);
+        string getClassName(string name);
         map<string, vector<int>> getStates(string name);
         pair<vector<vector<float>>&, vector<int>&> getVectors(string name);
         pair<vector<vector<int>>&, vector<int>&> getVectorsDiscretized(string name);

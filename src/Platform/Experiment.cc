@@ -79,17 +79,16 @@ namespace platform {
         file << data;
         file.close();
     }
-    Result cross_validation(Fold* fold, string model_name, torch::Tensor& X, torch::Tensor& y, vector<string> features, string className, map<string, vector<int>> states)
+    Result cross_validation(Fold* fold, string model_name, torch::Tensor& Xt, torch::Tensor& y, vector<string> features, string className, map<string, vector<int>> states)
     {
         auto classifiers = map<string, bayesnet::BaseClassifier*>({
            { "AODE", new bayesnet::AODE() }, { "KDB", new bayesnet::KDB(2) },
            { "SPODE",  new bayesnet::SPODE(2) }, { "TAN",  new bayesnet::TAN() }
             }
         );
-        auto Xt = torch::transpose(X, 0, 1);
         auto result = Result();
         auto [values, counts] = at::_unique(y);
-        result.setSamples(X.size(0)).setFeatures(X.size(1)).setClasses(values.size(0));
+        result.setSamples(Xt.size(1)).setFeatures(Xt.size(0)).setClasses(values.size(0));
         auto k = fold->getNumberOfFolds();
         auto accuracy_test = torch::zeros({ k }, torch::kFloat64);
         auto accuracy_train = torch::zeros({ k }, torch::kFloat64);
@@ -99,6 +98,7 @@ namespace platform {
         auto edges = torch::zeros({ k }, torch::kFloat64);
         auto num_states = torch::zeros({ k }, torch::kFloat64);
         Timer train_timer, test_timer;
+        cout << "doing Fold: " << flush;
         for (int i = 0; i < k; i++) {
             bayesnet::BaseClassifier* model = classifiers[model_name];
             result.setModelVersion(model->getVersion());
@@ -110,15 +110,11 @@ namespace platform {
             auto y_train = y.index({ train_t });
             auto X_test = Xt.index({ "...", test_t });
             auto y_test = y.index({ test_t });
+            cout << i + 1 << ", " << flush;
             model->fit(X_train, y_train, features, className, states);
             nodes[i] = model->getNumberOfNodes();
             edges[i] = model->getNumberOfEdges();
             num_states[i] = model->getNumberOfStates();
-            cout << "Training Fold " << i + 1 << endl;
-            cout << "X_train: " << X_train.sizes() << endl;
-            cout << "y_train: " << y_train.sizes() << endl;
-            cout << "X_test: " << X_test.sizes() << endl;
-            cout << "y_test: " << y_test.sizes() << endl;
             train_time[i] = train_timer.getDuration();
             auto accuracy_train_value = model->score(X_train, y_train);
             test_timer.start();
@@ -127,6 +123,7 @@ namespace platform {
             accuracy_train[i] = accuracy_train_value;
             accuracy_test[i] = accuracy_test_value;
         }
+        cout << "end." << endl;
         result.setScoreTest(torch::mean(accuracy_test).item<double>()).setScoreTrain(torch::mean(accuracy_train).item<double>());
         result.setScoreTestStd(torch::std(accuracy_test).item<double>()).setScoreTrainStd(torch::std(accuracy_train).item<double>());
         result.setTrainTime(torch::mean(train_time).item<double>()).setTestTime(torch::mean(test_time).item<double>());

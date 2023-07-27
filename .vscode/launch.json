@@ -23,15 +23,15 @@
             "name": "experiment",
             "program": "${workspaceFolder}/build/src/Platform/main",
             "args": [
-                "-d",
-                "iris",
                 "-m",
                 "TAN",
                 "-p",
-                "../../../data/",
+                "datasets",
                 "--discretize",
                 "-f",
-                "2"
+                "5",
+                "--title",
+                "Debug test"
             ],
             "cwd": "${workspaceFolder}/build/src/Platform",
         },

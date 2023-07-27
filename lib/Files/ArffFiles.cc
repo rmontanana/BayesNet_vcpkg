@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <map>
+#include <iostream>
 
 using namespace std;
 
@@ -118,6 +119,7 @@ void ArffFiles::generateDataset(int labelIndex)
 {
     X = vector<vector<float>>(attributes.size(), vector<float>(lines.size()));
     auto yy = vector<string>(lines.size(), "");
+    auto removeLines = vector<int>(); // Lines with missing values
     for (size_t i = 0; i < lines.size(); i++) {
         stringstream ss(lines[i]);
         string value;
@@ -127,8 +129,18 @@ void ArffFiles::generateDataset(int labelIndex)
             if (pos++ == labelIndex) {
                 yy[i] = value;
             } else {
-                X[xIndex++][i] = stof(value);
+                if (value == "?") {
+                    X[xIndex++][i] = -1;
+                    removeLines.push_back(i);
+                } else
+                    X[xIndex++][i] = stof(value);
             }
+        }
+    }
+    for (auto i : removeLines) {
+        yy.erase(yy.begin() + i);
+        for (auto& x : X) {
+            x.erase(x.begin() + i);
         }
     }
     y = factorize(yy);
