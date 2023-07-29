@@ -1,4 +1,5 @@
 #include "Experiment.h"
+#include "Datasets.h"
 
 namespace platform {
     using json = nlohmann::json;
@@ -88,16 +89,25 @@ namespace platform {
         json data = build_json();
         cout << data.dump(4) << endl;
     }
-    Result Experiment::cross_validation(string model_name, torch::Tensor& Xt, torch::Tensor& y, vector<string> features, string className, map<string, vector<int>> states)
+    Result Experiment::cross_validation(const string& path, const string& fileName)
     {
         auto classifiers = map<string, bayesnet::BaseClassifier*>({
            { "AODE", new bayesnet::AODE() }, { "KDB", new bayesnet::KDB(2) },
            { "SPODE",  new bayesnet::SPODE(2) }, { "TAN",  new bayesnet::TAN() }
             }
         );
+        auto datasets = platform::Datasets(path, true, platform::ARFF);
+        // Get dataset
+        auto [X, y] = datasets.getTensors(fileName);
+        auto states = datasets.getStates(fileName);
+        auto features = datasets.getFeatures(fileName);
+        auto samples = datasets.getNSamples(fileName);
+        auto className = datasets.getClassName(fileName);
+        cout << " (" << setw(5) << samples << "," << setw(3) << features.size() << ") " << flush;
+        // Prepare Result
         auto result = Result();
-        auto [values, counts] = at::_unique(y);
-        result.setSamples(Xt.size(1)).setFeatures(Xt.size(0)).setClasses(values.size(0));
+        auto [values, counts] = at::_unique(y);;
+        result.setSamples(X.size(1)).setFeatures(X.size(0)).setClasses(values.size(0));
         int nResults = nfolds * static_cast<int>(randomSeeds.size());
         auto accuracy_test = torch::zeros({ nResults }, torch::kFloat64);
         auto accuracy_train = torch::zeros({ nResults }, torch::kFloat64);
@@ -123,9 +133,9 @@ namespace platform {
                 auto [train, test] = fold->getFold(nfold);
                 auto train_t = torch::tensor(train);
                 auto test_t = torch::tensor(test);
-                auto X_train = Xt.index({ "...", train_t });
+                auto X_train = X.index({ "...", train_t });
                 auto y_train = y.index({ train_t });
-                auto X_test = Xt.index({ "...", test_t });
+                auto X_test = X.index({ "...", test_t });
                 auto y_test = y.index({ test_t });
                 cout << nfold + 1 << ", " << flush;
                 clf->fit(X_train, y_train, features, className, states);

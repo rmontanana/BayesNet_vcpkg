@@ -120,13 +120,7 @@ int main(int argc, char** argv)
     timer.start();
     for (auto fileName : filesToProcess) {
         cout << "- " << setw(20) << left << fileName << " " << right << flush;
-        auto [X, y] = datasets.getTensors(fileName);
-        auto states = datasets.getStates(fileName);
-        auto features = datasets.getFeatures(fileName);
-        auto samples = datasets.getNSamples(fileName);
-        auto className = datasets.getClassName(fileName);
-        cout << " (" << setw(5) << samples << "," << setw(3) << features.size() << ") " << flush;
-        auto result = experiment.cross_validation(model_name, X, y, features, className, states);
+        auto result = experiment.cross_validation(path, fileName);
         result.setDataset(fileName);
         experiment.addResult(result);
         cout << endl;
