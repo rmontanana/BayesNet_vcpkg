@@ -2,21 +2,11 @@
 #include "platformUtils.h"
 #include "ArffFiles.h"
 namespace platform {
-    vector<string> split(string text, char delimiter)
-    {
-        vector<string> result;
-        stringstream ss(text);
-        string token;
-        while (getline(ss, token, delimiter)) {
-            result.push_back(token);
-        }
-        return result;
-    }
     void Datasets::load()
     {
-        string line;
         ifstream catalog(path + "/all.txt");
         if (catalog.is_open()) {
+            string line;
             while (getline(catalog, line)) {
                 vector<string> tokens = split(line, ',');
                 string name = tokens[0];
@@ -31,9 +21,7 @@ namespace platform {
     vector<string> Datasets::getNames()
     {
         vector<string> result;
-        for (auto& d : datasets) {
-            result.push_back(d.first);
-        }
+        transform(datasets.begin(), datasets.end(), back_inserter(result), [](const auto& d) { return d.first; });
         return result;
     }
     vector<string> Datasets::getFeatures(string name)
@@ -89,27 +77,12 @@ namespace platform {
         }
         return datasets[name]->getTensors();
     }
-    bool Datasets::isDataset(string name)
+    bool Datasets::isDataset(const string& name)
     {
         return datasets.find(name) != datasets.end();
     }
-    Dataset::Dataset(Dataset& dataset)
+    Dataset::Dataset(const Dataset& dataset) : path(dataset.path), name(dataset.name), className(dataset.className), n_samples(dataset.n_samples), n_features(dataset.n_features), features(dataset.features), states(dataset.states), loaded(dataset.loaded), discretize(dataset.discretize), X(dataset.X), y(dataset.y), Xv(dataset.Xv), Xd(dataset.Xd), yv(dataset.yv), fileType(dataset.fileType)
     {
-        path = dataset.path;
-        name = dataset.name;
-        className = dataset.className;
-        n_samples = dataset.n_samples;
-        n_features = dataset.n_features;
-        features = dataset.features;
-        states = dataset.states;
-        loaded = dataset.loaded;
-        discretize = dataset.discretize;
-        X = dataset.X;
-        y = dataset.y;
-        Xv = dataset.Xv;
-        Xd = dataset.Xd;
-        yv = dataset.yv;
-        fileType = dataset.fileType;
     }
     string Dataset::getName()
     {
@@ -178,9 +151,9 @@ namespace platform {
     }
     void Dataset::load_csv()
     {
-        string line;
         ifstream file(path + "/" + name + ".csv");
         if (file.is_open()) {
+            string line;
             getline(file, line);
             vector<string> tokens = split(line, ',');
             features = vector<string>(tokens.begin(), tokens.end() - 1);
@@ -218,9 +191,8 @@ namespace platform {
         yv = arff.getY();
         // Get className & Features
         className = arff.getClassName();
-        for (auto feature : arff.getAttributes()) {
-            features.push_back(feature.first);
-        }
+        auto attributes = arff.getAttributes();
+        transform(attributes.begin(), attributes.end(), back_inserter(features), [](const auto& attribute) { return attribute.first; });
     }
     void Dataset::load()
     {

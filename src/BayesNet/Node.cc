@@ -88,18 +88,15 @@ namespace bayesnet {
     {
         // Get dimensions of the CPT
         dimensions.push_back(numStates);
-        for (auto father : getParents()) {
-            dimensions.push_back(father->getNumStates());
-        }
+        transform(parents.begin(), parents.end(), back_inserter(dimensions), [](const auto& parent) { return parent->getNumStates(); });
+
         // Create a tensor of zeros with the dimensions of the CPT
         cpTable = torch::zeros(dimensions, torch::kFloat) + laplaceSmoothing;
         // Fill table with counts
         for (int n_sample = 0; n_sample < dataset[name].size(); ++n_sample) {
             torch::List<c10::optional<torch::Tensor>> coordinates;
             coordinates.push_back(torch::tensor(dataset[name][n_sample]));
-            for (auto father : getParents()) {
-                coordinates.push_back(torch::tensor(dataset[father->getName()][n_sample]));
-            }
+            transform(parents.begin(), parents.end(), back_inserter(coordinates), [&dataset, &n_sample](const auto& parent) { return torch::tensor(dataset[parent->getName()][n_sample]); });
             // Increment the count of the corresponding coordinate
             cpTable.index_put_({ coordinates }, cpTable.index({ coordinates }) + 1);
         }
@@ -111,19 +108,15 @@ namespace bayesnet {
         torch::List<c10::optional<torch::Tensor>> coordinates;
         // following predetermined order of indices in the cpTable (see Node.h)
         coordinates.push_back(torch::tensor(evidence[name]));
-        for (auto parent : getParents()) {
-            coordinates.push_back(torch::tensor(evidence[parent->getName()]));
-        }
+        transform(parents.begin(), parents.end(), back_inserter(coordinates), [&evidence](const auto& parent) { return torch::tensor(evidence[parent->getName()]); });
         return cpTable.index({ coordinates }).item<float>();
     }
-    vector<string> Node::graph(string className)
+    vector<string> Node::graph(const string& className)
     {
         auto output = vector<string>();
         auto suffix = name == className ? ", fontcolor=red, fillcolor=lightblue, style=filled " : "";
         output.push_back(name + " [shape=circle" + suffix + "] \n");
-        for (auto& child : children) {
-            output.push_back(name + " -> " + child->getName());
-        }
+        transform(children.begin(), children.end(), back_inserter(output), [this](const auto& child) { return name + " -> " + child->getName(); });
         return output;
     }
 }

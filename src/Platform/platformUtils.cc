@@ -2,6 +2,17 @@
 
 using namespace torch;
 
+vector<string> split(const string& text, char delimiter)
+{
+    vector<string> result;
+    stringstream ss(text);
+    string token;
+    while (getline(ss, token, delimiter)) {
+        result.push_back(token);
+    }
+    return result;
+}
+
 pair<vector<mdlp::labels_t>, map<string, int>> discretize(vector<mdlp::samples_t>& X, mdlp::labels_t& y, vector<string> features)
 {
     vector<mdlp::labels_t> Xd;
@@ -28,7 +39,7 @@ vector<mdlp::labels_t> discretizeDataset(vector<mdlp::samples_t>& X, mdlp::label
     return Xd;
 }
 
-bool file_exists(const std::string& name)
+bool file_exists(const string& name)
 {
     if (FILE* file = fopen(name.c_str(), "r")) {
         fclose(file);
@@ -38,7 +49,7 @@ bool file_exists(const std::string& name)
     }
 }
 
-tuple<Tensor, Tensor, vector<string>, string, map<string, vector<int>>> loadDataset(string path, string name, bool class_last, bool discretize_dataset)
+tuple<Tensor, Tensor, vector<string>, string, map<string, vector<int>>> loadDataset(const string& path, const string& name, bool class_last, bool discretize_dataset)
 {
     auto handler = ArffFiles();
     handler.load(path + static_cast<string>(name) + ".arff", class_last);
@@ -48,9 +59,8 @@ tuple<Tensor, Tensor, vector<string>, string, map<string, vector<int>>> loadData
     // Get className & Features
     auto className = handler.getClassName();
     vector<string> features;
-    for (auto feature : handler.getAttributes()) {
-        features.push_back(feature.first);
-    }
+    auto attributes = handler.getAttributes();
+    transform(attributes.begin(), attributes.end(), back_inserter(features), [](const auto& pair) { return pair.first; });
     Tensor Xd;
     auto states = map<string, vector<int>>();
     if (discretize_dataset) {
@@ -72,7 +82,7 @@ tuple<Tensor, Tensor, vector<string>, string, map<string, vector<int>>> loadData
     return { Xd, torch::tensor(y, torch::kInt32), features, className, states };
 }
 
-tuple<vector<vector<int>>, vector<int>, vector<string>, string, map<string, vector<int>>> loadFile(string name)
+tuple<vector<vector<int>>, vector<int>, vector<string>, string, map<string, vector<int>>> loadFile(const string& name)
 {
     auto handler = ArffFiles();
     handler.load(PATH + static_cast<string>(name) + ".arff");
@@ -82,9 +92,8 @@ tuple<vector<vector<int>>, vector<int>, vector<string>, string, map<string, vect
     // Get className & Features
     auto className = handler.getClassName();
     vector<string> features;
-    for (auto feature : handler.getAttributes()) {
-        features.push_back(feature.first);
-    }
+    auto attributes = handler.getAttributes();
+    transform(attributes.begin(), attributes.end(), back_inserter(features), [](const auto& pair) { return pair.first; });
     // Discretize Dataset
     vector<mdlp::labels_t> Xd;
     map<string, int> maxes;

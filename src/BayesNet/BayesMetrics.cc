@@ -12,8 +12,8 @@ namespace bayesnet {
         : features(features)
         , className(className)
         , classNumStates(classNumStates)
+        , samples(torch::zeros({ static_cast<int>(vsamples[0].size()), static_cast<int>(vsamples.size() + 1) }, torch::kInt32))
     {
-        samples = torch::zeros({ static_cast<int>(vsamples[0].size()), static_cast<int>(vsamples.size() + 1) }, torch::kInt32);
         for (int i = 0; i < vsamples.size(); ++i) {
             samples.index_put_({ "...", i }, torch::tensor(vsamples[i], torch::kInt32));
         }
@@ -123,7 +123,6 @@ namespace bayesnet {
     */
     vector<pair<int, int>> Metrics::maximumSpanningTree(vector<string> features, Tensor& weights, int root)
     {
-        auto result = vector<pair<int, int>>();
         auto mst = MST(features, weights, root);
         return mst.maximumSpanningTree();
     }

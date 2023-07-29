@@ -11,7 +11,7 @@ namespace bayesnet {
         Tensor samples;
         vector<string> features;
         string className;
-        int classNumStates;
+        int classNumStates = 0;
     public:
         Metrics() = default;
         Metrics(Tensor&, vector<string>&, string&, int);

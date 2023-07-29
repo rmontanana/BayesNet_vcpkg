@@ -7,9 +7,8 @@ Fold::Fold(int k, int n, int seed) : k(k), n(n), seed(seed)
     random_seed = default_random_engine(seed == -1 ? rd() : seed);
     srand(seed == -1 ? time(0) : seed);
 }
-KFold::KFold(int k, int n, int seed) : Fold(k, n, seed)
+KFold::KFold(int k, int n, int seed) : Fold(k, n, seed), indices(vector<int>(n))
 {
-    indices = vector<int>(n);
     iota(begin(indices), end(indices), 0); // fill with 0, 1, ..., n - 1
     shuffle(indices.begin(), indices.end(), random_seed);
 }

@@ -16,7 +16,7 @@ namespace bayesnet {
         vector<int64_t> dimensions; // dimensions of the cpTable
     public:
         vector<pair<string, string>> combinations(const vector<string>&);
-        Node(const std::string&, int);
+        Node(const string&, int);
         void clear();
         void addParent(Node*);
         void addChild(Node*);
@@ -30,7 +30,7 @@ namespace bayesnet {
         int getNumStates() const;
         void setNumStates(int);
         unsigned minFill();
-        vector<string> graph(string clasName); // Returns a vector of strings representing the graph in graphviz format
+        vector<string> graph(const string& clasName); // Returns a vector of strings representing the graph in graphviz format
         float getFactorValue(map<string, int>&);
     };
 }

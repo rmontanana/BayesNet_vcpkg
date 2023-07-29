@@ -148,10 +148,10 @@ namespace bayesnet {
     }
     int Ensemble::getNumberOfStates()
     {
-        int states = 0;
+        int nstates = 0;
         for (auto i = 0; i < n_models; ++i) {
-            states += models[i]->getNumberOfStates();
+            nstates += models[i]->getNumberOfStates();
         }
-        return states;
+        return nstates;
     }
 }

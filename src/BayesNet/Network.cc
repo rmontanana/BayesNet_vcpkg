@@ -8,7 +8,7 @@ namespace bayesnet {
     Network::Network(float maxT, int smoothing) : laplaceSmoothing(smoothing), features(vector<string>()), className(""), classNumStates(0), maxThreads(maxT), fitted(false) {}
     Network::Network(Network& other) : laplaceSmoothing(other.laplaceSmoothing), features(other.features), className(other.className), classNumStates(other.getClassNumStates()), maxThreads(other.getmaxThreads()), fitted(other.fitted)
     {
-        for (auto& pair : other.nodes) {
+        for (const auto& pair : other.nodes) {
             nodes[pair.first] = std::make_unique<Node>(*pair.second);
         }
     }
@@ -20,7 +20,7 @@ namespace bayesnet {
     {
         return samples;
     }
-    void Network::addNode(string name, int numStates)
+    void Network::addNode(const string& name, int numStates)
     {
         if (find(features.begin(), features.end(), name) == features.end()) {
             features.push_back(name);
@@ -69,7 +69,7 @@ namespace bayesnet {
         recStack.erase(nodeId); // remove node from recursion stack before function ends
         return false;
     }
-    void Network::addEdge(const string parent, const string child)
+    void Network::addEdge(const string& parent, const string& child)
     {
         if (nodes.find(parent) == nodes.end()) {
             throw invalid_argument("Parent node " + parent + " does not exist");
@@ -105,8 +105,8 @@ namespace bayesnet {
         for (int i = 0; i < featureNames.size(); ++i) {
             auto column = torch::flatten(X.index({ "...", i }));
             auto k = vector<int>();
-            for (auto i = 0; i < X.size(0); ++i) {
-                k.push_back(column[i].item<int>());
+            for (auto z = 0; z < X.size(0); ++z) {
+                k.push_back(column[z].item<int>());
             }
             dataset[featureNames[i]] = k;
         }
@@ -145,9 +145,6 @@ namespace bayesnet {
         while (nextNodeIndex < nodes.size()) {
             unique_lock<mutex> lock(mtx);
             cv.wait(lock, [&activeThreads, &maxThreadsRunning]() { return activeThreads < maxThreadsRunning; });
-            if (nextNodeIndex >= nodes.size()) {
-                break;  // No more work remaining
-            }
             threads.emplace_back([this, &nextNodeIndex, &mtx, &cv, &activeThreads]() {
                 while (true) {
                     unique_lock<mutex> lock(mtx);
@@ -262,9 +259,7 @@ namespace bayesnet {
 
         // Normalize result
         double sum = accumulate(result.begin(), result.end(), 0.0);
-        for (double& value : result) {
-            value /= sum;
-        }
+        transform(result.begin(), result.end(), result.begin(), [sum](double& value) { return value / sum; });
         return result;
     }
     vector<string> Network::show()
@@ -280,7 +275,7 @@ namespace bayesnet {
         }
         return result;
     }
-    vector<string> Network::graph(string title)
+    vector<string> Network::graph(const string& title)
     {
         auto output = vector<string>();
         auto prefix = "digraph BayesNet {\nlabel=<BayesNet ";

@@ -13,7 +13,8 @@ namespace bayesnet {
     protected:
         void train() override;
     public:
-        KDB(int k, float theta = 0.03);
+        explicit KDB(int k, float theta = 0.03);
+        virtual ~KDB() {};
         vector<string> graph(string name = "KDB") override;
     };
 }

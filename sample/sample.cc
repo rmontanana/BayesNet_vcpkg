@@ -4,16 +4,12 @@
 #include <thread>
 #include <map>
 #include <argparse/argparse.hpp>
-#include "BaseClassifier.h"
 #include "ArffFiles.h"
-#include "Network.h"
 #include "BayesMetrics.h"
 #include "CPPFImdlp.h"
-#include "KDB.h"
-#include "SPODE.h"
-#include "AODE.h"
-#include "TAN.h"
 #include "Folding.h"
+#include "Models.h"
+#include "modelRegister.h"
 
 
 using namespace std;
@@ -73,9 +69,8 @@ int main(int argc, char** argv)
             {"mfeat-factors",      true},
     };
     auto valid_datasets = vector<string>();
-    for (auto dataset : datasets) {
-        valid_datasets.push_back(dataset.first);
-    }
+    transform(datasets.begin(), datasets.end(), back_inserter(valid_datasets),
+        [](const pair<string, bool>& pair) { return pair.first; });
     argparse::ArgumentParser program("BayesNetSample");
     program.add_argument("-d", "--dataset")
         .help("Dataset file name")
@@ -91,13 +86,13 @@ int main(int argc, char** argv)
         .default_value(string{ PATH }
     );
     program.add_argument("-m", "--model")
-        .help("Model to use {AODE, KDB, SPODE, TAN}")
+        .help("Model to use " + platform::Models::instance()->toString())
         .action([](const std::string& value) {
-        static const vector<string> choices = { "AODE", "KDB", "SPODE", "TAN" };
+        static const vector<string> choices = platform::Models::instance()->getNames();
         if (find(choices.begin(), choices.end(), value) != choices.end()) {
             return value;
         }
-        throw runtime_error("Model must be one of {AODE, KDB, SPODE, TAN}");
+        throw runtime_error("Model must be one of " + platform::Models::instance()->toString());
             }
     );
     program.add_argument("--discretize").help("Discretize input dataset").default_value(false).implicit_value(true);
@@ -153,9 +148,9 @@ int main(int argc, char** argv)
     // Get className & Features
     auto className = handler.getClassName();
     vector<string> features;
-    for (auto feature : handler.getAttributes()) {
-        features.push_back(feature.first);
-    }
+    auto attributes = handler.getAttributes();
+    transform(attributes.begin(), attributes.end(), back_inserter(features),
+        [](const pair<string, string>& item) { return item.first; });
     // Discretize Dataset
     auto [Xd, maxes] = discretize(X, y, features);
     maxes[className] = *max_element(y.begin(), y.end()) + 1;
@@ -164,12 +159,7 @@ int main(int argc, char** argv)
         states[feature] = vector<int>(maxes[feature]);
     }
     states[className] = vector<int>(maxes[className]);
-    auto classifiers = map<string, bayesnet::BaseClassifier*>({
-        { "AODE", new bayesnet::AODE() }, { "KDB", new bayesnet::KDB(2) },
-        { "SPODE",  new bayesnet::SPODE(2) }, { "TAN",  new bayesnet::TAN() }
-        }
-    );
-    bayesnet::BaseClassifier* clf = classifiers[model_name];
+    auto clf = platform::Models::instance()->create(model_name);
     clf->fit(Xd, y, features, className, states);
     auto score = clf->score(Xd, y);
     auto lines = clf->show();

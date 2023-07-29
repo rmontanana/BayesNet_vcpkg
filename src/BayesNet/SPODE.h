@@ -1,6 +1,7 @@
 #ifndef SPODE_H
 #define SPODE_H
 #include "Classifier.h"
+
 namespace bayesnet {
     class SPODE : public Classifier {
     private:
@@ -8,7 +9,8 @@ namespace bayesnet {
     protected:
         void train() override;
     public:
-        SPODE(int root);
+        explicit SPODE(int root);
+        virtual ~SPODE() {};
         vector<string> graph(string name = "SPODE") override;
     };
 }

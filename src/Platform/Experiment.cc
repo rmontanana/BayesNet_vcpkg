@@ -1,4 +1,6 @@
 #include "Experiment.h"
+#include "Datasets.h"
+#include "Models.h"
 
 namespace platform {
     using json = nlohmann::json;
@@ -43,10 +45,10 @@ namespace platform {
         result["discretized"] = discretized;
         result["stratified"] = stratified;
         result["folds"] = nfolds;
-        result["seeds"] = random_seeds;
+        result["seeds"] = randomSeeds;
         result["duration"] = duration;
         result["results"] = json::array();
-        for (auto& r : results) {
+        for (const auto& r : results) {
             json j;
             j["dataset"] = r.getDataset();
             j["hyperparameters"] = r.getHyperparameters();
@@ -65,6 +67,10 @@ namespace platform {
             j["test_time_std"] = r.getTestTimeStd();
             j["time"] = r.getTestTime() + r.getTrainTime();
             j["time_std"] = r.getTestTimeStd() + r.getTrainTimeStd();
+            j["scores_train"] = r.getScoresTrain();
+            j["scores_test"] = r.getScoresTest();
+            j["times_train"] = r.getTimesTrain();
+            j["times_test"] = r.getTimesTest();
             j["nodes"] = r.getNodes();
             j["leaves"] = r.getLeaves();
             j["depth"] = r.getDepth();
@@ -72,62 +78,99 @@ namespace platform {
         }
         return result;
     }
-    void Experiment::save(string path)
+    void Experiment::save(const string& path)
     {
         json data = build_json();
         ofstream file(path + "/" + get_file_name());
         file << data;
         file.close();
     }
-    Result cross_validation(Fold* fold, string model_name, torch::Tensor& Xt, torch::Tensor& y, vector<string> features, string className, map<string, vector<int>> states)
+
+    void Experiment::show()
     {
-        auto classifiers = map<string, bayesnet::BaseClassifier*>({
-           { "AODE", new bayesnet::AODE() }, { "KDB", new bayesnet::KDB(2) },
-           { "SPODE",  new bayesnet::SPODE(2) }, { "TAN",  new bayesnet::TAN() }
-            }
-        );
-        auto result = Result();
-        auto [values, counts] = at::_unique(y);
-        result.setSamples(Xt.size(1)).setFeatures(Xt.size(0)).setClasses(values.size(0));
-        auto k = fold->getNumberOfFolds();
-        auto accuracy_test = torch::zeros({ k }, torch::kFloat64);
-        auto accuracy_train = torch::zeros({ k }, torch::kFloat64);
-        auto train_time = torch::zeros({ k }, torch::kFloat64);
-        auto test_time = torch::zeros({ k }, torch::kFloat64);
-        auto nodes = torch::zeros({ k }, torch::kFloat64);
-        auto edges = torch::zeros({ k }, torch::kFloat64);
-        auto num_states = torch::zeros({ k }, torch::kFloat64);
-        Timer train_timer, test_timer;
-        cout << "doing Fold: " << flush;
-        for (int i = 0; i < k; i++) {
-            bayesnet::BaseClassifier* model = classifiers[model_name];
-            result.setModelVersion(model->getVersion());
-            train_timer.start();
-            auto [train, test] = fold->getFold(i);
-            auto train_t = torch::tensor(train);
-            auto test_t = torch::tensor(test);
-            auto X_train = Xt.index({ "...", train_t });
-            auto y_train = y.index({ train_t });
-            auto X_test = Xt.index({ "...", test_t });
-            auto y_test = y.index({ test_t });
-            cout << i + 1 << ", " << flush;
-            model->fit(X_train, y_train, features, className, states);
-            nodes[i] = model->getNumberOfNodes();
-            edges[i] = model->getNumberOfEdges();
-            num_states[i] = model->getNumberOfStates();
-            train_time[i] = train_timer.getDuration();
-            auto accuracy_train_value = model->score(X_train, y_train);
-            test_timer.start();
-            auto accuracy_test_value = model->score(X_test, y_test);
-            test_time[i] = test_timer.getDuration();
-            accuracy_train[i] = accuracy_train_value;
-            accuracy_test[i] = accuracy_test_value;
+        json data = build_json();
+        cout << data.dump(4) << endl;
+    }
+
+    void Experiment::go(vector<string> filesToProcess, const string& path)
+    {
+        cout << "*** Starting experiment: " << title << " ***" << endl;
+        for (auto fileName : filesToProcess) {
+            cout << "- " << setw(20) << left << fileName << " " << right << flush;
+            cross_validation(path, fileName);
+            cout << endl;
         }
-        cout << "end." << endl;
+    }
+
+    void Experiment::cross_validation(const string& path, const string& fileName)
+    {
+        auto datasets = platform::Datasets(path, true, platform::ARFF);
+        // Get dataset
+        auto [X, y] = datasets.getTensors(fileName);
+        auto states = datasets.getStates(fileName);
+        auto features = datasets.getFeatures(fileName);
+        auto samples = datasets.getNSamples(fileName);
+        auto className = datasets.getClassName(fileName);
+        cout << " (" << setw(5) << samples << "," << setw(3) << features.size() << ") " << flush;
+        // Prepare Result
+        auto result = Result();
+        auto [values, counts] = at::_unique(y);;
+        result.setSamples(X.size(1)).setFeatures(X.size(0)).setClasses(values.size(0));
+        int nResults = nfolds * static_cast<int>(randomSeeds.size());
+        auto accuracy_test = torch::zeros({ nResults }, torch::kFloat64);
+        auto accuracy_train = torch::zeros({ nResults }, torch::kFloat64);
+        auto train_time = torch::zeros({ nResults }, torch::kFloat64);
+        auto test_time = torch::zeros({ nResults }, torch::kFloat64);
+        auto nodes = torch::zeros({ nResults }, torch::kFloat64);
+        auto edges = torch::zeros({ nResults }, torch::kFloat64);
+        auto num_states = torch::zeros({ nResults }, torch::kFloat64);
+        Timer train_timer, test_timer;
+        int item = 0;
+        for (auto seed : randomSeeds) {
+            cout << "(" << seed << ") doing Fold: " << flush;
+            Fold* fold;
+            if (stratified)
+                fold = new StratifiedKFold(nfolds, y, seed);
+            else
+                fold = new KFold(nfolds, y.size(0), seed);
+            for (int nfold = 0; nfold < nfolds; nfold++) {
+                auto clf = Models::instance()->create(model);
+                setModelVersion(clf->getVersion());
+                train_timer.start();
+                auto [train, test] = fold->getFold(nfold);
+                auto train_t = torch::tensor(train);
+                auto test_t = torch::tensor(test);
+                auto X_train = X.index({ "...", train_t });
+                auto y_train = y.index({ train_t });
+                auto X_test = X.index({ "...", test_t });
+                auto y_test = y.index({ test_t });
+                cout << nfold + 1 << ", " << flush;
+                clf->fit(X_train, y_train, features, className, states);
+                nodes[item] = clf->getNumberOfNodes();
+                edges[item] = clf->getNumberOfEdges();
+                num_states[item] = clf->getNumberOfStates();
+                train_time[item] = train_timer.getDuration();
+                auto accuracy_train_value = clf->score(X_train, y_train);
+                test_timer.start();
+                auto accuracy_test_value = clf->score(X_test, y_test);
+                test_time[item] = test_timer.getDuration();
+                accuracy_train[item] = accuracy_train_value;
+                accuracy_test[item] = accuracy_test_value;
+                // Store results and times in vector
+                result.addScoreTrain(accuracy_train_value);
+                result.addScoreTest(accuracy_test_value);
+                result.addTimeTrain(train_time[item].item<double>());
+                result.addTimeTest(test_time[item].item<double>());
+                item++;
+            }
+            cout << "end. " << flush;
+            delete fold;
+        }
         result.setScoreTest(torch::mean(accuracy_test).item<double>()).setScoreTrain(torch::mean(accuracy_train).item<double>());
         result.setScoreTestStd(torch::std(accuracy_test).item<double>()).setScoreTrainStd(torch::std(accuracy_train).item<double>());
         result.setTrainTime(torch::mean(train_time).item<double>()).setTestTime(torch::mean(test_time).item<double>());
         result.setNodes(torch::mean(nodes).item<double>()).setLeaves(torch::mean(edges).item<double>()).setDepth(torch::mean(num_states).item<double>());
-        return result;
+        result.setDataset(fileName);
+        addResult(result);
     }
 }

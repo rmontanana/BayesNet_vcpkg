@@ -3,33 +3,37 @@
 #include "platformUtils.h"
 #include "Experiment.h"
 #include "Datasets.h"
-
+#include "DotEnv.h"
+#include "Models.h"
+#include "modelRegister.h"
 
 using namespace std;
 const string PATH_RESULTS = "results";
+const string PATH_DATASETS = "datasets";
 
 argparse::ArgumentParser manageArguments(int argc, char** argv)
 {
+    auto env = platform::DotEnv();
     argparse::ArgumentParser program("BayesNetSample");
     program.add_argument("-d", "--dataset").default_value("").help("Dataset file name");
     program.add_argument("-p", "--path")
         .help("folder where the data files are located, default")
-        .default_value(string{ PATH }
+        .default_value(string{ PATH_DATASETS }
     );
     program.add_argument("-m", "--model")
-        .help("Model to use {AODE, KDB, SPODE, TAN}")
+        .help("Model to use " + platform::Models::instance()->toString())
         .action([](const std::string& value) {
-        static const vector<string> choices = { "AODE", "KDB", "SPODE", "TAN" };
+        static const vector<string> choices = platform::Models::instance()->getNames();
         if (find(choices.begin(), choices.end(), value) != choices.end()) {
             return value;
         }
-        throw runtime_error("Model must be one of {AODE, KDB, SPODE, TAN}");
+        throw runtime_error("Model must be one of " + platform::Models::instance()->toString());
             }
     );
-    program.add_argument("--title").required().help("Experiment title");
-    program.add_argument("--discretize").help("Discretize input dataset").default_value(false).implicit_value(true);
-    program.add_argument("--stratified").help("If Stratified KFold is to be done").default_value(false).implicit_value(true);
-    program.add_argument("-f", "--folds").help("Number of folds").default_value(5).scan<'i', int>().action([](const string& value) {
+    program.add_argument("--title").default_value("").help("Experiment title");
+    program.add_argument("--discretize").help("Discretize input dataset").default_value((bool)stoi(env.get("discretize"))).implicit_value(true);
+    program.add_argument("--stratified").help("If Stratified KFold is to be done").default_value((bool)stoi(env.get("stratified"))).implicit_value(true);
+    program.add_argument("-f", "--folds").help("Number of folds").default_value(stoi(env.get("n_folds"))).scan<'i', int>().action([](const string& value) {
         try {
             auto k = stoi(value);
             if (k < 2) {
@@ -43,22 +47,22 @@ argparse::ArgumentParser manageArguments(int argc, char** argv)
         catch (...) {
             throw runtime_error("Number of folds must be an integer");
         }});
-    program.add_argument("-s", "--seed").help("Random seed").default_value(-1).scan<'i', int>();
-    bool class_last, discretize_dataset, stratified;
-    int n_folds, seed;
-    string model_name, file_name, path, complete_file_name, title;
+    auto seed_values = env.getSeeds();
+    program.add_argument("-s", "--seeds").nargs(1, 10).help("Random seeds. Set to -1 to have pseudo random").scan<'i', int>().default_value(seed_values);
     try {
         program.parse_args(argc, argv);
-        file_name = program.get<string>("dataset");
-        path = program.get<string>("path");
-        model_name = program.get<string>("model");
-        discretize_dataset = program.get<bool>("discretize");
-        stratified = program.get<bool>("stratified");
-        n_folds = program.get<int>("folds");
-        seed = program.get<int>("seed");
-        complete_file_name = path + file_name + ".arff";
-        class_last = false;//datasets[file_name];
-        title = program.get<string>("title");
+        auto file_name = program.get<string>("dataset");
+        auto path = program.get<string>("path");
+        auto model_name = program.get<string>("model");
+        auto discretize_dataset = program.get<bool>("discretize");
+        auto stratified = program.get<bool>("stratified");
+        auto n_folds = program.get<int>("folds");
+        auto seeds = program.get<vector<int>>("seeds");
+        auto complete_file_name = path + file_name + ".arff";
+        auto title = program.get<string>("title");
+        if (title == "" && file_name == "") {
+            throw runtime_error("title is mandatory if dataset is not provided");
+        }
     }
     catch (const exception& err) {
         cerr << err.what() << endl;
@@ -71,25 +75,30 @@ argparse::ArgumentParser manageArguments(int argc, char** argv)
 int main(int argc, char** argv)
 {
     auto program = manageArguments(argc, argv);
+    bool saveResults = false;
     auto file_name = program.get<string>("dataset");
     auto path = program.get<string>("path");
     auto model_name = program.get<string>("model");
     auto discretize_dataset = program.get<bool>("discretize");
     auto stratified = program.get<bool>("stratified");
     auto n_folds = program.get<int>("folds");
-    auto seed = program.get<int>("seed");
-    vector<string> filesToProcess;
+    auto seeds = program.get<vector<int>>("seeds");
+    vector<string> filesToTest;
     auto datasets = platform::Datasets(path, true, platform::ARFF);
+    auto title = program.get<string>("title");
     if (file_name != "") {
         if (!datasets.isDataset(file_name)) {
             cerr << "Dataset " << file_name << " not found" << endl;
             exit(1);
         }
-        filesToProcess.push_back(file_name);
+        if (title == "") {
+            title = "Test " + file_name + " " + model_name + " " + to_string(n_folds) + " folds";
+        }
+        filesToTest.push_back(file_name);
     } else {
-        filesToProcess = platform::Datasets(path, true, platform::ARFF).getNames();
+        filesToTest = platform::Datasets(path, true, platform::ARFF).getNames();
+        saveResults = true;
     }
-    auto title = program.get<string>("title");
 
     /*
     * Begin Processing
@@ -97,31 +106,18 @@ int main(int argc, char** argv)
     auto experiment = platform::Experiment();
     experiment.setTitle(title).setLanguage("cpp").setLanguageVersion("1.0.0");
     experiment.setDiscretized(discretize_dataset).setModel(model_name).setPlatform("BayesNet");
-    experiment.setStratified(stratified).setNFolds(n_folds).addRandomSeed(seed).setScoreName("accuracy");
-    platform::Timer timer;
-    cout << "*** Starting experiment: " << title << " ***" << endl;
-    timer.start();
-    for (auto fileName : filesToProcess) {
-        cout << "- " << setw(20) << left << fileName << " " << right << flush;
-        auto [X, y] = datasets.getTensors(fileName);
-        auto states = datasets.getStates(fileName);
-        auto features = datasets.getFeatures(fileName);
-        auto samples = datasets.getNSamples(fileName);
-        auto className = datasets.getClassName(fileName);
-        cout << " (" << setw(5) << samples << "," << setw(3) << features.size() << ") " << flush;
-        Fold* fold;
-        if (stratified)
-            fold = new StratifiedKFold(n_folds, y, seed);
-        else
-            fold = new KFold(n_folds, samples, seed);
-        auto result = platform::cross_validation(fold, model_name, X, y, features, className, states);
-        result.setDataset(fileName);
-        experiment.setModelVersion(result.getModelVersion());
-        experiment.addResult(result);
-        delete fold;
+    experiment.setStratified(stratified).setNFolds(n_folds).setScoreName("accuracy");
+    for (auto seed : seeds) {
+        experiment.addRandomSeed(seed);
     }
+    platform::Timer timer;
+    timer.start();
+    experiment.go(filesToTest, path);
     experiment.setDuration(timer.getDuration());
-    experiment.save(PATH_RESULTS);
+    if (saveResults)
+        experiment.save(PATH_RESULTS);
+    else
+        experiment.show();
     cout << "Done!" << endl;
     return 0;
 }

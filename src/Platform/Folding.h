@@ -22,7 +22,7 @@ private:
     vector<int> indices;
 public:
     KFold(int k, int n, int seed = -1);
-    pair<vector<int>, vector<int>> getFold(int nFold);
+    pair<vector<int>, vector<int>> getFold(int nFold) override;
 };
 class StratifiedKFold : public Fold {
 private:
@@ -32,6 +32,6 @@ private:
 public:
     StratifiedKFold(int k, const vector<int>& y, int seed = -1);
     StratifiedKFold(int k, torch::Tensor& y, int seed = -1);
-    pair<vector<int>, vector<int>> getFold(int nFold);
+    pair<vector<int>, vector<int>> getFold(int nFold) override;
 };
 #endif

@@ -27,13 +27,13 @@ namespace bayesnet {
         void completeFit();
     public:
         Network();
-        Network(float, int);
-        Network(float);
-        Network(Network&);
+        explicit Network(float, int);
+        explicit Network(float);
+        explicit Network(Network&);
         torch::Tensor& getSamples();
         float getmaxThreads();
-        void addNode(string, int);
-        void addEdge(const string, const string);
+        void addNode(const string&, int);
+        void addEdge(const string&, const string&);
         map<string, std::unique_ptr<Node>>& getNodes();
         vector<string> getFeatures();
         int getStates();
@@ -48,7 +48,7 @@ namespace bayesnet {
         vector<vector<double>> predict_proba(const vector<vector<int>>&);
         double score(const vector<vector<int>>&, const vector<int>&);
         vector<string> show();
-        vector<string> graph(string title); // Returns a vector of strings representing the graph in graphviz format
+        vector<string> graph(const string& title); // Returns a vector of strings representing the graph in graphviz format
         inline string version() { return "0.1.0"; }
     };
 }
