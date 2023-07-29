@@ -48,7 +48,7 @@ namespace platform {
         result["seeds"] = randomSeeds;
         result["duration"] = duration;
         result["results"] = json::array();
-        for (auto& r : results) {
+        for (const auto& r : results) {
             json j;
             j["dataset"] = r.getDataset();
             j["hyperparameters"] = r.getHyperparameters();
@@ -78,7 +78,7 @@ namespace platform {
         }
         return result;
     }
-    void Experiment::save(string path)
+    void Experiment::save(const string& path)
     {
         json data = build_json();
         ofstream file(path + "/" + get_file_name());
@@ -97,14 +97,12 @@ namespace platform {
         cout << "*** Starting experiment: " << title << " ***" << endl;
         for (auto fileName : filesToProcess) {
             cout << "- " << setw(20) << left << fileName << " " << right << flush;
-            auto result = cross_validation(path, fileName);
-            result.setDataset(fileName);
-            addResult(result);
+            cross_validation(path, fileName);
             cout << endl;
         }
     }
 
-    Result Experiment::cross_validation(const string& path, const string& fileName)
+    void Experiment::cross_validation(const string& path, const string& fileName)
     {
         auto datasets = platform::Datasets(path, true, platform::ARFF);
         // Get dataset
@@ -172,6 +170,7 @@ namespace platform {
         result.setScoreTestStd(torch::std(accuracy_test).item<double>()).setScoreTrainStd(torch::std(accuracy_train).item<double>());
         result.setTrainTime(torch::mean(train_time).item<double>()).setTestTime(torch::mean(test_time).item<double>());
         result.setNodes(torch::mean(nodes).item<double>()).setLeaves(torch::mean(edges).item<double>()).setDepth(torch::mean(num_states).item<double>());
-        return result;
+        result.setDataset(fileName);
+        addResult(result);
     }
 }

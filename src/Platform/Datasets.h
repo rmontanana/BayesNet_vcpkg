@@ -13,7 +13,7 @@ namespace platform {
         string name;
         fileType_t fileType;
         string className;
-        int n_samples, n_features;
+        int n_samples{ 0 }, n_features{ 0 };
         vector<string> features;
         map<string, vector<int>> states;
         bool loaded;
@@ -27,8 +27,8 @@ namespace platform {
         void load_arff();
         void computeStates();
     public:
-        Dataset(string path, string name, string className, bool discretize, fileType_t fileType) : path(path), name(name), className(className), discretize(discretize), loaded(false), fileType(fileType) {};
-        Dataset(Dataset&);
+        Dataset(const string& path, const string& name, const string& className, bool discretize, fileType_t fileType) : path(path), name(name), className(className), discretize(discretize), loaded(false), fileType(fileType) {};
+        explicit Dataset(const Dataset&);
         string getName();
         string getClassName();
         vector<string> getFeatures();
@@ -49,7 +49,7 @@ namespace platform {
         bool discretize;
         void load(); // Loads the list of datasets
     public:
-        Datasets(string path, bool discretize = false, fileType_t fileType = ARFF) : path(path), discretize(discretize), fileType(fileType) { load(); };
+        Datasets(const string& path, bool discretize = false, fileType_t fileType = ARFF) : path(path), discretize(discretize), fileType(fileType) { load(); };
         vector<string> getNames();
         vector<string> getFeatures(string name);
         int getNSamples(string name);

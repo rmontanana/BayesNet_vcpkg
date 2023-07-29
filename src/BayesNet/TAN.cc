@@ -18,7 +18,7 @@ namespace bayesnet {
             auto mi_value = metrics.mutualInformation(class_dataset, feature_dataset);
             mi.push_back({ i, mi_value });
         }
-        sort(mi.begin(), mi.end(), [](auto& left, auto& right) {return left.second < right.second;});
+        sort(mi.begin(), mi.end(), [](const auto& left, const auto& right) {return left.second < right.second;});
         auto root = mi[mi.size() - 1].first;
         // 2. Compute mutual information between each feature and the class
         auto weights = metrics.conditionalEdge();

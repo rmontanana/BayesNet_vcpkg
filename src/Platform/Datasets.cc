@@ -4,9 +4,9 @@
 namespace platform {
     void Datasets::load()
     {
-        string line;
         ifstream catalog(path + "/all.txt");
         if (catalog.is_open()) {
+            string line;
             while (getline(catalog, line)) {
                 vector<string> tokens = split(line, ',');
                 string name = tokens[0];
@@ -83,23 +83,8 @@ namespace platform {
     {
         return datasets.find(name) != datasets.end();
     }
-    Dataset::Dataset(Dataset& dataset)
+    Dataset::Dataset(const Dataset& dataset) : path(dataset.path), name(dataset.name), className(dataset.className), n_samples(dataset.n_samples), n_features(dataset.n_features), features(dataset.features), states(dataset.states), loaded(dataset.loaded), discretize(dataset.discretize), X(dataset.X), y(dataset.y), Xv(dataset.Xv), Xd(dataset.Xd), yv(dataset.yv), fileType(dataset.fileType)
     {
-        path = dataset.path;
-        name = dataset.name;
-        className = dataset.className;
-        n_samples = dataset.n_samples;
-        n_features = dataset.n_features;
-        features = dataset.features;
-        states = dataset.states;
-        loaded = dataset.loaded;
-        discretize = dataset.discretize;
-        X = dataset.X;
-        y = dataset.y;
-        Xv = dataset.Xv;
-        Xd = dataset.Xd;
-        yv = dataset.yv;
-        fileType = dataset.fileType;
     }
     string Dataset::getName()
     {
@@ -168,9 +153,9 @@ namespace platform {
     }
     void Dataset::load_csv()
     {
-        string line;
         ifstream file(path + "/" + name + ".csv");
         if (file.is_open()) {
+            string line;
             getline(file, line);
             vector<string> tokens = split(line, ',');
             features = vector<string>(tokens.begin(), tokens.end() - 1);
