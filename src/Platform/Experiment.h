@@ -105,9 +105,9 @@ namespace platform {
         Experiment& setDuration(float duration) { this->duration = duration; return *this; }
         string get_file_name();
         void save(string path);
-        Result cross_validation(const string& path, const string& fileName);
+        //Result cross_validation(const string& path, const string& fileName);
+        Result cross_validation(string model_name, torch::Tensor& X, torch::Tensor& y, vector<string> features, string className, map<string, vector<int>> states);
         void show();
     };
-    Result cross_validation(Fold* fold, string model_name, torch::Tensor& X, torch::Tensor& y, vector<string> features, string className, map<string, vector<int>> states);
 }
 #endif
