@@ -27,9 +27,9 @@ namespace bayesnet {
         void completeFit();
     public:
         Network();
-        Network(float, int);
-        Network(float);
-        Network(Network&);
+        explicit Network(float, int);
+        explicit Network(float);
+        explicit Network(Network&);
         torch::Tensor& getSamples();
         float getmaxThreads();
         void addNode(string, int);

@@ -9,7 +9,7 @@ namespace bayesnet {
     protected:
         void train() override;
     public:
-        SPODE(int root);
+        explicit SPODE(int root);
         virtual ~SPODE() {};
         vector<string> graph(string name = "SPODE") override;
     };

@@ -10,7 +10,7 @@ namespace bayesnet {
     private:
         Tensor weights;
         vector<string> features;
-        int root;
+        int root = 0;
     public:
         MST() = default;
         MST(vector<string>& features, Tensor& weights, int root);
@@ -23,7 +23,7 @@ namespace bayesnet {
         vector <pair<float, pair<int, int>>> T; // vector for mst
         vector<int> parent;
     public:
-        Graph(int V);
+        explicit Graph(int V);
         void addEdge(int u, int v, float wt);
         int find_set(int i);
         void union_set(int u, int v);

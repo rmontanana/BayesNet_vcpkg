@@ -76,10 +76,6 @@ argparse::ArgumentParser manageArguments(int argc, char** argv)
     }
     return program;
 }
-void registerModels()
-{
-
-}
 
 int main(int argc, char** argv)
 {
@@ -92,7 +88,7 @@ int main(int argc, char** argv)
     auto stratified = program.get<bool>("stratified");
     auto n_folds = program.get<int>("folds");
     auto seeds = program.get<vector<int>>("seeds");
-    vector<string> filesToProcess;
+    vector<string> filesToTest;
     auto datasets = platform::Datasets(path, true, platform::ARFF);
     auto title = program.get<string>("title");
     if (file_name != "") {
@@ -103,9 +99,9 @@ int main(int argc, char** argv)
         if (title == "") {
             title = "Test " + file_name + " " + model_name + " " + to_string(n_folds) + " folds";
         }
-        filesToProcess.push_back(file_name);
+        filesToTest.push_back(file_name);
     } else {
-        filesToProcess = platform::Datasets(path, true, platform::ARFF).getNames();
+        filesToTest = platform::Datasets(path, true, platform::ARFF).getNames();
         saveResults = true;
     }
 
@@ -121,7 +117,7 @@ int main(int argc, char** argv)
     }
     platform::Timer timer;
     timer.start();
-    experiment.go(filesToProcess, path);
+    experiment.go(filesToTest, path);
     experiment.setDuration(timer.getDuration());
     if (saveResults)
         experiment.save(PATH_RESULTS);

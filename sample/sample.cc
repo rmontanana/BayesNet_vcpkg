@@ -148,9 +148,9 @@ int main(int argc, char** argv)
     // Get className & Features
     auto className = handler.getClassName();
     vector<string> features;
-    for (auto feature : handler.getAttributes()) {
-        features.push_back(feature.first);
-    }
+    auto attributes = handler.getAttributes();
+    transform(attributes.begin(), attributes.end(), back_inserter(features),
+        [](const pair<string, string>& item) { return item.first; });
     // Discretize Dataset
     auto [Xd, maxes] = discretize(X, y, features);
     maxes[className] = *max_element(y.begin(), y.end()) + 1;
@@ -159,12 +159,7 @@ int main(int argc, char** argv)
         states[feature] = vector<int>(maxes[feature]);
     }
     states[className] = vector<int>(maxes[className]);
-    auto classifiers = map<string, bayesnet::BaseClassifier*>({
-        { "AODE", new bayesnet::AODE() }, { "KDB", new bayesnet::KDB(2) },
-        { "SPODE",  new bayesnet::SPODE(2) }, { "TAN",  new bayesnet::TAN() }
-        }
-    );
-    bayesnet::BaseClassifier* clf = classifiers[model_name];
+    auto clf = platform::Models::instance()->create(model_name);
     clf->fit(Xd, y, features, className, states);
     auto score = clf->score(Xd, y);
     auto lines = clf->show();
