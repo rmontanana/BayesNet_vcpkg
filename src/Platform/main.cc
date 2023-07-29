@@ -135,13 +135,17 @@ int main(int argc, char** argv)
                 fold = new KFold(n_folds, samples, seed);
             auto result = platform::cross_validation(fold, model_name, X, y, features, className, states);
             result.setDataset(fileName);
-            experiment.setModelVersion(result.getModelVersion());
+            experiment.setModelVersion("-FIXME-");
             experiment.addResult(result);
             delete fold;
         }
+        cout << endl;
     }
     experiment.setDuration(timer.getDuration());
-    experiment.save(PATH_RESULTS);
+    if (saveResults)
+        experiment.save(PATH_RESULTS);
+    else
+        experiment.show();
     cout << "Done!" << endl;
     return 0;
 }

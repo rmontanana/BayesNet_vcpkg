@@ -33,6 +33,7 @@ namespace platform {
         int samples, features, classes;
         double score_train, score_test, score_train_std, score_test_std, train_time, train_time_std, test_time, test_time_std;
         float nodes, leaves, depth;
+        vector<double> scores_train, scores_test, times_train, times_test;
     public:
         Result() = default;
         Result& setDataset(string dataset) { this->dataset = dataset; return *this; }
@@ -51,7 +52,10 @@ namespace platform {
         Result& setNodes(float nodes) { this->nodes = nodes; return *this; }
         Result& setLeaves(float leaves) { this->leaves = leaves; return *this; }
         Result& setDepth(float depth) { this->depth = depth; return *this; }
-        Result& setModelVersion(string model_version) { this->model_version = model_version; return *this; }
+        Result& addScoreTrain(double score) { scores_train.push_back(score); return *this; }
+        Result& addScoreTest(double score) { scores_test.push_back(score); return *this; }
+        Result& addTimeTrain(double time) { times_train.push_back(time); return *this; }
+        Result& addTimeTest(double time) { times_test.push_back(time); return *this; }
         const float get_score_train() const { return score_train; }
         float get_score_test() { return score_test; }
         const string& getDataset() const { return dataset; }
@@ -70,14 +74,17 @@ namespace platform {
         const float getNodes() const { return nodes; }
         const float getLeaves() const { return leaves; }
         const float getDepth() const { return depth; }
-        const string& getModelVersion() const { return model_version; }
+        const vector<double>& getScoresTrain() const { return scores_train; }
+        const vector<double>& getScoresTest() const { return scores_test; }
+        const vector<double>& getTimesTrain() const { return times_train; }
+        const vector<double>& getTimesTest() const { return times_test; }
     };
     class Experiment {
     private:
         string title, model, platform, score_name, model_version, language_version, language;
         bool discretized, stratified;
         vector<Result> results;
-        vector<int> random_seeds;
+        vector<int> randomSeeds;
         int nfolds;
         float duration;
         json build_json();
@@ -94,11 +101,12 @@ namespace platform {
         Experiment& setStratified(bool stratified) { this->stratified = stratified; return *this; }
         Experiment& setNFolds(int nfolds) { this->nfolds = nfolds; return *this; }
         Experiment& addResult(Result result) { results.push_back(result); return *this; }
-        Experiment& addRandomSeed(int random_seed) { random_seeds.push_back(random_seed); return *this; }
+        Experiment& addRandomSeed(int randomSeed) { randomSeeds.push_back(randomSeed); return *this; }
         Experiment& setDuration(float duration) { this->duration = duration; return *this; }
         string get_file_name();
         void save(string path);
-        void show() { cout << "Showing experiment..." << "Score Test: " << results[0].get_score_test() << " Score Train: " << results[0].get_score_train() << endl; }
+        Result cross_validation(const string& path, const string& fileName);
+        void show();
     };
     Result cross_validation(Fold* fold, string model_name, torch::Tensor& X, torch::Tensor& y, vector<string> features, string className, map<string, vector<int>> states);
 }
