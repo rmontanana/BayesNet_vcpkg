@@ -85,11 +85,25 @@ namespace platform {
         file << data;
         file.close();
     }
+
     void Experiment::show()
     {
         json data = build_json();
         cout << data.dump(4) << endl;
     }
+
+    void Experiment::go(vector<string> filesToProcess, const string& path)
+    {
+        cout << "*** Starting experiment: " << title << " ***" << endl;
+        for (auto fileName : filesToProcess) {
+            cout << "- " << setw(20) << left << fileName << " " << right << flush;
+            auto result = cross_validation(path, fileName);
+            result.setDataset(fileName);
+            addResult(result);
+            cout << endl;
+        }
+    }
+
     Result Experiment::cross_validation(const string& path, const string& fileName)
     {
         auto datasets = platform::Datasets(path, true, platform::ARFF);

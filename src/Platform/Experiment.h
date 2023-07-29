@@ -106,6 +106,7 @@ namespace platform {
         string get_file_name();
         void save(string path);
         Result cross_validation(const string& path, const string& fileName);
+        void go(vector<string> filesToProcess, const string& path);
         void show();
     };
 }
