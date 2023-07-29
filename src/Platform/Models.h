@@ -8,18 +8,25 @@
 #include "SPODE.h"
 namespace platform {
     class Models {
+    private:
+        map<string, function<bayesnet::BaseClassifier* (void)>> functionRegistry;
+        static Models* factory; //singleton
+        Models() {};
     public:
+        Models(Models&) = delete;
+        void operator=(const Models&) = delete;
         // Idea from: https://www.codeproject.com/Articles/567242/AplusC-2b-2bplusObjectplusFactory
-        static shared_ptr<bayesnet::BaseClassifier> createInstance(const string& name);
-        static vector<string> getNames()
-        {
-            return { "aaaaaAODE", "KDB", "SPODE", "TAN" };
-        }
-        static string toString()
-        {
-            return "{aaaaae34223AODE, KDB, SPODE, TAN}";
-            //return "{" + names.substr(0, names.size() - 2) + "}";
-        }
+        static Models* instance();
+        shared_ptr<bayesnet::BaseClassifier> create(const string& name);
+        void registerFactoryFunction(const string& name,
+            function<bayesnet::BaseClassifier* (void)> classFactoryFunction);
+        vector<string> getNames();
+        string toString();
+
+    };
+    class Registrar {
+    public:
+        Registrar(const string& className, function<bayesnet::BaseClassifier* (void)> classFactoryFunction);
     };
 }
 #endif

@@ -93,11 +93,6 @@ namespace platform {
     Result Experiment::cross_validation(const string& path, const string& fileName)
     {
         auto datasets = platform::Datasets(path, true, platform::ARFF);
-        auto classifiers = map<string, bayesnet::BaseClassifier*>({
-            { "AODE", new bayesnet::AODE() }, { "KDB", new bayesnet::KDB(2) },
-            { "SPODE",  new bayesnet::SPODE(2) }, { "TAN",  new bayesnet::TAN() }
-            }
-        );
         // Get dataset
         auto [X, y] = datasets.getTensors(fileName);
         auto states = datasets.getStates(fileName);
@@ -127,7 +122,7 @@ namespace platform {
             else
                 fold = new KFold(nfolds, y.size(0), seed);
             for (int nfold = 0; nfold < nfolds; nfold++) {
-                auto clf = Models::createInstance(model);
+                auto clf = Models::instance()->create(model);
                 setModelVersion(clf->getVersion());
                 train_timer.start();
                 auto [train, test] = fold->getFold(nfold);
