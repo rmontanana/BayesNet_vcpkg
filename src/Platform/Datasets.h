@@ -49,7 +49,7 @@ namespace platform {
         bool discretize;
         void load(); // Loads the list of datasets
     public:
-        Datasets(const string& path, bool discretize = false, fileType_t fileType = ARFF) : path(path), discretize(discretize), fileType(fileType) { load(); };
+        explicit Datasets(const string& path, bool discretize = false, fileType_t fileType = ARFF) : path(path), discretize(discretize), fileType(fileType) { load(); };
         vector<string> getNames();
         vector<string> getFeatures(string name);
         int getNSamples(string name);
@@ -58,7 +58,7 @@ namespace platform {
         pair<vector<vector<float>>&, vector<int>&> getVectors(string name);
         pair<vector<vector<int>>&, vector<int>&> getVectorsDiscretized(string name);
         pair<torch::Tensor&, torch::Tensor&> getTensors(string name);
-        bool isDataset(string name);
+        bool isDataset(const string& name);
     };
 };
 

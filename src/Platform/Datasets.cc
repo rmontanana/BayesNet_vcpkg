@@ -21,9 +21,7 @@ namespace platform {
     vector<string> Datasets::getNames()
     {
         vector<string> result;
-        for (auto& d : datasets) {
-            result.push_back(d.first);
-        }
+        transform(datasets.begin(), datasets.end(), back_inserter(result), [](const auto& d) { return d.first; });
         return result;
     }
     vector<string> Datasets::getFeatures(string name)
@@ -79,7 +77,7 @@ namespace platform {
         }
         return datasets[name]->getTensors();
     }
-    bool Datasets::isDataset(string name)
+    bool Datasets::isDataset(const string& name)
     {
         return datasets.find(name) != datasets.end();
     }
@@ -193,9 +191,8 @@ namespace platform {
         yv = arff.getY();
         // Get className & Features
         className = arff.getClassName();
-        for (auto feature : arff.getAttributes()) {
-            features.push_back(feature.first);
-        }
+        auto attributes = arff.getAttributes();
+        transform(attributes.begin(), attributes.end(), back_inserter(features), [](const auto& attribute) { return attribute.first; });
     }
     void Dataset::load()
     {

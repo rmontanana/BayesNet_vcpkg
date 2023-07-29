@@ -7,7 +7,7 @@
 
 namespace bayesnet {
     using namespace std;
-    Graph::Graph(int V)
+    Graph::Graph(int V) : V(V)
     {
         parent = vector<int>(V);
         for (int i = 0; i < V; i++)
@@ -34,10 +34,10 @@ namespace bayesnet {
     }
     void Graph::kruskal_algorithm()
     {
-        int i, uSt, vEd;
         // sort the edges ordered on decreasing weight
-        sort(G.begin(), G.end(), [](auto& left, auto& right) {return left.first > right.first;});
-        for (i = 0; i < G.size(); i++) {
+        sort(G.begin(), G.end(), [](const auto& left, const auto& right) {return left.first > right.first;});
+        for (int i = 0; i < G.size(); i++) {
+            int uSt, vEd;
             uSt = find_set(G[i].second.first);
             vEd = find_set(G[i].second.second);
             if (uSt != vEd) {
