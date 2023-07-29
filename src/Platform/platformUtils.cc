@@ -2,6 +2,17 @@
 
 using namespace torch;
 
+vector<string> split(string text, char delimiter)
+{
+    vector<string> result;
+    stringstream ss(text);
+    string token;
+    while (getline(ss, token, delimiter)) {
+        result.push_back(token);
+    }
+    return result;
+}
+
 pair<vector<mdlp::labels_t>, map<string, int>> discretize(vector<mdlp::samples_t>& X, mdlp::labels_t& y, vector<string> features)
 {
     vector<mdlp::labels_t> Xd;

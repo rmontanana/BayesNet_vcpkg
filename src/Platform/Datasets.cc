@@ -2,16 +2,6 @@
 #include "platformUtils.h"
 #include "ArffFiles.h"
 namespace platform {
-    vector<string> split(string text, char delimiter)
-    {
-        vector<string> result;
-        stringstream ss(text);
-        string token;
-        while (getline(ss, token, delimiter)) {
-            result.push_back(token);
-        }
-        return result;
-    }
     void Datasets::load()
     {
         string line;

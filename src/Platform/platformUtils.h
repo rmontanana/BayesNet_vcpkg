@@ -11,6 +11,7 @@ using namespace std;
 const string PATH = "../../data/";
 
 bool file_exists(const std::string& name);
+vector<string> split(string text, char delimiter);
 pair<vector<mdlp::labels_t>, map<string, int>> discretize(vector<mdlp::samples_t>& X, mdlp::labels_t& y, vector<string> features);
 vector<mdlp::labels_t> discretizeDataset(vector<mdlp::samples_t>& X, mdlp::labels_t& y);
 pair<torch::Tensor, map<string, vector<int>>> discretizeTorch(torch::Tensor& X, torch::Tensor& y, vector<string>& features, string className);
