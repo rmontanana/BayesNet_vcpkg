@@ -8,7 +8,7 @@ namespace bayesnet {
     Network::Network(float maxT, int smoothing) : laplaceSmoothing(smoothing), features(vector<string>()), className(""), classNumStates(0), maxThreads(maxT), fitted(false) {}
     Network::Network(Network& other) : laplaceSmoothing(other.laplaceSmoothing), features(other.features), className(other.className), classNumStates(other.getClassNumStates()), maxThreads(other.getmaxThreads()), fitted(other.fitted)
     {
-        for (auto& pair : other.nodes) {
+        for (const auto& pair : other.nodes) {
             nodes[pair.first] = std::make_unique<Node>(*pair.second);
         }
     }
@@ -145,9 +145,6 @@ namespace bayesnet {
         while (nextNodeIndex < nodes.size()) {
             unique_lock<mutex> lock(mtx);
             cv.wait(lock, [&activeThreads, &maxThreadsRunning]() { return activeThreads < maxThreadsRunning; });
-            if (nextNodeIndex >= nodes.size()) {
-                break;  // No more work remaining
-            }
             threads.emplace_back([this, &nextNodeIndex, &mtx, &cv, &activeThreads]() {
                 while (true) {
                     unique_lock<mutex> lock(mtx);
@@ -262,9 +259,7 @@ namespace bayesnet {
 
         // Normalize result
         double sum = accumulate(result.begin(), result.end(), 0.0);
-        for (double& value : result) {
-            value /= sum;
-        }
+        transform(result.begin(), result.end(), result.begin(), [sum](double& value) { return value / sum; });
         return result;
     }
     vector<string> Network::show()

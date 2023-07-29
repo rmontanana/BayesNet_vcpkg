@@ -7,9 +7,8 @@
 
 namespace bayesnet {
     using namespace std;
-    Graph::Graph(int V) : V(V)
+    Graph::Graph(int V) : V(V), parent(vector<int>(V))
     {
-        parent = vector<int>(V);
         for (int i = 0; i < V; i++)
             parent[i] = i;
         G.clear();

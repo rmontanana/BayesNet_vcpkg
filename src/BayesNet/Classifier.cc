@@ -125,7 +125,6 @@ namespace bayesnet {
     }
     void Classifier::addNodes()
     {
-        auto test = model.getEdges();
         // Add all nodes to the network
         for (auto feature : features) {
             model.addNode(feature, states[feature].size());
