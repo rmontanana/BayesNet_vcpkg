@@ -8,25 +8,17 @@
 #include "SPODE.h"
 namespace platform {
     class Models {
-    private:
-        static map<string, bayesnet::BaseClassifier*> classifiers;
     public:
-        static bayesnet::BaseClassifier* get(string name) { return classifiers[name]; }
+        // Idea from: https://www.codeproject.com/Articles/567242/AplusC-2b-2bplusObjectplusFactory
+        static shared_ptr<bayesnet::BaseClassifier> createInstance(const string& name);
         static vector<string> getNames()
         {
-            vector<string> names;
-            for (auto& [name, classifier] : classifiers) {
-                names.push_back(name);
-            }
-            return names;
+            return { "aaaaaAODE", "KDB", "SPODE", "TAN" };
         }
         static string toString()
         {
-            string names = "";
-            for (auto& [name, classifier] : classifiers) {
-                names += name + ", ";
-            }
-            return "{" + names.substr(0, names.size() - 2) + "}";
+            return "{aaaaae34223AODE, KDB, SPODE, TAN}";
+            //return "{" + names.substr(0, names.size() - 2) + "}";
         }
     };
 }
