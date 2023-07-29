@@ -49,22 +49,17 @@ argparse::ArgumentParser manageArguments(int argc, char** argv)
         }});
     auto seed_values = env.getSeeds();
     program.add_argument("-s", "--seeds").nargs(1, 10).help("Random seeds. Set to -1 to have pseudo random").scan<'i', int>().default_value(seed_values);
-    bool class_last, discretize_dataset, stratified;
-    int n_folds;
-    vector<int> seeds;
-    string model_name, file_name, path, complete_file_name, title;
     try {
         program.parse_args(argc, argv);
-        file_name = program.get<string>("dataset");
-        path = program.get<string>("path");
-        model_name = program.get<string>("model");
-        discretize_dataset = program.get<bool>("discretize");
-        stratified = program.get<bool>("stratified");
-        n_folds = program.get<int>("folds");
-        seeds = program.get<vector<int>>("seeds");
-        complete_file_name = path + file_name + ".arff";
-        class_last = false;//datasets[file_name];
-        title = program.get<string>("title");
+        auto file_name = program.get<string>("dataset");
+        auto path = program.get<string>("path");
+        auto model_name = program.get<string>("model");
+        auto discretize_dataset = program.get<bool>("discretize");
+        auto stratified = program.get<bool>("stratified");
+        auto n_folds = program.get<int>("folds");
+        auto seeds = program.get<vector<int>>("seeds");
+        auto complete_file_name = path + file_name + ".arff";
+        auto title = program.get<string>("title");
         if (title == "" && file_name == "") {
             throw runtime_error("title is mandatory if dataset is not provided");
         }

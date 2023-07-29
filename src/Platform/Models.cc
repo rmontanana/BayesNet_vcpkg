@@ -40,7 +40,7 @@ namespace platform {
     string Models::toString()
     {
         string result = "";
-        for (auto& pair : functionRegistry) {
+        for (const auto& pair : functionRegistry) {
             result += pair.first + ", ";
         }
         return "{" + result.substr(0, result.size() - 2) + "}";
