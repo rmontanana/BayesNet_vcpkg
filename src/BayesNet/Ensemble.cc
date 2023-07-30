@@ -16,15 +16,22 @@ namespace bayesnet {
         train();
         // Train models
         n_models = models.size();
+        auto Xt = torch::transpose(X, 0, 1);
         for (auto i = 0; i < n_models; ++i) {
-            models[i]->fit(Xv, yv, features, className, states);
+            if (Xv == vector<vector<int>>()) {
+                // fit with tensors
+                models[i]->fit(Xt, y, features, className, states);
+            } else {
+                // fit with vectors
+                models[i]->fit(Xv, yv, features, className, states);
+            }
         }
         fitted = true;
         return *this;
     }
     Ensemble& Ensemble::fit(torch::Tensor& X, torch::Tensor& y, vector<string>& features, string className, map<string, vector<int>>& states)
     {
-        this->X = X;
+        this->X = torch::transpose(X, 0, 1);
         this->y = y;
         Xv = vector<vector<int>>();
         yv = vector<int>(y.data_ptr<int>(), y.data_ptr<int>() + y.size(0));
@@ -41,17 +48,6 @@ namespace bayesnet {
         yv = y;
         return build(features, className, states);
     }
-    Tensor Ensemble::predict(Tensor& X)
-    {
-        if (!fitted) {
-            throw logic_error("Ensemble has not been fitted");
-        }
-        Tensor y_pred = torch::zeros({ X.size(0), n_models }, kInt32);
-        for (auto i = 0; i < n_models; ++i) {
-            y_pred.index_put_({ "...", i }, models[i]->predict(X));
-        }
-        return torch::tensor(voting(y_pred));
-    }
     vector<int> Ensemble::voting(Tensor& y_pred)
     {
         auto y_pred_ = y_pred.accessor<int, 2>();
@@ -65,6 +61,18 @@ namespace bayesnet {
             y_pred_final.push_back(indices[0]);
         }
         return y_pred_final;
+    }
+    Tensor Ensemble::predict(Tensor& X)
+    {
+        if (!fitted) {
+            throw logic_error("Ensemble has not been fitted");
+        }
+        Tensor y_pred = torch::zeros({ X.size(1), n_models }, kInt32);
+        for (auto i = 0; i < n_models; ++i) {
+            auto ypredict = models[i]->predict(X);
+            y_pred.index_put_({ "...", i }, ypredict);
+        }
+        return torch::tensor(voting(y_pred));
     }
     vector<int> Ensemble::predict(vector<vector<int>>& X)
     {

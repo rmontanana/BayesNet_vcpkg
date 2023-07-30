@@ -12,10 +12,10 @@
                 "-m",
                 "TAN",
                 "-p",
-                "../../data/",
+                "/Users/rmontanana/Code/discretizbench/datasets/",
                 "--tensors"
             ],
-            "cwd": "${workspaceFolder}/build/sample/",
+            //"cwd": "${workspaceFolder}/build/sample/",
         },
         {
             "type": "lldb",

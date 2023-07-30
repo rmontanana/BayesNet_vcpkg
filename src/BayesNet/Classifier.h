@@ -35,7 +35,7 @@ namespace bayesnet {
         int getNumberOfNodes() override;
         int getNumberOfEdges() override;
         int getNumberOfStates() override;
-        Tensor predict(Tensor& X);
+        Tensor predict(Tensor& X) override;
         vector<int> predict(vector<vector<int>>& X) override;
         float score(Tensor& X, Tensor& y) override;
         float score(vector<vector<int>>& X, vector<int>& y) override;

@@ -65,23 +65,14 @@ namespace bayesnet {
             }
         }
     }
-
     Tensor Classifier::predict(Tensor& X)
     {
         if (!fitted) {
             throw logic_error("Classifier has not been fitted");
         }
-        auto m_ = X.size(0);
-        auto n_ = X.size(1);
-        //auto Xt = torch::transpose(X, 0, 1);
-        vector<vector<int>> Xd(n_, vector<int>(m_, 0));
-        for (auto i = 0; i < n_; i++) {
-            auto temp = X.index({ "...", i });
-            Xd[i] = vector<int>(temp.data_ptr<int>(), temp.data_ptr<int>() + temp.numel());
-        }
-        auto yp = model.predict(Xd);
-        auto ypred = torch::tensor(yp, torch::kInt32);
-        return ypred;
+        auto Xt = torch::transpose(X, 0, 1); // Base classifiers expect samples as columns
+        auto y_proba = model.predict(Xt);
+        return y_proba.argmax(1);
     }
     vector<int> Classifier::predict(vector<vector<int>>& X)
     {
@@ -102,8 +93,7 @@ namespace bayesnet {
         if (!fitted) {
             throw logic_error("Classifier has not been fitted");
         }
-        auto Xt = torch::transpose(X, 0, 1);
-        Tensor y_pred = predict(Xt);
+        Tensor y_pred = predict(X);
         return (y_pred == y).sum().item<float>() / y.size(0);
     }
     float Classifier::score(vector<vector<int>>& X, vector<int>& y)
@@ -111,13 +101,13 @@ namespace bayesnet {
         if (!fitted) {
             throw logic_error("Classifier has not been fitted");
         }
-        auto m_ = X[0].size();
-        auto n_ = X.size();
-        vector<vector<int>> Xd(n_, vector<int>(m_, 0));
-        for (auto i = 0; i < n_; i++) {
-            Xd[i] = vector<int>(X[i].begin(), X[i].end());
-        }
-        return model.score(Xd, y);
+        // auto m_ = X[0].size();
+        // auto n_ = X.size();
+        // vector<vector<int>> Xd(n_, vector<int>(m_, 0));
+        // for (auto i = 0; i < n_; i++) {
+        //     Xd[i] = vector<int>(X[i].begin(), X[i].end());
+        // }
+        return model.score(X, y);
     }
     vector<string> Classifier::show()
     {

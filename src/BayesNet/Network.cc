@@ -170,6 +170,34 @@ namespace bayesnet {
         }
         fitted = true;
     }
+    Tensor Network::predict_proba(const Tensor& samples)
+    {
+        if (!fitted) {
+            throw logic_error("You must call fit() before calling predict_proba()");
+        }
+        Tensor result = torch::zeros({ samples.size(0), classNumStates }, torch::kFloat64);
+        auto Xt = torch::transpose(samples, 0, 1);
+        for (int i = 0; i < samples.size(0); ++i) {
+            auto sample = Xt.index({ "...", i });
+            auto classProbabilities = predict_sample(sample);
+            result.index_put_({ i, "..." }, torch::tensor(classProbabilities, torch::kFloat64));
+        }
+        return result;
+    }
+    Tensor Network::predict(const Tensor& samples)
+    {
+        if (!fitted) {
+            throw logic_error("You must call fit() before calling predict()");
+        }
+        Tensor result = torch::zeros({ samples.size(0), classNumStates }, torch::kFloat64);
+        auto Xt = torch::transpose(samples, 0, 1);
+        for (int i = 0; i < samples.size(0); ++i) {
+            auto sample = Xt.index({ "...", i });
+            auto classProbabilities = predict_sample(sample);
+            result.index_put_({ i, "..." }, torch::tensor(classProbabilities, torch::kFloat64));
+        }
+        return result;
+    }
 
     vector<int> Network::predict(const vector<vector<int>>& tsamples)
     {
@@ -228,6 +256,19 @@ namespace bayesnet {
         map<string, int> evidence;
         for (int i = 0; i < sample.size(); ++i) {
             evidence[features[i]] = sample[i];
+        }
+        return exactInference(evidence);
+    }
+    vector<double> Network::predict_sample(const Tensor& sample)
+    {
+        // Ensure the sample size is equal to the number of features
+        if (sample.size(0) != features.size()) {
+            throw invalid_argument("Sample size (" + to_string(sample.size(0)) +
+                ") does not match the number of features (" + to_string(features.size()) + ")");
+        }
+        map<string, int> evidence;
+        for (int i = 0; i < sample.size(0); ++i) {
+            evidence[features[i]] = sample[i].item<int>();
         }
         return exactInference(evidence);
     }
