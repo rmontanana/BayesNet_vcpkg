@@ -10,7 +10,7 @@
                 "-d",
                 "iris",
                 "-m",
-                "TAN",
+                "TANNew",
                 "-p",
                 "/Users/rmontanana/Code/discretizbench/datasets/",
                 "--tensors"
@@ -24,15 +24,12 @@
             "program": "${workspaceFolder}/build/src/Platform/main",
             "args": [
                 "-m",
-                "TAN",
+                "TANNew",
                 "-p",
                 "/Users/rmontanana/Code/discretizbench/datasets",
-                "--discretize",
                 "--stratified",
-                "--title",
-                "Debug test",
                 "-d",
-                "ionosphere"
+                "iris"
             ],
             "cwd": "${workspaceFolder}/build/src/Platform",
         },

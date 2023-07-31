@@ -2,6 +2,8 @@
 #define MODEL_REGISTER_H
 static platform::Registrar registrarT("TAN",
     [](void) -> bayesnet::BaseClassifier* { return new bayesnet::TAN();});
+static platform::Registrar registrarTN("TANNew",
+    [](void) -> bayesnet::BaseClassifier* { return new bayesnet::TANNew();});
 static platform::Registrar registrarS("SPODE",
     [](void) -> bayesnet::BaseClassifier* { return new bayesnet::SPODE(2);});
 static platform::Registrar registrarK("KDB",

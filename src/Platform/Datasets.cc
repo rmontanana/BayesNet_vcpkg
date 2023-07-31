@@ -207,9 +207,9 @@ namespace platform {
         if (discretize) {
             Xd = discretizeDataset(Xv, yv);
             computeStates();
-            n_samples = Xd[0].size();
-            n_features = Xd.size();
         }
+        n_samples = Xv[0].size();
+        n_features = Xv.size();
         loaded = true;
     }
     void Dataset::buildTensors()

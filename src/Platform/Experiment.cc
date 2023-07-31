@@ -104,7 +104,7 @@ namespace platform {
 
     void Experiment::cross_validation(const string& path, const string& fileName)
     {
-        auto datasets = platform::Datasets(path, true, platform::ARFF);
+        auto datasets = platform::Datasets(path, discretized, platform::ARFF);
         // Get dataset
         auto [X, y] = datasets.getTensors(fileName);
         auto states = datasets.getStates(fileName);

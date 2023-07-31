@@ -40,7 +40,7 @@ namespace bayesnet {
         int getNumberOfEdges() override;
         int getNumberOfStates() override;
         vector<string> show() override;
-        vector<string> graph(string title) override;
+        vector<string> graph(const string& title) override;
     };
 }
 #endif

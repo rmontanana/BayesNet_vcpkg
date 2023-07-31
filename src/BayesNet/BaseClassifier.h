@@ -16,7 +16,7 @@ namespace bayesnet {
         int virtual getNumberOfEdges() = 0;
         int virtual getNumberOfStates() = 0;
         vector<string> virtual show() = 0;
-        vector<string> virtual graph(string title = "") = 0;
+        vector<string> virtual graph(const string& title = "") = 0;
         virtual ~BaseClassifier() = default;
         const string inline getVersion() const { return "0.1.0"; };
     };

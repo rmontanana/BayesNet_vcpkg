@@ -79,11 +79,12 @@ namespace bayesnet {
             exit_cond = num == n_edges || candidates.size(0) == 0;
         }
     }
-    vector<string> KDB::graph(string title)
+    vector<string> KDB::graph(const string& title)
     {
+        string header{ title };
         if (title == "KDB") {
-            title += " (k=" + to_string(k) + ", theta=" + to_string(theta) + ")";
+            header += " (k=" + to_string(k) + ", theta=" + to_string(theta) + ")";
         }
-        return model.graph(title);
+        return model.graph(header);
     }
 }

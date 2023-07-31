@@ -139,7 +139,7 @@ namespace bayesnet {
         }
         return result;
     }
-    vector<string> Ensemble::graph(string title)
+    vector<string> Ensemble::graph(const string& title)
     {
         auto result = vector<string>();
         for (auto i = 0; i < n_models; ++i) {

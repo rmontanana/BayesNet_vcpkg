@@ -34,7 +34,7 @@ namespace bayesnet {
             model.addEdge(className, feature);
         }
     }
-    vector<string> TAN::graph(string title)
+    vector<string> TAN::graph(const string& title)
     {
         return model.graph(title);
     }
