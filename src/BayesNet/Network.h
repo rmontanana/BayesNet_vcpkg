@@ -10,11 +10,11 @@ namespace bayesnet {
         map<string, unique_ptr<Node>> nodes;
         map<string, vector<int>> dataset;
         bool fitted;
-        float maxThreads;
+        float maxThreads = 0.95;
         int classNumStates;
         vector<string> features;
         string className;
-        int laplaceSmoothing;
+        int laplaceSmoothing = 1;
         torch::Tensor samples;
         bool isCyclic(const std::string&, std::unordered_set<std::string>&, std::unordered_set<std::string>&);
         vector<double> predict_sample(const vector<int>&);

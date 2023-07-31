@@ -68,9 +68,19 @@ namespace bayesnet {
             throw logic_error("Ensemble has not been fitted");
         }
         Tensor y_pred = torch::zeros({ X.size(1), n_models }, kInt32);
+        //Create a threadpool
+        auto threads{ vector<thread>() };
+        auto lock = mutex();
         for (auto i = 0; i < n_models; ++i) {
-            auto ypredict = models[i]->predict(X);
-            y_pred.index_put_({ "...", i }, ypredict);
+            threads.push_back(thread([&, i]() {
+                auto ypredict = models[i]->predict(X);
+                lock.lock();
+                y_pred.index_put_({ "...", i }, ypredict);
+                lock.unlock();
+                }));
+        }
+        for (auto& thread : threads) {
+            thread.join();
         }
         return torch::tensor(voting(y_pred));
     }
