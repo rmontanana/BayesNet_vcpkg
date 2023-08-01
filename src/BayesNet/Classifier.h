@@ -40,6 +40,7 @@ namespace bayesnet {
         float score(Tensor& X, Tensor& y) override;
         float score(vector<vector<int>>& X, vector<int>& y) override;
         vector<string> show() override;
+        vector<string> topological_order() override;
     };
 }
 #endif

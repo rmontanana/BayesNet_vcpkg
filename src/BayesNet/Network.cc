@@ -341,4 +341,45 @@ namespace bayesnet {
         }
         return edges;
     }
+    vector<string> Network::topological_sort()
+    {
+        /* Check if al the fathers of every node are before the node */
+        auto result = features;
+        bool ending{ false };
+        int idx = 0;
+        while (!ending) {
+            ending = true;
+            for (auto feature : features) {
+                if (feature == className) {
+                    continue;
+                }
+                auto fathers = nodes[feature]->getParents();
+                for (const auto& father : fathers) {
+                    auto fatherName = father->getName();
+                    if (fatherName == className) {
+                        continue;
+                    }
+                    auto it = find(result.begin(), result.end(), fatherName);
+                    if (it != result.end()) {
+                        auto it2 = find(result.begin(), result.end(), feature);
+                        if (it2 != result.end()) {
+                            if (distance(it, it2) < 0) {
+                                result.erase(remove(result.begin(), result.end(), fatherName), result.end());
+                                result.insert(it2, fatherName);
+                                ending = false;
+                            }
+                        } else {
+                            throw logic_error("Error in topological sort because of node " + feature + " is not in result");
+                        }
+                    } else {
+                        throw logic_error("Error in topological sort because of node father " + fatherName + " is not in result");
+                    }
+                }
+            }
+        }
+
+
+
+        return result;
+    }
 }

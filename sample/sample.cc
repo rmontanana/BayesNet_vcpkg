@@ -158,6 +158,7 @@ int main(int argc, char** argv)
         states[feature] = vector<int>(maxes[feature]);
     }
     states[className] = vector<int>(maxes[className]);
+
     auto clf = platform::Models::instance()->create(model_name);
     clf->fit(Xd, y, features, className, states);
     auto score = clf->score(Xd, y);
@@ -166,6 +167,11 @@ int main(int argc, char** argv)
     for (auto line : lines) {
         cout << line << endl;
     }
+    cout << "--- Topological Order ---" << endl;
+    for (auto name : clf->topological_order()) {
+        cout << name << ", ";
+    }
+    cout << "end." << endl;
     cout << "Score: " << score << endl;
     auto dot_file = model_name + "_" + file_name;
     ofstream file(dot_file + ".dot");

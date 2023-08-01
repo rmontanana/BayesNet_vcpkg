@@ -50,6 +50,7 @@ namespace bayesnet {
         vector<vector<double>> predict_proba(const vector<vector<int>>&);
         torch::Tensor predict_proba(const torch::Tensor&);
         double score(const vector<vector<int>>&, const vector<int>&);
+        vector<string> topological_sort();
         vector<string> show();
         vector<string> graph(const string& title); // Returns a vector of strings representing the graph in graphviz format
         inline string version() { return "0.1.0"; }

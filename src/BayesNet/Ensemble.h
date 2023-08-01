@@ -41,6 +41,10 @@ namespace bayesnet {
         int getNumberOfStates() override;
         vector<string> show() override;
         vector<string> graph(const string& title) override;
+        vector<string> topological_order() override
+        {
+            return vector<string>();
+        }
     };
 }
 #endif

@@ -134,4 +134,8 @@ namespace bayesnet {
     {
         return fitted ? model.getStates() : 0;
     }
+    vector<string> Classifier::topological_order()
+    {
+        return model.topological_sort();
+    }
 }
