@@ -114,7 +114,7 @@ namespace platform {
         cout << " (" << setw(5) << samples << "," << setw(3) << features.size() << ") " << flush;
         // Prepare Result
         auto result = Result();
-        auto [values, counts] = at::_unique(y);;
+        auto [values, counts] = at::_unique(y);
         result.setSamples(X.size(1)).setFeatures(X.size(0)).setClasses(values.size(0));
         int nResults = nfolds * static_cast<int>(randomSeeds.size());
         auto accuracy_test = torch::zeros({ nResults }, torch::kFloat64);

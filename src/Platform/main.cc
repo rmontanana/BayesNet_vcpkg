@@ -99,7 +99,6 @@ int main(int argc, char** argv)
         filesToTest = platform::Datasets(path, true, platform::ARFF).getNames();
         saveResults = true;
     }
-
     /*
     * Begin Processing
     */
