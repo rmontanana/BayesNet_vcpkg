@@ -103,9 +103,10 @@ int main(int argc, char** argv)
     /*
     * Begin Processing
     */
+    auto env = platform::DotEnv();
     auto experiment = platform::Experiment();
     experiment.setTitle(title).setLanguage("cpp").setLanguageVersion("1.0.0");
-    experiment.setDiscretized(discretize_dataset).setModel(model_name).setPlatform("BayesNet");
+    experiment.setDiscretized(discretize_dataset).setModel(model_name).setPlatform(env.get("platform"));
     experiment.setStratified(stratified).setNFolds(n_folds).setScoreName("accuracy");
     for (auto seed : seeds) {
         experiment.addRandomSeed(seed);
