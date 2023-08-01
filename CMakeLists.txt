@@ -7,10 +7,14 @@ project(BayesNet
   LANGUAGES CXX
 )
 
+if (CODE_COVERAGE AND NOT ENABLE_TESTING)
+  MESSAGE(FATAL_ERROR "Code coverage requires testing enabled")
+endif (CODE_COVERAGE AND NOT ENABLE_TESTING)
+
 find_package(Torch REQUIRED)
 
 if (POLICY CMP0135)
-    cmake_policy(SET CMP0135 NEW)
+  cmake_policy(SET CMP0135 NEW)
 endif ()
 
 # Global CMake variables
@@ -24,24 +28,31 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 # Options
 # -------
 option(ENABLE_CLANG_TIDY "Enable to add clang tidy."              OFF)
-option(ENABLE_TESTING "Unit testing build"                        ON)
-option(CODE_COVERAGE "Collect coverage from test library"         ON)
-
-set(CMAKE_BUILD_TYPE "Debug")
+option(ENABLE_TESTING "Unit testing build"                        OFF)
+option(CODE_COVERAGE "Collect coverage from test library"         OFF)
 
 # CMakes modules
 # --------------
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
 
 include(AddGitSubmodule)
-include(StaticAnalyzers) # clang-tidy
-include(CodeCoverage)
+if (CODE_COVERAGE)
+    enable_testing()
+    include(CodeCoverage)
+    MESSAGE("Code coverage enabled")
+    set(CMAKE_C_FLAGS " ${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage")
+    set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
+    SET(GCC_COVERAGE_LINK_FLAGS " ${GCC_COVERAGE_LINK_FLAGS} -lgcov --coverage")
+endif (CODE_COVERAGE)
+
+if (ENABLE_CLANG_TIDY)
+  include(StaticAnalyzers) # clang-tidy
+endif (ENABLE_CLANG_TIDY)
 
 # External libraries - dependencies of BayesNet
 # ---------------------------------------------
 # include(FetchContent)
 add_git_submodule("lib/mdlp")
-add_git_submodule("lib/catch2")
 add_git_submodule("lib/argparse")
 add_git_submodule("lib/json")
 
@@ -59,18 +70,11 @@ file(GLOB Platform_SOURCES CONFIGURE_DEPENDS ${BayesNet_SOURCE_DIR}/src/Platform
 
 # Testing
 # -------
+
 if (ENABLE_TESTING)
   MESSAGE("Testing enabled")
-  enable_testing()
-  if (CODE_COVERAGE)
-    #include(CodeCoverage)
-    MESSAGE("Code coverage enabled")
-    set(CMAKE_C_FLAGS " ${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage")
-    set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
-    SET(GCC_COVERAGE_LINK_FLAGS " ${GCC_COVERAGE_LINK_FLAGS} -lgcov --coverage")
-  endif (CODE_COVERAGE)
-  #find_package(Catch2 3 REQUIRED)
+  add_git_submodule("lib/catch2")
+  
   include(CTest)
-  #include(Catch)
   add_subdirectory(tests)
 endif (ENABLE_TESTING)

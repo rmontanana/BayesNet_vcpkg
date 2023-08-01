@@ -14,15 +14,21 @@ setup: ## Install dependencies for tests and coverage
 dependency: ## Create a dependency graph diagram of the project (build/dependency.png)
 	cd build && cmake .. --graphviz=dependency.dot && dot -Tpng dependency.dot -o dependency.png
 
-build: ## Build the project
-	@echo ">>> Building BayesNet ...";
+debug: ## Build the project
+	@echo ">>> Building Debug BayesNet ...";
 	@if [ -d ./build ]; then rm -rf ./build; fi
 	@mkdir build; 
-	cmake -S . -B build; \
-	cd build; \
-	make; \
-	
+	cmake -S . -B build -D CMAKE_BUILD_TYPE=Debug -D ENABLE_TESTING=ON -D CODE_COVERAGE=ON; \
+	cmake --build build -j 32;
 	@echo ">>> Done";
+
+release:
+	@echo ">>> Building Release BayesNet ...";
+	@if [ -d ./build ]; then rm -rf ./build; fi
+	@mkdir build; 
+	cmake -S . -B build -D CMAKE_BUILD_TYPE=Release; \
+	cmake --build build -t main -j 32;
+	@echo ">>> Done";	
 
 test: ## Run tests
 	@echo "* Running tests...";
