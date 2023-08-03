@@ -27,9 +27,10 @@ namespace bayesnet {
         */
         // 1. For each feature Xi, compute mutual information, I(X;C),
         // where C is the class.
+        addNodes();
         vector <float> mi;
         for (auto i = 0; i < features.size(); i++) {
-            Tensor firstFeature = X.index({ "...", i });
+            Tensor firstFeature = X.index({ i, "..." });
             mi.push_back(metrics.mutualInformation(firstFeature, y));
         }
         // 2. Compute class conditional mutual information I(Xi;XjIC), f or each
@@ -38,14 +39,12 @@ namespace bayesnet {
         vector<int> S;
         // 4. Let the DAG network being constructed, BN, begin with a single
         // class node, C.
-        model.addNode(className, states[className].size());
         // 5. Repeat until S includes all domain features
         // 5.1. Select feature Xmax which is not in S and has the largest value
         // I(Xmax;C).
         auto order = argsort(mi);
         for (auto idx : order) {
             // 5.2. Add a node to BN representing Xmax.
-            model.addNode(features[idx], states[features[idx]].size());
             // 5.3. Add an arc from C to Xmax in BN.
             model.addEdge(className, features[idx]);
             // 5.4. Add m = min(lSl,/c) arcs from m distinct features Xj in S with

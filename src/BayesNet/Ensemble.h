@@ -45,6 +45,9 @@ namespace bayesnet {
         {
             return vector<string>();
         }
+        void dump_cpt() override
+        {
+        }
     };
 }
 #endif

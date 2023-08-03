@@ -8,7 +8,7 @@ namespace bayesnet {
     using namespace torch;
     class Metrics {
     private:
-        Tensor samples;
+        Tensor samples; // nxm tensor used to fit the model
         vector<string> features;
         string className;
         int classNumStates = 0;
@@ -19,7 +19,7 @@ namespace bayesnet {
         double entropy(Tensor&);
         double conditionalEntropy(Tensor&, Tensor&);
         double mutualInformation(Tensor&, Tensor&);
-        vector<float> conditionalEdgeWeights();
+        vector<float> conditionalEdgeWeights(); // To use in Python
         Tensor conditionalEdge();
         vector<pair<string, string>> doCombinations(const vector<string>&);
         vector<pair<int, int>> maximumSpanningTree(vector<string> features, Tensor& weights, int root);

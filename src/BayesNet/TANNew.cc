@@ -32,19 +32,26 @@ namespace bayesnet {
         iota(yStates.begin(), yStates.end(), 0);
         this->states[className] = yStates;
         // Now we have standard TAN and now we implement the proposal
+        // 1st we need to fit the model to build the TAN structure
+        cout << "TANNew: Fitting model" << endl;
+        TAN::fit(Xv, yv, features, className, this->states);
+        cout << "TANNew: Model fitted" << endl;
         // order of local discretization is important. no good 0, 1, 2...
+        auto edges = model.getEdges();
         auto order = model.topological_sort();
-        auto nodes = model.getNodes();
+        auto& nodes = model.getNodes();
+        vector<int> indicesToReDiscretize;
         bool upgrade = false; // Flag to check if we need to upgrade the model
         for (auto feature : order) {
             auto nodeParents = nodes[feature]->getParents();
             int index = find(features.begin(), features.end(), feature) - features.begin();
             vector<string> parents;
+            transform(nodeParents.begin(), nodeParents.end(), back_inserter(parents), [](const auto& p) {return p->getName(); });
             if (parents.size() == 1) continue; // Only has class as parent
             upgrade = true;
-            transform(nodeParents.begin(), nodeParents.end(), back_inserter(parents), [](const auto& p) {return p->getName(); });
             // Remove class as parent as it will be added later
             parents.erase(remove(parents.begin(), parents.end(), className), parents.end());
+            // Get the indices of the parents
             vector<int> indices;
             transform(parents.begin(), parents.end(), back_inserter(indices), [&](const auto& p) {return find(features.begin(), features.end(), p) - features.begin(); });
             // Now we fit the discretizer of the feature conditioned on its parents and the class i.e. discretizer.fit(X[index], X[indices] + y)
@@ -58,22 +65,23 @@ namespace bayesnet {
             auto arff = ArffFiles();
             auto yxv = arff.factorize(yJoinParents);
             discretizers[feature]->fit(Xvf[index], yxv);
+            indicesToReDiscretize.push_back(index);
         }
         if (upgrade) {
-            // Discretize again X with the new fitted discretizers
-            Xv = vector<vector<int>>();
-            for (int i = 0; i < features.size(); ++i) {
-                auto Xt_ptr = X.index({ i }).data_ptr<float>();
+            // Discretize again X (only the affected indices) with the new fitted discretizers
+            for (auto index : indicesToReDiscretize) {
+                auto Xt_ptr = X.index({ index }).data_ptr<float>();
                 auto Xt = vector<float>(Xt_ptr, Xt_ptr + X.size(1));
-                Xv.push_back(discretizers[features[i]]->transform(Xt));
-                auto xStates = vector<int>(discretizers[features[i]]->getCutPoints().size() + 1);
+                Xv[index] = discretizers[features[index]]->transform(Xt);
+                auto xStates = vector<int>(discretizers[features[index]]->getCutPoints().size() + 1);
                 iota(xStates.begin(), xStates.end(), 0);
-                this->states[features[i]] = xStates;
+                this->states[features[index]] = xStates;
             }
+            // Now we fit the model again with the new values
+            cout << "TANNew: Upgrading model" << endl;
+            model.fit(Xv, yv, features, className);
+            cout << "TANNew: Model upgraded" << endl;
         }
-
-
-        TAN::fit(Xv, yv, features, className, this->states);
         return *this;
     }
     void TANNew::train()
@@ -88,6 +96,7 @@ namespace bayesnet {
             auto Xd = discretizers[features[i]]->transform(Xt);
             Xtd.index_put_({ i }, torch::tensor(Xd, torch::kInt32));
         }
+        cout << "TANNew Xtd: " << Xtd.sizes() << endl;
         return TAN::predict(Xtd);
     }
     vector<string> TANNew::graph(const string& name)

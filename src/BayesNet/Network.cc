@@ -6,11 +6,22 @@ namespace bayesnet {
     Network::Network() : features(vector<string>()), className(""), classNumStates(0), fitted(false) {}
     Network::Network(float maxT) : features(vector<string>()), className(""), classNumStates(0), maxThreads(maxT), fitted(false) {}
     Network::Network(float maxT, int smoothing) : laplaceSmoothing(smoothing), features(vector<string>()), className(""), classNumStates(0), maxThreads(maxT), fitted(false) {}
-    Network::Network(Network& other) : laplaceSmoothing(other.laplaceSmoothing), features(other.features), className(other.className), classNumStates(other.getClassNumStates()), maxThreads(other.getmaxThreads()), fitted(other.fitted)
+    Network::Network(Network& other) : laplaceSmoothing(other.laplaceSmoothing), features(other.features), className(other.className), classNumStates(other.getClassNumStates()), maxThreads(other.
+        getmaxThreads()), fitted(other.fitted)
     {
         for (const auto& pair : other.nodes) {
             nodes[pair.first] = std::make_unique<Node>(*pair.second);
         }
+    }
+    void Network::initialize()
+    {
+        features = vector<string>();
+        className = "";
+        classNumStates = 0;
+        fitted = false;
+        nodes.clear();
+        dataset.clear();
+        samples = torch::Tensor();
     }
     float Network::getmaxThreads()
     {
@@ -22,6 +33,9 @@ namespace bayesnet {
     }
     void Network::addNode(const string& name, int numStates)
     {
+        if (name == "") {
+            throw invalid_argument("Node name cannot be empty");
+        }
         if (find(features.begin(), features.end(), name) == features.end()) {
             features.push_back(name);
         }
@@ -94,40 +108,59 @@ namespace bayesnet {
     {
         return nodes;
     }
+    void Network::checkFitData(int n_samples, int n_features, int n_samples_y, const vector<string>& featureNames, const string& className)
+    {
+        if (n_samples != n_samples_y) {
+            throw invalid_argument("X and y must have the same number of samples in Network::fit (" + to_string(n_samples) + " != " + to_string(n_samples_y) + ")");
+        }
+        if (n_features != featureNames.size()) {
+            throw invalid_argument("X and features must have the same number of features in Network::fit (" + to_string(n_features) + " != " + to_string(featureNames.size()) + ")");
+        }
+        if (n_features != features.size() - 1) {
+            throw invalid_argument("X and local features must have the same number of features in Network::fit (" + to_string(n_features) + " != " + to_string(features.size() - 1) + ")");
+        }
+        if (find(features.begin(), features.end(), className) == features.end()) {
+            throw invalid_argument("className not found in Network::features");
+        }
+        for (auto& feature : featureNames) {
+            if (find(features.begin(), features.end(), feature) == features.end()) {
+                throw invalid_argument("Feature " + feature + " not found in Network::features");
+            }
+        }
+    }
+    // X comes in nxm, where n is the number of features and m the number of samples
     void Network::fit(torch::Tensor& X, torch::Tensor& y, const vector<string>& featureNames, const string& className)
     {
-        features = featureNames;
+        checkFitData(X.size(1), X.size(0), y.size(0), featureNames, className);
         this->className = className;
         dataset.clear();
         // Specific part
         classNumStates = torch::max(y).item<int>() + 1;
-        samples = torch::cat({ X, y.view({ y.size(0), 1 }) }, 1);
+        Tensor ytmp = torch::transpose(y.view({ y.size(0), 1 }), 0, 1);
+        samples = torch::cat({ X , ytmp }, 0);
         for (int i = 0; i < featureNames.size(); ++i) {
-            auto column = torch::flatten(X.index({ "...", i }));
-            auto k = vector<int>();
-            for (auto z = 0; z < X.size(0); ++z) {
-                k.push_back(column[z].item<int>());
-            }
-            dataset[featureNames[i]] = k;
+            auto row_feature = X.index({ i, "..." });
+            dataset[featureNames[i]] = vector<int>(row_feature.data_ptr<int>(), row_feature.data_ptr<int>() + row_feature.size(0));;
         }
         dataset[className] = vector<int>(y.data_ptr<int>(), y.data_ptr<int>() + y.size(0));
         completeFit();
     }
+    // input_data comes in nxm, where n is the number of features and m the number of samples
     void Network::fit(const vector<vector<int>>& input_data, const vector<int>& labels, const vector<string>& featureNames, const string& className)
     {
-        features = featureNames;
+        checkFitData(input_data[0].size(), input_data.size(), labels.size(), featureNames, className);
         this->className = className;
         dataset.clear();
         // Specific part
         classNumStates = *max_element(labels.begin(), labels.end()) + 1;
-        // Build dataset & tensor of samples
-        samples = torch::zeros({ static_cast<int>(input_data[0].size()), static_cast<int>(input_data.size() + 1) }, torch::kInt32);
+        // Build dataset & tensor of samples (nxm) (n+1 because of the class)
+        samples = torch::zeros({ static_cast<int>(input_data.size() + 1), static_cast<int>(input_data[0].size()) }, torch::kInt32);
         for (int i = 0; i < featureNames.size(); ++i) {
             dataset[featureNames[i]] = input_data[i];
-            samples.index_put_({ "...", i }, torch::tensor(input_data[i], torch::kInt32));
+            samples.index_put_({ i, "..." }, torch::tensor(input_data[i], torch::kInt32));
         }
         dataset[className] = labels;
-        samples.index_put_({ "...", -1 }, torch::tensor(labels, torch::kInt32));
+        samples.index_put_({ -1, "..." }, torch::tensor(labels, torch::kInt32));
         completeFit();
     }
     void Network::completeFit()
@@ -169,35 +202,36 @@ namespace bayesnet {
         }
         fitted = true;
     }
-    Tensor Network::predict_proba(const Tensor& samples)
-    {
-        if (!fitted) {
-            throw logic_error("You must call fit() before calling predict_proba()");
-        }
-        Tensor result = torch::zeros({ samples.size(0), classNumStates }, torch::kFloat64);
-        auto Xt = torch::transpose(samples, 0, 1);
-        for (int i = 0; i < samples.size(0); ++i) {
-            auto sample = Xt.index({ "...", i });
-            auto classProbabilities = predict_sample(sample);
-            result.index_put_({ i, "..." }, torch::tensor(classProbabilities, torch::kFloat64));
-        }
-        return result;
-    }
-    Tensor Network::predict(const Tensor& samples)
+    torch::Tensor Network::predict_tensor(const torch::Tensor& samples, const bool proba)
     {
         if (!fitted) {
             throw logic_error("You must call fit() before calling predict()");
         }
-        Tensor result = torch::zeros({ samples.size(0), classNumStates }, torch::kFloat64);
-        auto Xt = torch::transpose(samples, 0, 1);
-        for (int i = 0; i < samples.size(0); ++i) {
-            auto sample = Xt.index({ "...", i });
-            auto classProbabilities = predict_sample(sample);
-            result.index_put_({ i, "..." }, torch::tensor(classProbabilities, torch::kFloat64));
+        torch::Tensor result;
+        result = torch::zeros({ samples.size(1), classNumStates }, torch::kFloat64);
+        for (int i = 0; i < samples.size(1); ++i) {
+            auto sample = samples.index({ "...", i });
+            result.index_put_({ i, "..." }, torch::tensor(predict_sample(sample), torch::kFloat64));
         }
-        return result;
+        if (proba)
+            return result;
+        else
+            return result.argmax(1);
+    }
+    // Return mxn tensor of probabilities
+    Tensor Network::predict_proba(const Tensor& samples)
+    {
+        return predict_tensor(samples, true);
     }
 
+    // Return mxn tensor of probabilities
+    Tensor Network::predict(const Tensor& samples)
+    {
+        return predict_tensor(samples, false);
+    }
+
+    // Return mx1 vector of predictions
+    // tsamples is nxm vector of samples
     vector<int> Network::predict(const vector<vector<int>>& tsamples)
     {
         if (!fitted) {
@@ -218,6 +252,7 @@ namespace bayesnet {
         }
         return predictions;
     }
+    // Return mxn vector of probabilities
     vector<vector<double>> Network::predict_proba(const vector<vector<int>>& tsamples)
     {
         if (!fitted) {
@@ -245,12 +280,13 @@ namespace bayesnet {
         }
         return (double)correct / y_pred.size();
     }
+    // Return 1xn vector of probabilities
     vector<double> Network::predict_sample(const vector<int>& sample)
     {
         // Ensure the sample size is equal to the number of features
-        if (sample.size() != features.size()) {
+        if (sample.size() != features.size() - 1) {
             throw invalid_argument("Sample size (" + to_string(sample.size()) +
-                ") does not match the number of features (" + to_string(features.size()) + ")");
+                ") does not match the number of features (" + to_string(features.size() - 1) + ")");
         }
         map<string, int> evidence;
         for (int i = 0; i < sample.size(); ++i) {
@@ -258,17 +294,21 @@ namespace bayesnet {
         }
         return exactInference(evidence);
     }
+    // Return 1xn vector of probabilities
     vector<double> Network::predict_sample(const Tensor& sample)
     {
         // Ensure the sample size is equal to the number of features
-        if (sample.size(0) != features.size()) {
+        if (sample.size(0) != features.size() - 1) {
             throw invalid_argument("Sample size (" + to_string(sample.size(0)) +
-                ") does not match the number of features (" + to_string(features.size()) + ")");
+                ") does not match the number of features (" + to_string(features.size() - 1) + ")");
         }
         map<string, int> evidence;
         for (int i = 0; i < sample.size(0); ++i) {
             evidence[features[i]] = sample[i].item<int>();
+            cout << "Evidence: " << features[i] << " = " << sample[i].item<int>() << endl;
         }
+        cout << "BEfore exact inference" << endl;
+
         return exactInference(evidence);
     }
     double Network::computeFactor(map<string, int>& completeEvidence)
@@ -345,25 +385,25 @@ namespace bayesnet {
     {
         /* Check if al the fathers of every node are before the node */
         auto result = features;
+        result.erase(remove(result.begin(), result.end(), className), result.end());
         bool ending{ false };
         int idx = 0;
         while (!ending) {
             ending = true;
             for (auto feature : features) {
-                if (feature == className) {
-                    continue;
-                }
                 auto fathers = nodes[feature]->getParents();
                 for (const auto& father : fathers) {
                     auto fatherName = father->getName();
                     if (fatherName == className) {
                         continue;
                     }
+                    // Check if father is placed before the actual feature
                     auto it = find(result.begin(), result.end(), fatherName);
                     if (it != result.end()) {
                         auto it2 = find(result.begin(), result.end(), feature);
                         if (it2 != result.end()) {
                             if (distance(it, it2) < 0) {
+                                // if it is not, insert it before the feature
                                 result.erase(remove(result.begin(), result.end(), fatherName), result.end());
                                 result.insert(it2, fatherName);
                                 ending = false;
@@ -377,9 +417,12 @@ namespace bayesnet {
                 }
             }
         }
-
-
-
         return result;
+    }
+    void Network::dump_cpt()
+    {
+        for (auto& node : nodes) {
+            cout << "* " << node.first << ": " << node.second->getCPT() << endl;
+        }
     }
 }

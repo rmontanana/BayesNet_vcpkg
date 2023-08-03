@@ -15,11 +15,11 @@ namespace bayesnet {
     protected:
         Network model;
         int m, n; // m: number of samples, n: number of features
-        Tensor X;
-        vector<vector<int>> Xv;
+        Tensor X; // nxm tensor
+        vector<vector<int>> Xv; // nxm vector
         Tensor y;
         vector<int> yv;
-        Tensor dataset;
+        Tensor samples; // (n+1)xm tensor
         Metrics metrics;
         vector<string> features;
         string className;
@@ -41,6 +41,7 @@ namespace bayesnet {
         float score(vector<vector<int>>& X, vector<int>& y) override;
         vector<string> show() override;
         vector<string> topological_order() override;
+        void dump_cpt() override;
     };
 }
 #endif

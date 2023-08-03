@@ -1,6 +1,7 @@
 #include "BayesMetrics.h"
 #include "Mst.h"
 namespace bayesnet {
+    //samples is nxm tensor used to fit the model
     Metrics::Metrics(torch::Tensor& samples, vector<string>& features, string& className, int classNumStates)
         : samples(samples)
         , features(features)
@@ -8,6 +9,7 @@ namespace bayesnet {
         , classNumStates(classNumStates)
     {
     }
+    //samples is nxm vector used to fit the model
     Metrics::Metrics(const vector<vector<int>>& vsamples, const vector<int>& labels, const vector<string>& features, const string& className, const int classNumStates)
         : features(features)
         , className(className)
@@ -15,9 +17,9 @@ namespace bayesnet {
         , samples(torch::zeros({ static_cast<int>(vsamples[0].size()), static_cast<int>(vsamples.size() + 1) }, torch::kInt32))
     {
         for (int i = 0; i < vsamples.size(); ++i) {
-            samples.index_put_({ "...", i }, torch::tensor(vsamples[i], torch::kInt32));
+            samples.index_put_({ i,  "..." }, torch::tensor(vsamples[i], torch::kInt32));
         }
-        samples.index_put_({ "...", -1 }, torch::tensor(labels, torch::kInt32));
+        samples.index_put_({ -1, "..." }, torch::tensor(labels, torch::kInt32));
     }
     vector<pair<string, string>> Metrics::doCombinations(const vector<string>& source)
     {
@@ -39,17 +41,17 @@ namespace bayesnet {
         // Compute class prior
         auto margin = torch::zeros({ classNumStates });
         for (int value = 0; value < classNumStates; ++value) {
-            auto mask = samples.index({ "...", -1 }) == value;
-            margin[value] = mask.sum().item<float>() / samples.sizes()[0];
+            auto mask = samples.index({ -1,  "..." }) == value;
+            margin[value] = mask.sum().item<float>() / samples.size(1);
         }
         for (auto [first, second] : combinations) {
             int index_first = find(features.begin(), features.end(), first) - features.begin();
             int index_second = find(features.begin(), features.end(), second) - features.begin();
             double accumulated = 0;
             for (int value = 0; value < classNumStates; ++value) {
-                auto mask = samples.index({ "...", -1 }) == value;
-                auto first_dataset = samples.index({ mask, index_first });
-                auto second_dataset = samples.index({ mask, index_second });
+                auto mask = samples.index({ -1, "..." }) == value;
+                auto first_dataset = samples.index({ index_first, mask });
+                auto second_dataset = samples.index({ index_second, mask });
                 auto mi = mutualInformation(first_dataset, second_dataset);
                 auto pb = margin[value].item<float>();
                 accumulated += pb * mi;
@@ -67,6 +69,7 @@ namespace bayesnet {
         }
         return matrix;
     }
+    // To use in Python
     vector<float> Metrics::conditionalEdgeWeights()
     {
         auto matrix = conditionalEdge();

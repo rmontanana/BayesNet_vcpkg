@@ -7,15 +7,18 @@ namespace bayesnet {
     Classifier::Classifier(Network model) : model(model), m(0), n(0), metrics(Metrics()), fitted(false) {}
     Classifier& Classifier::build(vector<string>& features, string className, map<string, vector<int>>& states)
     {
-        dataset = torch::cat({ X, y.view({y.size(0), 1}) }, 1);
+        Tensor ytmp = torch::transpose(y.view({ y.size(0), 1 }), 0, 1);
+        samples = torch::cat({ X, ytmp }, 0);
         this->features = features;
         this->className = className;
         this->states = states;
+        cout << "Classifier samples: " << samples.sizes() << endl;
         checkFitParameters();
         auto n_classes = states[className].size();
-        metrics = Metrics(dataset, features, className, n_classes);
+        metrics = Metrics(samples, features, className, n_classes);
+        model.initialize();
         train();
-        if (Xv == vector<vector<int>>()) {
+        if (Xv.empty()) {
             // fit with tensors
             model.fit(X, y, features, className);
         } else {
@@ -25,21 +28,23 @@ namespace bayesnet {
         fitted = true;
         return *this;
     }
+    // X is nxm where n is the number of features and m the number of samples
     Classifier& Classifier::fit(torch::Tensor& X, torch::Tensor& y, vector<string>& features, string className, map<string, vector<int>>& states)
     {
-        this->X = torch::transpose(X, 0, 1);
+        this->X = X;
         this->y = y;
         Xv = vector<vector<int>>();
         yv = vector<int>(y.data_ptr<int>(), y.data_ptr<int>() + y.size(0));
         return build(features, className, states);
     }
-
+    // X is nxm where n is the number of features and m the number of samples
     Classifier& Classifier::fit(vector<vector<int>>& X, vector<int>& y, vector<string>& features, string className, map<string, vector<int>>& states)
     {
-        this->X = torch::zeros({ static_cast<int>(X[0].size()), static_cast<int>(X.size()) }, kInt32);
+
+        this->X = torch::zeros({ static_cast<int>(X.size()), static_cast<int>(X[0].size()) }, kInt32);
         Xv = X;
         for (int i = 0; i < X.size(); ++i) {
-            this->X.index_put_({ "...", i }, torch::tensor(X[i], kInt32));
+            this->X.index_put_({ i, "..." }, torch::tensor(X[i], kInt32));
         }
         this->y = torch::tensor(y, kInt32);
         yv = y;
@@ -48,8 +53,8 @@ namespace bayesnet {
     void Classifier::checkFitParameters()
     {
         auto sizes = X.sizes();
-        m = sizes[0];
-        n = sizes[1];
+        m = sizes[1];
+        n = sizes[0];
         if (m != y.size(0)) {
             throw invalid_argument("X and y must have the same number of samples");
         }
@@ -70,9 +75,7 @@ namespace bayesnet {
         if (!fitted) {
             throw logic_error("Classifier has not been fitted");
         }
-        auto Xt = torch::transpose(X, 0, 1); // Base classifiers expect samples as columns
-        auto y_proba = model.predict(Xt);
-        return y_proba.argmax(1);
+        return model.predict(X);
     }
     vector<int> Classifier::predict(vector<vector<int>>& X)
     {
@@ -101,12 +104,6 @@ namespace bayesnet {
         if (!fitted) {
             throw logic_error("Classifier has not been fitted");
         }
-        // auto m_ = X[0].size();
-        // auto n_ = X.size();
-        // vector<vector<int>> Xd(n_, vector<int>(m_, 0));
-        // for (auto i = 0; i < n_; i++) {
-        //     Xd[i] = vector<int>(X[i].begin(), X[i].end());
-        // }
         return model.score(X, y);
     }
     vector<string> Classifier::show()
@@ -116,7 +113,7 @@ namespace bayesnet {
     void Classifier::addNodes()
     {
         // Add all nodes to the network
-        for (auto feature : features) {
+        for (const auto& feature : features) {
             model.addNode(feature, states[feature].size());
         }
         model.addNode(className, states[className].size());
@@ -137,5 +134,9 @@ namespace bayesnet {
     vector<string> Classifier::topological_order()
     {
         return model.topological_sort();
+    }
+    void Classifier::dump_cpt()
+    {
+        model.dump_cpt();
     }
 }

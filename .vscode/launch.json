@@ -10,10 +10,11 @@
                 "-d",
                 "iris",
                 "-m",
-                "TANNew",
+                "KDB",
+                "-s",
+                "271",
                 "-p",
                 "/Users/rmontanana/Code/discretizbench/datasets/",
-                "--tensors"
             ],
             //"cwd": "${workspaceFolder}/build/sample/",
         },

@@ -12,13 +12,17 @@ namespace bayesnet {
         // 1. Compute mutual information between each feature and the class and set the root node
         // as the highest mutual information with the class
         auto mi = vector <pair<int, float >>();
-        Tensor class_dataset = dataset.index({ "...", -1 });
+        Tensor class_dataset = samples.index({ -1, "..." });
         for (int i = 0; i < static_cast<int>(features.size()); ++i) {
-            Tensor feature_dataset = dataset.index({ "...", i });
+            Tensor feature_dataset = samples.index({ i, "..." });
             auto mi_value = metrics.mutualInformation(class_dataset, feature_dataset);
             mi.push_back({ i, mi_value });
         }
         sort(mi.begin(), mi.end(), [](const auto& left, const auto& right) {return left.second < right.second;});
+        cout << "MI: " << endl;
+        for (int i = 0; i < mi.size(); ++i) {
+            cout << mi[i].first << " " << mi[i].second << endl;
+        }
         auto root = mi[mi.size() - 1].first;
         // 2. Compute mutual information between each feature and the class
         auto weights = metrics.conditionalEdge();

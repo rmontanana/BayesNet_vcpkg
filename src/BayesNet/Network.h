@@ -12,10 +12,10 @@ namespace bayesnet {
         bool fitted;
         float maxThreads = 0.95;
         int classNumStates;
-        vector<string> features;
+        vector<string> features; // Including class
         string className;
         int laplaceSmoothing = 1;
-        torch::Tensor samples;
+        torch::Tensor samples; // nxm tensor used to fit the model
         bool isCyclic(const std::string&, std::unordered_set<std::string>&, std::unordered_set<std::string>&);
         vector<double> predict_sample(const vector<int>&);
         vector<double> predict_sample(const torch::Tensor&);
@@ -26,6 +26,7 @@ namespace bayesnet {
         double conditionalEntropy(torch::Tensor&, torch::Tensor&);
         double mutualInformation(torch::Tensor&, torch::Tensor&);
         void completeFit();
+        void checkFitData(int n_features, int n_samples, int n_samples_y, const vector<string>& featureNames, const string& className);
     public:
         Network();
         explicit Network(float, int);
@@ -43,16 +44,19 @@ namespace bayesnet {
         string getClassName();
         void fit(const vector<vector<int>>&, const vector<int>&, const vector<string>&, const string&);
         void fit(torch::Tensor&, torch::Tensor&, const vector<string>&, const string&);
-        vector<int> predict(const vector<vector<int>>&);
-        torch::Tensor predict(const torch::Tensor&);
+        vector<int> predict(const vector<vector<int>>&); // Return mx1 vector of predictions
+        torch::Tensor predict(const torch::Tensor&); // Return mx1 tensor of predictions
         //Computes the conditional edge weight of variable index u and v conditioned on class_node
         torch::Tensor conditionalEdgeWeight();
-        vector<vector<double>> predict_proba(const vector<vector<int>>&);
-        torch::Tensor predict_proba(const torch::Tensor&);
+        torch::Tensor predict_tensor(const torch::Tensor& samples, const bool proba);
+        vector<vector<double>> predict_proba(const vector<vector<int>>&); // Return mxn vector of probabilities
+        torch::Tensor predict_proba(const torch::Tensor&); // Return mxn tensor of probabilities
         double score(const vector<vector<int>>&, const vector<int>&);
         vector<string> topological_sort();
         vector<string> show();
         vector<string> graph(const string& title); // Returns a vector of strings representing the graph in graphviz format
+        void initialize();
+        void dump_cpt();
         inline string version() { return "0.1.0"; }
     };
 }
