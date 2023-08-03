@@ -19,10 +19,6 @@ namespace bayesnet {
             mi.push_back({ i, mi_value });
         }
         sort(mi.begin(), mi.end(), [](const auto& left, const auto& right) {return left.second < right.second;});
-        cout << "MI: " << endl;
-        for (int i = 0; i < mi.size(); ++i) {
-            cout << mi[i].first << " " << mi[i].second << endl;
-        }
         auto root = mi[mi.size() - 1].first;
         // 2. Compute mutual information between each feature and the class
         auto weights = metrics.conditionalEdge();

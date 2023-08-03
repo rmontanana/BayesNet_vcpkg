@@ -305,10 +305,7 @@ namespace bayesnet {
         map<string, int> evidence;
         for (int i = 0; i < sample.size(0); ++i) {
             evidence[features[i]] = sample[i].item<int>();
-            cout << "Evidence: " << features[i] << " = " << sample[i].item<int>() << endl;
         }
-        cout << "BEfore exact inference" << endl;
-
         return exactInference(evidence);
     }
     double Network::computeFactor(map<string, int>& completeEvidence)

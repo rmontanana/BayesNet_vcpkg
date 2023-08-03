@@ -8,12 +8,10 @@ namespace bayesnet {
     class TANNew : public TAN {
     private:
         map<string, mdlp::CPPFImdlp*> discretizers;
-        int n_features;
-        torch::Tensor Xf; // X continuous
+        torch::Tensor Xf; // X continuous nxm tensor
     public:
         TANNew();
         virtual ~TANNew();
-        void train() override;
         TANNew& fit(torch::Tensor& X, torch::Tensor& y, vector<string>& features, string className, map<string, vector<int>>& states) override;
         vector<string> graph(const string& name = "TAN") override;
         Tensor predict(Tensor& X) override;
