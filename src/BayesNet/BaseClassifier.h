@@ -10,6 +10,7 @@ namespace bayesnet {
         virtual BaseClassifier& fit(vector<vector<int>>& X, vector<int>& y, vector<string>& features, string className, map<string, vector<int>>& states) = 0;
         // X is nxm tensor, y is nx1 tensor
         virtual BaseClassifier& fit(torch::Tensor& X, torch::Tensor& y, vector<string>& features, string className, map<string, vector<int>>& states) = 0;
+        virtual ~BaseClassifier() = default;
         torch::Tensor virtual predict(torch::Tensor& X) = 0;
         vector<int> virtual predict(vector<vector<int>>& X) = 0;
         float virtual score(vector<vector<int>>& X, vector<int>& y) = 0;
@@ -19,7 +20,6 @@ namespace bayesnet {
         int virtual getNumberOfStates() = 0;
         vector<string> virtual show() = 0;
         vector<string> virtual graph(const string& title = "") = 0;
-        virtual ~BaseClassifier() = default;
         const string inline getVersion() const { return "0.1.0"; };
         vector<string> virtual topological_order() = 0;
         void virtual dump_cpt() = 0;

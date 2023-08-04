@@ -4,7 +4,6 @@
 #include "BaseClassifier.h"
 #include "Network.h"
 #include "BayesMetrics.h"
-#include "CPPFImdlp.h"
 using namespace std;
 using namespace torch;
 
@@ -27,7 +26,6 @@ namespace bayesnet {
         map<string, vector<int>> states;
         void checkFitParameters();
         virtual void train() = 0;
-        void localDiscretizationProposal(map<string, mdlp::CPPFImdlp*>& discretizers, Tensor& Xf);
     public:
         Classifier(Network model);
         virtual ~Classifier() = default;

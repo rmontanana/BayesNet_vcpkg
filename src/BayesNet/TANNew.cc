@@ -2,41 +2,25 @@
 
 namespace bayesnet {
     using namespace std;
-    TANNew::TANNew() : TAN() {}
+    TANNew::TANNew() : TAN(), Proposal(TAN::Xv, TAN::yv, TAN::features, TAN::className) {}
     TANNew::~TANNew() {}
     TANNew& TANNew::fit(torch::Tensor& X_, torch::Tensor& y_, vector<string>& features_, string className_, map<string, vector<int>>& states_)
     {
+        // This first part should go in a Classifier method called fit_local_discretization o fit_float...
+        TAN::features = features_;
+        TAN::className = className_;
         Xf = X_;
         y = y_;
-        features = features_;
-        className = className_;
-        Xv = vector<vector<int>>();
-        yv = vector<int>(y.data_ptr<int>(), y.data_ptr<int>() + y.size(0));
-        // discretize input data by feature(row)
-        for (int i = 0; i < features.size(); ++i) {
-            auto* discretizer = new mdlp::CPPFImdlp();
-            auto Xt_ptr = Xf.index({ i }).data_ptr<float>();
-            auto Xt = vector<float>(Xt_ptr, Xt_ptr + Xf.size(1));
-            discretizer->fit(Xt, yv);
-            Xv.push_back(discretizer->transform(Xt));
-            auto xStates = vector<int>(discretizer->getCutPoints().size() + 1);
-            iota(xStates.begin(), xStates.end(), 0);
-            states[features[i]] = xStates;
-            discretizers[features[i]] = discretizer;
-        }
-        int n_classes = torch::max(y).item<int>() + 1;
-        auto yStates = vector<int>(n_classes);
-        iota(yStates.begin(), yStates.end(), 0);
-        states[className] = yStates;
-        // Now we have standard TAN and now we implement the proposal
-        // 1st we need to fit the model to build the TAN structure
+        fit_local_discretization(states, y);
+        // We have discretized the input data
+        // 1st we need to fit the model to build the normal TAN structure, TAN::fit initializes the base Bayesian network
         cout << "TANNew: Fitting model" << endl;
-        TAN::fit(Xv, yv, features, className, states);
+        TAN::fit(TAN::Xv, TAN::yv, TAN::features, TAN::className, states);
         cout << "TANNew: Model fitted" << endl;
-        localDiscretizationProposal(discretizers, Xf);
+        //localDiscretizationProposal(states, model);
+        //addNodes();
         return *this;
     }
-
     Tensor TANNew::predict(Tensor& X)
     {
         auto Xtd = torch::zeros_like(X, torch::kInt32);

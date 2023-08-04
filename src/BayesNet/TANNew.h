@@ -1,14 +1,12 @@
 #ifndef TANNEW_H
 #define TANNEW_H
 #include "TAN.h"
-#include "CPPFImdlp.h"
+#include "Proposal.h"
 
 namespace bayesnet {
     using namespace std;
-    class TANNew : public TAN {
+    class TANNew : public TAN, public Proposal {
     private:
-        map<string, mdlp::CPPFImdlp*> discretizers;
-        torch::Tensor Xf; // X continuous nxm tensor
     public:
         TANNew();
         virtual ~TANNew();

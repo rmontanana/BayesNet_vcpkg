@@ -211,7 +211,10 @@ namespace bayesnet {
         result = torch::zeros({ samples.size(1), classNumStates }, torch::kFloat64);
         for (int i = 0; i < samples.size(1); ++i) {
             auto sample = samples.index({ "...", i });
-            result.index_put_({ i, "..." }, torch::tensor(predict_sample(sample), torch::kFloat64));
+            auto psample = predict_sample(sample);
+            auto temp = torch::tensor(psample, torch::kFloat64);
+//            result.index_put_({ i, "..." }, torch::tensor(predict_sample(sample), torch::kFloat64));
+            result.index_put_({ i, "..." }, temp);
         }
         if (proba)
             return result;
@@ -333,7 +336,6 @@ namespace bayesnet {
         for (auto& thread : threads) {
             thread.join();
         }
-
         // Normalize result
         double sum = accumulate(result.begin(), result.end(), 0.0);
         transform(result.begin(), result.end(), result.begin(), [sum](double& value) { return value / sum; });
