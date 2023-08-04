@@ -3,7 +3,6 @@
 namespace bayesnet {
     using namespace std;
     TANNew::TANNew() : TAN(), Proposal(TAN::Xv, TAN::yv, TAN::features, TAN::className) {}
-    TANNew::~TANNew() {}
     TANNew& TANNew::fit(torch::Tensor& X_, torch::Tensor& y_, vector<string>& features_, string className_, map<string, vector<int>>& states_)
     {
         // This first part should go in a Classifier method called fit_local_discretization o fit_float...
@@ -17,8 +16,9 @@ namespace bayesnet {
         cout << "TANNew: Fitting model" << endl;
         TAN::fit(TAN::Xv, TAN::yv, TAN::features, TAN::className, states);
         cout << "TANNew: Model fitted" << endl;
-        //localDiscretizationProposal(states, model);
-        //addNodes();
+        localDiscretizationProposal(states, model);
+        addNodes();
+        model.fit(TAN::Xv, TAN::yv, features, className);
         return *this;
     }
     Tensor TANNew::predict(Tensor& X)

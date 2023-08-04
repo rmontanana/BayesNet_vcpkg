@@ -325,17 +325,17 @@ namespace bayesnet {
         vector<thread> threads;
         mutex mtx;
         for (int i = 0; i < classNumStates; ++i) {
-            threads.emplace_back([this, &result, &evidence, i, &mtx]() {
+//            threads.emplace_back([this, &result, &evidence, i, &mtx]() {
                 auto completeEvidence = map<string, int>(evidence);
                 completeEvidence[getClassName()] = i;
                 double factor = computeFactor(completeEvidence);
-                lock_guard<mutex> lock(mtx);
+//                lock_guard<mutex> lock(mtx);
                 result[i] = factor;
-                });
+//                });
         }
-        for (auto& thread : threads) {
-            thread.join();
-        }
+//        for (auto& thread : threads) {
+//            thread.join();
+//        }
         // Normalize result
         double sum = accumulate(result.begin(), result.end(), 0.0);
         transform(result.begin(), result.end(), result.begin(), [sum](double& value) { return value / sum; });

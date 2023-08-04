@@ -9,7 +9,7 @@ namespace bayesnet {
     private:
     public:
         TANNew();
-        virtual ~TANNew();
+        virtual ~TANNew() = default;
         TANNew& fit(torch::Tensor& X, torch::Tensor& y, vector<string>& features, string className, map<string, vector<int>>& states) override;
         vector<string> graph(const string& name = "TAN") override;
         Tensor predict(Tensor& X) override;
