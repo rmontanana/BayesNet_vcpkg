@@ -13,7 +13,6 @@ namespace bayesnet {
         KDBNew& fit(torch::Tensor& X, torch::Tensor& y, vector<string>& features, string className, map<string, vector<int>>& states) override;
         vector<string> graph(const string& name = "KDB") override;
         Tensor predict(Tensor& X) override;
-        void train() override;
         static inline string version() { return "0.0.1"; };
     };
 }

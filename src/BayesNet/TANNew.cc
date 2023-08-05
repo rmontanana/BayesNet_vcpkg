@@ -15,9 +15,7 @@ namespace bayesnet {
         generateTensorXFromVector();
         // We have discretized the input data
         // 1st we need to fit the model to build the normal TAN structure, TAN::fit initializes the base Bayesian network
-        cout << "TANNew: Fitting model" << endl;
         TAN::fit(TAN::Xv, TAN::yv, features, className, states);
-        cout << "TANNew: Model fitted" << endl;
         localDiscretizationProposal(states, model);
         generateTensorXFromVector();
         Tensor ytmp = torch::transpose(y.view({ y.size(0), 1 }), 0, 1);
@@ -27,14 +25,8 @@ namespace bayesnet {
     }
     Tensor TANNew::predict(Tensor& X)
     {
-        auto Xtd = torch::zeros_like(X, torch::kInt32);
-        for (int i = 0; i < X.size(0); ++i) {
-            auto Xt = vector<float>(X[i].data_ptr<float>(), X[i].data_ptr<float>() + X.size(1));
-            auto Xd = discretizers[features[i]]->transform(Xt);
-            Xtd.index_put_({ i }, torch::tensor(Xd, torch::kInt32));
-        }
-        cout << "TANNew Xtd: " << Xtd.sizes() << endl;
-        return TAN::predict(Xtd);
+        auto Xt = prepareX(X);
+        return TAN::predict(Xt);
     }
     vector<string> TANNew::graph(const string& name)
     {

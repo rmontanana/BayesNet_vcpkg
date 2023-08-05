@@ -47,25 +47,25 @@ namespace bayesnet {
             //
             //
             //
-            auto tmp = discretizers[feature]->transform(xvf);
-            Xv[index] = tmp;
-            auto xStates = vector<int>(discretizers[pFeatures[index]]->getCutPoints().size() + 1);
-            iota(xStates.begin(), xStates.end(), 0);
-            //Update new states of the feature/node
-            states[feature] = xStates;
+            // auto tmp = discretizers[feature]->transform(xvf);
+            // Xv[index] = tmp;
+            // auto xStates = vector<int>(discretizers[pFeatures[index]]->getCutPoints().size() + 1);
+            // iota(xStates.begin(), xStates.end(), 0);
+            // //Update new states of the feature/node
+            // states[feature] = xStates;
         }
-        // if (upgrade) {
-        //     // Discretize again X (only the affected indices) with the new fitted discretizers
-        //     for (auto index : indicesToReDiscretize) {
-        //         auto Xt_ptr = Xf.index({ index }).data_ptr<float>();
-        //         auto Xt = vector<float>(Xt_ptr, Xt_ptr + Xf.size(1));
-        //         Xv[index] = discretizers[pFeatures[index]]->transform(Xt);
-        //         auto xStates = vector<int>(discretizers[pFeatures[index]]->getCutPoints().size() + 1);
-        //         iota(xStates.begin(), xStates.end(), 0);
-        //         //Update new states of the feature/node
-        //         states[pFeatures[index]] = xStates;
-        //     }
-        // }
+        if (upgrade) {
+            // Discretize again X (only the affected indices) with the new fitted discretizers
+            for (auto index : indicesToReDiscretize) {
+                auto Xt_ptr = Xf.index({ index }).data_ptr<float>();
+                auto Xt = vector<float>(Xt_ptr, Xt_ptr + Xf.size(1));
+                Xv[index] = discretizers[pFeatures[index]]->transform(Xt);
+                auto xStates = vector<int>(discretizers[pFeatures[index]]->getCutPoints().size() + 1);
+                iota(xStates.begin(), xStates.end(), 0);
+                //Update new states of the feature/node
+                states[pFeatures[index]] = xStates;
+            }
+        }
     }
     void Proposal::fit_local_discretization(map<string, vector<int>>& states, torch::Tensor& y)
     {
@@ -88,5 +88,15 @@ namespace bayesnet {
         auto yStates = vector<int>(n_classes);
         iota(yStates.begin(), yStates.end(), 0);
         states[pClassName] = yStates;
+    }
+    torch::Tensor Proposal::prepareX(torch::Tensor& X)
+    {
+        auto Xtd = torch::zeros_like(X, torch::kInt32);
+        for (int i = 0; i < X.size(0); ++i) {
+            auto Xt = vector<float>(X[i].data_ptr<float>(), X[i].data_ptr<float>() + X.size(1));
+            auto Xd = discretizers[pFeatures[i]]->transform(Xt);
+            Xtd.index_put_({ i }, torch::tensor(Xd, torch::kInt32));
+        }
+        return Xtd;
     }
 }
