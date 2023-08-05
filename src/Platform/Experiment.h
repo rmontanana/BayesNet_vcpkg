@@ -108,6 +108,7 @@ namespace platform {
         void cross_validation(const string& path, const string& fileName);
         void go(vector<string> filesToProcess, const string& path);
         void show();
+        void report();
     };
 }
 #endif

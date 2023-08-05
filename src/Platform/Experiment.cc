@@ -1,6 +1,7 @@
 #include "Experiment.h"
 #include "Datasets.h"
 #include "Models.h"
+#include "Report.h"
 
 namespace platform {
     using json = nlohmann::json;
@@ -84,6 +85,13 @@ namespace platform {
         ofstream file(path + "/" + get_file_name());
         file << data;
         file.close();
+    }
+
+    void Experiment::report()
+    {
+        json data = build_json();
+        Report report(data);
+        report.show();
     }
 
     void Experiment::show()

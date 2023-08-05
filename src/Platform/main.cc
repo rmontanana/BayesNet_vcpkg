@@ -116,7 +116,7 @@ int main(int argc, char** argv)
     if (saveResults)
         experiment.save(PATH_RESULTS);
     else
-        experiment.show();
+        experiment.report();
     cout << "Done!" << endl;
     return 0;
 }

@@ -35,7 +35,6 @@ namespace bayesnet {
         }
         // 2. Compute class conditional mutual information I(Xi;XjIC), f or each
         auto conditionalEdgeWeights = metrics.conditionalEdge();
-        cout << "Conditional edge weights: " << conditionalEdgeWeights << endl;
         // 3. Let the used variable list, S, be empty.
         vector<int> S;
         // 4. Let the DAG network being constructed, BN, begin with a single
