@@ -36,14 +36,18 @@ namespace bayesnet {
         yv = vector<int>(y.data_ptr<int>(), y.data_ptr<int>() + y.size(0));
         return build(features, className, states);
     }
+    void Classifier::generateTensorXFromVector()
+    {
+        X = torch::zeros({ static_cast<int>(Xv.size()), static_cast<int>(Xv[0].size()) }, kInt32);
+        for (int i = 0; i < Xv.size(); ++i) {
+            X.index_put_({ i, "..." }, torch::tensor(Xv[i], kInt32));
+        }
+    }
     // X is nxm where n is the number of features and m the number of samples
     Classifier& Classifier::fit(vector<vector<int>>& X, vector<int>& y, vector<string>& features, string className, map<string, vector<int>>& states)
     {
-        this->X = torch::zeros({ static_cast<int>(X.size()), static_cast<int>(X[0].size()) }, kInt32);
         Xv = X;
-        for (int i = 0; i < X.size(); ++i) {
-            this->X.index_put_({ i, "..." }, torch::tensor(X[i], kInt32));
-        }
+        generateTensorXFromVector();
         this->y = torch::tensor(y, kInt32);
         yv = y;
         return build(features, className, states);
@@ -112,11 +116,9 @@ namespace bayesnet {
     {
         // Add all nodes to the network
         for (const auto& feature : features) {
-            model.addNode(feature, states[feature].size());
-            cout << "-Adding node " << feature << " with " << states[feature].size() << " states" << endl;
+            model.addNode(feature);
         }
-        model.addNode(className, states[className].size());
-        cout << "*Adding class " << className << " with " << states[className].size() << " states" << endl;
+        model.addNode(className);
     }
     int Classifier::getNumberOfNodes()
     {

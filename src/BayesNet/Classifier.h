@@ -25,6 +25,7 @@ namespace bayesnet {
         string className;
         map<string, vector<int>> states;
         void checkFitParameters();
+        void generateTensorXFromVector();
         virtual void train() = 0;
     public:
         Classifier(Network model);

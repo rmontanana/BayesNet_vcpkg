@@ -8,6 +8,8 @@ static platform::Registrar registrarS("SPODE",
     [](void) -> bayesnet::BaseClassifier* { return new bayesnet::SPODE(2);});
 static platform::Registrar registrarK("KDB",
     [](void) -> bayesnet::BaseClassifier* { return new bayesnet::KDB(2);});
+static platform::Registrar registrarKN("KDBNew",
+    [](void) -> bayesnet::BaseClassifier* { return new bayesnet::KDBNew(2);});
 static platform::Registrar registrarA("AODE",
     [](void) -> bayesnet::BaseClassifier* { return new bayesnet::AODE();});
 #endif

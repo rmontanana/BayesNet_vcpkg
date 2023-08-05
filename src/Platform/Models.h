@@ -7,6 +7,7 @@
 #include "KDB.h"
 #include "SPODE.h"
 #include "TANNew.h"
+#include "KDBNew.h"
 namespace platform {
     class Models {
     private:

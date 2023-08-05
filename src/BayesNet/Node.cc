@@ -2,8 +2,8 @@
 
 namespace bayesnet {
 
-    Node::Node(const std::string& name, int numStates)
-        : name(name), numStates(numStates), cpTable(torch::Tensor()), parents(vector<Node*>()), children(vector<Node*>())
+    Node::Node(const std::string& name)
+        : name(name), numStates(0), cpTable(torch::Tensor()), parents(vector<Node*>()), children(vector<Node*>())
     {
     }
     void Node::clear()
@@ -86,6 +86,7 @@ namespace bayesnet {
     }
     void Node::computeCPT(map<string, vector<int>>& dataset, const int laplaceSmoothing)
     {
+        dimensions.clear();
         // Get dimensions of the CPT
         dimensions.push_back(numStates);
         transform(parents.begin(), parents.end(), back_inserter(dimensions), [](const auto& parent) { return parent->getNumStates(); });

@@ -146,6 +146,11 @@ namespace platform {
                 auto y_test = y.index({ test_t });
                 cout << nfold + 1 << ", " << flush;
                 clf->fit(X_train, y_train, features, className, states);
+                cout << endl;
+                auto lines = clf->show();
+                for (auto line : lines) {
+                    cout << line << endl;
+                }
                 nodes[item] = clf->getNumberOfNodes();
                 edges[item] = clf->getNumberOfEdges();
                 num_states[item] = clf->getNumberOfStates();

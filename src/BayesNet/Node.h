@@ -16,7 +16,7 @@ namespace bayesnet {
         vector<int64_t> dimensions; // dimensions of the cpTable
     public:
         vector<pair<string, string>> combinations(const vector<string>&);
-        Node(const string&, int);
+        explicit Node(const string&);
         void clear();
         void addParent(Node*);
         void addChild(Node*);

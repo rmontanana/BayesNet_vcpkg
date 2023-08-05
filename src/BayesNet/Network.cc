@@ -31,21 +31,18 @@ namespace bayesnet {
     {
         return samples;
     }
-    void Network::addNode(const string& name, int numStates)
+    void Network::addNode(const string& name)
     {
         if (name == "") {
             throw invalid_argument("Node name cannot be empty");
         }
+        if (nodes.find(name) != nodes.end()) {
+            return;
+        }
         if (find(features.begin(), features.end(), name) == features.end()) {
             features.push_back(name);
         }
-        if (nodes.find(name) != nodes.end()) {
-            // if node exists update its number of states and remove parents, children and CPT
-            nodes[name]->clear();
-            nodes[name]->setNumStates(numStates);
-            return;
-        }
-        nodes[name] = std::make_unique<Node>(name, numStates);
+        nodes[name] = std::make_unique<Node>(name);
     }
     vector<string> Network::getFeatures()
     {
@@ -128,14 +125,20 @@ namespace bayesnet {
             }
         }
     }
+    void Network::setStates()
+    {
+        // Set states to every Node in the network
+        for (int i = 0; i < features.size(); ++i) {
+            nodes[features[i]]->setNumStates(static_cast<int>(torch::max(samples.index({ i, "..." })).item<int>()) + 1);
+        }
+        classNumStates = nodes[className]->getNumStates();
+    }
     // X comes in nxm, where n is the number of features and m the number of samples
     void Network::fit(torch::Tensor& X, torch::Tensor& y, const vector<string>& featureNames, const string& className)
     {
         checkFitData(X.size(1), X.size(0), y.size(0), featureNames, className);
         this->className = className;
         dataset.clear();
-        // Specific part
-        classNumStates = torch::max(y).item<int>() + 1;
         Tensor ytmp = torch::transpose(y.view({ y.size(0), 1 }), 0, 1);
         samples = torch::cat({ X , ytmp }, 0);
         for (int i = 0; i < featureNames.size(); ++i) {
@@ -151,8 +154,6 @@ namespace bayesnet {
         checkFitData(input_data[0].size(), input_data.size(), labels.size(), featureNames, className);
         this->className = className;
         dataset.clear();
-        // Specific part
-        classNumStates = *max_element(labels.begin(), labels.end()) + 1;
         // Build dataset & tensor of samples (nxm) (n+1 because of the class)
         samples = torch::zeros({ static_cast<int>(input_data.size() + 1), static_cast<int>(input_data[0].size()) }, torch::kInt32);
         for (int i = 0; i < featureNames.size(); ++i) {
@@ -165,6 +166,7 @@ namespace bayesnet {
     }
     void Network::completeFit()
     {
+        setStates();
         int maxThreadsRunning = static_cast<int>(std::thread::hardware_concurrency() * maxThreads);
         if (maxThreadsRunning < 1) {
             maxThreadsRunning = 1;
@@ -213,7 +215,7 @@ namespace bayesnet {
             auto sample = samples.index({ "...", i });
             auto psample = predict_sample(sample);
             auto temp = torch::tensor(psample, torch::kFloat64);
-//            result.index_put_({ i, "..." }, torch::tensor(predict_sample(sample), torch::kFloat64));
+            //            result.index_put_({ i, "..." }, torch::tensor(predict_sample(sample), torch::kFloat64));
             result.index_put_({ i, "..." }, temp);
         }
         if (proba)
@@ -325,17 +327,17 @@ namespace bayesnet {
         vector<thread> threads;
         mutex mtx;
         for (int i = 0; i < classNumStates; ++i) {
-//            threads.emplace_back([this, &result, &evidence, i, &mtx]() {
-                auto completeEvidence = map<string, int>(evidence);
-                completeEvidence[getClassName()] = i;
+            threads.emplace_back([this, &result, &evidence, i, &mtx]() {
+            auto completeEvidence = map<string, int>(evidence);
+            completeEvidence[getClassName()] = i;
                 double factor = computeFactor(completeEvidence);
-//                lock_guard<mutex> lock(mtx);
+                lock_guard<mutex> lock(mtx);
                 result[i] = factor;
-//                });
+            });
         }
-//        for (auto& thread : threads) {
-//            thread.join();
-//        }
+        for (auto& thread : threads) {
+            thread.join();
+        }
         // Normalize result
         double sum = accumulate(result.begin(), result.end(), 0.0);
         transform(result.begin(), result.end(), result.begin(), [sum](double& value) { return value / sum; });
@@ -421,7 +423,7 @@ namespace bayesnet {
     void Network::dump_cpt()
     {
         for (auto& node : nodes) {
-            cout << "* " << node.first << ": " << node.second->getCPT() << endl;
+            cout << "* " << node.first << ": (" << node.second->getNumStates() << ") : " << node.second->getCPT().sizes() << endl;
         }
     }
 }

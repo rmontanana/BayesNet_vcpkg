@@ -14,6 +14,9 @@ setup: ## Install dependencies for tests and coverage
 dependency: ## Create a dependency graph diagram of the project (build/dependency.png)
 	cd build && cmake .. --graphviz=dependency.dot && dot -Tpng dependency.dot -o dependency.png
 
+build: ## Build the main and BayesNetSample
+	cmake --build build -t main -t BayesNetSample -j 32
+
 debug: ## Build a debug version of the project
 	@echo ">>> Building Debug BayesNet ...";
 	@if [ -d ./build ]; then rm -rf ./build; fi

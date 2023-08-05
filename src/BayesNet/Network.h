@@ -27,6 +27,7 @@ namespace bayesnet {
         double mutualInformation(torch::Tensor&, torch::Tensor&);
         void completeFit();
         void checkFitData(int n_features, int n_samples, int n_samples_y, const vector<string>& featureNames, const string& className);
+        void setStates();
     public:
         Network();
         explicit Network(float, int);
@@ -34,7 +35,7 @@ namespace bayesnet {
         explicit Network(Network&);
         torch::Tensor& getSamples();
         float getmaxThreads();
-        void addNode(const string&, int);
+        void addNode(const string&);
         void addEdge(const string&, const string&);
         map<string, std::unique_ptr<Node>>& getNodes();
         vector<string> getFeatures();
