@@ -6,6 +6,8 @@ static platform::Registrar registrarTN("TANNew",
     [](void) -> bayesnet::BaseClassifier* { return new bayesnet::TANNew();});
 static platform::Registrar registrarS("SPODE",
     [](void) -> bayesnet::BaseClassifier* { return new bayesnet::SPODE(2);});
+static platform::Registrar registrarSN("SPODENew",
+    [](void) -> bayesnet::BaseClassifier* { return new bayesnet::SPODENew(2);});
 static platform::Registrar registrarK("KDB",
     [](void) -> bayesnet::BaseClassifier* { return new bayesnet::KDB(2);});
 static platform::Registrar registrarKN("KDBNew",

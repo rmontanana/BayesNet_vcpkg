@@ -48,9 +48,9 @@ namespace platform {
             cout << setw(6) << right << r["samples"].get<int>() << " ";
             cout << setw(5) << right << r["features"].get<int>() << " ";
             cout << setw(3) << right << r["classes"].get<int>() << " ";
-            cout << setw(7) << right << r["nodes"].get<float>() << " ";
-            cout << setw(7) << right << r["leaves"].get<float>() << " ";
-            cout << setw(7) << right << r["depth"].get<float>() << " ";
+            cout << setw(7) << setprecision(2) << fixed << r["nodes"].get<float>() << " ";
+            cout << setw(7) << setprecision(2) << fixed << r["leaves"].get<float>() << " ";
+            cout << setw(7) << setprecision(2) << fixed << r["depth"].get<float>() << " ";
             cout << setw(8) << right << setprecision(6) << fixed << r["score_test"].get<double>() << "±" << setw(6) << setprecision(4) << fixed << r["score_test_std"].get<double>() << " ";
             cout << setw(10) << right << setprecision(6) << fixed << r["test_time"].get<double>() << "±" << setw(6) << setprecision(4) << fixed << r["test_time_std"].get<double>() << " ";
             cout << " " << r["hyperparameters"].get<string>();

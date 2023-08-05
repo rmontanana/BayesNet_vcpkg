@@ -8,7 +8,7 @@ namespace bayesnet {
     class KDBNew : public KDB, public Proposal {
     private:
     public:
-        KDBNew(int k);
+        explicit KDBNew(int k);
         virtual ~KDBNew() = default;
         KDBNew& fit(torch::Tensor& X, torch::Tensor& y, vector<string>& features, string className, map<string, vector<int>>& states) override;
         vector<string> graph(const string& name = "KDB") override;

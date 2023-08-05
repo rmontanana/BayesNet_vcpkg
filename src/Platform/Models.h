@@ -8,6 +8,7 @@
 #include "SPODE.h"
 #include "TANNew.h"
 #include "KDBNew.h"
+#include "SPODENew.h"
 namespace platform {
     class Models {
     private:
