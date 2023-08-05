@@ -6,9 +6,9 @@
 #include "TAN.h"
 #include "KDB.h"
 #include "SPODE.h"
-#include "TANNew.h"
-#include "KDBNew.h"
-#include "SPODENew.h"
+#include "TANLd.h"
+#include "KDBLd.h"
+#include "SPODELd.h"
 namespace platform {
     class Models {
     private:

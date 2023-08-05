@@ -1,9 +1,9 @@
-#include "KDBNew.h"
+#include "SPODELd.h"
 
 namespace bayesnet {
     using namespace std;
-    KDBNew::KDBNew(int k) : KDB(k), Proposal(KDB::Xv, KDB::yv, features, className) {}
-    KDBNew& KDBNew::fit(torch::Tensor& X_, torch::Tensor& y_, vector<string>& features_, string className_, map<string, vector<int>>& states_)
+    SPODELd::SPODELd(int root) : SPODE(root), Proposal(SPODE::Xv, SPODE::yv, features, className) {}
+    SPODELd& SPODELd::fit(torch::Tensor& X_, torch::Tensor& y_, vector<string>& features_, string className_, map<string, vector<int>>& states_)
     {
         // This first part should go in a Classifier method called fit_local_discretization o fit_float...
         features = features_;
@@ -14,22 +14,22 @@ namespace bayesnet {
         fit_local_discretization(states, y);
         generateTensorXFromVector();
         // We have discretized the input data
-        // 1st we need to fit the model to build the normal KDB structure, KDB::fit initializes the base Bayesian network
-        KDB::fit(KDB::Xv, KDB::yv, features, className, states);
+        // 1st we need to fit the model to build the normal SPODE structure, SPODE::fit initializes the base Bayesian network
+        SPODE::fit(SPODE::Xv, SPODE::yv, features, className, states);
         localDiscretizationProposal(states, model);
         generateTensorXFromVector();
         Tensor ytmp = torch::transpose(y.view({ y.size(0), 1 }), 0, 1);
         samples = torch::cat({ X, ytmp }, 0);
-        model.fit(KDB::Xv, KDB::yv, features, className);
+        model.fit(SPODE::Xv, SPODE::yv, features, className);
         return *this;
     }
-    Tensor KDBNew::predict(Tensor& X)
+    Tensor SPODELd::predict(Tensor& X)
     {
         auto Xt = prepareX(X);
-        return KDB::predict(Xt);
+        return SPODE::predict(Xt);
     }
-    vector<string> KDBNew::graph(const string& name)
+    vector<string> SPODELd::graph(const string& name)
     {
-        return KDB::graph(name);
+        return SPODE::graph(name);
     }
 }
