@@ -9,6 +9,7 @@
 #include "TANLd.h"
 #include "KDBLd.h"
 #include "SPODELd.h"
+#include "AODELd.h"
 namespace platform {
     class Models {
     private:

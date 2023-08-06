@@ -10,23 +10,23 @@ using namespace torch;
 namespace bayesnet {
     class Ensemble : public BaseClassifier {
     private:
-        bool fitted;
-        long n_models;
         Ensemble& build(vector<string>& features, string className, map<string, vector<int>>& states);
     protected:
+        unsigned n_models;
+        bool fitted;
         vector<unique_ptr<Classifier>> models;
-        int m, n; // m: number of samples, n: number of features
         Tensor X;
         vector<vector<int>> Xv;
         Tensor y;
         vector<int> yv;
-        Tensor dataset;
+        Tensor samples;
         Metrics metrics;
         vector<string> features;
         string className;
         map<string, vector<int>> states;
         void virtual train() = 0;
         vector<int> voting(Tensor& y_pred);
+        void generateTensorXFromVector();
     public:
         Ensemble();
         virtual ~Ensemble() = default;

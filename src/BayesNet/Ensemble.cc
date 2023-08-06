@@ -3,24 +3,24 @@
 namespace bayesnet {
     using namespace torch;
 
-    Ensemble::Ensemble() : m(0), n(0), n_models(0), metrics(Metrics()), fitted(false) {}
+    Ensemble::Ensemble() : n_models(0), metrics(Metrics()), fitted(false) {}
     Ensemble& Ensemble::build(vector<string>& features, string className, map<string, vector<int>>& states)
     {
-        dataset = cat({ X, y.view({y.size(0), 1}) }, 1);
+        Tensor ytmp = torch::transpose(y.view({ y.size(0), 1 }), 0, 1);
+        samples = torch::cat({ X, ytmp }, 0);
         this->features = features;
         this->className = className;
         this->states = states;
         auto n_classes = states[className].size();
-        metrics = Metrics(dataset, features, className, n_classes);
+        metrics = Metrics(samples, features, className, n_classes);
         // Build models
         train();
         // Train models
         n_models = models.size();
-        auto Xt = torch::transpose(X, 0, 1);
         for (auto i = 0; i < n_models; ++i) {
-            if (Xv == vector<vector<int>>()) {
+            if (Xv.empty()) {
                 // fit with tensors
-                models[i]->fit(Xt, y, features, className, states);
+                models[i]->fit(X, y, features, className, states);
             } else {
                 // fit with vectors
                 models[i]->fit(Xv, yv, features, className, states);
@@ -29,9 +29,16 @@ namespace bayesnet {
         fitted = true;
         return *this;
     }
+    void Ensemble::generateTensorXFromVector()
+    {
+        X = torch::zeros({ static_cast<int>(Xv.size()), static_cast<int>(Xv[0].size()) }, kInt32);
+        for (int i = 0; i < Xv.size(); ++i) {
+            X.index_put_({ i, "..." }, torch::tensor(Xv[i], kInt32));
+        }
+    }
     Ensemble& Ensemble::fit(torch::Tensor& X, torch::Tensor& y, vector<string>& features, string className, map<string, vector<int>>& states)
     {
-        this->X = torch::transpose(X, 0, 1);
+        this->X = X;
         this->y = y;
         Xv = vector<vector<int>>();
         yv = vector<int>(y.data_ptr<int>(), y.data_ptr<int>() + y.size(0));
@@ -39,11 +46,8 @@ namespace bayesnet {
     }
     Ensemble& Ensemble::fit(vector<vector<int>>& X, vector<int>& y, vector<string>& features, string className, map<string, vector<int>>& states)
     {
-        this->X = torch::zeros({ static_cast<int>(X[0].size()), static_cast<int>(X.size()) }, kInt32);
         Xv = X;
-        for (int i = 0; i < X.size(); ++i) {
-            this->X.index_put_({ "...", i }, torch::tensor(X[i], kInt32));
-        }
+        generateTensorXFromVector();
         this->y = torch::tensor(y, kInt32);
         yv = y;
         return build(features, className, states);
@@ -53,10 +57,11 @@ namespace bayesnet {
         auto y_pred_ = y_pred.accessor<int, 2>();
         vector<int> y_pred_final;
         for (int i = 0; i < y_pred.size(0); ++i) {
-            vector<float> votes(states[className].size(), 0);
+            vector<float> votes(y_pred.size(1), 0);
             for (int j = 0; j < y_pred.size(1); ++j) {
                 votes[y_pred_[i][j]] += 1;
             }
+            // argsort in descending order
             auto indices = argsort(votes);
             y_pred_final.push_back(indices[0]);
         }
@@ -70,13 +75,12 @@ namespace bayesnet {
         Tensor y_pred = torch::zeros({ X.size(1), n_models }, kInt32);
         //Create a threadpool
         auto threads{ vector<thread>() };
-        auto lock = mutex();
+        mutex mtx;
         for (auto i = 0; i < n_models; ++i) {
             threads.push_back(thread([&, i]() {
                 auto ypredict = models[i]->predict(X);
-                lock.lock();
+                lock_guard<mutex> lock(mtx);
                 y_pred.index_put_({ "...", i }, ypredict);
-                lock.unlock();
                 }));
         }
         for (auto& thread : threads) {

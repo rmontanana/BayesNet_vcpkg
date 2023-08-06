@@ -17,6 +17,11 @@ dependency: ## Create a dependency graph diagram of the project (build/dependenc
 build: ## Build the main and BayesNetSample
 	cmake --build build -t main -t BayesNetSample -j 32
 
+clean: ## Clean the debug info
+	@echo ">>> Cleaning Debug BayesNet ...";
+	find . -name "*.gcda" -print0 | xargs -0 rm
+	@echo ">>> Done";
+
 debug: ## Build a debug version of the project
 	@echo ">>> Building Debug BayesNet ...";
 	@if [ -d ./build ]; then rm -rf ./build; fi
