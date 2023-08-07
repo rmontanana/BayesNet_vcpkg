@@ -8,11 +8,10 @@ namespace bayesnet {
     class Network {
     private:
         map<string, unique_ptr<Node>> nodes;
-        map<string, vector<int>> dataset;
         bool fitted;
         float maxThreads = 0.95;
         int classNumStates;
-        vector<string> features; // Including class
+        vector<string> features; // Including classname
         string className;
         int laplaceSmoothing = 1;
         torch::Tensor samples; // nxm tensor used to fit the model
@@ -44,7 +43,8 @@ namespace bayesnet {
         int getClassNumStates();
         string getClassName();
         void fit(const vector<vector<int>>&, const vector<int>&, const vector<string>&, const string&);
-        void fit(torch::Tensor&, torch::Tensor&, const vector<string>&, const string&);
+        void fit(const torch::Tensor&, const torch::Tensor&, const vector<string>&, const string&);
+        void fit(const torch::Tensor&, const vector<string>&, const string&);
         vector<int> predict(const vector<vector<int>>&); // Return mx1 vector of predictions
         torch::Tensor predict(const torch::Tensor&); // Return mx1 tensor of predictions
         //Computes the conditional edge weight of variable index u and v conditioned on class_node

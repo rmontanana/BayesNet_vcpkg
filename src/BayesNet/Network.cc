@@ -20,7 +20,6 @@ namespace bayesnet {
         classNumStates = 0;
         fitted = false;
         nodes.clear();
-        dataset.clear();
         samples = torch::Tensor();
     }
     float Network::getmaxThreads()
@@ -134,18 +133,22 @@ namespace bayesnet {
         classNumStates = nodes[className]->getNumStates();
     }
     // X comes in nxm, where n is the number of features and m the number of samples
-    void Network::fit(torch::Tensor& X, torch::Tensor& y, const vector<string>& featureNames, const string& className)
+    void Network::fit(const torch::Tensor& X, const torch::Tensor& y, const vector<string>& featureNames, const string& className)
     {
         checkFitData(X.size(1), X.size(0), y.size(0), featureNames, className);
         this->className = className;
-        dataset.clear();
         Tensor ytmp = torch::transpose(y.view({ y.size(0), 1 }), 0, 1);
         samples = torch::cat({ X , ytmp }, 0);
         for (int i = 0; i < featureNames.size(); ++i) {
             auto row_feature = X.index({ i, "..." });
-            dataset[featureNames[i]] = vector<int>(row_feature.data_ptr<int>(), row_feature.data_ptr<int>() + row_feature.size(0));;
         }
-        dataset[className] = vector<int>(y.data_ptr<int>(), y.data_ptr<int>() + y.size(0));
+        completeFit();
+    }
+    void Network::fit(const torch::Tensor& samples, const vector<string>& featureNames, const string& className)
+    {
+        checkFitData(samples.size(1), samples.size(0) - 1, samples.size(1), featureNames, className);
+        this->className = className;
+        this->samples = samples;
         completeFit();
     }
     // input_data comes in nxm, where n is the number of features and m the number of samples
@@ -153,14 +156,11 @@ namespace bayesnet {
     {
         checkFitData(input_data[0].size(), input_data.size(), labels.size(), featureNames, className);
         this->className = className;
-        dataset.clear();
-        // Build dataset & tensor of samples (nxm) (n+1 because of the class)
+        // Build tensor of samples (nxm) (n+1 because of the class)
         samples = torch::zeros({ static_cast<int>(input_data.size() + 1), static_cast<int>(input_data[0].size()) }, torch::kInt32);
         for (int i = 0; i < featureNames.size(); ++i) {
-            dataset[featureNames[i]] = input_data[i];
             samples.index_put_({ i, "..." }, torch::tensor(input_data[i], torch::kInt32));
         }
-        dataset[className] = labels;
         samples.index_put_({ -1, "..." }, torch::tensor(labels, torch::kInt32));
         completeFit();
     }
@@ -188,7 +188,7 @@ namespace bayesnet {
                     auto& pair = *std::next(nodes.begin(), nextNodeIndex);
                     ++nextNodeIndex;
                     lock.unlock();
-                    pair.second->computeCPT(dataset, laplaceSmoothing);
+                    pair.second->computeCPT(samples, features, laplaceSmoothing);
                     lock.lock();
                     nodes[pair.first] = std::move(pair.second);
                     lock.unlock();
@@ -328,12 +328,12 @@ namespace bayesnet {
         mutex mtx;
         for (int i = 0; i < classNumStates; ++i) {
             threads.emplace_back([this, &result, &evidence, i, &mtx]() {
-            auto completeEvidence = map<string, int>(evidence);
-            completeEvidence[getClassName()] = i;
+                auto completeEvidence = map<string, int>(evidence);
+                completeEvidence[getClassName()] = i;
                 double factor = computeFactor(completeEvidence);
                 lock_guard<mutex> lock(mtx);
                 result[i] = factor;
-            });
+                });
         }
         for (auto& thread : threads) {
             thread.join();

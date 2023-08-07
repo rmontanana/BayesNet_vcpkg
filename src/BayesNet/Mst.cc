@@ -94,7 +94,7 @@ namespace bayesnet {
         return result;
     }
 
-    MST::MST(vector<string>& features, Tensor& weights, int root) : features(features), weights(weights), root(root) {}
+    MST::MST(const vector<string>& features, const Tensor& weights, const int root) : features(features), weights(weights), root(root) {}
     vector<pair<int, int>> MST::maximumSpanningTree()
     {
         auto num_features = features.size();

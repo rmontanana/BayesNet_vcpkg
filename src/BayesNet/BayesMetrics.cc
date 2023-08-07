@@ -2,7 +2,7 @@
 #include "Mst.h"
 namespace bayesnet {
     //samples is nxm tensor used to fit the model
-    Metrics::Metrics(torch::Tensor& samples, vector<string>& features, string& className, int classNumStates)
+    Metrics::Metrics(const torch::Tensor& samples, const vector<string>& features, const string& className, const int classNumStates)
         : samples(samples)
         , features(features)
         , className(className)
@@ -76,7 +76,7 @@ namespace bayesnet {
         std::vector<float> v(matrix.data_ptr<float>(), matrix.data_ptr<float>() + matrix.numel());
         return v;
     }
-    double Metrics::entropy(torch::Tensor& feature)
+    double Metrics::entropy(const torch::Tensor& feature)
     {
         torch::Tensor counts = feature.bincount();
         int totalWeight = counts.sum().item<int>();
@@ -86,7 +86,7 @@ namespace bayesnet {
         return entropy.nansum().item<double>();
     }
     // H(Y|X) = sum_{x in X} p(x) H(Y|X=x)
-    double Metrics::conditionalEntropy(torch::Tensor& firstFeature, torch::Tensor& secondFeature)
+    double Metrics::conditionalEntropy(const torch::Tensor& firstFeature, const torch::Tensor& secondFeature)
     {
         int numSamples = firstFeature.sizes()[0];
         torch::Tensor featureCounts = secondFeature.bincount();
@@ -115,7 +115,7 @@ namespace bayesnet {
         return entropyValue;
     }
     // I(X;Y) = H(Y) - H(Y|X)
-    double Metrics::mutualInformation(torch::Tensor& firstFeature, torch::Tensor& secondFeature)
+    double Metrics::mutualInformation(const torch::Tensor& firstFeature, const torch::Tensor& secondFeature)
     {
         return entropy(firstFeature) - conditionalEntropy(firstFeature, secondFeature);
     }
@@ -124,7 +124,7 @@ namespace bayesnet {
     and the indices of the weights as nodes of this square matrix using
     Kruskal algorithm
     */
-    vector<pair<int, int>> Metrics::maximumSpanningTree(vector<string> features, Tensor& weights, int root)
+    vector<pair<int, int>> Metrics::maximumSpanningTree(const vector<string>& features, const Tensor& weights, const int root)
     {
         auto mst = MST(features, weights, root);
         return mst.maximumSpanningTree();

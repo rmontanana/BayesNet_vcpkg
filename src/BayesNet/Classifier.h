@@ -10,28 +10,26 @@ using namespace torch;
 namespace bayesnet {
     class Classifier : public BaseClassifier {
     private:
-        bool fitted;
+        void buildDataset(torch::Tensor& y);
         Classifier& build(vector<string>& features, string className, map<string, vector<int>>& states);
     protected:
+        bool fitted;
         Network model;
         int m, n; // m: number of samples, n: number of features
-        Tensor X; // nxm tensor
-        vector<vector<int>> Xv; // nxm vector
-        Tensor y;
-        vector<int> yv;
-        Tensor samples; // (n+1)xm tensor
+        Tensor dataset; // (n+1)xm tensor
         Metrics metrics;
         vector<string> features;
         string className;
         map<string, vector<int>> states;
         void checkFitParameters();
-        void generateTensorXFromVector();
-        virtual void train() = 0;
+        virtual void buildModel() = 0;
+        void trainModel();
     public:
         Classifier(Network model);
         virtual ~Classifier() = default;
         Classifier& fit(vector<vector<int>>& X, vector<int>& y, vector<string>& features, string className, map<string, vector<int>>& states) override;
         Classifier& fit(torch::Tensor& X, torch::Tensor& y, vector<string>& features, string className, map<string, vector<int>>& states) override;
+        Classifier& fit(torch::Tensor& dataset, vector<string>& features, string className, map<string, vector<int>>& states) override;
         void addNodes();
         int getNumberOfNodes() override;
         int getNumberOfEdges() override;

@@ -7,13 +7,15 @@
 namespace bayesnet {
     using namespace std;
     class AODELd : public Ensemble, public Proposal {
+    private:
+        void trainModel();
+        void buildModel() override;
     public:
         AODELd();
         virtual ~AODELd() = default;
         AODELd& fit(torch::Tensor& X, torch::Tensor& y, vector<string>& features, string className, map<string, vector<int>>& states) override;
         vector<string> graph(const string& name = "AODE") override;
         Tensor predict(Tensor& X) override;
-        void train() override;
         static inline string version() { return "0.0.1"; };
     };
 }

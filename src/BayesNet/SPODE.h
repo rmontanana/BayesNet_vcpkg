@@ -7,7 +7,7 @@ namespace bayesnet {
     private:
         int root;
     protected:
-        void train() override;
+        void buildModel() override;
     public:
         explicit SPODE(int root);
         virtual ~SPODE() {};

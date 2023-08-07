@@ -2,7 +2,7 @@
 
 namespace bayesnet {
     AODE::AODE() : Ensemble() {}
-    void AODE::train()
+    void AODE::buildModel()
     {
         models.clear();
         for (int i = 0; i < features.size(); ++i) {

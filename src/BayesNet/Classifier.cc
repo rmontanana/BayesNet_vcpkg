@@ -7,59 +7,54 @@ namespace bayesnet {
     Classifier::Classifier(Network model) : model(model), m(0), n(0), metrics(Metrics()), fitted(false) {}
     Classifier& Classifier::build(vector<string>& features, string className, map<string, vector<int>>& states)
     {
-        Tensor ytmp = torch::transpose(y.view({ y.size(0), 1 }), 0, 1);
-        samples = torch::cat({ X, ytmp }, 0);
         this->features = features;
         this->className = className;
         this->states = states;
         checkFitParameters();
         auto n_classes = states[className].size();
-        metrics = Metrics(samples, features, className, n_classes);
+        metrics = Metrics(dataset, features, className, n_classes);
         model.initialize();
-        train();
-        if (Xv.empty()) {
-            // fit with tensors
-            model.fit(X, y, features, className);
-        } else {
-            // fit with vectors
-            model.fit(Xv, yv, features, className);
-        }
+        buildModel();
+        m = dataset.size(1);
+        n = dataset.size(0);
+        trainModel();
         fitted = true;
         return *this;
+    }
+    void Classifier::trainModel()
+    {
+        model.fit(dataset, features, className);
+    }
+    void Classifier::buildDataset(Tensor& ytmp)
+    {
+        ytmp = torch::transpose(ytmp.view({ ytmp.size(0), 1 }), 0, 1);
+        dataset = torch::cat({ dataset, ytmp }, 0);
     }
     // X is nxm where n is the number of features and m the number of samples
     Classifier& Classifier::fit(torch::Tensor& X, torch::Tensor& y, vector<string>& features, string className, map<string, vector<int>>& states)
     {
-        this->X = X;
-        this->y = y;
-        Xv = vector<vector<int>>();
-        yv = vector<int>(y.data_ptr<int>(), y.data_ptr<int>() + y.size(0));
+        dataset = X;
+        buildDataset(y);
         return build(features, className, states);
-    }
-    void Classifier::generateTensorXFromVector()
-    {
-        X = torch::zeros({ static_cast<int>(Xv.size()), static_cast<int>(Xv[0].size()) }, kInt32);
-        for (int i = 0; i < Xv.size(); ++i) {
-            X.index_put_({ i, "..." }, torch::tensor(Xv[i], kInt32));
-        }
     }
     // X is nxm where n is the number of features and m the number of samples
     Classifier& Classifier::fit(vector<vector<int>>& X, vector<int>& y, vector<string>& features, string className, map<string, vector<int>>& states)
     {
-        Xv = X;
-        generateTensorXFromVector();
-        this->y = torch::tensor(y, kInt32);
-        yv = y;
+        dataset = torch::zeros({ static_cast<int>(X.size()), static_cast<int>(X[0].size()) }, kInt32);
+        for (int i = 0; i < X.size(); ++i) {
+            dataset.index_put_({ i, "..." }, torch::tensor(X[i], kInt32));
+        }
+        auto ytmp = torch::tensor(y, kInt32);
+        buildDataset(ytmp);
+        return build(features, className, states);
+    }
+    Classifier& Classifier::fit(torch::Tensor& dataset, vector<string>& features, string className, map<string, vector<int>>& states)
+    {
+        this->dataset = dataset;
         return build(features, className, states);
     }
     void Classifier::checkFitParameters()
     {
-        auto sizes = X.sizes();
-        m = sizes[1];
-        n = sizes[0];
-        if (m != y.size(0)) {
-            throw invalid_argument("X and y must have the same number of samples");
-        }
         if (n != features.size()) {
             throw invalid_argument("X and features must have the same number of features");
         }
@@ -141,5 +136,4 @@ namespace bayesnet {
     {
         model.dump_cpt();
     }
-
 }

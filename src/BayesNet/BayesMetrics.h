@@ -14,15 +14,15 @@ namespace bayesnet {
         int classNumStates = 0;
     public:
         Metrics() = default;
-        Metrics(Tensor&, vector<string>&, string&, int);
+        Metrics(const Tensor&, const vector<string>&, const string&, const int);
         Metrics(const vector<vector<int>>&, const vector<int>&, const vector<string>&, const string&, const int);
-        double entropy(Tensor&);
-        double conditionalEntropy(Tensor&, Tensor&);
-        double mutualInformation(Tensor&, Tensor&);
+        double entropy(const Tensor&);
+        double conditionalEntropy(const Tensor&, const Tensor&);
+        double mutualInformation(const Tensor&, const Tensor&);
         vector<float> conditionalEdgeWeights(); // To use in Python
         Tensor conditionalEdge();
         vector<pair<string, string>> doCombinations(const vector<string>&);
-        vector<pair<int, int>> maximumSpanningTree(vector<string> features, Tensor& weights, int root);
+        vector<pair<int, int>> maximumSpanningTree(const vector<string>& features, const Tensor& weights, const int root);
     };
 }
 #endif

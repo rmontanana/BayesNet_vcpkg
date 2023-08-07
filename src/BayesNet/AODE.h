@@ -5,7 +5,7 @@
 namespace bayesnet {
     class AODE : public Ensemble {
     protected:
-        void train() override;
+        void buildModel() override;
     public:
         AODE();
         virtual ~AODE() {};

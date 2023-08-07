@@ -5,16 +5,16 @@ namespace bayesnet {
 
     TAN::TAN() : Classifier(Network()) {}
 
-    void TAN::train()
+    void TAN::buildModel()
     {
         // 0. Add all nodes to the model
         addNodes();
         // 1. Compute mutual information between each feature and the class and set the root node
         // as the highest mutual information with the class
         auto mi = vector <pair<int, float >>();
-        Tensor class_dataset = samples.index({ -1, "..." });
+        Tensor class_dataset = dataset.index({ -1, "..." });
         for (int i = 0; i < static_cast<int>(features.size()); ++i) {
-            Tensor feature_dataset = samples.index({ i, "..." });
+            Tensor feature_dataset = dataset.index({ i, "..." });
             auto mi_value = metrics.mutualInformation(class_dataset, feature_dataset);
             mi.push_back({ i, mi_value });
         }

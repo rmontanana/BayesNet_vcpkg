@@ -7,7 +7,7 @@ namespace bayesnet {
     class TAN : public Classifier {
     private:
     protected:
-        void train() override;
+        void buildModel() override;
     public:
         TAN();
         virtual ~TAN() {};
