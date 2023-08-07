@@ -19,7 +19,6 @@ namespace bayesnet {
         torch::Tensor Xf; // X continuous nxm tensor
         torch::Tensor y; // y discrete nx1 tensor
         map<string, mdlp::CPPFImdlp*> discretizers;
-        int m, n;
     private:
         torch::Tensor& pDataset; // (n+1)xm tensor
         vector<string>& pFeatures;

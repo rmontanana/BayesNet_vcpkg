@@ -11,7 +11,7 @@ namespace bayesnet {
     public:
         explicit SPODE(int root);
         virtual ~SPODE() {};
-        vector<string> graph(const string& name = "SPODE") override;
+        vector<string> graph(const string& name = "SPODE") const override;
     };
 }
 #endif

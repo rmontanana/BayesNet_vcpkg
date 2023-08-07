@@ -16,15 +16,15 @@ namespace bayesnet {
         // 1st we need to fit the model to build the normal TAN structure, TAN::fit initializes the base Bayesian network
         TAN::fit(dataset, features, className, states);
         localDiscretizationProposal(states, model);
-        //model.fit(dataset, features, className);
         return *this;
+
     }
     Tensor TANLd::predict(Tensor& X)
     {
         auto Xt = prepareX(X);
         return TAN::predict(Xt);
     }
-    vector<string> TANLd::graph(const string& name)
+    vector<string> TANLd::graph(const string& name) const
     {
         return TAN::graph(name);
     }

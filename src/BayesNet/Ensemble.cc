@@ -94,7 +94,7 @@ namespace bayesnet {
         }
         return (double)correct / y_pred.size();
     }
-    vector<string> Ensemble::show()
+    vector<string> Ensemble::show() const
     {
         auto result = vector<string>();
         for (auto i = 0; i < n_models; ++i) {
@@ -103,7 +103,7 @@ namespace bayesnet {
         }
         return result;
     }
-    vector<string> Ensemble::graph(const string& title)
+    vector<string> Ensemble::graph(const string& title) const
     {
         auto result = vector<string>();
         for (auto i = 0; i < n_models; ++i) {
@@ -112,7 +112,7 @@ namespace bayesnet {
         }
         return result;
     }
-    int Ensemble::getNumberOfNodes()
+    int Ensemble::getNumberOfNodes() const
     {
         int nodes = 0;
         for (auto i = 0; i < n_models; ++i) {
@@ -120,7 +120,7 @@ namespace bayesnet {
         }
         return nodes;
     }
-    int Ensemble::getNumberOfEdges()
+    int Ensemble::getNumberOfEdges() const
     {
         int edges = 0;
         for (auto i = 0; i < n_models; ++i) {
@@ -128,7 +128,7 @@ namespace bayesnet {
         }
         return edges;
     }
-    int Ensemble::getNumberOfStates()
+    int Ensemble::getNumberOfStates() const
     {
         int nstates = 0;
         for (auto i = 0; i < n_models; ++i) {

@@ -23,7 +23,7 @@ namespace bayesnet {
         map<string, vector<int>> states;
         void checkFitParameters();
         virtual void buildModel() = 0;
-        virtual void trainModel();
+        void trainModel() override;
     public:
         Classifier(Network model);
         virtual ~Classifier() = default;
@@ -31,16 +31,16 @@ namespace bayesnet {
         Classifier& fit(torch::Tensor& X, torch::Tensor& y, vector<string>& features, string className, map<string, vector<int>>& states) override;
         Classifier& fit(torch::Tensor& dataset, vector<string>& features, string className, map<string, vector<int>>& states) override;
         void addNodes();
-        int getNumberOfNodes() override;
-        int getNumberOfEdges() override;
-        int getNumberOfStates() override;
+        int getNumberOfNodes() const override;
+        int getNumberOfEdges() const override;
+        int getNumberOfStates() const override;
         Tensor predict(Tensor& X) override;
         vector<int> predict(vector<vector<int>>& X) override;
         float score(Tensor& X, Tensor& y) override;
         float score(vector<vector<int>>& X, vector<int>& y) override;
-        vector<string> show() override;
-        vector<string> topological_order() override;
-        void dump_cpt() override;
+        vector<string> show() const override;
+        vector<string> topological_order()  override;
+        void dump_cpt() const override;
     };
 }
 #endif

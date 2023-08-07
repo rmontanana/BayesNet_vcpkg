@@ -2,7 +2,7 @@
 #include "ArffFiles.h"
 
 namespace bayesnet {
-    Proposal::Proposal(torch::Tensor& dataset_, vector<string>& features_, string& className_) : pDataset(dataset_), pFeatures(features_), pClassName(className_), m(dataset_.size(1)), n(dataset_.size(0) - 1) {}
+    Proposal::Proposal(torch::Tensor& dataset_, vector<string>& features_, string& className_) : pDataset(dataset_), pFeatures(features_), pClassName(className_) {}
     Proposal::~Proposal()
     {
         for (auto& [key, value] : discretizers) {
@@ -32,9 +32,9 @@ namespace bayesnet {
             indices.push_back(-1); // Add class index
             transform(parents.begin(), parents.end(), back_inserter(indices), [&](const auto& p) {return find(pFeatures.begin(), pFeatures.end(), p) - pFeatures.begin(); });
             // Now we fit the discretizer of the feature, conditioned on its parents and the class i.e. discretizer.fit(X[index], X[indices] + y)
-            vector<string> yJoinParents(indices.size());
+            vector<string> yJoinParents(Xf.size(1));
             for (auto idx : indices) {
-                for (int i = 0; i < n; ++i) {
+                for (int i = 0; i < Xf.size(1); ++i) {
                     yJoinParents[i] += to_string(pDataset.index({ idx, i }).item<int>());
                 }
             }
@@ -64,10 +64,13 @@ namespace bayesnet {
                 //Update new states of the feature/node
                 states[pFeatures[index]] = xStates;
             }
+            model.fit(pDataset, pFeatures, pClassName);
         }
     }
     void Proposal::fit_local_discretization(map<string, vector<int>>& states, torch::Tensor& y)
     {
+        int m = Xf.size(1);
+        int n = Xf.size(0);
         pDataset = torch::zeros({ n + 1, m }, kInt32);
         auto yv = vector<int>(y.data_ptr<int>(), y.data_ptr<int>() + y.size(0));
         // discretize input data by feature(row)

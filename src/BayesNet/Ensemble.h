@@ -23,16 +23,16 @@ namespace bayesnet {
         vector<int> predict(vector<vector<int>>& X) override;
         float score(Tensor& X, Tensor& y) override;
         float score(vector<vector<int>>& X, vector<int>& y) override;
-        int getNumberOfNodes() override;
-        int getNumberOfEdges() override;
-        int getNumberOfStates() override;
-        vector<string> show() override;
-        vector<string> graph(const string& title) override;
-        vector<string> topological_order() override
+        int getNumberOfNodes() const override;
+        int getNumberOfEdges() const override;
+        int getNumberOfStates() const override;
+        vector<string> show() const override;
+        vector<string> graph(const string& title) const override;
+        vector<string> topological_order()  override
         {
             return vector<string>();
         }
-        void dump_cpt() override
+        void dump_cpt() const override
         {
         }
     };

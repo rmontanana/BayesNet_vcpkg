@@ -79,7 +79,7 @@ namespace bayesnet {
             exit_cond = num == n_edges || candidates.size(0) == 0;
         }
     }
-    vector<string> KDB::graph(const string& title)
+    vector<string> KDB::graph(const string& title) const
     {
         string header{ title };
         if (title == "KDB") {

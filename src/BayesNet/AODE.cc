@@ -9,7 +9,7 @@ namespace bayesnet {
             models.push_back(std::make_unique<SPODE>(i));
         }
     }
-    vector<string> AODE::graph(const string& title)
+    vector<string> AODE::graph(const string& title) const
     {
         return Ensemble::graph(title);
     }

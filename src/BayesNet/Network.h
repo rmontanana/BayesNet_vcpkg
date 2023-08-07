@@ -37,11 +37,12 @@ namespace bayesnet {
         void addNode(const string&);
         void addEdge(const string&, const string&);
         map<string, std::unique_ptr<Node>>& getNodes();
-        vector<string> getFeatures();
-        int getStates();
-        vector<pair<string, string>> getEdges();
-        int getClassNumStates();
-        string getClassName();
+        vector<string> getFeatures() const;
+        int getStates() const;
+        vector<pair<string, string>> getEdges() const;
+        int getNumEdges() const;
+        int getClassNumStates() const;
+        string getClassName() const;
         void fit(const vector<vector<int>>&, const vector<int>&, const vector<string>&, const string&);
         void fit(const torch::Tensor&, const torch::Tensor&, const vector<string>&, const string&);
         void fit(const torch::Tensor&, const vector<string>&, const string&);
@@ -54,10 +55,10 @@ namespace bayesnet {
         torch::Tensor predict_proba(const torch::Tensor&); // Return mxn tensor of probabilities
         double score(const vector<vector<int>>&, const vector<int>&);
         vector<string> topological_sort();
-        vector<string> show();
-        vector<string> graph(const string& title); // Returns a vector of strings representing the graph in graphviz format
+        vector<string> show() const;
+        vector<string> graph(const string& title) const; // Returns a vector of strings representing the graph in graphviz format
         void initialize();
-        void dump_cpt();
+        void dump_cpt() const;
         inline string version() { return "0.1.0"; }
     };
 }

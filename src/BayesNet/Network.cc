@@ -43,15 +43,15 @@ namespace bayesnet {
         }
         nodes[name] = std::make_unique<Node>(name);
     }
-    vector<string> Network::getFeatures()
+    vector<string> Network::getFeatures() const
     {
         return features;
     }
-    int Network::getClassNumStates()
+    int Network::getClassNumStates() const
     {
         return classNumStates;
     }
-    int Network::getStates()
+    int Network::getStates() const
     {
         int result = 0;
         for (auto& node : nodes) {
@@ -59,7 +59,7 @@ namespace bayesnet {
         }
         return result;
     }
-    string Network::getClassName()
+    string Network::getClassName() const
     {
         return className;
     }
@@ -343,7 +343,7 @@ namespace bayesnet {
         transform(result.begin(), result.end(), result.begin(), [sum](double& value) { return value / sum; });
         return result;
     }
-    vector<string> Network::show()
+    vector<string> Network::show() const
     {
         vector<string> result;
         // Draw the network
@@ -356,7 +356,7 @@ namespace bayesnet {
         }
         return result;
     }
-    vector<string> Network::graph(const string& title)
+    vector<string> Network::graph(const string& title) const
     {
         auto output = vector<string>();
         auto prefix = "digraph BayesNet {\nlabel=<BayesNet ";
@@ -370,7 +370,7 @@ namespace bayesnet {
         output.push_back("}\n");
         return output;
     }
-    vector<pair<string, string>> Network::getEdges()
+    vector<pair<string, string>> Network::getEdges() const
     {
         auto edges = vector<pair<string, string>>();
         for (const auto& node : nodes) {
@@ -381,6 +381,10 @@ namespace bayesnet {
             }
         }
         return edges;
+    }
+    int Network::getNumEdges() const
+    {
+        return getEdges().size();
     }
     vector<string> Network::topological_sort()
     {
@@ -420,7 +424,7 @@ namespace bayesnet {
         }
         return result;
     }
-    void Network::dump_cpt()
+    void Network::dump_cpt() const
     {
         for (auto& node : nodes) {
             cout << "* " << node.first << ": (" << node.second->getNumStates() << ") : " << node.second->getCPT().sizes() << endl;

@@ -112,7 +112,7 @@ namespace bayesnet {
         }
         return model.score(X, y);
     }
-    vector<string> Classifier::show()
+    vector<string> Classifier::show() const
     {
         return model.show();
     }
@@ -124,16 +124,16 @@ namespace bayesnet {
         }
         model.addNode(className);
     }
-    int Classifier::getNumberOfNodes()
+    int Classifier::getNumberOfNodes() const
     {
         // Features does not include class
         return fitted ? model.getFeatures().size() + 1 : 0;
     }
-    int Classifier::getNumberOfEdges()
+    int Classifier::getNumberOfEdges() const
     {
-        return fitted ? model.getEdges().size() : 0;
+        return fitted ? model.getNumEdges() : 0;
     }
-    int Classifier::getNumberOfStates()
+    int Classifier::getNumberOfStates() const
     {
         return fitted ? model.getStates() : 0;
     }
@@ -141,7 +141,7 @@ namespace bayesnet {
     {
         return model.topological_sort();
     }
-    void Classifier::dump_cpt()
+    void Classifier::dump_cpt() const
     {
         model.dump_cpt();
     }

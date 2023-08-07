@@ -23,7 +23,7 @@ namespace bayesnet {
         auto Xt = prepareX(X);
         return KDB::predict(Xt);
     }
-    vector<string> KDBLd::graph(const string& name)
+    vector<string> KDBLd::graph(const string& name) const
     {
         return KDB::graph(name);
     }

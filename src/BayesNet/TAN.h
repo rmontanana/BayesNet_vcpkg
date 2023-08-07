@@ -11,7 +11,7 @@ namespace bayesnet {
     public:
         TAN();
         virtual ~TAN() {};
-        vector<string> graph(const string& name = "TAN") override;
+        vector<string> graph(const string& name = "TAN") const override;
     };
 }
 #endif
