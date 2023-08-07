@@ -23,7 +23,7 @@ namespace bayesnet {
         map<string, vector<int>> states;
         void checkFitParameters();
         virtual void buildModel() = 0;
-        void trainModel();
+        virtual void trainModel();
     public:
         Classifier(Network model);
         virtual ~Classifier() = default;

@@ -14,7 +14,7 @@ namespace bayesnet {
     protected:
         unsigned n_models;
         vector<unique_ptr<Classifier>> models;
-        void trainModel();
+        void trainModel() override;
         vector<int> voting(Tensor& y_pred);
     public:
         Ensemble();

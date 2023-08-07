@@ -25,7 +25,8 @@
             "program": "${workspaceFolder}/build/src/Platform/main",
             "args": [
                 "-m",
-                "AODELd",
+                "AODE",
+                "--discretize",
                 "-p",
                 "/Users/rmontanana/Code/discretizbench/datasets",
                 "--stratified",

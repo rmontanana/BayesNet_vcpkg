@@ -8,7 +8,7 @@ namespace bayesnet {
     using namespace std;
     class AODELd : public Ensemble, public Proposal {
     private:
-        void trainModel();
+        void trainModel() override;
         void buildModel() override;
     public:
         AODELd();
