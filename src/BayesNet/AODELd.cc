@@ -22,22 +22,15 @@ namespace bayesnet {
     void AODELd::buildModel()
     {
         models.clear();
-        cout << "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaah!" << endl;
         for (int i = 0; i < features.size(); ++i) {
-            models.push_back(Models::instance().create("SPODELd"));
-            models[i]->test();
+            models.push_back(std::make_unique<SPODELd>(i));
         }
         n_models = models.size();
     }
     void AODELd::trainModel()
     {
-        cout << "dataset: " << dataset.sizes() << endl;
-        cout << "features: " << features.size() << endl;
-        cout << "className: " << className << endl;
-        cout << "states: " << states.size() << endl;
         for (const auto& model : models) {
-            model->fit(dataset, features, className, states);
-            model->test();
+            model->fit(Xf, y, features, className, states);
         }
     }
     vector<string> AODELd::graph(const string& name) const
