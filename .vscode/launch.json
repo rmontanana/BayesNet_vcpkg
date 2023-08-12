@@ -25,12 +25,13 @@
             "program": "${workspaceFolder}/build/src/Platform/main",
             "args": [
                 "-m",
-                "SPODELd",
+                "SPODE",
                 "-p",
                 "/Users/rmontanana/Code/discretizbench/datasets",
                 "--stratified",
+                "--discretize",
                 "-d",
-                "iris"
+                "letter"
             ],
             "cwd": "/Users/rmontanana/Code/discretizbench",
         },

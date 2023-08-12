@@ -65,7 +65,8 @@ namespace bayesnet {
                 //Update new states of the feature/node
                 states[pFeatures[index]] = xStates;
             }
-            model.fit(pDataset, pFeatures, pClassName, states);
+            const torch::Tensor weights = torch::ones({ pDataset.size(1) }, torch::kFloat);
+            model.fit(pDataset, weights, pFeatures, pClassName, states);
         }
         return states;
     }

@@ -20,8 +20,8 @@ namespace bayesnet {
         vector<double> predict_sample(const torch::Tensor&);
         vector<double> exactInference(map<string, int>&);
         double computeFactor(map<string, int>&);
-        void completeFit(const map<string, vector<int>>&);
-        void checkFitData(int n_features, int n_samples, int n_samples_y, const vector<string>& featureNames, const string& className, const map<string, vector<int>>&);
+        void completeFit(const map<string, vector<int>>& states, const torch::Tensor& weights);
+        void checkFitData(int n_features, int n_samples, int n_samples_y, const vector<string>& featureNames, const string& className, const map<string, vector<int>>& states, const torch::Tensor& weights);
         void setStates(const map<string, vector<int>>&);
     public:
         Network();
@@ -39,9 +39,9 @@ namespace bayesnet {
         int getNumEdges() const;
         int getClassNumStates() const;
         string getClassName() const;
-        void fit(const vector<vector<int>>&, const vector<int>&, const vector<string>&, const string&, const map<string, vector<int>>&);
-        void fit(const torch::Tensor&, const torch::Tensor&, const vector<string>&, const string&, const map<string, vector<int>>&);
-        void fit(const torch::Tensor&, const vector<string>&, const string&, const map<string, vector<int>>&);
+        void fit(const vector<vector<int>>& input_data, const vector<int>& labels, const vector<float>& weights, const vector<string>& featureNames, const string& className, const map<string, vector<int>>& states);
+        void fit(const torch::Tensor& X, const torch::Tensor& y, const torch::Tensor& weights, const vector<string>& featureNames, const string& className, const map<string, vector<int>>& states);
+        void fit(const torch::Tensor& samples, const torch::Tensor& weights, const vector<string>& featureNames, const string& className, const map<string, vector<int>>& states);
         vector<int> predict(const vector<vector<int>>&); // Return mx1 vector of predictions
         torch::Tensor predict(const torch::Tensor&); // Return mx1 tensor of predictions
         torch::Tensor predict_tensor(const torch::Tensor& samples, const bool proba);
