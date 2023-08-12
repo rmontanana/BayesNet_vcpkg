@@ -12,7 +12,7 @@ namespace bayesnet {
         Xf = X_;
         y = y_;
         // Fills vectors Xv & yv with the data from tensors X_ (discretized) & y
-        fit_local_discretization(states, y);
+        states = fit_local_discretization(y);
         // We have discretized the input data
         // 1st we need to fit the model to build the normal TAN structure, TAN::fit initializes the base Bayesian network
         Ensemble::fit(dataset, features, className, states);

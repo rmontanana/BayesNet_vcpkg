@@ -67,10 +67,12 @@ namespace bayesnet {
             model.fit(pDataset, pFeatures, pClassName, states);
         }
     }
-    void Proposal::fit_local_discretization(map<string, vector<int>>& states, torch::Tensor& y)
+    map<string, vector<int>> Proposal::fit_local_discretization(torch::Tensor& y)
     {
+        // Discretize the continuous input data and build pDataset (Classifier::dataset)
         int m = Xf.size(1);
         int n = Xf.size(0);
+        map<string, vector<int>> states;
         pDataset = torch::zeros({ n + 1, m }, kInt32);
         auto yv = vector<int>(y.data_ptr<int>(), y.data_ptr<int>() + y.size(0));
         // discretize input data by feature(row)
@@ -89,6 +91,8 @@ namespace bayesnet {
         auto yStates = vector<int>(n_classes);
         iota(yStates.begin(), yStates.end(), 0);
         states[pClassName] = yStates;
+        pDataset.index_put_({ n, "..." }, y);
+        return states;
     }
     torch::Tensor Proposal::prepareX(torch::Tensor& X)
     {
