@@ -9,12 +9,13 @@ namespace bayesnet {
             delete value;
         }
     }
-    void Proposal::localDiscretizationProposal(map<string, vector<int>>& states, Network& model)
+    map<string, vector<int>> Proposal::localDiscretizationProposal(const map<string, vector<int>>& oldStates, Network& model)
     {
         // order of local discretization is important. no good 0, 1, 2...
         // although we rediscretize features after the local discretization of every feature
         auto order = model.topological_sort();
         auto& nodes = model.getNodes();
+        map<string, vector<int>> states = oldStates;
         vector<int> indicesToReDiscretize;
         bool upgrade = false; // Flag to check if we need to upgrade the model
         for (auto feature : order) {
@@ -66,8 +67,9 @@ namespace bayesnet {
             }
             model.fit(pDataset, pFeatures, pClassName, states);
         }
+        return states;
     }
-    map<string, vector<int>> Proposal::fit_local_discretization(torch::Tensor& y)
+    map<string, vector<int>> Proposal::fit_local_discretization(const torch::Tensor& y)
     {
         // Discretize the continuous input data and build pDataset (Classifier::dataset)
         int m = Xf.size(1);
