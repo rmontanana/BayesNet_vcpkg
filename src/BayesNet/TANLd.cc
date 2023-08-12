@@ -15,7 +15,7 @@ namespace bayesnet {
         // We have discretized the input data
         // 1st we need to fit the model to build the normal TAN structure, TAN::fit initializes the base Bayesian network
         TAN::fit(dataset, features, className, states);
-        localDiscretizationProposal(states, model);
+        states = localDiscretizationProposal(states, model);
         return *this;
 
     }

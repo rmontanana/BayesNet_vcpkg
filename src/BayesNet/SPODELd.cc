@@ -15,7 +15,7 @@ namespace bayesnet {
         // We have discretized the input data
         // 1st we need to fit the model to build the normal SPODE structure, SPODE::fit initializes the base Bayesian network
         SPODE::fit(dataset, features, className, states);
-        localDiscretizationProposal(states, model);
+        states = localDiscretizationProposal(states, model);
         return *this;
     }
     SPODELd& SPODELd::fit(torch::Tensor& dataset, vector<string>& features_, string className_, map<string, vector<int>>& states_)
@@ -31,7 +31,7 @@ namespace bayesnet {
         // We have discretized the input data
         // 1st we need to fit the model to build the normal SPODE structure, SPODE::fit initializes the base Bayesian network
         SPODE::fit(dataset, features, className, states);
-        localDiscretizationProposal(states, model);
+        states = localDiscretizationProposal(states, model);
         return *this;
     }
 

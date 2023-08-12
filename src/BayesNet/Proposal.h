@@ -14,8 +14,8 @@ namespace bayesnet {
         virtual ~Proposal();
     protected:
         torch::Tensor prepareX(torch::Tensor& X);
-        void localDiscretizationProposal(map<string, vector<int>>& states, Network& model);
-        map<string, vector<int>> fit_local_discretization(torch::Tensor& y);
+        map<string, vector<int>> localDiscretizationProposal(const map<string, vector<int>>& states, Network& model);
+        map<string, vector<int>> fit_local_discretization(const torch::Tensor& y);
         torch::Tensor Xf; // X continuous nxm tensor
         torch::Tensor y; // y discrete nx1 tensor
         map<string, mdlp::CPPFImdlp*> discretizers;

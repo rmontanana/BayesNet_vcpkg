@@ -15,7 +15,7 @@ namespace bayesnet {
         // We have discretized the input data
         // 1st we need to fit the model to build the normal KDB structure, KDB::fit initializes the base Bayesian network
         KDB::fit(dataset, features, className, states);
-        localDiscretizationProposal(states, model);
+        states = localDiscretizationProposal(states, model);
         return *this;
     }
     Tensor KDBLd::predict(Tensor& X)
