@@ -4,6 +4,7 @@ namespace platform {
     string headerLine(const string& text)
     {
         int n = MAXL - text.length() - 3;
+        n = n < 0 ? 0 : n;
         return "* " + text + string(n, ' ') + "*\n";
     }
     string Report::fromVector(const string& key)
@@ -13,7 +14,7 @@ namespace platform {
         for (auto& item : data[key]) {
             result += to_string(item) + ", ";
         }
-        return "[" + result.substr(0, result.length() - 2) + "]";
+        return "[" + result.substr(0, result.size() - 2) + "]";
     }
     string fVector(const json& data)
     {
@@ -21,7 +22,7 @@ namespace platform {
         for (const auto& item : data) {
             result += to_string(item) + ", ";
         }
-        return "[" + result.substr(0, result.length() - 2) + "]";
+        return "[" + result.substr(0, result.size() - 2) + "]";
     }
     void Report::show()
     {

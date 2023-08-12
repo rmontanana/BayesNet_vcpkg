@@ -7,11 +7,11 @@ namespace bayesnet {
     private:
         int root;
     protected:
-        void train() override;
+        void buildModel() override;
     public:
         explicit SPODE(int root);
         virtual ~SPODE() {};
-        vector<string> graph(const string& name = "SPODE") override;
+        vector<string> graph(const string& name = "SPODE") const override;
     };
 }
 #endif

@@ -7,11 +7,11 @@ namespace bayesnet {
     class TAN : public Classifier {
     private:
     protected:
-        void train() override;
+        void buildModel() override;
     public:
         TAN();
         virtual ~TAN() {};
-        vector<string> graph(const string& name = "TAN") override;
+        vector<string> graph(const string& name = "TAN") const override;
     };
 }
 #endif

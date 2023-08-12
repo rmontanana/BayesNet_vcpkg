@@ -13,7 +13,7 @@ namespace bayesnet {
         int root = 0;
     public:
         MST() = default;
-        MST(vector<string>& features, Tensor& weights, int root);
+        MST(const vector<string>& features, const Tensor& weights, const int root);
         vector<pair<int, int>> maximumSpanningTree();
     };
     class Graph {

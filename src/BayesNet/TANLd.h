@@ -11,7 +11,7 @@ namespace bayesnet {
         TANLd();
         virtual ~TANLd() = default;
         TANLd& fit(torch::Tensor& X, torch::Tensor& y, vector<string>& features, string className, map<string, vector<int>>& states) override;
-        vector<string> graph(const string& name = "TAN") override;
+        vector<string> graph(const string& name = "TAN") const override;
         Tensor predict(Tensor& X) override;
         static inline string version() { return "0.0.1"; };
     };

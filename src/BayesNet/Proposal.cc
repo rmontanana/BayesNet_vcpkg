@@ -2,7 +2,7 @@
 #include "ArffFiles.h"
 
 namespace bayesnet {
-    Proposal::Proposal(vector<vector<int>>& Xv_, vector<int>& yv_, vector<string>& features_, string& className_) : Xv(Xv_), yv(yv_), pFeatures(features_), pClassName(className_) {}
+    Proposal::Proposal(torch::Tensor& dataset_, vector<string>& features_, string& className_) : pDataset(dataset_), pFeatures(features_), pClassName(className_) {}
     Proposal::~Proposal()
     {
         for (auto& [key, value] : discretizers) {
@@ -16,7 +16,6 @@ namespace bayesnet {
         auto order = model.topological_sort();
         auto& nodes = model.getNodes();
         vector<int> indicesToReDiscretize;
-        auto n_samples = Xf.size(1);
         bool upgrade = false; // Flag to check if we need to upgrade the model
         for (auto feature : order) {
             auto nodeParents = nodes[feature]->getParents();
@@ -30,13 +29,13 @@ namespace bayesnet {
             parents.erase(remove(parents.begin(), parents.end(), pClassName), parents.end());
             // Get the indices of the parents
             vector<int> indices;
+            indices.push_back(-1); // Add class index
             transform(parents.begin(), parents.end(), back_inserter(indices), [&](const auto& p) {return find(pFeatures.begin(), pFeatures.end(), p) - pFeatures.begin(); });
             // Now we fit the discretizer of the feature, conditioned on its parents and the class i.e. discretizer.fit(X[index], X[indices] + y)
-            vector<string> yJoinParents;
-            transform(yv.begin(), yv.end(), back_inserter(yJoinParents), [&](const auto& p) {return to_string(p); });
+            vector<string> yJoinParents(Xf.size(1));
             for (auto idx : indices) {
-                for (int i = 0; i < n_samples; ++i) {
-                    yJoinParents[i] += to_string(Xv[idx][i]);
+                for (int i = 0; i < Xf.size(1); ++i) {
+                    yJoinParents[i] += to_string(pDataset.index({ idx, i }).item<int>());
                 }
             }
             auto arff = ArffFiles();
@@ -59,26 +58,30 @@ namespace bayesnet {
             for (auto index : indicesToReDiscretize) {
                 auto Xt_ptr = Xf.index({ index }).data_ptr<float>();
                 auto Xt = vector<float>(Xt_ptr, Xt_ptr + Xf.size(1));
-                Xv[index] = discretizers[pFeatures[index]]->transform(Xt);
+                pDataset.index_put_({ index, "..." }, torch::tensor(discretizers[pFeatures[index]]->transform(Xt)));
                 auto xStates = vector<int>(discretizers[pFeatures[index]]->getCutPoints().size() + 1);
                 iota(xStates.begin(), xStates.end(), 0);
                 //Update new states of the feature/node
                 states[pFeatures[index]] = xStates;
             }
+            model.fit(pDataset, pFeatures, pClassName, states);
         }
     }
-    void Proposal::fit_local_discretization(map<string, vector<int>>& states, torch::Tensor& y)
+    map<string, vector<int>> Proposal::fit_local_discretization(torch::Tensor& y)
     {
-        // Sharing Xv and yv with Classifier
-        Xv = vector<vector<int>>();
-        yv = vector<int>(y.data_ptr<int>(), y.data_ptr<int>() + y.size(0));
+        // Discretize the continuous input data and build pDataset (Classifier::dataset)
+        int m = Xf.size(1);
+        int n = Xf.size(0);
+        map<string, vector<int>> states;
+        pDataset = torch::zeros({ n + 1, m }, kInt32);
+        auto yv = vector<int>(y.data_ptr<int>(), y.data_ptr<int>() + y.size(0));
         // discretize input data by feature(row)
-        for (int i = 0; i < pFeatures.size(); ++i) {
+        for (auto i = 0; i < pFeatures.size(); ++i) {
             auto* discretizer = new mdlp::CPPFImdlp();
             auto Xt_ptr = Xf.index({ i }).data_ptr<float>();
             auto Xt = vector<float>(Xt_ptr, Xt_ptr + Xf.size(1));
             discretizer->fit(Xt, yv);
-            Xv.push_back(discretizer->transform(Xt));
+            pDataset.index_put_({ i, "..." }, torch::tensor(discretizer->transform(Xt)));
             auto xStates = vector<int>(discretizer->getCutPoints().size() + 1);
             iota(xStates.begin(), xStates.end(), 0);
             states[pFeatures[i]] = xStates;
@@ -88,6 +91,8 @@ namespace bayesnet {
         auto yStates = vector<int>(n_classes);
         iota(yStates.begin(), yStates.end(), 0);
         states[pClassName] = yStates;
+        pDataset.index_put_({ n, "..." }, y);
+        return states;
     }
     torch::Tensor Proposal::prepareX(torch::Tensor& X)
     {

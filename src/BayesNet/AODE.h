@@ -5,11 +5,11 @@
 namespace bayesnet {
     class AODE : public Ensemble {
     protected:
-        void train() override;
+        void buildModel() override;
     public:
         AODE();
         virtual ~AODE() {};
-        vector<string> graph(const string& title = "AODE") override;
+        vector<string> graph(const string& title = "AODE") const override;
     };
 }
 #endif

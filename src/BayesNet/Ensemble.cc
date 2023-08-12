@@ -3,54 +3,15 @@
 namespace bayesnet {
     using namespace torch;
 
-    Ensemble::Ensemble() : n_models(0), metrics(Metrics()), fitted(false) {}
-    Ensemble& Ensemble::build(vector<string>& features, string className, map<string, vector<int>>& states)
+    Ensemble::Ensemble() : Classifier(Network()) {}
+
+    void Ensemble::trainModel()
     {
-        Tensor ytmp = torch::transpose(y.view({ y.size(0), 1 }), 0, 1);
-        samples = torch::cat({ X, ytmp }, 0);
-        this->features = features;
-        this->className = className;
-        this->states = states;
-        auto n_classes = states[className].size();
-        metrics = Metrics(samples, features, className, n_classes);
-        // Build models
-        train();
-        // Train models
         n_models = models.size();
         for (auto i = 0; i < n_models; ++i) {
-            if (Xv.empty()) {
-                // fit with tensors
-                models[i]->fit(X, y, features, className, states);
-            } else {
-                // fit with vectors
-                models[i]->fit(Xv, yv, features, className, states);
-            }
+            // fit with vectors
+            models[i]->fit(dataset, features, className, states);
         }
-        fitted = true;
-        return *this;
-    }
-    void Ensemble::generateTensorXFromVector()
-    {
-        X = torch::zeros({ static_cast<int>(Xv.size()), static_cast<int>(Xv[0].size()) }, kInt32);
-        for (int i = 0; i < Xv.size(); ++i) {
-            X.index_put_({ i, "..." }, torch::tensor(Xv[i], kInt32));
-        }
-    }
-    Ensemble& Ensemble::fit(torch::Tensor& X, torch::Tensor& y, vector<string>& features, string className, map<string, vector<int>>& states)
-    {
-        this->X = X;
-        this->y = y;
-        Xv = vector<vector<int>>();
-        yv = vector<int>(y.data_ptr<int>(), y.data_ptr<int>() + y.size(0));
-        return build(features, className, states);
-    }
-    Ensemble& Ensemble::fit(vector<vector<int>>& X, vector<int>& y, vector<string>& features, string className, map<string, vector<int>>& states)
-    {
-        Xv = X;
-        generateTensorXFromVector();
-        this->y = torch::tensor(y, kInt32);
-        yv = y;
-        return build(features, className, states);
     }
     vector<int> Ensemble::voting(Tensor& y_pred)
     {
@@ -132,9 +93,8 @@ namespace bayesnet {
             }
         }
         return (double)correct / y_pred.size();
-
     }
-    vector<string> Ensemble::show()
+    vector<string> Ensemble::show() const
     {
         auto result = vector<string>();
         for (auto i = 0; i < n_models; ++i) {
@@ -143,7 +103,7 @@ namespace bayesnet {
         }
         return result;
     }
-    vector<string> Ensemble::graph(const string& title)
+    vector<string> Ensemble::graph(const string& title) const
     {
         auto result = vector<string>();
         for (auto i = 0; i < n_models; ++i) {
@@ -152,7 +112,7 @@ namespace bayesnet {
         }
         return result;
     }
-    int Ensemble::getNumberOfNodes()
+    int Ensemble::getNumberOfNodes() const
     {
         int nodes = 0;
         for (auto i = 0; i < n_models; ++i) {
@@ -160,7 +120,7 @@ namespace bayesnet {
         }
         return nodes;
     }
-    int Ensemble::getNumberOfEdges()
+    int Ensemble::getNumberOfEdges() const
     {
         int edges = 0;
         for (auto i = 0; i < n_models; ++i) {
@@ -168,7 +128,7 @@ namespace bayesnet {
         }
         return edges;
     }
-    int Ensemble::getNumberOfStates()
+    int Ensemble::getNumberOfStates() const
     {
         int nstates = 0;
         for (auto i = 0; i < n_models; ++i) {

@@ -4,7 +4,7 @@ namespace bayesnet {
 
     SPODE::SPODE(int root) : Classifier(Network()), root(root) {}
 
-    void SPODE::train()
+    void SPODE::buildModel()
     {
         // 0. Add all nodes to the model
         addNodes();
@@ -17,7 +17,7 @@ namespace bayesnet {
             }
         }
     }
-    vector<string> SPODE::graph(const string& name)
+    vector<string> SPODE::graph(const string& name) const
     {
         return model.graph(name);
     }

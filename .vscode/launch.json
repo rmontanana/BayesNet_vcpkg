@@ -25,7 +25,7 @@
             "program": "${workspaceFolder}/build/src/Platform/main",
             "args": [
                 "-m",
-                "AODELd",
+                "SPODELd",
                 "-p",
                 "/Users/rmontanana/Code/discretizbench/datasets",
                 "--stratified",

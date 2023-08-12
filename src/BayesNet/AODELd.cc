@@ -1,33 +1,39 @@
 #include "AODELd.h"
+#include "Models.h"
 
 namespace bayesnet {
     using namespace std;
-    AODELd::AODELd() : Ensemble(), Proposal(Ensemble::Xv, Ensemble::yv, features, className) {}
+    AODELd::AODELd() : Ensemble(), Proposal(dataset, features, className) {}
     AODELd& AODELd::fit(torch::Tensor& X_, torch::Tensor& y_, vector<string>& features_, string className_, map<string, vector<int>>& states_)
     {
+        // This first part should go in a Classifier method called fit_local_discretization o fit_float...
         features = features_;
         className = className_;
-        states = states_;
-        train();
-        for (const auto& model : models) {
-            model->fit(X_, y_, features_, className_, states_);
-        }
-        n_models = models.size();
-        fitted = true;
+        Xf = X_;
+        y = y_;
+        // Fills vectors Xv & yv with the data from tensors X_ (discretized) & y
+        states = fit_local_discretization(y);
+        // We have discretized the input data
+        // 1st we need to fit the model to build the normal TAN structure, TAN::fit initializes the base Bayesian network
+        Ensemble::fit(dataset, features, className, states);
         return *this;
+
     }
-    void AODELd::train()
+    void AODELd::buildModel()
     {
         models.clear();
         for (int i = 0; i < features.size(); ++i) {
             models.push_back(std::make_unique<SPODELd>(i));
         }
+        n_models = models.size();
     }
-    Tensor AODELd::predict(Tensor& X)
+    void AODELd::trainModel()
     {
-        return Ensemble::predict(X);
+        for (const auto& model : models) {
+            model->fit(Xf, y, features, className, states);
+        }
     }
-    vector<string> AODELd::graph(const string& name)
+    vector<string> AODELd::graph(const string& name) const
     {
         return Ensemble::graph(name);
     }

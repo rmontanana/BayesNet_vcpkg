@@ -4,7 +4,7 @@ namespace bayesnet {
     using namespace torch;
 
     KDB::KDB(int k, float theta) : Classifier(Network()), k(k), theta(theta) {}
-    void KDB::train()
+    void KDB::buildModel()
     {
         /*
         1. For each feature Xi, compute mutual information, I(X;C),
@@ -28,9 +28,10 @@ namespace bayesnet {
         // 1. For each feature Xi, compute mutual information, I(X;C),
         // where C is the class.
         addNodes();
+        const Tensor& y = dataset.index({ -1, "..." });
         vector <float> mi;
         for (auto i = 0; i < features.size(); i++) {
-            Tensor firstFeature = X.index({ i, "..." });
+            Tensor firstFeature = dataset.index({ i, "..." });
             mi.push_back(metrics.mutualInformation(firstFeature, y));
         }
         // 2. Compute class conditional mutual information I(Xi;XjIC), f or each
@@ -78,7 +79,7 @@ namespace bayesnet {
             exit_cond = num == n_edges || candidates.size(0) == 0;
         }
     }
-    vector<string> KDB::graph(const string& title)
+    vector<string> KDB::graph(const string& title) const
     {
         string header{ title };
         if (title == "KDB") {

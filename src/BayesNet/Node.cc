@@ -84,7 +84,7 @@ namespace bayesnet {
         }
         return result;
     }
-    void Node::computeCPT(map<string, vector<int>>& dataset, const int laplaceSmoothing)
+    void Node::computeCPT(const torch::Tensor& dataset, const vector<string>& features, const int laplaceSmoothing)
     {
         dimensions.clear();
         // Get dimensions of the CPT
@@ -94,10 +94,22 @@ namespace bayesnet {
         // Create a tensor of zeros with the dimensions of the CPT
         cpTable = torch::zeros(dimensions, torch::kFloat) + laplaceSmoothing;
         // Fill table with counts
-        for (int n_sample = 0; n_sample < dataset[name].size(); ++n_sample) {
+        auto pos = find(features.begin(), features.end(), name);
+        if (pos == features.end()) {
+            throw logic_error("Feature " + name + " not found in dataset");
+        }
+        int name_index = pos - features.begin();
+        for (int n_sample = 0; n_sample < dataset.size(1); ++n_sample) {
             torch::List<c10::optional<torch::Tensor>> coordinates;
-            coordinates.push_back(torch::tensor(dataset[name][n_sample]));
-            transform(parents.begin(), parents.end(), back_inserter(coordinates), [&dataset, &n_sample](const auto& parent) { return torch::tensor(dataset[parent->getName()][n_sample]); });
+            coordinates.push_back(dataset.index({ name_index, n_sample }));
+            for (auto parent : parents) {
+                pos = find(features.begin(), features.end(), parent->getName());
+                if (pos == features.end()) {
+                    throw logic_error("Feature parent " + parent->getName() + " not found in dataset");
+                }
+                int parent_index = pos - features.begin();
+                coordinates.push_back(dataset.index({ parent_index, n_sample }));
+            }
             // Increment the count of the corresponding coordinate
             cpTable.index_put_({ coordinates }, cpTable.index({ coordinates }) + 1);
         }
