@@ -64,7 +64,7 @@ namespace bayesnet {
                 //Update new states of the feature/node
                 states[pFeatures[index]] = xStates;
             }
-            model.fit(pDataset, pFeatures, pClassName);
+            model.fit(pDataset, pFeatures, pClassName, states);
         }
     }
     void Proposal::fit_local_discretization(map<string, vector<int>>& states, torch::Tensor& y)

@@ -25,12 +25,12 @@
             "program": "${workspaceFolder}/build/src/Platform/main",
             "args": [
                 "-m",
-                "AODELd",
+                "TANLd",
                 "-p",
                 "/Users/rmontanana/Code/discretizbench/datasets",
                 "--stratified",
                 "-d",
-                "iris"
+                "vehicle"
             ],
             "cwd": "/Users/rmontanana/Code/discretizbench",
         },

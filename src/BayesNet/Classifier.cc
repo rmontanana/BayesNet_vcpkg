@@ -37,7 +37,7 @@ namespace bayesnet {
     }
     void Classifier::trainModel()
     {
-        model.fit(dataset, features, className);
+        model.fit(dataset, features, className, states);
     }
     // X is nxm where n is the number of features and m the number of samples
     Classifier& Classifier::fit(torch::Tensor& X, torch::Tensor& y, vector<string>& features, string className, map<string, vector<int>>& states)

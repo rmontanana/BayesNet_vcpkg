@@ -20,13 +20,9 @@ namespace bayesnet {
         vector<double> predict_sample(const torch::Tensor&);
         vector<double> exactInference(map<string, int>&);
         double computeFactor(map<string, int>&);
-        double mutual_info(torch::Tensor&, torch::Tensor&);
-        double entropy(torch::Tensor&);
-        double conditionalEntropy(torch::Tensor&, torch::Tensor&);
-        double mutualInformation(torch::Tensor&, torch::Tensor&);
-        void completeFit();
-        void checkFitData(int n_features, int n_samples, int n_samples_y, const vector<string>& featureNames, const string& className);
-        void setStates();
+        void completeFit(const map<string, vector<int>>&);
+        void checkFitData(int n_features, int n_samples, int n_samples_y, const vector<string>& featureNames, const string& className, const map<string, vector<int>>&);
+        void setStates(const map<string, vector<int>>&);
     public:
         Network();
         explicit Network(float, int);
@@ -43,13 +39,11 @@ namespace bayesnet {
         int getNumEdges() const;
         int getClassNumStates() const;
         string getClassName() const;
-        void fit(const vector<vector<int>>&, const vector<int>&, const vector<string>&, const string&);
-        void fit(const torch::Tensor&, const torch::Tensor&, const vector<string>&, const string&);
-        void fit(const torch::Tensor&, const vector<string>&, const string&);
+        void fit(const vector<vector<int>>&, const vector<int>&, const vector<string>&, const string&, const map<string, vector<int>>&);
+        void fit(const torch::Tensor&, const torch::Tensor&, const vector<string>&, const string&, const map<string, vector<int>>&);
+        void fit(const torch::Tensor&, const vector<string>&, const string&, const map<string, vector<int>>&);
         vector<int> predict(const vector<vector<int>>&); // Return mx1 vector of predictions
         torch::Tensor predict(const torch::Tensor&); // Return mx1 tensor of predictions
-        //Computes the conditional edge weight of variable index u and v conditioned on class_node
-        torch::Tensor conditionalEdgeWeight();
         torch::Tensor predict_tensor(const torch::Tensor& samples, const bool proba);
         vector<vector<double>> predict_proba(const vector<vector<int>>&); // Return mxn vector of probabilities
         torch::Tensor predict_proba(const torch::Tensor&); // Return mxn tensor of probabilities
