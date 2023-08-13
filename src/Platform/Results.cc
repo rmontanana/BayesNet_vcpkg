@@ -1,6 +1,7 @@
 #include <filesystem>
 #include "platformUtils.h"
 #include "Results.h"
+#include "Report.h"
 namespace platform {
     const double REFERENCE_SCORE = 22.109799;
     Result::Result(const string& path, const string& filename)
@@ -48,13 +49,140 @@ namespace platform {
         oss << setw(50) << left << title << " ";
         return  oss.str();
     }
-    void Results::manage()
+    void Results::show() const
     {
         cout << "Results found: " << files.size() << endl;
-        cout << "========================" << endl;
+        cout << "-------------------" << endl;
+        auto i = 0;
+        cout << " #  Date       Model        Score     Duration  Title" << endl;
+        cout << "=== ========== ============ ========= ========= =============================================================" << endl;
         for (const auto& result : files) {
+            cout << setw(3) << fixed << right << i++ << " ";
             cout << result.to_string() << endl;
+            if (i == max && max != 0) {
+                break;
+            }
+
         }
+    }
+    int Results::getIndex(const string& intent) const
+    {
+        cout << "Choose result to " << intent << ": ";
+        int index;
+        cin >> index;
+        if (index >= 0 && index < files.size()) {
+            return index;
+        }
+
+        cout << "Invalid index" << endl;
+        return -1;
+    }
+    void Results::menu()
+    {
+        cout << "Choose option (quit='q', list='l', delete='d', hide='h', sort='s', report='r'): ";
+        char option;
+        int index;
+        string filename;
+        cin >> option;
+        switch (option) {
+            case 'q':
+                exit(0);
+            case 'l':
+                show();
+                menu();
+                break;
+            case 'd':
+                index = getIndex("delete");
+                if (index == -1)
+                    break;
+                filename = files[index].getFilename();
+                cout << "Deleting " << filename << endl;
+                remove((path + "/" + filename).c_str());
+                files.erase(files.begin() + index);
+                show();
+                menu();
+                break;
+            case 'h':
+                index = getIndex("hide");
+                if (index == -1)
+                    break;
+                filename = files[index].getFilename();
+                cout << "Hiding " << filename << endl;
+                rename((path + "/" + filename).c_str(), (path + "/." + filename).c_str());
+                files.erase(files.begin() + index);
+                show();
+                menu();
+                break;
+            case 's':
+                sortList();
+                show();
+                menu();
+                break;
+            case 'r':
+                index = getIndex("report");
+                if (index == -1)
+                    break;
+                filename = files[index].getFilename();
+                cout << "Reporting " << filename << endl;
+                auto data = files[index].load();
+                Report report(data);
+                report.show();
+                menu();
+                break;
+
+        }
+    }
+    void Results::sortList()
+    {
+        cout << "Choose sorting field (date='d', score='s', duration='u', model='m'): ";
+        char option;
+        cin >> option;
+        switch (option) {
+            case 'd':
+                sortDate();
+                break;
+            case 's':
+                sortScore();
+                break;
+            case 'u':
+                sortDuration();
+                break;
+            case 'm':
+                sortModel();
+                break;
+            default:
+                cout << "Invalid option" << endl;
+        }
+
+    }
+    void Results::sortDate()
+    {
+        sort(files.begin(), files.end(), [](const Result& a, const Result& b) {
+            return a.getDate() > b.getDate();
+            });
+    }
+    void Results::sortModel()
+    {
+        sort(files.begin(), files.end(), [](const Result& a, const Result& b) {
+            return a.getModel() > b.getModel();
+            });
+    }
+    void Results::sortDuration()
+    {
+        sort(files.begin(), files.end(), [](const Result& a, const Result& b) {
+            return a.getDuration() > b.getDuration();
+            });
+    }
+    void Results::sortScore()
+    {
+        sort(files.begin(), files.end(), [](const Result& a, const Result& b) {
+            return a.getScore() > b.getScore();
+            });
+    }
+    void Results::manage()
+    {
+        show();
+        menu();
     }
 
 }
