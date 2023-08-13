@@ -14,13 +14,14 @@ namespace bayesnet {
         Classifier& build(vector<string>& features, string className, map<string, vector<int>>& states);
     protected:
         bool fitted;
-        Network model;
         int m, n; // m: number of samples, n: number of features
-        Tensor dataset; // (n+1)xm tensor
+        Network model;
         Metrics metrics;
         vector<string> features;
         string className;
         map<string, vector<int>> states;
+        Tensor dataset; // (n+1)xm tensor
+        Tensor weights;
         void checkFitParameters();
         virtual void buildModel() = 0;
         void trainModel() override;

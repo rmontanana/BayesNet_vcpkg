@@ -32,7 +32,7 @@ namespace bayesnet {
         }
         return result;
     }
-    torch::Tensor Metrics::conditionalEdge()
+    torch::Tensor Metrics::conditionalEdge(const torch::Tensor& weights)
     {
         auto result = vector<double>();
         auto source = vector<string>(features);
@@ -52,7 +52,7 @@ namespace bayesnet {
                 auto mask = samples.index({ -1, "..." }) == value;
                 auto first_dataset = samples.index({ index_first, mask });
                 auto second_dataset = samples.index({ index_second, mask });
-                auto mi = mutualInformation(first_dataset, second_dataset);
+                auto mi = mutualInformation(first_dataset, second_dataset, weights);
                 auto pb = margin[value].item<float>();
                 accumulated += pb * mi;
             }
@@ -70,15 +70,16 @@ namespace bayesnet {
         return matrix;
     }
     // To use in Python
-    vector<float> Metrics::conditionalEdgeWeights()
+    vector<float> Metrics::conditionalEdgeWeights(vector<float>& weights_)
     {
-        auto matrix = conditionalEdge();
+        const torch::Tensor weights = torch::tensor(weights_);
+        auto matrix = conditionalEdge(weights);
         std::vector<float> v(matrix.data_ptr<float>(), matrix.data_ptr<float>() + matrix.numel());
         return v;
     }
-    double Metrics::entropy(const torch::Tensor& feature)
+    double Metrics::entropy(const torch::Tensor& feature, const torch::Tensor& weights)
     {
-        torch::Tensor counts = feature.bincount();
+        torch::Tensor counts = feature.bincount(weights);
         int totalWeight = counts.sum().item<int>();
         torch::Tensor probs = counts.to(torch::kFloat) / totalWeight;
         torch::Tensor logProbs = torch::log(probs);
@@ -86,15 +87,15 @@ namespace bayesnet {
         return entropy.nansum().item<double>();
     }
     // H(Y|X) = sum_{x in X} p(x) H(Y|X=x)
-    double Metrics::conditionalEntropy(const torch::Tensor& firstFeature, const torch::Tensor& secondFeature)
+    double Metrics::conditionalEntropy(const torch::Tensor& firstFeature, const torch::Tensor& secondFeature, const torch::Tensor& weights)
     {
         int numSamples = firstFeature.sizes()[0];
-        torch::Tensor featureCounts = secondFeature.bincount();
+        torch::Tensor featureCounts = secondFeature.bincount(weights);
         unordered_map<int, unordered_map<int, double>> jointCounts;
         double totalWeight = 0;
         for (auto i = 0; i < numSamples; i++) {
             jointCounts[secondFeature[i].item<int>()][firstFeature[i].item<int>()] += 1;
-            totalWeight += 1;
+            totalWeight += weights[i].item<float>();
         }
         if (totalWeight == 0)
             return 0;
@@ -115,9 +116,9 @@ namespace bayesnet {
         return entropyValue;
     }
     // I(X;Y) = H(Y) - H(Y|X)
-    double Metrics::mutualInformation(const torch::Tensor& firstFeature, const torch::Tensor& secondFeature)
+    double Metrics::mutualInformation(const torch::Tensor& firstFeature, const torch::Tensor& secondFeature, const torch::Tensor& weights)
     {
-        return entropy(firstFeature) - conditionalEntropy(firstFeature, secondFeature);
+        return entropy(firstFeature, weights) - conditionalEntropy(firstFeature, secondFeature, weights);
     }
     /*
     Compute the maximum spanning tree considering the weights as distances
