@@ -14,7 +14,7 @@ const string PATH_DATASETS = "datasets";
 argparse::ArgumentParser manageArguments(int argc, char** argv)
 {
     auto env = platform::DotEnv();
-    argparse::ArgumentParser program("BayesNetSample");
+    argparse::ArgumentParser program("main");
     program.add_argument("-d", "--dataset").default_value("").help("Dataset file name");
     program.add_argument("-p", "--path")
         .help("folder where the data files are located, default")
