@@ -2,8 +2,8 @@
 #include "platformUtils.h"
 #include "Results.h"
 #include "Report.h"
+#include "BestResult.h"
 namespace platform {
-    const double REFERENCE_SCORE = 22.109799;
     Result::Result(const string& path, const string& filename)
         : path(path)
         , filename(filename)
@@ -14,7 +14,10 @@ namespace platform {
         for (const auto& result : data["results"]) {
             score += result["score"].get<double>();
         }
-        score /= REFERENCE_SCORE;
+        scoreName = data["score_name"];
+        if (scoreName == BestResult::scoreName()) {
+            score /= BestResult::score();
+        }
         title = data["title"];
         duration = data["duration"];
         model = data["model"];
@@ -35,7 +38,11 @@ namespace platform {
             auto filename = file.path().filename().string();
             if (filename.find(".json") != string::npos && filename.find("results_") == 0) {
                 auto result = Result(path, filename);
-                files.push_back(result);
+                bool addResult = true;
+                if (model != "any" && result.getModel() != model || scoreName != "any" && scoreName != result.getScoreName())
+                    addResult = false;
+                if (addResult)
+                    files.push_back(result);
             }
         }
     }
@@ -44,7 +51,8 @@ namespace platform {
         stringstream oss;
         oss << date << " ";
         oss << setw(12) << left << model << " ";
-        oss << right << setw(9) << setprecision(7) << fixed << score << " ";
+        oss << setw(11) << left << scoreName << " ";
+        oss << right << setw(11) << setprecision(7) << fixed << score << " ";
         oss << setw(9) << setprecision(3) << fixed << duration << " ";
         oss << setw(50) << left << title << " ";
         return  oss.str();
@@ -54,8 +62,8 @@ namespace platform {
         cout << "Results found: " << files.size() << endl;
         cout << "-------------------" << endl;
         auto i = 0;
-        cout << " #  Date       Model        Score     Duration  Title" << endl;
-        cout << "=== ========== ============ ========= ========= =============================================================" << endl;
+        cout << " #  Date       Model        Score Name  Score       Duration  Title" << endl;
+        cout << "=== ========== ============ =========== =========== ========= =============================================================" << endl;
         for (const auto& result : files) {
             cout << setw(3) << fixed << right << i++ << " ";
             cout << result.to_string() << endl;
@@ -181,6 +189,10 @@ namespace platform {
     }
     void Results::manage()
     {
+        if (files.size() == 0) {
+            cout << "No results found!" << endl;
+            exit(0);
+        }
         show();
         menu();
     }

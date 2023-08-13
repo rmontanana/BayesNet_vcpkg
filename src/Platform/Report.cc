@@ -1,4 +1,5 @@
 #include "Report.h"
+#include "BestResult.h"
 
 namespace platform {
     string headerLine(const string& text)
@@ -28,6 +29,7 @@ namespace platform {
     {
         header();
         body();
+        footer();
     }
     void Report::header()
     {
@@ -44,6 +46,8 @@ namespace platform {
     {
         cout << "Dataset                        Sampl. Feat. Cls Nodes   Edges   States  Score           Time              Hyperparameters" << endl;
         cout << "============================== ====== ===== === ======= ======= ======= =============== ================= ===============" << endl;
+        json lastResult;
+        totalScore = 0;
         for (const auto& r : data["results"]) {
             cout << setw(30) << left << r["dataset"].get<string>() << " ";
             cout << setw(6) << right << r["samples"].get<int>() << " ";
@@ -56,12 +60,26 @@ namespace platform {
             cout << setw(10) << right << setprecision(6) << fixed << r["test_time"].get<double>() << "±" << setw(6) << setprecision(4) << fixed << r["test_time_std"].get<double>() << " ";
             cout << " " << r["hyperparameters"].get<string>();
             cout << endl;
+            lastResult = r;
+            totalScore += r["score_test"].get<double>();
+        }
+        if (data["results"].size() == 1) {
             cout << string(MAXL, '*') << endl;
-            cout << headerLine("Train scores: " + fVector(r["scores_train"]));
-            cout << headerLine("Test  scores: " + fVector(r["scores_test"]));
-            cout << headerLine("Train  times: " + fVector(r["times_train"]));
-            cout << headerLine("Test   times: " + fVector(r["times_test"]));
+            cout << headerLine("Train scores: " + fVector(lastResult["scores_train"]));
+            cout << headerLine("Test  scores: " + fVector(lastResult["scores_test"]));
+            cout << headerLine("Train  times: " + fVector(lastResult["times_train"]));
+            cout << headerLine("Test   times: " + fVector(lastResult["times_test"]));
             cout << string(MAXL, '*') << endl;
         }
+    }
+    void Report::footer()
+    {
+        cout << string(MAXL, '*') << endl;
+        auto score = data["score_name"].get<string>();
+        if (score == BestResult::scoreName()) {
+            cout << headerLine(score + " compared to " + BestResult::title() + " .:  " + to_string(totalScore / BestResult::score()));
+        }
+        cout << string(MAXL, '*') << endl;
+
     }
 }

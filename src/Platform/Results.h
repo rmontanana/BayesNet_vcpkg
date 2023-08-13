@@ -19,6 +19,7 @@ namespace platform {
         string getTitle() const { return title; };
         double getDuration() const { return duration; };
         string getModel() const { return model; };
+        string getScoreName() const { return scoreName; };
     private:
         string path;
         string filename;
@@ -27,14 +28,17 @@ namespace platform {
         string title;
         double duration;
         string model;
+        string scoreName;
     };
     class Results {
     public:
-        explicit Results(const string& path, const int max) : path(path), max(max) { load(); };
+        Results(const string& path, const int max, const string& model, const string& score) : path(path), max(max), model(model), scoreName(score) { load(); };
         void manage();
     private:
         string path;
         int max;
+        string model;
+        string scoreName;
         vector<Result> files;
         void load(); // Loads the list of results
         void show() const;
