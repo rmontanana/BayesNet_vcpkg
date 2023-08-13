@@ -22,7 +22,7 @@ namespace platform {
         duration = data["duration"];
         model = data["model"];
     }
-    json Result::load()
+    json Result::load() const
     {
         ifstream resultData(path + "/" + filename);
         if (resultData.is_open()) {
@@ -70,7 +70,6 @@ namespace platform {
             if (i == max && max != 0) {
                 break;
             }
-
         }
     }
     int Results::getIndex(const string& intent) const
@@ -81,70 +80,98 @@ namespace platform {
         if (index >= 0 && index < files.size()) {
             return index;
         }
-
         cout << "Invalid index" << endl;
         return -1;
     }
+    void Results::report(const int index) const
+    {
+        cout << "Reporting " << files.at(index).getFilename() << endl;
+        auto data = files.at(index).load();
+        Report report(data);
+        report.show();
+    }
     void Results::menu()
     {
-        cout << "Choose option (quit='q', list='l', delete='d', hide='h', sort='s', report='r'): ";
         char option;
         int index;
-        string filename;
-        cin >> option;
-        switch (option) {
-            case 'q':
-                exit(0);
-            case 'l':
-                show();
-                menu();
-                break;
-            case 'd':
-                index = getIndex("delete");
-                if (index == -1)
+        bool finished = false;
+        string filename, line, options = "qldhsr";
+        while (!finished) {
+            cout << "Choose option (quit='q', list='l', delete='d', hide='h', sort='s', report='r'): ";
+            getline(cin, line);
+            if (line.size() == 0)
+                continue;
+            if (options.find(line[0]) != string::npos) {
+                if (line.size() > 1) {
+                    cout << "Invalid option" << endl;
+                    continue;
+                }
+                option = line[0];
+            } else {
+                index = stoi(line);
+                if (index >= 0 && index < files.size()) {
+                    report(index);
+                } else {
+                    cout << "Invalid option" << endl;
+                }
+                continue;
+            }
+            switch (option) {
+                case 'q':
+                    finished = true;
                     break;
-                filename = files[index].getFilename();
-                cout << "Deleting " << filename << endl;
-                remove((path + "/" + filename).c_str());
-                files.erase(files.begin() + index);
-                show();
-                menu();
-                break;
-            case 'h':
-                index = getIndex("hide");
-                if (index == -1)
+                case 'l':
+                    show();
                     break;
-                filename = files[index].getFilename();
-                cout << "Hiding " << filename << endl;
-                rename((path + "/" + filename).c_str(), (path + "/." + filename).c_str());
-                files.erase(files.begin() + index);
-                show();
-                menu();
-                break;
-            case 's':
-                sortList();
-                show();
-                menu();
-                break;
-            case 'r':
-                index = getIndex("report");
-                if (index == -1)
+                case 'd':
+                    index = getIndex("delete");
+                    if (index == -1)
+                        break;
+                    filename = files[index].getFilename();
+                    cout << "Deleting " << filename << endl;
+                    remove((path + "/" + filename).c_str());
+                    files.erase(files.begin() + index);
+                    show();
                     break;
-                filename = files[index].getFilename();
-                cout << "Reporting " << filename << endl;
-                auto data = files[index].load();
-                Report report(data);
-                report.show();
-                menu();
-                break;
-
+                case 'h':
+                    index = getIndex("hide");
+                    if (index == -1)
+                        break;
+                    filename = files[index].getFilename();
+                    cout << "Hiding " << filename << endl;
+                    rename((path + "/" + filename).c_str(), (path + "/." + filename).c_str());
+                    files.erase(files.begin() + index);
+                    show();
+                    menu();
+                    break;
+                case 's':
+                    sortList();
+                    show();
+                    break;
+                case 'r':
+                    index = getIndex("report");
+                    if (index == -1)
+                        break;
+                    report(index);
+                    break;
+                default:
+                    cout << "Invalid option" << endl;
+            }
         }
     }
     void Results::sortList()
     {
         cout << "Choose sorting field (date='d', score='s', duration='u', model='m'): ";
+        string line;
         char option;
-        cin >> option;
+        getline(cin, line);
+        if (line.size() == 0)
+            return;
+        if (line.size() > 1) {
+            cout << "Invalid option" << endl;
+            return;
+        }
+        option = line[0];
         switch (option) {
             case 'd':
                 sortDate();
@@ -161,7 +188,6 @@ namespace platform {
             default:
                 cout << "Invalid option" << endl;
         }
-
     }
     void Results::sortDate()
     {
@@ -195,6 +221,7 @@ namespace platform {
         }
         show();
         menu();
+        cout << "Done!" << endl;
     }
 
 }

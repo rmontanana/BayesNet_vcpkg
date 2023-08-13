@@ -11,7 +11,7 @@ namespace platform {
     class Result {
     public:
         Result(const string& path, const string& filename);
-        json load();
+        json load() const;
         string to_string() const;
         string getFilename() const { return filename; };
         string getDate() const { return date; };
@@ -42,6 +42,7 @@ namespace platform {
         vector<Result> files;
         void load(); // Loads the list of results
         void show() const;
+        void report(const int index) const;
         int getIndex(const string& intent) const;
         void menu();
         void sortList();

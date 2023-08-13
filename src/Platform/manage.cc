@@ -1,10 +1,10 @@
 #include <iostream>
 #include <argparse/argparse.hpp>
 #include "platformUtils.h"
+#include "Paths.h"
 #include "Results.h"
 
 using namespace std;
-const string PATH_RESULTS = "results";
 
 argparse::ArgumentParser manageArguments(int argc, char** argv)
 {
@@ -35,7 +35,7 @@ int main(int argc, char** argv)
     auto number = program.get<int>("number");
     auto model = program.get<string>("model");
     auto score = program.get<string>("score");
-    auto results = platform::Results(PATH_RESULTS, number, model, score);
+    auto results = platform::Results(platform::Paths::results(), number, model, score);
     results.manage();
     return 0;
 }
