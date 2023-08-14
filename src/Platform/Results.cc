@@ -3,6 +3,7 @@
 #include "Results.h"
 #include "Report.h"
 #include "BestResult.h"
+#include "Colors.h"
 namespace platform {
     Result::Result(const string& path, const string& filename)
         : path(path)
@@ -59,25 +60,35 @@ namespace platform {
     }
     void Results::show() const
     {
-        cout << "Results found: " << files.size() << endl;
+        cout << Colors::GREEN() << "Results found: " << files.size() << endl;
         cout << "-------------------" << endl;
         auto i = 0;
         cout << " #  Date       Model        Score Name  Score       Duration  Title" << endl;
         cout << "=== ========== ============ =========== =========== ========= =============================================================" << endl;
+        bool odd = true;
         for (const auto& result : files) {
-            cout << setw(3) << fixed << right << i++ << " ";
+            auto color = odd ? Colors::BLUE() : Colors::CYAN();
+            cout << color << setw(3) << fixed << right << i++ << " ";
             cout << result.to_string() << endl;
             if (i == max && max != 0) {
                 break;
             }
+            odd = !odd;
         }
     }
     int Results::getIndex(const string& intent) const
     {
-        cout << "Choose result to " << intent << ": ";
-        int index;
-        cin >> index;
-        if (index >= 0 && index < files.size()) {
+        string color;
+        if (intent == "delete") {
+            color = Colors::RED();
+        } else {
+            color = Colors::YELLOW();
+        }
+        cout << color << "Choose result to " << intent << " (cancel=-1): ";
+        string line;
+        getline(cin, line);
+        int index = stoi(line);
+        if (index >= -1 && index < static_cast<int>(files.size())) {
             return index;
         }
         cout << "Invalid index" << endl;
@@ -85,7 +96,7 @@ namespace platform {
     }
     void Results::report(const int index) const
     {
-        cout << "Reporting " << files.at(index).getFilename() << endl;
+        cout << Colors::YELLOW() << "Reporting " << files.at(index).getFilename() << endl;
         auto data = files.at(index).load();
         Report report(data);
         report.show();
@@ -97,7 +108,7 @@ namespace platform {
         bool finished = false;
         string filename, line, options = "qldhsr";
         while (!finished) {
-            cout << "Choose option (quit='q', list='l', delete='d', hide='h', sort='s', report='r'): ";
+            cout << Colors::RESET() << "Choose option (quit='q', list='l', delete='d', hide='h', sort='s', report='r'): ";
             getline(cin, line);
             if (line.size() == 0)
                 continue;
@@ -131,6 +142,7 @@ namespace platform {
                     cout << "Deleting " << filename << endl;
                     remove((path + "/" + filename).c_str());
                     files.erase(files.begin() + index);
+                    cout << "File: " + filename + " deleted!" << endl;
                     show();
                     break;
                 case 'h':
@@ -161,7 +173,7 @@ namespace platform {
     }
     void Results::sortList()
     {
-        cout << "Choose sorting field (date='d', score='s', duration='u', model='m'): ";
+        cout << Colors::YELLOW() << "Choose sorting field (date='d', score='s', duration='u', model='m'): ";
         string line;
         char option;
         getline(cin, line);

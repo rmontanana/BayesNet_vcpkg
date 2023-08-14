@@ -33,7 +33,7 @@ namespace platform {
     }
     void Report::header()
     {
-        cout << string(MAXL, '*') << endl;
+        cout << Colors::MAGENTA() << string(MAXL, '*') << endl;
         cout << headerLine("Report " + data["model"].get<string>() + " ver. " + data["version"].get<string>() + " with " + to_string(data["folds"].get<int>()) + " Folds cross validation and " + to_string(data["seeds"].size()) + " random seeds. " + data["date"].get<string>() + " " + data["time"].get<string>());
         cout << headerLine(data["title"].get<string>());
         cout << headerLine("Random seeds: " + fromVector("seeds") + " Stratified: " + (data["stratified"].get<bool>() ? "True" : "False"));
@@ -44,24 +44,32 @@ namespace platform {
     }
     void Report::body()
     {
-        cout << "Dataset                        Sampl. Feat. Cls Nodes   Edges   States  Score           Time              Hyperparameters" << endl;
-        cout << "============================== ====== ===== === ======= ======= ======= =============== ================= ===============" << endl;
+        cout << Colors::GREEN() << "Dataset                        Sampl. Feat. Cls Nodes   Edges   States  Score           Time               Hyperparameters" << endl;
+        cout << "============================== ====== ===== === ======= ======= ======= =============== ================== ===============" << endl;
         json lastResult;
         totalScore = 0;
+        bool odd = true;
         for (const auto& r : data["results"]) {
-            cout << setw(30) << left << r["dataset"].get<string>() << " ";
+            auto color = odd ? Colors::CYAN() : Colors::BLUE();
+            cout << color << setw(30) << left << r["dataset"].get<string>() << " ";
             cout << setw(6) << right << r["samples"].get<int>() << " ";
             cout << setw(5) << right << r["features"].get<int>() << " ";
             cout << setw(3) << right << r["classes"].get<int>() << " ";
             cout << setw(7) << setprecision(2) << fixed << r["nodes"].get<float>() << " ";
             cout << setw(7) << setprecision(2) << fixed << r["leaves"].get<float>() << " ";
             cout << setw(7) << setprecision(2) << fixed << r["depth"].get<float>() << " ";
-            cout << setw(8) << right << setprecision(6) << fixed << r["score_test"].get<double>() << "±" << setw(6) << setprecision(4) << fixed << r["score_test_std"].get<double>() << " ";
-            cout << setw(10) << right << setprecision(6) << fixed << r["test_time"].get<double>() << "±" << setw(6) << setprecision(4) << fixed << r["test_time_std"].get<double>() << " ";
-            cout << " " << r["hyperparameters"].get<string>();
+            cout << setw(8) << right << setprecision(6) << fixed << r["score"].get<double>() << "±" << setw(6) << setprecision(4) << fixed << r["score_std"].get<double>() << " ";
+            cout << setw(11) << right << setprecision(6) << fixed << r["time"].get<double>() << "±" << setw(6) << setprecision(4) << fixed << r["time_std"].get<double>() << " ";
+            try {
+                cout << r["hyperparameters"].get<string>();
+            }
+            catch (const exception& err) {
+                cout << r["hyperparameters"];
+            }
             cout << endl;
             lastResult = r;
-            totalScore += r["score_test"].get<double>();
+            totalScore += r["score"].get<double>();
+            odd = !odd;
         }
         if (data["results"].size() == 1) {
             cout << string(MAXL, '*') << endl;
@@ -74,12 +82,12 @@ namespace platform {
     }
     void Report::footer()
     {
-        cout << string(MAXL, '*') << endl;
+        cout << Colors::MAGENTA() << string(MAXL, '*') << endl;
         auto score = data["score_name"].get<string>();
         if (score == BestResult::scoreName()) {
             cout << headerLine(score + " compared to " + BestResult::title() + " .:  " + to_string(totalScore / BestResult::score()));
         }
-        cout << string(MAXL, '*') << endl;
+        cout << string(MAXL, '*') << endl << Colors::RESET();
 
     }
 }
