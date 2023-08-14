@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream>
 #include <nlohmann/json.hpp>
+#include "Colors.h"
 
 using json = nlohmann::json;
 const int MAXL = 121;
@@ -16,8 +17,10 @@ namespace platform {
     private:
         void header();
         void body();
+        void footer();
         string fromVector(const string& key);
         json data;
+        double totalScore; // Total score of all results in a report
     };
 };
 #endif

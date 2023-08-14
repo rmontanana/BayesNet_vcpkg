@@ -1,4 +1,5 @@
 #include "platformUtils.h"
+#include "Paths.h"
 
 using namespace torch;
 
@@ -85,7 +86,7 @@ tuple<Tensor, Tensor, vector<string>, string, map<string, vector<int>>> loadData
 tuple<vector<vector<int>>, vector<int>, vector<string>, string, map<string, vector<int>>> loadFile(const string& name)
 {
     auto handler = ArffFiles();
-    handler.load(PATH + static_cast<string>(name) + ".arff");
+    handler.load(platform::Paths::datasets() + static_cast<string>(name) + ".arff");
     // Get Dataset X, y
     vector<mdlp::samples_t>& X = handler.getX();
     mdlp::labels_t& y = handler.getY();

@@ -6,20 +6,19 @@
 #include "DotEnv.h"
 #include "Models.h"
 #include "modelRegister.h"
+#include "Paths.h"
+
 
 using namespace std;
-const string PATH_RESULTS = "results";
-const string PATH_DATASETS = "datasets";
 
 argparse::ArgumentParser manageArguments(int argc, char** argv)
 {
     auto env = platform::DotEnv();
-    argparse::ArgumentParser program("BayesNetSample");
+    argparse::ArgumentParser program("main");
     program.add_argument("-d", "--dataset").default_value("").help("Dataset file name");
     program.add_argument("-p", "--path")
         .help("folder where the data files are located, default")
-        .default_value(string{ PATH_DATASETS }
-    );
+        .default_value(string{ platform::Paths::datasets() });
     program.add_argument("-m", "--model")
         .help("Model to use " + platform::Models::instance()->toString())
         .action([](const std::string& value) {
@@ -115,7 +114,7 @@ int main(int argc, char** argv)
     experiment.go(filesToTest, path);
     experiment.setDuration(timer.getDuration());
     if (saveResults)
-        experiment.save(PATH_RESULTS);
+        experiment.save(platform::Paths::results());
     else
         experiment.report();
     cout << "Done!" << endl;

@@ -36,6 +36,17 @@
             "cwd": "/Users/rmontanana/Code/discretizbench",
         },
         {
+            "type": "lldb",
+            "request": "launch",
+            "name": "manage",
+            "program": "${workspaceFolder}/build/src/Platform/manage",
+            "args": [
+                "-n",
+                "20"
+            ],
+            "cwd": "/Users/rmontanana/Code/discretizbench",
+        },
+        {
             "name": "Build & debug active file",
             "type": "cppdbg",
             "request": "launch",
