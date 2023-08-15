@@ -13,6 +13,7 @@ namespace bayesnet {
         // X is nxm tensor, y is nx1 tensor
         virtual BaseClassifier& fit(torch::Tensor& X, torch::Tensor& y, vector<string>& features, string className, map<string, vector<int>>& states) = 0;
         virtual BaseClassifier& fit(torch::Tensor& dataset, vector<string>& features, string className, map<string, vector<int>>& states) = 0;
+        virtual BaseClassifier& fit(torch::Tensor& dataset, vector<string>& features, string className, map<string, vector<int>>& states, const torch::Tensor& weights) = 0;
         virtual ~BaseClassifier() = default;
         torch::Tensor virtual predict(torch::Tensor& X) = 0;
         vector<int> virtual predict(vector<vector<int>>& X) = 0;
