@@ -19,7 +19,7 @@ namespace bayesnet {
         return *this;
 
     }
-    void AODELd::buildModel()
+    void AODELd::buildModel(const torch::Tensor& weights)
     {
         models.clear();
         for (int i = 0; i < features.size(); ++i) {
@@ -27,7 +27,7 @@ namespace bayesnet {
         }
         n_models = models.size();
     }
-    void AODELd::trainModel()
+    void AODELd::trainModel(const torch::Tensor& weights)
     {
         for (const auto& model : models) {
             model->fit(Xf, y, features, className, states);

@@ -21,10 +21,9 @@ namespace bayesnet {
         string className;
         map<string, vector<int>> states;
         Tensor dataset; // (n+1)xm tensor
-        Tensor weights;
         void checkFitParameters();
-        virtual void buildModel() = 0;
-        void trainModel() override;
+        virtual void buildModel(const torch::Tensor& weights) = 0;
+        void trainModel(const torch::Tensor& weights) override;
     public:
         Classifier(Network model);
         virtual ~Classifier() = default;

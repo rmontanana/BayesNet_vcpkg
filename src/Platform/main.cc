@@ -103,7 +103,7 @@ int main(int argc, char** argv)
     */
     auto env = platform::DotEnv();
     auto experiment = platform::Experiment();
-    experiment.setTitle(title).setLanguage("cpp").setLanguageVersion("1.0.0");
+    experiment.setTitle(title).setLanguage("cpp").setLanguageVersion("14.0.3");
     experiment.setDiscretized(discretize_dataset).setModel(model_name).setPlatform(env.get("platform"));
     experiment.setStratified(stratified).setNFolds(n_folds).setScoreName("accuracy");
     for (auto seed : seeds) {

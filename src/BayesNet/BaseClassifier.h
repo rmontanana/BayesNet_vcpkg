@@ -6,7 +6,7 @@ namespace bayesnet {
     using namespace std;
     class BaseClassifier {
     protected:
-        virtual void trainModel() = 0;
+        virtual void trainModel(const torch::Tensor& weights) = 0;
     public:
         // X is nxm vector, y is nx1 vector
         virtual BaseClassifier& fit(vector<vector<int>>& X, vector<int>& y, vector<string>& features, string className, map<string, vector<int>>& states) = 0;

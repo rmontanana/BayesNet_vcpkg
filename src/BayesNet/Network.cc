@@ -107,7 +107,7 @@ namespace bayesnet {
     void Network::checkFitData(int n_samples, int n_features, int n_samples_y, const vector<string>& featureNames, const string& className, const map<string, vector<int>>& states, const torch::Tensor& weights)
     {
         if (weights.size(0) != n_samples) {
-            throw invalid_argument("Weights must have the same number of elements as samples in Network::fit");
+            throw invalid_argument("Weights (" + to_string(weights.size(0)) + ") must have the same number of elements as samples (" + to_string(n_samples) + ") in Network::fit");
         }
         if (n_samples != n_samples_y) {
             throw invalid_argument("X and y must have the same number of samples in Network::fit (" + to_string(n_samples) + " != " + to_string(n_samples_y) + ")");

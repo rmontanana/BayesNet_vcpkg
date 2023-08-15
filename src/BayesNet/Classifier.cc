@@ -16,8 +16,10 @@ namespace bayesnet {
         auto n_classes = states[className].size();
         metrics = Metrics(dataset, features, className, n_classes);
         model.initialize();
-        buildModel();
-        trainModel();
+        // TODO weights can't be ones
+        const torch::Tensor weights = torch::ones({ m }, torch::kFloat);
+        buildModel(weights);
+        trainModel(weights);
         fitted = true;
         return *this;
     }
@@ -35,9 +37,8 @@ namespace bayesnet {
             exit(1);
         }
     }
-    void Classifier::trainModel()
+    void Classifier::trainModel(const torch::Tensor& weights)
     {
-        const torch::Tensor weights = torch::ones({ m });
         model.fit(dataset, weights, features, className, states);
     }
     // X is nxm where n is the number of features and m the number of samples

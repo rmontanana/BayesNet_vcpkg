@@ -52,7 +52,8 @@ namespace bayesnet {
                 auto mask = samples.index({ -1, "..." }) == value;
                 auto first_dataset = samples.index({ index_first, mask });
                 auto second_dataset = samples.index({ index_second, mask });
-                auto mi = mutualInformation(first_dataset, second_dataset, weights);
+                auto weights_dataset = weights.index({ mask });
+                auto mi = mutualInformation(first_dataset, second_dataset, weights_dataset);
                 auto pb = margin[value].item<float>();
                 accumulated += pb * mi;
             }

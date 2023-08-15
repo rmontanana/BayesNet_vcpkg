@@ -4,7 +4,7 @@ namespace bayesnet {
     using namespace torch;
 
     KDB::KDB(int k, float theta) : Classifier(Network()), k(k), theta(theta) {}
-    void KDB::buildModel()
+    void KDB::buildModel(const torch::Tensor& weights)
     {
         /*
         1. For each feature Xi, compute mutual information, I(X;C),

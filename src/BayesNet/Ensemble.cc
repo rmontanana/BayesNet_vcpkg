@@ -5,7 +5,7 @@ namespace bayesnet {
 
     Ensemble::Ensemble() : Classifier(Network()) {}
 
-    void Ensemble::trainModel()
+    void Ensemble::trainModel(const torch::Tensor& weights)
     {
         n_models = models.size();
         for (auto i = 0; i < n_models; ++i) {

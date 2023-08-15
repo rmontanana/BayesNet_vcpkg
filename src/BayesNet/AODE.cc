@@ -2,7 +2,7 @@
 
 namespace bayesnet {
     AODE::AODE() : Ensemble() {}
-    void AODE::buildModel()
+    void AODE::buildModel(const torch::Tensor& weights)
     {
         models.clear();
         for (int i = 0; i < features.size(); ++i) {

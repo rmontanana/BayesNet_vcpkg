@@ -5,7 +5,7 @@ namespace bayesnet {
 
     TAN::TAN() : Classifier(Network()) {}
 
-    void TAN::buildModel()
+    void TAN::buildModel(const torch::Tensor& weights)
     {
         // 0. Add all nodes to the model
         addNodes();
