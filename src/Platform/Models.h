@@ -10,6 +10,7 @@
 #include "KDBLd.h"
 #include "SPODELd.h"
 #include "AODELd.h"
+#include "BoostAODE.h"
 namespace platform {
     class Models {
     private:
