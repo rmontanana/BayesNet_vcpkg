@@ -22,6 +22,8 @@ namespace bayesnet {
         auto root = mi[mi.size() - 1].first;
         // 2. Compute mutual information between each feature and the class
         auto weights_matrix = metrics.conditionalEdge(weights);
+        cout << "*** Weights matrix ***\n";
+        cout << weights_matrix << "\n";
         // 3. Compute the maximum spanning tree
         auto mst = metrics.maximumSpanningTree(features, weights_matrix, root);
         // 4. Add edges from the maximum spanning tree to the model

@@ -13,7 +13,7 @@ namespace bayesnet {
         int classNumStates;
         vector<string> features; // Including classname
         string className;
-        int laplaceSmoothing = 1;
+        double laplaceSmoothing;
         torch::Tensor samples; // nxm tensor used to fit the model
         bool isCyclic(const std::string&, std::unordered_set<std::string>&, std::unordered_set<std::string>&);
         vector<double> predict_sample(const vector<int>&);
@@ -25,7 +25,6 @@ namespace bayesnet {
         void setStates(const map<string, vector<int>>&);
     public:
         Network();
-        explicit Network(float, int);
         explicit Network(float);
         explicit Network(Network&);
         torch::Tensor& getSamples();

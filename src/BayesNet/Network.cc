@@ -5,7 +5,6 @@
 namespace bayesnet {
     Network::Network() : features(vector<string>()), className(""), classNumStates(0), fitted(false) {}
     Network::Network(float maxT) : features(vector<string>()), className(""), classNumStates(0), maxThreads(maxT), fitted(false) {}
-    Network::Network(float maxT, int smoothing) : laplaceSmoothing(smoothing), features(vector<string>()), className(""), classNumStates(0), maxThreads(maxT), fitted(false) {}
     Network::Network(Network& other) : laplaceSmoothing(other.laplaceSmoothing), features(other.features), className(other.className), classNumStates(other.getClassNumStates()), maxThreads(other.
         getmaxThreads()), fitted(other.fitted)
     {
@@ -174,6 +173,7 @@ namespace bayesnet {
     void Network::completeFit(const map<string, vector<int>>& states, const torch::Tensor& weights)
     {
         setStates(states);
+        laplaceSmoothing = 1.0 / samples.size(1); // To use in CPT computation
         int maxThreadsRunning = static_cast<int>(std::thread::hardware_concurrency() * maxThreads);
         if (maxThreadsRunning < 1) {
             maxThreadsRunning = 1;
@@ -347,7 +347,7 @@ namespace bayesnet {
         }
         // Normalize result
         double sum = accumulate(result.begin(), result.end(), 0.0);
-        transform(result.begin(), result.end(), result.begin(), [sum](double& value) { return value / sum; });
+        transform(result.begin(), result.end(), result.begin(), [sum](const double& value) { return value / sum; });
         return result;
     }
     vector<string> Network::show() const
@@ -435,6 +435,7 @@ namespace bayesnet {
     {
         for (auto& node : nodes) {
             cout << "* " << node.first << ": (" << node.second->getNumStates() << ") : " << node.second->getCPT().sizes() << endl;
+            cout << node.second->getCPT() << endl;
         }
     }
 }

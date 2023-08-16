@@ -38,12 +38,14 @@ namespace bayesnet {
         auto source = vector<string>(features);
         source.push_back(className);
         auto combinations = doCombinations(source);
+        double totalWeight = weights.sum().item<double>();
         // Compute class prior
-        auto margin = torch::zeros({ classNumStates });
+        auto margin = torch::zeros({ classNumStates }, torch::kFloat);
         for (int value = 0; value < classNumStates; ++value) {
             auto mask = samples.index({ -1,  "..." }) == value;
-            margin[value] = mask.sum().item<float>() / samples.size(1);
+            margin[value] = mask.sum().item<double>() / samples.size(1);
         }
+        cout << "Margin: " << margin;
         for (auto [first, second] : combinations) {
             int index_first = find(features.begin(), features.end(), first) - features.begin();
             int index_second = find(features.begin(), features.end(), second) - features.begin();
@@ -54,7 +56,7 @@ namespace bayesnet {
                 auto second_dataset = samples.index({ index_second, mask });
                 auto weights_dataset = weights.index({ mask });
                 auto mi = mutualInformation(first_dataset, second_dataset, weights_dataset);
-                auto pb = margin[value].item<float>();
+                auto pb = margin[value].item<double>();
                 accumulated += pb * mi;
             }
             result.push_back(accumulated);
@@ -81,7 +83,7 @@ namespace bayesnet {
     double Metrics::entropy(const torch::Tensor& feature, const torch::Tensor& weights)
     {
         torch::Tensor counts = feature.bincount(weights);
-        int totalWeight = counts.sum().item<int>();
+        double totalWeight = counts.sum().item<double>();
         torch::Tensor probs = counts.to(torch::kFloat) / totalWeight;
         torch::Tensor logProbs = torch::log(probs);
         torch::Tensor entropy = -probs * logProbs;
@@ -95,7 +97,7 @@ namespace bayesnet {
         unordered_map<int, unordered_map<int, double>> jointCounts;
         double totalWeight = 0;
         for (auto i = 0; i < numSamples; i++) {
-            jointCounts[secondFeature[i].item<int>()][firstFeature[i].item<int>()] += 1;
+            jointCounts[secondFeature[i].item<int>()][firstFeature[i].item<int>()] += weights[i].item<double>();
             totalWeight += weights[i].item<float>();
         }
         if (totalWeight == 0)

@@ -178,59 +178,59 @@ int main(int argc, char** argv)
     cout << "end." << endl;
     auto score = clf->score(Xd, y);
     cout << "Score: " << score << endl;
-    // auto graph = clf->graph();
-    // auto dot_file = model_name + "_" + file_name;
-    // ofstream file(dot_file + ".dot");
-    // file << graph;
-    // file.close();
-    // cout << "Graph saved in " << model_name << "_" << file_name << ".dot" << endl;
-    // cout << "dot -Tpng -o " + dot_file + ".png " + dot_file + ".dot " << endl;
-    // string stratified_string = stratified ? " Stratified" : "";
-    // cout << nFolds << " Folds" << stratified_string << " Cross validation" << endl;
-    // cout << "==========================================" << endl;
-    // torch::Tensor Xt = torch::zeros({ static_cast<int>(Xd.size()), static_cast<int>(Xd[0].size()) }, torch::kInt32);
-    // torch::Tensor yt = torch::tensor(y, torch::kInt32);
-    // for (int i = 0; i < features.size(); ++i) {
-    //     Xt.index_put_({ i, "..." }, torch::tensor(Xd[i], torch::kInt32));
-    // }
-    // float total_score = 0, total_score_train = 0, score_train, score_test;
-    // Fold* fold;
-    // if (stratified)
-    //     fold = new StratifiedKFold(nFolds, y, seed);
-    // else
-    //     fold = new KFold(nFolds, y.size(), seed);
-    // for (auto i = 0; i < nFolds; ++i) {
-    //     auto [train, test] = fold->getFold(i);
-    //     cout << "Fold: " << i + 1 << endl;
-    //     if (tensors) {
-    //         auto ttrain = torch::tensor(train, torch::kInt64);
-    //         auto ttest = torch::tensor(test, torch::kInt64);
-    //         torch::Tensor Xtraint = torch::index_select(Xt, 1, ttrain);
-    //         torch::Tensor ytraint = yt.index({ ttrain });
-    //         torch::Tensor Xtestt = torch::index_select(Xt, 1, ttest);
-    //         torch::Tensor ytestt = yt.index({ ttest });
-    //         clf->fit(Xtraint, ytraint, features, className, states);
-    //         auto temp = clf->predict(Xtraint);
-    //         score_train = clf->score(Xtraint, ytraint);
-    //         score_test = clf->score(Xtestt, ytestt);
-    //     } else {
-    //         auto [Xtrain, ytrain] = extract_indices(train, Xd, y);
-    //         auto [Xtest, ytest] = extract_indices(test, Xd, y);
-    //         clf->fit(Xtrain, ytrain, features, className, states);
-    //         score_train = clf->score(Xtrain, ytrain);
-    //         score_test = clf->score(Xtest, ytest);
-    //     }
-    //     if (dump_cpt) {
-    //         cout << "--- CPT Tables ---" << endl;
-    //         clf->dump_cpt();
-    //     }
-    //     total_score_train += score_train;
-    //     total_score += score_test;
-    //     cout << "Score Train: " << score_train << endl;
-    //     cout << "Score Test : " << score_test << endl;
-    //     cout << "-------------------------------------------------------------------------------" << endl;
-    // }
-    // cout << "**********************************************************************************" << endl;
-    // cout << "Average Score Train: " << total_score_train / nFolds << endl;
-    // cout << "Average Score Test : " << total_score / nFolds << endl;return 0;
+    auto graph = clf->graph();
+    auto dot_file = model_name + "_" + file_name;
+    ofstream file(dot_file + ".dot");
+    file << graph;
+    file.close();
+    cout << "Graph saved in " << model_name << "_" << file_name << ".dot" << endl;
+    cout << "dot -Tpng -o " + dot_file + ".png " + dot_file + ".dot " << endl;
+    string stratified_string = stratified ? " Stratified" : "";
+    cout << nFolds << " Folds" << stratified_string << " Cross validation" << endl;
+    cout << "==========================================" << endl;
+    torch::Tensor Xt = torch::zeros({ static_cast<int>(Xd.size()), static_cast<int>(Xd[0].size()) }, torch::kInt32);
+    torch::Tensor yt = torch::tensor(y, torch::kInt32);
+    for (int i = 0; i < features.size(); ++i) {
+        Xt.index_put_({ i, "..." }, torch::tensor(Xd[i], torch::kInt32));
+    }
+    float total_score = 0, total_score_train = 0, score_train, score_test;
+    Fold* fold;
+    if (stratified)
+        fold = new StratifiedKFold(nFolds, y, seed);
+    else
+        fold = new KFold(nFolds, y.size(), seed);
+    for (auto i = 0; i < nFolds; ++i) {
+        auto [train, test] = fold->getFold(i);
+        cout << "Fold: " << i + 1 << endl;
+        if (tensors) {
+            auto ttrain = torch::tensor(train, torch::kInt64);
+            auto ttest = torch::tensor(test, torch::kInt64);
+            torch::Tensor Xtraint = torch::index_select(Xt, 1, ttrain);
+            torch::Tensor ytraint = yt.index({ ttrain });
+            torch::Tensor Xtestt = torch::index_select(Xt, 1, ttest);
+            torch::Tensor ytestt = yt.index({ ttest });
+            clf->fit(Xtraint, ytraint, features, className, states);
+            auto temp = clf->predict(Xtraint);
+            score_train = clf->score(Xtraint, ytraint);
+            score_test = clf->score(Xtestt, ytestt);
+        } else {
+            auto [Xtrain, ytrain] = extract_indices(train, Xd, y);
+            auto [Xtest, ytest] = extract_indices(test, Xd, y);
+            clf->fit(Xtrain, ytrain, features, className, states);
+            score_train = clf->score(Xtrain, ytrain);
+            score_test = clf->score(Xtest, ytest);
+        }
+        if (dump_cpt) {
+            cout << "--- CPT Tables ---" << endl;
+            clf->dump_cpt();
+        }
+        total_score_train += score_train;
+        total_score += score_test;
+        cout << "Score Train: " << score_train << endl;
+        cout << "Score Test : " << score_test << endl;
+        cout << "-------------------------------------------------------------------------------" << endl;
+    }
+    cout << "**********************************************************************************" << endl;
+    cout << "Average Score Train: " << total_score_train / nFolds << endl;
+    cout << "Average Score Test : " << total_score / nFolds << endl;return 0;
 }

@@ -26,7 +26,7 @@ namespace bayesnet {
         vector<Node*>& getParents();
         vector<Node*>& getChildren();
         torch::Tensor& getCPT();
-        void computeCPT(const torch::Tensor& dataset, const vector<string>& features, const int laplaceSmoothing, const torch::Tensor& weights);
+        void computeCPT(const torch::Tensor& dataset, const vector<string>& features, const double laplaceSmoothing, const torch::Tensor& weights);
         int getNumStates() const;
         void setNumStates(int);
         unsigned minFill();

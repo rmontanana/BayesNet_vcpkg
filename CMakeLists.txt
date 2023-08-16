@@ -60,6 +60,7 @@ add_git_submodule("lib/json")
 # --------------
 add_subdirectory(config)
 add_subdirectory(lib/Files)
+add_subdirectory(lib/FeatureSelect)
 add_subdirectory(src/BayesNet)
 add_subdirectory(src/Platform)
 add_subdirectory(sample)

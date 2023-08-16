@@ -43,7 +43,7 @@ namespace bayesnet {
     {
         dataset = X;
         buildDataset(y);
-        const torch::Tensor weights = torch::ones({ dataset.size(1) }, torch::kFloat);
+        const torch::Tensor weights = torch::full({ dataset.size(1) }, 1.0 / dataset.size(1), torch::kFloat);
         return build(features, className, states, weights);
     }
     // X is nxm where n is the number of features and m the number of samples
@@ -55,13 +55,13 @@ namespace bayesnet {
         }
         auto ytmp = torch::tensor(y, kInt32);
         buildDataset(ytmp);
-        const torch::Tensor weights = torch::ones({ dataset.size(1) }, torch::kFloat);
+        const torch::Tensor weights = torch::full({ dataset.size(1) }, 1.0 / dataset.size(1), torch::kFloat);
         return build(features, className, states, weights);
     }
     Classifier& Classifier::fit(torch::Tensor& dataset, vector<string>& features, string className, map<string, vector<int>>& states)
     {
         this->dataset = dataset;
-        const torch::Tensor weights = torch::ones({ dataset.size(1) }, torch::kFloat);
+        const torch::Tensor weights = torch::full({ dataset.size(1) }, 1.0 / dataset.size(1), torch::kFloat);
         return build(features, className, states, weights);
     }
     Classifier& Classifier::fit(torch::Tensor& dataset, vector<string>& features, string className, map<string, vector<int>>& states, const torch::Tensor& weights)
