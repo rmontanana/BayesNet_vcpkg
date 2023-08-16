@@ -65,8 +65,7 @@ namespace bayesnet {
                 //Update new states of the feature/node
                 states[pFeatures[index]] = xStates;
             }
-            // TODO weights can't be ones
-            const torch::Tensor weights = torch::ones({ pDataset.size(1) }, torch::kFloat);
+            const torch::Tensor weights = torch::full({ pDataset.size(1) }, 1.0 / pDataset.size(1), torch::kDouble);
             model.fit(pDataset, weights, pFeatures, pClassName, states);
         }
         return states;
