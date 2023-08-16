@@ -12,6 +12,8 @@ namespace bayesnet {
         vector<string> features;
         string className;
         int classNumStates = 0;
+        vector<double> scoresKBest;
+        vector<int> featuresKBest; // sorted indices of the features
         double entropy(const Tensor& feature, const Tensor& weights);
         double conditionalEntropy(const Tensor& firstFeature, const Tensor& secondFeature, const Tensor& weights);
         vector<pair<string, string>> doCombinations(const vector<string>&);
@@ -19,6 +21,8 @@ namespace bayesnet {
         Metrics() = default;
         Metrics(const torch::Tensor& samples, const vector<string>& features, const string& className, const int classNumStates);
         Metrics(const vector<vector<int>>& vsamples, const vector<int>& labels, const vector<string>& features, const string& className, const int classNumStates);
+        vector<int> SelectKBestWeighted(const torch::Tensor& weights, unsigned k = 0);
+        vector<double> getScoresKBest() const;
         double mutualInformation(const Tensor& firstFeature, const Tensor& secondFeature, const Tensor& weights);
         vector<float> conditionalEdgeWeights(vector<float>& weights); // To use in Python
         Tensor conditionalEdge(const torch::Tensor& weights);
