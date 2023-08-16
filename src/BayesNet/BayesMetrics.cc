@@ -45,7 +45,6 @@ namespace bayesnet {
             auto mask = samples.index({ -1,  "..." }) == value;
             margin[value] = mask.sum().item<double>() / samples.size(1);
         }
-        cout << "Margin: " << margin;
         for (auto [first, second] : combinations) {
             int index_first = find(features.begin(), features.end(), first) - features.begin();
             int index_second = find(features.begin(), features.end(), second) - features.begin();
