@@ -5,7 +5,7 @@
 namespace bayesnet {
     using namespace std;
     using namespace torch;
-    vector<int> argsort(vector<float>& nums);
+    vector<int> argsort(vector<double>& nums);
     vector<vector<int>> tensorToVector(Tensor& tensor);
 }
 #endif //BAYESNET_UTILS_H

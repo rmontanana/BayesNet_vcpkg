@@ -23,7 +23,7 @@ namespace bayesnet {
     }
     vector<int> Metrics::SelectKBestWeighted(const torch::Tensor& weights, unsigned k)
     {
-        auto n = samples.size(1);
+        auto n = samples.size(0) - 1;
         if (k == 0) {
             k = n;
         }

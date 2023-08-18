@@ -141,96 +141,111 @@ int main(int argc, char** argv)
     /*
     * Begin Processing
     */
-    auto handler = ArffFiles();
-    handler.load(complete_file_name, class_last);
-    // Get Dataset X, y
-    vector<mdlp::samples_t>& X = handler.getX();
-    mdlp::labels_t& y = handler.getY();
-    // Get className & Features
-    auto className = handler.getClassName();
-    vector<string> features;
-    auto attributes = handler.getAttributes();
-    transform(attributes.begin(), attributes.end(), back_inserter(features),
-        [](const pair<string, string>& item) { return item.first; });
-    // Discretize Dataset
-    auto [Xd, maxes] = discretize(X, y, features);
-    maxes[className] = *max_element(y.begin(), y.end()) + 1;
-    map<string, vector<int>> states;
-    for (auto feature : features) {
-        states[feature] = vector<int>(maxes[feature]);
-    }
-    states[className] = vector<int>(maxes[className]);
-    auto clf = platform::Models::instance()->create(model_name);
-    clf->fit(Xd, y, features, className, states);
-    if (dump_cpt) {
-        cout << "--- CPT Tables ---" << endl;
-        clf->dump_cpt();
-    }
-    auto lines = clf->show();
-    for (auto line : lines) {
-        cout << line << endl;
-    }
-    cout << "--- Topological Order ---" << endl;
-    auto order = clf->topological_order();
-    for (auto name : order) {
-        cout << name << ", ";
-    }
-    cout << "end." << endl;
-    auto score = clf->score(Xd, y);
-    cout << "Score: " << score << endl;
-    auto graph = clf->graph();
-    auto dot_file = model_name + "_" + file_name;
-    ofstream file(dot_file + ".dot");
-    file << graph;
-    file.close();
-    cout << "Graph saved in " << model_name << "_" << file_name << ".dot" << endl;
-    cout << "dot -Tpng -o " + dot_file + ".png " + dot_file + ".dot " << endl;
-    string stratified_string = stratified ? " Stratified" : "";
-    cout << nFolds << " Folds" << stratified_string << " Cross validation" << endl;
-    cout << "==========================================" << endl;
-    torch::Tensor Xt = torch::zeros({ static_cast<int>(Xd.size()), static_cast<int>(Xd[0].size()) }, torch::kInt32);
-    torch::Tensor yt = torch::tensor(y, torch::kInt32);
-    for (int i = 0; i < features.size(); ++i) {
-        Xt.index_put_({ i, "..." }, torch::tensor(Xd[i], torch::kInt32));
-    }
-    float total_score = 0, total_score_train = 0, score_train, score_test;
-    Fold* fold;
-    if (stratified)
-        fold = new StratifiedKFold(nFolds, y, seed);
-    else
-        fold = new KFold(nFolds, y.size(), seed);
-    for (auto i = 0; i < nFolds; ++i) {
-        auto [train, test] = fold->getFold(i);
-        cout << "Fold: " << i + 1 << endl;
-        if (tensors) {
-            auto ttrain = torch::tensor(train, torch::kInt64);
-            auto ttest = torch::tensor(test, torch::kInt64);
-            torch::Tensor Xtraint = torch::index_select(Xt, 1, ttrain);
-            torch::Tensor ytraint = yt.index({ ttrain });
-            torch::Tensor Xtestt = torch::index_select(Xt, 1, ttest);
-            torch::Tensor ytestt = yt.index({ ttest });
-            clf->fit(Xtraint, ytraint, features, className, states);
-            auto temp = clf->predict(Xtraint);
-            score_train = clf->score(Xtraint, ytraint);
-            score_test = clf->score(Xtestt, ytestt);
-        } else {
-            auto [Xtrain, ytrain] = extract_indices(train, Xd, y);
-            auto [Xtest, ytest] = extract_indices(test, Xd, y);
-            clf->fit(Xtrain, ytrain, features, className, states);
-            score_train = clf->score(Xtrain, ytrain);
-            score_test = clf->score(Xtest, ytest);
-        }
-        if (dump_cpt) {
-            cout << "--- CPT Tables ---" << endl;
-            clf->dump_cpt();
-        }
-        total_score_train += score_train;
-        total_score += score_test;
-        cout << "Score Train: " << score_train << endl;
-        cout << "Score Test : " << score_test << endl;
-        cout << "-------------------------------------------------------------------------------" << endl;
-    }
-    cout << "**********************************************************************************" << endl;
-    cout << "Average Score Train: " << total_score_train / nFolds << endl;
-    cout << "Average Score Test : " << total_score / nFolds << endl;return 0;
+    auto ypred = torch::tensor({ 1,2,3,2,2,3,4,5,2,1 });
+    auto y = torch::tensor({ 0,0,0,0,2,3,4,0,0,0 });
+    auto weights = torch::ones({ 10 }, kDouble);
+    auto mask = ypred == y;
+    cout << "ypred:" << ypred << endl;
+    cout << "y:" << y << endl;
+    cout << "weights:" << weights << endl;
+    cout << "mask:" << mask << endl;
+    double value_to_add = 0.5;
+    weights += mask.to(torch::kDouble) * value_to_add;
+    cout << "New weights:" << weights << endl;
+    auto masked_weights = weights * mask.to(weights.dtype());
+    double sum_of_weights = masked_weights.sum().item<double>();
+    cout << "Sum of weights: " << sum_of_weights << endl;
+    //weights.index_put_({ mask }, weights + 10);
+    // auto handler = ArffFiles();
+    // handler.load(complete_file_name, class_last);
+    // // Get Dataset X, y
+    // vector<mdlp::samples_t>& X = handler.getX();
+    // mdlp::labels_t& y = handler.getY();
+    // // Get className & Features
+    // auto className = handler.getClassName();
+    // vector<string> features;
+    // auto attributes = handler.getAttributes();
+    // transform(attributes.begin(), attributes.end(), back_inserter(features),
+    //     [](const pair<string, string>& item) { return item.first; });
+    // // Discretize Dataset
+    // auto [Xd, maxes] = discretize(X, y, features);
+    // maxes[className] = *max_element(y.begin(), y.end()) + 1;
+    // map<string, vector<int>> states;
+    // for (auto feature : features) {
+    //     states[feature] = vector<int>(maxes[feature]);
+    // }
+    // states[className] = vector<int>(maxes[className]);
+    // auto clf = platform::Models::instance()->create(model_name);
+    // clf->fit(Xd, y, features, className, states);
+    // if (dump_cpt) {
+    //     cout << "--- CPT Tables ---" << endl;
+    //     clf->dump_cpt();
+    // }
+    // auto lines = clf->show();
+    // for (auto line : lines) {
+    //     cout << line << endl;
+    // }
+    // cout << "--- Topological Order ---" << endl;
+    // auto order = clf->topological_order();
+    // for (auto name : order) {
+    //     cout << name << ", ";
+    // }
+    // cout << "end." << endl;
+    // auto score = clf->score(Xd, y);
+    // cout << "Score: " << score << endl;
+    // auto graph = clf->graph();
+    // auto dot_file = model_name + "_" + file_name;
+    // ofstream file(dot_file + ".dot");
+    // file << graph;
+    // file.close();
+    // cout << "Graph saved in " << model_name << "_" << file_name << ".dot" << endl;
+    // cout << "dot -Tpng -o " + dot_file + ".png " + dot_file + ".dot " << endl;
+    // string stratified_string = stratified ? " Stratified" : "";
+    // cout << nFolds << " Folds" << stratified_string << " Cross validation" << endl;
+    // cout << "==========================================" << endl;
+    // torch::Tensor Xt = torch::zeros({ static_cast<int>(Xd.size()), static_cast<int>(Xd[0].size()) }, torch::kInt32);
+    // torch::Tensor yt = torch::tensor(y, torch::kInt32);
+    // for (int i = 0; i < features.size(); ++i) {
+    //     Xt.index_put_({ i, "..." }, torch::tensor(Xd[i], torch::kInt32));
+    // }
+    // float total_score = 0, total_score_train = 0, score_train, score_test;
+    // Fold* fold;
+    // if (stratified)
+    //     fold = new StratifiedKFold(nFolds, y, seed);
+    // else
+    //     fold = new KFold(nFolds, y.size(), seed);
+    // for (auto i = 0; i < nFolds; ++i) {
+    //     auto [train, test] = fold->getFold(i);
+    //     cout << "Fold: " << i + 1 << endl;
+    //     if (tensors) {
+    //         auto ttrain = torch::tensor(train, torch::kInt64);
+    //         auto ttest = torch::tensor(test, torch::kInt64);
+    //         torch::Tensor Xtraint = torch::index_select(Xt, 1, ttrain);
+    //         torch::Tensor ytraint = yt.index({ ttrain });
+    //         torch::Tensor Xtestt = torch::index_select(Xt, 1, ttest);
+    //         torch::Tensor ytestt = yt.index({ ttest });
+    //         clf->fit(Xtraint, ytraint, features, className, states);
+    //         auto temp = clf->predict(Xtraint);
+    //         score_train = clf->score(Xtraint, ytraint);
+    //         score_test = clf->score(Xtestt, ytestt);
+    //     } else {
+    //         auto [Xtrain, ytrain] = extract_indices(train, Xd, y);
+    //         auto [Xtest, ytest] = extract_indices(test, Xd, y);
+    //         clf->fit(Xtrain, ytrain, features, className, states);
+    //         score_train = clf->score(Xtrain, ytrain);
+    //         score_test = clf->score(Xtest, ytest);
+    //     }
+    //     if (dump_cpt) {
+    //         cout << "--- CPT Tables ---" << endl;
+    //         clf->dump_cpt();
+    //     }
+    //     total_score_train += score_train;
+    //     total_score += score_test;
+    //     cout << "Score Train: " << score_train << endl;
+    //     cout << "Score Test : " << score_test << endl;
+    //     cout << "-------------------------------------------------------------------------------" << endl;
+    // }
+    // cout << "**********************************************************************************" << endl;
+    // cout << "Average Score Train: " << total_score_train / nFolds << endl;
+    // cout << "Average Score Test : " << total_score / nFolds << endl;return 0;
 }

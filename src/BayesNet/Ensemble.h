@@ -14,6 +14,7 @@ namespace bayesnet {
     protected:
         unsigned n_models;
         vector<unique_ptr<Classifier>> models;
+        vector<double> significanceModels;
         void trainModel(const torch::Tensor& weights) override;
         vector<int> voting(Tensor& y_pred);
     public:

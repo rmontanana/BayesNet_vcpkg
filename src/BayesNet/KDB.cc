@@ -29,7 +29,7 @@ namespace bayesnet {
         // where C is the class.
         addNodes();
         const Tensor& y = dataset.index({ -1, "..." });
-        vector <float> mi;
+        vector<double> mi;
         for (auto i = 0; i < features.size(); i++) {
             Tensor firstFeature = dataset.index({ i, "..." });
             mi.push_back(metrics.mutualInformation(firstFeature, y, weights));
