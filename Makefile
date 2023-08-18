@@ -35,7 +35,7 @@ release: ## Build a Release version of the project
 	@if [ -d ./build ]; then rm -rf ./build; fi
 	@mkdir build; 
 	cmake -S . -B build -D CMAKE_BUILD_TYPE=Release; \
-	cmake --build build -t main -t BayesNetSample -j 32;
+	cmake --build build -t main -t BayesNetSample -t manage -j 32;
 	@echo ">>> Done";	
 
 test: ## Run tests
