@@ -16,7 +16,7 @@ namespace bayesnet {
         auto X_ = dataset.index({ torch::indexing::Slice(0, dataset.size(0) - 1), "..." });
         auto y_ = dataset.index({ -1, "..." });
         bool exitCondition = false;
-        bool repeatSparent = true;
+        bool repeatSparent = false;
         vector<int> featuresUsed;
         // Step 0: Set the finish condition
         // if not repeatSparent a finish condition is run out of features
