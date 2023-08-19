@@ -15,7 +15,7 @@ namespace platform {
     {
         stringstream oss;
         string sep = "";
-        oss << "[" << fixed << setprecision(16);
+        oss << "[";
         for (auto& item : data[key]) {
             oss << sep << item.get<double>();
             sep = ", ";
@@ -23,13 +23,13 @@ namespace platform {
         oss << "]";
         return oss.str();
     }
-    string fVector(const string& title, const json& data)
+    string fVector(const string& title, const json& data, const int width, const int precision)
     {
         stringstream oss;
         string sep = "";
-        oss << title << "[" << fixed << setprecision(16);
+        oss << title << "[";
         for (const auto& item : data) {
-            oss << sep << item.get<double>();
+            oss << sep << fixed << setw(width) << setprecision(precision) << item.get<double>();
             sep = ", ";
         }
         oss << "]";
@@ -93,10 +93,10 @@ namespace platform {
         }
         if (data["results"].size() == 1) {
             cout << string(MAXL, '*') << endl;
-            cout << headerLine(fVector("Train scores: ", lastResult["scores_train"]));
-            cout << headerLine(fVector("Test  scores: ", lastResult["scores_test"]));
-            cout << headerLine(fVector("Train  times: ", lastResult["times_train"]));
-            cout << headerLine(fVector("Test   times: ", lastResult["times_test"]));
+            cout << headerLine(fVector("Train scores: ", lastResult["scores_train"], 14, 12));
+            cout << headerLine(fVector("Test  scores: ", lastResult["scores_test"], 14, 12));
+            cout << headerLine(fVector("Train  times: ", lastResult["times_train"], 10, 3));
+            cout << headerLine(fVector("Test   times: ", lastResult["times_test"], 10, 3));
             cout << string(MAXL, '*') << endl;
         }
     }

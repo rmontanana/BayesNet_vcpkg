@@ -6,7 +6,7 @@
 #include "Colors.h"
 
 using json = nlohmann::json;
-const int MAXL = 122;
+const int MAXL = 128;
 namespace platform {
     using namespace std;
     class Report {
