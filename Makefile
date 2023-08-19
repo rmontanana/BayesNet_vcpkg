@@ -15,7 +15,7 @@ dependency: ## Create a dependency graph diagram of the project (build/dependenc
 	cd build && cmake .. --graphviz=dependency.dot && dot -Tpng dependency.dot -o dependency.png
 
 build: ## Build the main and BayesNetSample
-	cmake --build build -t main -t BayesNetSample -t manage -j 32
+	cmake --build build -t main -t BayesNetSample -t manage -t list -j 32
 
 clean: ## Clean the debug info
 	@echo ">>> Cleaning Debug BayesNet ...";
@@ -35,7 +35,7 @@ release: ## Build a Release version of the project
 	@if [ -d ./build ]; then rm -rf ./build; fi
 	@mkdir build; 
 	cmake -S . -B build -D CMAKE_BUILD_TYPE=Release; \
-	cmake --build build -t main -t BayesNetSample -t manage -j 32;
+	cmake --build build -t main -t BayesNetSample -t manage -t list -j 32;
 	@echo ">>> Done";	
 
 test: ## Run tests
