@@ -5,7 +5,7 @@
 namespace bayesnet {
     class AODE : public Ensemble {
     protected:
-        void buildModel() override;
+        void buildModel(const torch::Tensor& weights) override;
     public:
         AODE();
         virtual ~AODE() {};

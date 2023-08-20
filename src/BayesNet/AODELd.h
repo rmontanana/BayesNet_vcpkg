@@ -8,8 +8,8 @@ namespace bayesnet {
     using namespace std;
     class AODELd : public Ensemble, public Proposal {
     protected:
-        void trainModel() override;
-        void buildModel() override;
+        void trainModel(const torch::Tensor& weights) override;
+        void buildModel(const torch::Tensor& weights) override;
     public:
         AODELd();
         AODELd& fit(torch::Tensor& X_, torch::Tensor& y_, vector<string>& features_, string className_, map<string, vector<int>>& states_) override;

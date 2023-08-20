@@ -29,15 +29,15 @@ namespace platform {
     public:
         Dataset(const string& path, const string& name, const string& className, bool discretize, fileType_t fileType) : path(path), name(name), className(className), discretize(discretize), loaded(false), fileType(fileType) {};
         explicit Dataset(const Dataset&);
-        string getName();
-        string getClassName();
-        vector<string> getFeatures();
-        map<string, vector<int>> getStates();
+        string getName() const;
+        string getClassName() const;
+        vector<string> getFeatures() const;
+        map<string, vector<int>> getStates() const;
         pair<vector<vector<float>>&, vector<int>&> getVectors();
         pair<vector<vector<int>>&, vector<int>&> getVectorsDiscretized();
         pair<torch::Tensor&, torch::Tensor&> getTensors();
-        int getNFeatures();
-        int getNSamples();
+        int getNFeatures() const;
+        int getNSamples() const;
         void load();
         const bool inline isLoaded() const { return loaded; };
     };
@@ -51,14 +51,17 @@ namespace platform {
     public:
         explicit Datasets(const string& path, bool discretize = false, fileType_t fileType = ARFF) : path(path), discretize(discretize), fileType(fileType) { load(); };
         vector<string> getNames();
-        vector<string> getFeatures(string name);
-        int getNSamples(string name);
-        string getClassName(string name);
-        map<string, vector<int>> getStates(string name);
-        pair<vector<vector<float>>&, vector<int>&> getVectors(string name);
-        pair<vector<vector<int>>&, vector<int>&> getVectorsDiscretized(string name);
-        pair<torch::Tensor&, torch::Tensor&> getTensors(string name);
-        bool isDataset(const string& name);
+        vector<string> getFeatures(const string& name) const;
+        int getNSamples(const string& name) const;
+        string getClassName(const string& name) const;
+        int getNClasses(const string& name);
+        vector<int> getClassesCounts(const string& name) const;
+        map<string, vector<int>> getStates(const string& name) const;
+        pair<vector<vector<float>>&, vector<int>&> getVectors(const string& name);
+        pair<vector<vector<int>>&, vector<int>&> getVectorsDiscretized(const string& name);
+        pair<torch::Tensor&, torch::Tensor&> getTensors(const string& name);
+        bool isDataset(const string& name) const;
+        void loadDataset(const string& name) const;
     };
 };
 

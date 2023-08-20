@@ -21,7 +21,6 @@ namespace bayesnet {
     SPODELd& SPODELd::fit(torch::Tensor& dataset, vector<string>& features_, string className_, map<string, vector<int>>& states_)
     {
         Xf = dataset.index({ torch::indexing::Slice(0, dataset.size(0) - 1), "..." }).clone();
-        cout << "Xf " << Xf.sizes() << " dtype: " << Xf.dtype() << endl;
         y = dataset.index({ -1, "..." }).clone();
         // This first part should go in a Classifier method called fit_local_discretization o fit_float...
         features = features_;

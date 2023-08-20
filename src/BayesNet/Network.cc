@@ -5,7 +5,6 @@
 namespace bayesnet {
     Network::Network() : features(vector<string>()), className(""), classNumStates(0), fitted(false) {}
     Network::Network(float maxT) : features(vector<string>()), className(""), classNumStates(0), maxThreads(maxT), fitted(false) {}
-    Network::Network(float maxT, int smoothing) : laplaceSmoothing(smoothing), features(vector<string>()), className(""), classNumStates(0), maxThreads(maxT), fitted(false) {}
     Network::Network(Network& other) : laplaceSmoothing(other.laplaceSmoothing), features(other.features), className(other.className), classNumStates(other.getClassNumStates()), maxThreads(other.
         getmaxThreads()), fitted(other.fitted)
     {
@@ -104,8 +103,11 @@ namespace bayesnet {
     {
         return nodes;
     }
-    void Network::checkFitData(int n_samples, int n_features, int n_samples_y, const vector<string>& featureNames, const string& className, const map<string, vector<int>>& states)
+    void Network::checkFitData(int n_samples, int n_features, int n_samples_y, const vector<string>& featureNames, const string& className, const map<string, vector<int>>& states, const torch::Tensor& weights)
     {
+        if (weights.size(0) != n_samples) {
+            throw invalid_argument("Weights (" + to_string(weights.size(0)) + ") must have the same number of elements as samples (" + to_string(n_samples) + ") in Network::fit");
+        }
         if (n_samples != n_samples_y) {
             throw invalid_argument("X and y must have the same number of samples in Network::fit (" + to_string(n_samples) + " != " + to_string(n_samples_y) + ")");
         }
@@ -136,28 +138,29 @@ namespace bayesnet {
         classNumStates = nodes[className]->getNumStates();
     }
     // X comes in nxm, where n is the number of features and m the number of samples
-    void Network::fit(const torch::Tensor& X, const torch::Tensor& y, const vector<string>& featureNames, const string& className, const map<string, vector<int>>& states)
+    void Network::fit(const torch::Tensor& X, const torch::Tensor& y, const torch::Tensor& weights, const vector<string>& featureNames, const string& className, const map<string, vector<int>>& states)
     {
-        checkFitData(X.size(1), X.size(0), y.size(0), featureNames, className, states);
+        checkFitData(X.size(1), X.size(0), y.size(0), featureNames, className, states, weights);
         this->className = className;
         Tensor ytmp = torch::transpose(y.view({ y.size(0), 1 }), 0, 1);
         samples = torch::cat({ X , ytmp }, 0);
         for (int i = 0; i < featureNames.size(); ++i) {
             auto row_feature = X.index({ i, "..." });
         }
-        completeFit(states);
+        completeFit(states, weights);
     }
-    void Network::fit(const torch::Tensor& samples, const vector<string>& featureNames, const string& className, const map<string, vector<int>>& states)
+    void Network::fit(const torch::Tensor& samples, const torch::Tensor& weights, const vector<string>& featureNames, const string& className, const map<string, vector<int>>& states)
     {
-        checkFitData(samples.size(1), samples.size(0) - 1, samples.size(1), featureNames, className, states);
+        checkFitData(samples.size(1), samples.size(0) - 1, samples.size(1), featureNames, className, states, weights);
         this->className = className;
         this->samples = samples;
-        completeFit(states);
+        completeFit(states, weights);
     }
     // input_data comes in nxm, where n is the number of features and m the number of samples
-    void Network::fit(const vector<vector<int>>& input_data, const vector<int>& labels, const vector<string>& featureNames, const string& className, const map<string, vector<int>>& states)
+    void Network::fit(const vector<vector<int>>& input_data, const vector<int>& labels, const vector<float>& weights_, const vector<string>& featureNames, const string& className, const map<string, vector<int>>& states)
     {
-        checkFitData(input_data[0].size(), input_data.size(), labels.size(), featureNames, className, states);
+        const torch::Tensor weights = torch::tensor(weights_, torch::kFloat64);
+        checkFitData(input_data[0].size(), input_data.size(), labels.size(), featureNames, className, states, weights);
         this->className = className;
         // Build tensor of samples (nxm) (n+1 because of the class)
         samples = torch::zeros({ static_cast<int>(input_data.size() + 1), static_cast<int>(input_data[0].size()) }, torch::kInt32);
@@ -165,11 +168,12 @@ namespace bayesnet {
             samples.index_put_({ i, "..." }, torch::tensor(input_data[i], torch::kInt32));
         }
         samples.index_put_({ -1, "..." }, torch::tensor(labels, torch::kInt32));
-        completeFit(states);
+        completeFit(states, weights);
     }
-    void Network::completeFit(const map<string, vector<int>>& states)
+    void Network::completeFit(const map<string, vector<int>>& states, const torch::Tensor& weights)
     {
         setStates(states);
+        laplaceSmoothing = 1.0 / samples.size(1); // To use in CPT computation
         int maxThreadsRunning = static_cast<int>(std::thread::hardware_concurrency() * maxThreads);
         if (maxThreadsRunning < 1) {
             maxThreadsRunning = 1;
@@ -182,7 +186,7 @@ namespace bayesnet {
         while (nextNodeIndex < nodes.size()) {
             unique_lock<mutex> lock(mtx);
             cv.wait(lock, [&activeThreads, &maxThreadsRunning]() { return activeThreads < maxThreadsRunning; });
-            threads.emplace_back([this, &nextNodeIndex, &mtx, &cv, &activeThreads]() {
+            threads.emplace_back([this, &nextNodeIndex, &mtx, &cv, &activeThreads, &weights]() {
                 while (true) {
                     unique_lock<mutex> lock(mtx);
                     if (nextNodeIndex >= nodes.size()) {
@@ -191,7 +195,7 @@ namespace bayesnet {
                     auto& pair = *std::next(nodes.begin(), nextNodeIndex);
                     ++nextNodeIndex;
                     lock.unlock();
-                    pair.second->computeCPT(samples, features, laplaceSmoothing);
+                    pair.second->computeCPT(samples, features, laplaceSmoothing, weights);
                     lock.lock();
                     nodes[pair.first] = std::move(pair.second);
                     lock.unlock();
@@ -343,7 +347,7 @@ namespace bayesnet {
         }
         // Normalize result
         double sum = accumulate(result.begin(), result.end(), 0.0);
-        transform(result.begin(), result.end(), result.begin(), [sum](double& value) { return value / sum; });
+        transform(result.begin(), result.end(), result.begin(), [sum](const double& value) { return value / sum; });
         return result;
     }
     vector<string> Network::show() const
@@ -431,6 +435,7 @@ namespace bayesnet {
     {
         for (auto& node : nodes) {
             cout << "* " << node.first << ": (" << node.second->getNumStates() << ") : " << node.second->getCPT().sizes() << endl;
+            cout << node.second->getCPT() << endl;
         }
     }
 }

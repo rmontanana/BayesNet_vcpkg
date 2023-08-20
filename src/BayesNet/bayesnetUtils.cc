@@ -4,7 +4,7 @@ namespace bayesnet {
     using namespace std;
     using namespace torch;
     // Return the indices in descending order
-    vector<int> argsort(vector<float>& nums)
+    vector<int> argsort(vector<double>& nums)
     {
         int n = nums.size();
         vector<int> indices(n);

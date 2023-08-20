@@ -7,7 +7,7 @@ namespace bayesnet {
     private:
         int root;
     protected:
-        void buildModel() override;
+        void buildModel(const torch::Tensor& weights) override;
     public:
         explicit SPODE(int root);
         virtual ~SPODE() {};

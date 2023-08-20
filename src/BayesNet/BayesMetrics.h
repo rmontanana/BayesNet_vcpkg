@@ -12,16 +12,20 @@ namespace bayesnet {
         vector<string> features;
         string className;
         int classNumStates = 0;
+        vector<double> scoresKBest;
+        vector<int> featuresKBest; // sorted indices of the features
+        double entropy(const Tensor& feature, const Tensor& weights);
+        double conditionalEntropy(const Tensor& firstFeature, const Tensor& secondFeature, const Tensor& weights);
+        vector<pair<string, string>> doCombinations(const vector<string>&);
     public:
         Metrics() = default;
-        Metrics(const Tensor&, const vector<string>&, const string&, const int);
-        Metrics(const vector<vector<int>>&, const vector<int>&, const vector<string>&, const string&, const int);
-        double entropy(const Tensor&);
-        double conditionalEntropy(const Tensor&, const Tensor&);
-        double mutualInformation(const Tensor&, const Tensor&);
-        vector<float> conditionalEdgeWeights(); // To use in Python
-        Tensor conditionalEdge();
-        vector<pair<string, string>> doCombinations(const vector<string>&);
+        Metrics(const torch::Tensor& samples, const vector<string>& features, const string& className, const int classNumStates);
+        Metrics(const vector<vector<int>>& vsamples, const vector<int>& labels, const vector<string>& features, const string& className, const int classNumStates);
+        vector<int> SelectKBestWeighted(const torch::Tensor& weights, unsigned k = 0);
+        vector<double> getScoresKBest() const;
+        double mutualInformation(const Tensor& firstFeature, const Tensor& secondFeature, const Tensor& weights);
+        vector<float> conditionalEdgeWeights(vector<float>& weights); // To use in Python
+        Tensor conditionalEdge(const torch::Tensor& weights);
         vector<pair<int, int>> maximumSpanningTree(const vector<string>& features, const Tensor& weights, const int root);
     };
 }

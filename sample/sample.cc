@@ -141,43 +141,58 @@ int main(int argc, char** argv)
     /*
     * Begin Processing
     */
-    auto handler = ArffFiles();
-    handler.load(complete_file_name, class_last);
-    // Get Dataset X, y
-    vector<mdlp::samples_t>& X = handler.getX();
-    mdlp::labels_t& y = handler.getY();
-    // Get className & Features
-    auto className = handler.getClassName();
-    vector<string> features;
-    auto attributes = handler.getAttributes();
-    transform(attributes.begin(), attributes.end(), back_inserter(features),
-        [](const pair<string, string>& item) { return item.first; });
-    // Discretize Dataset
-    auto [Xd, maxes] = discretize(X, y, features);
-    maxes[className] = *max_element(y.begin(), y.end()) + 1;
-    map<string, vector<int>> states;
-    for (auto feature : features) {
-        states[feature] = vector<int>(maxes[feature]);
-    }
-    states[className] = vector<int>(maxes[className]);
-    auto clf = platform::Models::instance()->create(model_name);
-    clf->fit(Xd, y, features, className, states);
-    if (dump_cpt) {
-        cout << "--- CPT Tables ---" << endl;
-        clf->dump_cpt();
-    }
-    auto lines = clf->show();
-    for (auto line : lines) {
-        cout << line << endl;
-    }
-    cout << "--- Topological Order ---" << endl;
-    auto order = clf->topological_order();
-    for (auto name : order) {
-        cout << name << ", ";
-    }
-    cout << "end." << endl;
-    auto score = clf->score(Xd, y);
-    cout << "Score: " << score << endl;
+    auto ypred = torch::tensor({ 1,2,3,2,2,3,4,5,2,1 });
+    auto y = torch::tensor({ 0,0,0,0,2,3,4,0,0,0 });
+    auto weights = torch::ones({ 10 }, kDouble);
+    auto mask = ypred == y;
+    cout << "ypred:" << ypred << endl;
+    cout << "y:" << y << endl;
+    cout << "weights:" << weights << endl;
+    cout << "mask:" << mask << endl;
+    double value_to_add = 0.5;
+    weights += mask.to(torch::kDouble) * value_to_add;
+    cout << "New weights:" << weights << endl;
+    auto masked_weights = weights * mask.to(weights.dtype());
+    double sum_of_weights = masked_weights.sum().item<double>();
+    cout << "Sum of weights: " << sum_of_weights << endl;
+    //weights.index_put_({ mask }, weights + 10);
+    // auto handler = ArffFiles();
+    // handler.load(complete_file_name, class_last);
+    // // Get Dataset X, y
+    // vector<mdlp::samples_t>& X = handler.getX();
+    // mdlp::labels_t& y = handler.getY();
+    // // Get className & Features
+    // auto className = handler.getClassName();
+    // vector<string> features;
+    // auto attributes = handler.getAttributes();
+    // transform(attributes.begin(), attributes.end(), back_inserter(features),
+    //     [](const pair<string, string>& item) { return item.first; });
+    // // Discretize Dataset
+    // auto [Xd, maxes] = discretize(X, y, features);
+    // maxes[className] = *max_element(y.begin(), y.end()) + 1;
+    // map<string, vector<int>> states;
+    // for (auto feature : features) {
+    //     states[feature] = vector<int>(maxes[feature]);
+    // }
+    // states[className] = vector<int>(maxes[className]);
+    // auto clf = platform::Models::instance()->create(model_name);
+    // clf->fit(Xd, y, features, className, states);
+    // if (dump_cpt) {
+    //     cout << "--- CPT Tables ---" << endl;
+    //     clf->dump_cpt();
+    // }
+    // auto lines = clf->show();
+    // for (auto line : lines) {
+    //     cout << line << endl;
+    // }
+    // cout << "--- Topological Order ---" << endl;
+    // auto order = clf->topological_order();
+    // for (auto name : order) {
+    //     cout << name << ", ";
+    // }
+    // cout << "end." << endl;
+    // auto score = clf->score(Xd, y);
+    // cout << "Score: " << score << endl;
     // auto graph = clf->graph();
     // auto dot_file = model_name + "_" + file_name;
     // ofstream file(dot_file + ".dot");

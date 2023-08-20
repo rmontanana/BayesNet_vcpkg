@@ -11,25 +11,26 @@ namespace bayesnet {
     class Classifier : public BaseClassifier {
     private:
         void buildDataset(torch::Tensor& y);
-        Classifier& build(vector<string>& features, string className, map<string, vector<int>>& states);
+        Classifier& build(vector<string>& features, string className, map<string, vector<int>>& states, const torch::Tensor& weights);
     protected:
         bool fitted;
-        Network model;
         int m, n; // m: number of samples, n: number of features
-        Tensor dataset; // (n+1)xm tensor
+        Network model;
         Metrics metrics;
         vector<string> features;
         string className;
         map<string, vector<int>> states;
+        Tensor dataset; // (n+1)xm tensor
         void checkFitParameters();
-        virtual void buildModel() = 0;
-        void trainModel() override;
+        virtual void buildModel(const torch::Tensor& weights) = 0;
+        void trainModel(const torch::Tensor& weights) override;
     public:
         Classifier(Network model);
         virtual ~Classifier() = default;
         Classifier& fit(vector<vector<int>>& X, vector<int>& y, vector<string>& features, string className, map<string, vector<int>>& states) override;
         Classifier& fit(torch::Tensor& X, torch::Tensor& y, vector<string>& features, string className, map<string, vector<int>>& states) override;
         Classifier& fit(torch::Tensor& dataset, vector<string>& features, string className, map<string, vector<int>>& states) override;
+        Classifier& fit(torch::Tensor& dataset, vector<string>& features, string className, map<string, vector<int>>& states, const torch::Tensor& weights) override;
         void addNodes();
         int getNumberOfNodes() const override;
         int getNumberOfEdges() const override;

@@ -84,7 +84,7 @@ namespace bayesnet {
         }
         return result;
     }
-    void Node::computeCPT(const torch::Tensor& dataset, const vector<string>& features, const int laplaceSmoothing)
+    void Node::computeCPT(const torch::Tensor& dataset, const vector<string>& features, const double laplaceSmoothing, const torch::Tensor& weights)
     {
         dimensions.clear();
         // Get dimensions of the CPT
@@ -111,7 +111,7 @@ namespace bayesnet {
                 coordinates.push_back(dataset.index({ parent_index, n_sample }));
             }
             // Increment the count of the corresponding coordinate
-            cpTable.index_put_({ coordinates }, cpTable.index({ coordinates }) + 1);
+            cpTable.index_put_({ coordinates }, cpTable.index({ coordinates }) + weights.index({ n_sample }).item<double>());
         }
         // Normalize the counts
         cpTable = cpTable / cpTable.sum(0);

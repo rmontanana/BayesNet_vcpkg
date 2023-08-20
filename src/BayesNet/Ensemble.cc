@@ -5,7 +5,7 @@ namespace bayesnet {
 
     Ensemble::Ensemble() : Classifier(Network()) {}
 
-    void Ensemble::trainModel()
+    void Ensemble::trainModel(const torch::Tensor& weights)
     {
         n_models = models.size();
         for (auto i = 0; i < n_models; ++i) {
@@ -18,9 +18,9 @@ namespace bayesnet {
         auto y_pred_ = y_pred.accessor<int, 2>();
         vector<int> y_pred_final;
         for (int i = 0; i < y_pred.size(0); ++i) {
-            vector<float> votes(y_pred.size(1), 0);
+            vector<double> votes(y_pred.size(1), 0);
             for (int j = 0; j < y_pred.size(1); ++j) {
-                votes[y_pred_[i][j]] += 1;
+                votes[y_pred_[i][j]] += significanceModels[j];
             }
             // argsort in descending order
             auto indices = argsort(votes);

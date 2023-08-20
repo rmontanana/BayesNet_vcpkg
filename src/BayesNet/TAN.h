@@ -7,7 +7,7 @@ namespace bayesnet {
     class TAN : public Classifier {
     private:
     protected:
-        void buildModel() override;
+        void buildModel(const torch::Tensor& weights) override;
     public:
         TAN();
         virtual ~TAN() {};
