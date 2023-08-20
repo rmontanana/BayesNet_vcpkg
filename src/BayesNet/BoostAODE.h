@@ -13,7 +13,9 @@ namespace bayesnet {
         void buildModel(const torch::Tensor& weights) override;
         void trainModel(const torch::Tensor& weights) override;
     private:
-        bool repeatSparent;
+        bool repeatSparent=false;
+        int maxModels=0;
+        bool ascending=false; //Process KBest features ascending or descending order
     };
 }
 #endif

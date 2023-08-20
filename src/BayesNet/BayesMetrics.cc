@@ -21,25 +21,39 @@ namespace bayesnet {
         }
         samples.index_put_({ -1, "..." }, torch::tensor(labels, torch::kInt32));
     }
-    vector<int> Metrics::SelectKBestWeighted(const torch::Tensor& weights, unsigned k)
+    vector<int> Metrics::SelectKBestWeighted(const torch::Tensor& weights, bool ascending, unsigned k)
     {
+        // Return the K Best features 
         auto n = samples.size(0) - 1;
         if (k == 0) {
             k = n;
         }
         // compute scores
-        scoresKBest.reserve(n);
+        scoresKBest.clear();
+        featuresKBest.clear();
         auto label = samples.index({ -1, "..." });
         for (int i = 0; i < n; ++i) {
             scoresKBest.push_back(mutualInformation(label, samples.index({ i, "..." }), weights));
             featuresKBest.push_back(i);
         }
         // sort & reduce scores and features
-        sort(featuresKBest.begin(), featuresKBest.end(), [&](int i, int j)
-            { return scoresKBest[i] > scoresKBest[j]; });
-        sort(scoresKBest.begin(), scoresKBest.end(), std::greater<double>());
-        featuresKBest.resize(k);
-        scoresKBest.resize(k);
+        if (ascending) {
+            sort(featuresKBest.begin(), featuresKBest.end(), [&](int i, int j)
+                { return scoresKBest[i] < scoresKBest[j]; });
+            sort(scoresKBest.begin(), scoresKBest.end(), std::less<double>());
+            if (k < n) {
+                for (int i = 0; i < n - k; ++i) {
+                    featuresKBest.erase(featuresKBest.begin());
+                    scoresKBest.erase(scoresKBest.begin());
+                }
+            }
+        } else {
+            sort(featuresKBest.begin(), featuresKBest.end(), [&](int i, int j)
+                { return scoresKBest[i] > scoresKBest[j]; });
+            sort(scoresKBest.begin(), scoresKBest.end(), std::greater<double>());
+            featuresKBest.resize(k);
+            scoresKBest.resize(k);
+        }
         return featuresKBest;
     }
     vector<double> Metrics::getScoresKBest() const

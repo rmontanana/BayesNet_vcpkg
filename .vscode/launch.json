@@ -31,7 +31,9 @@
                 "--discretize",
                 "--stratified",
                 "-d",
-                "iris"
+                "glass",
+                "--hyperparameters",
+                "{\"repeatSparent\": true, \"maxModels\": 12}"
             ],
             "cwd": "/Users/rmontanana/Code/discretizbench",
         },

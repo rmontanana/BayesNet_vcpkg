@@ -1,8 +1,9 @@
 #include "BoostAODE.h"
+#include <set>
 #include "BayesMetrics.h"
 
 namespace bayesnet {
-    BoostAODE::BoostAODE() : Ensemble(), repeatSparent(false) {}
+    BoostAODE::BoostAODE() : Ensemble() {}
     void BoostAODE::buildModel(const torch::Tensor& weights)
     {
         // Models shall be built in trainModel
@@ -12,40 +13,41 @@ namespace bayesnet {
         if (hyperparameters.contains("repeatSparent")) {
             repeatSparent = hyperparameters["repeatSparent"];
         }
+        if (hyperparameters.contains("maxModels")) {
+            maxModels = hyperparameters["maxModels"];
+        }
+        if (hyperparameters.contains("ascending")) {
+            ascending = hyperparameters["ascending"];
+        }
     }
     void BoostAODE::trainModel(const torch::Tensor& weights)
     {
         models.clear();
         n_models = 0;
-        int max_models = .1 * n > 10 ? .1 * n : n;
+        if (maxModels == 0)
+            maxModels = .1 * n > 10 ? .1 * n : n;
         Tensor weights_ = torch::full({ m }, 1.0 / m, torch::kFloat64);
         auto X_ = dataset.index({ torch::indexing::Slice(0, dataset.size(0) - 1), "..." });
         auto y_ = dataset.index({ -1, "..." });
         bool exitCondition = false;
-        vector<int> featuresUsed;
+        unordered_set<int> featuresUsed;
         // Step 0: Set the finish condition
         // if not repeatSparent a finish condition is run out of features
-        // n_models == max_models
+        // n_models == maxModels
         int numClasses = states[className].size();
         while (!exitCondition) {
             // Step 1: Build ranking with mutual information
-            auto featureSelection = metrics.SelectKBestWeighted(weights_, n); // Get all the features sorted
-            auto feature = featureSelection[0];
+            auto featureSelection = metrics.SelectKBestWeighted(weights_, ascending, n); // Get all the features sorted
             unique_ptr<Classifier> model;
-            if (!repeatSparent) {
-                if (n_models == 0) {
-                    models.resize(n); // Resize for n==nfeatures SPODEs
-                    significanceModels.resize(n);
-                }
+            auto feature = featureSelection[0];
+            if (!repeatSparent || featuresUsed.size() < featureSelection.size()) {
                 bool found = false;
-                for (int i = 0; i < featureSelection.size(); ++i) {
-                    if (find(featuresUsed.begin(), featuresUsed.end(), i) != featuresUsed.end()) {
+                for (auto feat : featureSelection) {
+                    if (find(featuresUsed.begin(), featuresUsed.end(), feat) != featuresUsed.end()) {
                         continue;
                     }
                     found = true;
-                    feature = i;
-                    featuresUsed.push_back(feature);
-                    n_models++;
+                    feature = feat;
                     break;
                 }
                 if (!found) {
@@ -53,7 +55,9 @@ namespace bayesnet {
                     continue;
                 }
             }
+            featuresUsed.insert(feature);
             model = std::make_unique<SPODE>(feature);
+            n_models++;
             model->fit(dataset, features, className, states, weights_);
             auto ypred = model->predict(X_);
             // Step 3.1: Compute the classifier amout of say
@@ -68,15 +72,12 @@ namespace bayesnet {
             double totalWeights = torch::sum(weights_).item<double>();
             weights_ = weights_ / totalWeights;
             // Step 3.4: Store classifier and its accuracy to weigh its future vote
-            if (!repeatSparent) {
-                models[feature] = std::move(model);
-                significanceModels[feature] = significance;
-            } else {
-                models.push_back(std::move(model));
-                significanceModels.push_back(significance);
-                n_models++;
-            }
-            exitCondition = n_models == max_models;
+            models.push_back(std::move(model));
+            significanceModels.push_back(significance);
+            exitCondition = n_models == maxModels;
+        }
+        if (featuresUsed.size() != features.size()) {
+            cout << "Warning: BoostAODE did not use all the features" << endl;
         }
         weights.copy_(weights_);
     }
