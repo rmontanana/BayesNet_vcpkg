@@ -142,7 +142,6 @@ int main(int argc, char** argv)
     /*
     * Begin Processing
     */
-    weights.index_put_({ mask }, weights + 10);
     auto handler = ArffFiles();
     handler.load(complete_file_name, class_last);
     // Get Dataset X, y
