@@ -1,5 +1,6 @@
 include_directories(${BayesNet_SOURCE_DIR}/lib/mdlp)
 include_directories(${BayesNet_SOURCE_DIR}/lib/Files)
+include_directories(${BayesNet_SOURCE_DIR}/lib/json/include)
 include_directories(${BayesNet_SOURCE_DIR}/src/BayesNet)
 include_directories(${BayesNet_SOURCE_DIR}/src/Platform)
 add_library(BayesNet bayesnetUtils.cc Network.cc Node.cc BayesMetrics.cc Classifier.cc 

@@ -1,6 +1,7 @@
 #ifndef BASE_H
 #define BASE_H
 #include <torch/torch.h>
+#include <nlohmann/json.hpp>
 #include <vector>
 namespace bayesnet {
     using namespace std;
@@ -27,6 +28,7 @@ namespace bayesnet {
         const string inline getVersion() const { return "0.1.0"; };
         vector<string> virtual topological_order() = 0;
         void virtual dump_cpt()const = 0;
+        virtual void setHyperparameters(nlohmann::json& hyperparameters) = 0;
     };
 }
 #endif

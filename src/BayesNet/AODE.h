@@ -10,6 +10,7 @@ namespace bayesnet {
         AODE();
         virtual ~AODE() {};
         vector<string> graph(const string& title = "AODE") const override;
+        void setHyperparameters(nlohmann::json& hyperparameters) override {};
     };
 }
 #endif

@@ -14,6 +14,7 @@ namespace bayesnet {
         vector<string> graph(const string& name = "TAN") const override;
         Tensor predict(Tensor& X) override;
         static inline string version() { return "0.0.1"; };
+        void setHyperparameters(nlohmann::json& hyperparameters) override {};
     };
 }
 #endif // !TANLD_H

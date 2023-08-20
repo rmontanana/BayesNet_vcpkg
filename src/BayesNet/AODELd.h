@@ -16,6 +16,7 @@ namespace bayesnet {
         virtual ~AODELd() = default;
         vector<string> graph(const string& name = "AODE") const override;
         static inline string version() { return "0.0.1"; };
+        void setHyperparameters(nlohmann::json& hyperparameters) override {};
     };
 }
 #endif // !AODELD_H

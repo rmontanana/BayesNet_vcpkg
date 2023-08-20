@@ -13,6 +13,7 @@ namespace bayesnet {
         SPODELd& fit(torch::Tensor& dataset, vector<string>& features, string className, map<string, vector<int>>& states) override;
         vector<string> graph(const string& name = "SPODE") const override;
         Tensor predict(Tensor& X) override;
+        void setHyperparameters(nlohmann::json& hyperparameters) override {};
         static inline string version() { return "0.0.1"; };
     };
 }

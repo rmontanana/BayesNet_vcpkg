@@ -3,7 +3,6 @@
 #include "Classifier.h"
 namespace bayesnet {
     using namespace std;
-    using namespace torch;
     class TAN : public Classifier {
     private:
     protected:
@@ -12,6 +11,7 @@ namespace bayesnet {
         TAN();
         virtual ~TAN() {};
         vector<string> graph(const string& name = "TAN") const override;
+        void setHyperparameters(nlohmann::json& hyperparameters) override {};
     };
 }
 #endif

@@ -2,10 +2,16 @@
 #include "BayesMetrics.h"
 
 namespace bayesnet {
-    BoostAODE::BoostAODE() : Ensemble() {}
+    BoostAODE::BoostAODE() : Ensemble(), repeatSparent(false) {}
     void BoostAODE::buildModel(const torch::Tensor& weights)
     {
         // Models shall be built in trainModel
+    }
+    void BoostAODE::setHyperparameters(nlohmann::json& hyperparameters)
+    {
+        if (hyperparameters.contains("repeatSparent")) {
+            repeatSparent = hyperparameters["repeatSparent"];
+        }
     }
     void BoostAODE::trainModel(const torch::Tensor& weights)
     {
@@ -16,7 +22,6 @@ namespace bayesnet {
         auto X_ = dataset.index({ torch::indexing::Slice(0, dataset.size(0) - 1), "..." });
         auto y_ = dataset.index({ -1, "..." });
         bool exitCondition = false;
-        bool repeatSparent = false;
         vector<int> featuresUsed;
         // Step 0: Set the finish condition
         // if not repeatSparent a finish condition is run out of features

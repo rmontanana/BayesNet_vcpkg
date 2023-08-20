@@ -1,5 +1,6 @@
 #include <iostream>
 #include <argparse/argparse.hpp>
+#include <nlohmann/json.hpp>
 #include "platformUtils.h"
 #include "Experiment.h"
 #include "Datasets.h"
@@ -10,12 +11,14 @@
 
 
 using namespace std;
+using json = nlohmann::json;
 
 argparse::ArgumentParser manageArguments(int argc, char** argv)
 {
     auto env = platform::DotEnv();
     argparse::ArgumentParser program("main");
     program.add_argument("-d", "--dataset").default_value("").help("Dataset file name");
+    program.add_argument("--hyperparameters").default_value("{}").help("Hyperparamters passed to the model in Experiment");
     program.add_argument("-p", "--path")
         .help("folder where the data files are located, default")
         .default_value(string{ platform::Paths::datasets() });
@@ -59,6 +62,7 @@ argparse::ArgumentParser manageArguments(int argc, char** argv)
         auto seeds = program.get<vector<int>>("seeds");
         auto complete_file_name = path + file_name + ".arff";
         auto title = program.get<string>("title");
+        auto hyperparameters = program.get<string>("hyperparameters");
         if (title == "" && file_name == "") {
             throw runtime_error("title is mandatory if dataset is not provided");
         }
@@ -82,6 +86,7 @@ int main(int argc, char** argv)
     auto stratified = program.get<bool>("stratified");
     auto n_folds = program.get<int>("folds");
     auto seeds = program.get<vector<int>>("seeds");
+    auto hyperparameters =program.get<string>("hyperparameters");
     vector<string> filesToTest;
     auto datasets = platform::Datasets(path, true, platform::ARFF);
     auto title = program.get<string>("title");
@@ -106,6 +111,7 @@ int main(int argc, char** argv)
     experiment.setTitle(title).setLanguage("cpp").setLanguageVersion("14.0.3");
     experiment.setDiscretized(discretize_dataset).setModel(model_name).setPlatform(env.get("platform"));
     experiment.setStratified(stratified).setNFolds(n_folds).setScoreName("accuracy");
+    experiment.setHyperparameters(json::parse(hyperparameters));
     for (auto seed : seeds) {
         experiment.addRandomSeed(seed);
     }
