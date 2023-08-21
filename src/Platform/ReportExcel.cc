@@ -1,6 +1,6 @@
 #include <sstream>
 #include <locale>
-#include "ReportConsole.h"
+#include "ReportExcel.h"
 #include "BestResult.h"
 
 
@@ -10,30 +10,30 @@ namespace platform {
         char do_thousands_sep() const { return '.'; }
         string do_grouping() const { return "\03"; }
     };
-    string ReportConsole::headerLine(const string& text)
+    string headerLine(const string& text)
     {
-        int n = MAXL - text.length() - 3;
+        int n = MAXLL - text.length() - 3;
         n = n < 0 ? 0 : n;
         return "* " + text + string(n, ' ') + "*\n";
     }
     
-    void ReportConsole::header()
+    void ReportExcel::header()
     {
         locale mylocale(cout.getloc(), new separated);
         locale::global(mylocale);
         cout.imbue(mylocale);
         stringstream oss;
-        cout << Colors::MAGENTA() << string(MAXL, '*') << endl;
+        cout << Colors::MAGENTA() << string(MAXLL, '*') << endl;
         cout << headerLine("Report " + data["model"].get<string>() + " ver. " + data["version"].get<string>() + " with " + to_string(data["folds"].get<int>()) + " Folds cross validation and " + to_string(data["seeds"].size()) + " random seeds. " + data["date"].get<string>() + " " + data["time"].get<string>());
         cout << headerLine(data["title"].get<string>());
         cout << headerLine("Random seeds: " + fromVector("seeds") + " Stratified: " + (data["stratified"].get<bool>() ? "True" : "False"));
         oss << "Execution took  " << setprecision(2) << fixed << data["duration"].get<float>() << " seconds,   " << data["duration"].get<float>() / 3600 << " hours, on " << data["platform"].get<string>();
         cout << headerLine(oss.str());
         cout << headerLine("Score is " + data["score_name"].get<string>());
-        cout << string(MAXL, '*') << endl;
+        cout << string(MAXLL, '*') << endl;
         cout << endl;
     }
-    void ReportConsole::body()
+    void ReportExcel::body()
     {
         cout << Colors::GREEN() << "Dataset                        Sampl. Feat. Cls Nodes     Edges     States    Score           Time               Hyperparameters" << endl;
         cout << "============================== ====== ===== === ========= ========= ========= =============== ================== ===============" << endl;
@@ -63,23 +63,23 @@ namespace platform {
             odd = !odd;
         }
         if (data["results"].size() == 1) {
-            cout << string(MAXL, '*') << endl;
+            cout << string(MAXLL, '*') << endl;
             cout << headerLine(fVector("Train scores: ", lastResult["scores_train"], 14, 12));
             cout << headerLine(fVector("Test  scores: ", lastResult["scores_test"], 14, 12));
             cout << headerLine(fVector("Train  times: ", lastResult["times_train"], 10, 3));
             cout << headerLine(fVector("Test   times: ", lastResult["times_test"], 10, 3));
-            cout << string(MAXL, '*') << endl;
+            cout << string(MAXLL, '*') << endl;
         }
     }
-    void ReportConsole::footer()
+    void ReportExcel::footer()
     {
-        cout << Colors::MAGENTA() << string(MAXL, '*') << endl;
+        cout << Colors::MAGENTA() << string(MAXLL, '*') << endl;
         auto score = data["score_name"].get<string>();
         if (score == BestResult::scoreName()) {
             stringstream oss;
             oss << score << " compared to " << BestResult::title() << " .:  " << totalScore / BestResult::score();
             cout << headerLine(oss.str());
         }
-        cout << string(MAXL, '*') << endl << Colors::RESET();
+        cout << string(MAXLL, '*') << endl << Colors::RESET();
     }
 }
