@@ -78,7 +78,6 @@ argparse::ArgumentParser manageArguments(int argc, char** argv)
 int main(int argc, char** argv)
 {
     auto program = manageArguments(argc, argv);
-    bool saveResults = false;
     auto file_name = program.get<string>("dataset");
     auto path = program.get<string>("path");
     auto model_name = program.get<string>("model");
@@ -101,7 +100,6 @@ int main(int argc, char** argv)
         filesToTest.push_back(file_name);
     } else {
         filesToTest = platform::Datasets(path, true, platform::ARFF).getNames();
-        saveResults = true;
     }
     /*
     * Begin Processing
@@ -119,10 +117,8 @@ int main(int argc, char** argv)
     timer.start();
     experiment.go(filesToTest, path);
     experiment.setDuration(timer.getDuration());
-    if (saveResults)
-        experiment.save(platform::Paths::results());
-    else
-        experiment.report();
+    experiment.save(platform::Paths::results());
+    experiment.report();
     cout << "Done!" << endl;
     return 0;
 }
