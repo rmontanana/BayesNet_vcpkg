@@ -231,6 +231,7 @@ namespace platform {
             cout << "No results found!" << endl;
             exit(0);
         }
+        sortDate();
         show();
         menu();
         cout << "Done!" << endl;
