@@ -34,6 +34,7 @@ argparse::ArgumentParser manageArguments(int argc, char** argv)
     );
     program.add_argument("--title").default_value("").help("Experiment title");
     program.add_argument("--discretize").help("Discretize input dataset").default_value((bool)stoi(env.get("discretize"))).implicit_value(true);
+    program.add_argument("--save").help("Save result (always save if no dataset is supplied)").default_value(false).implicit_value(true);
     program.add_argument("--stratified").help("If Stratified KFold is to be done").default_value((bool)stoi(env.get("stratified"))).implicit_value(true);
     program.add_argument("-f", "--folds").help("Number of folds").default_value(stoi(env.get("n_folds"))).scan<'i', int>().action([](const string& value) {
         try {
@@ -63,6 +64,7 @@ argparse::ArgumentParser manageArguments(int argc, char** argv)
         auto complete_file_name = path + file_name + ".arff";
         auto title = program.get<string>("title");
         auto hyperparameters = program.get<string>("hyperparameters");
+        auto saveResults = program.get<bool>("save");
         if (title == "" && file_name == "") {
             throw runtime_error("title is mandatory if dataset is not provided");
         }
@@ -89,6 +91,7 @@ int main(int argc, char** argv)
     vector<string> filesToTest;
     auto datasets = platform::Datasets(path, true, platform::ARFF);
     auto title = program.get<string>("title");
+    auto saveResults = program.get<bool>("save");
     if (file_name != "") {
         if (!datasets.isDataset(file_name)) {
             cerr << "Dataset " << file_name << " not found" << endl;
@@ -100,6 +103,7 @@ int main(int argc, char** argv)
         filesToTest.push_back(file_name);
     } else {
         filesToTest = platform::Datasets(path, true, platform::ARFF).getNames();
+        saveResults = true;
     }
     /*
     * Begin Processing
@@ -117,7 +121,9 @@ int main(int argc, char** argv)
     timer.start();
     experiment.go(filesToTest, path);
     experiment.setDuration(timer.getDuration());
-    experiment.save(platform::Paths::results());
+    if (saveResults) {
+        experiment.save(platform::Paths::results());
+    }
     experiment.report();
     cout << "Done!" << endl;
     return 0;

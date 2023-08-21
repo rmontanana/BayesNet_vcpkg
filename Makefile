@@ -11,6 +11,19 @@ setup: ## Install dependencies for tests and coverage
 		pip install gcovr; \
 	fi
 
+copy: ## Copy binary files to selected folder
+	@echo "Destination folder: $(dest)"
+	@if test "$(dest)" == "" ; then \
+		echo "Destination folder is empty"; \
+		exit 1; \
+	fi
+	make build
+	@echo ">>> Copying files to $(dest)"
+	@cp build/src/Platform/main $(dest)
+	@cp build/src/Platform/list $(dest)
+	@cp build/src/Platform/manage $(dest)
+	@echo ">>> Done"
+
 dependency: ## Create a dependency graph diagram of the project (build/dependency.png)
 	cd build && cmake .. --graphviz=dependency.dot && dot -Tpng dependency.dot -o dependency.png
 
