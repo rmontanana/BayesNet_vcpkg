@@ -1,7 +1,7 @@
 #include <filesystem>
 #include "platformUtils.h"
 #include "Results.h"
-#include "Report.h"
+#include "ReportConsole.h"
 #include "BestResult.h"
 #include "Colors.h"
 namespace platform {
@@ -98,7 +98,7 @@ namespace platform {
     {
         cout << Colors::YELLOW() << "Reporting " << files.at(index).getFilename() << endl;
         auto data = files.at(index).load();
-        Report report(data);
+        ReportConsole report(data);
         report.show();
     }
     void Results::menu()

@@ -1,52 +1,23 @@
 #include <sstream>
 #include <locale>
-#include "Report.h"
+#include "ReportConsole.h"
 #include "BestResult.h"
 
 
 namespace platform {
+    struct separated : numpunct<char> {
+        char do_decimal_point() const { return ','; }
+        char do_thousands_sep() const { return '.'; }
+        string do_grouping() const { return "\03"; }
+    };
     string headerLine(const string& text)
     {
         int n = MAXL - text.length() - 3;
         n = n < 0 ? 0 : n;
         return "* " + text + string(n, ' ') + "*\n";
     }
-    string Report::fromVector(const string& key)
-    {
-        stringstream oss;
-        string sep = "";
-        oss << "[";
-        for (auto& item : data[key]) {
-            oss << sep << item.get<double>();
-            sep = ", ";
-        }
-        oss << "]";
-        return oss.str();
-    }
-    string fVector(const string& title, const json& data, const int width, const int precision)
-    {
-        stringstream oss;
-        string sep = "";
-        oss << title << "[";
-        for (const auto& item : data) {
-            oss << sep << fixed << setw(width) << setprecision(precision) << item.get<double>();
-            sep = ", ";
-        }
-        oss << "]";
-        return oss.str();
-    }
-    void Report::show()
-    {
-        header();
-        body();
-        footer();
-    }
-    struct separated : numpunct<char> {
-        char do_decimal_point() const { return ','; }
-        char do_thousands_sep() const { return '.'; }
-        string do_grouping() const { return "\03"; }
-    };
-    void Report::header()
+    
+    void ReportConsole::header()
     {
         locale mylocale(cout.getloc(), new separated);
         locale::global(mylocale);
@@ -62,7 +33,7 @@ namespace platform {
         cout << string(MAXL, '*') << endl;
         cout << endl;
     }
-    void Report::body()
+    void ReportConsole::body()
     {
         cout << Colors::GREEN() << "Dataset                        Sampl. Feat. Cls Nodes     Edges     States    Score           Time               Hyperparameters" << endl;
         cout << "============================== ====== ===== === ========= ========= ========= =============== ================== ===============" << endl;
@@ -100,7 +71,7 @@ namespace platform {
             cout << string(MAXL, '*') << endl;
         }
     }
-    void Report::footer()
+    void ReportConsole::footer()
     {
         cout << Colors::MAGENTA() << string(MAXL, '*') << endl;
         auto score = data["score_name"].get<string>();
@@ -110,6 +81,5 @@ namespace platform {
             cout << headerLine(oss.str());
         }
         cout << string(MAXL, '*') << endl << Colors::RESET();
-
     }
 }

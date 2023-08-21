@@ -1,7 +1,7 @@
 #include "Experiment.h"
 #include "Datasets.h"
 #include "Models.h"
-#include "Report.h"
+#include "ReportConsole.h"
 
 namespace platform {
     using json = nlohmann::json;
@@ -91,7 +91,7 @@ namespace platform {
     void Experiment::report()
     {
         json data = build_json();
-        Report report(data);
+        ReportConsole report(data);
         report.show();
     }
 
