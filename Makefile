@@ -11,12 +11,9 @@ setup: ## Install dependencies for tests and coverage
 		pip install gcovr; \
 	fi
 
+dest ?= ../discretizbench
 copy: ## Copy binary files to selected folder
 	@echo "Destination folder: $(dest)"
-	@if test "$(dest)" == "" ; then \
-		echo "Destination folder is empty"; \
-		exit 1; \
-	fi
 	make build
 	@echo ">>> Copying files to $(dest)"
 	@cp build/src/Platform/main $(dest)
