@@ -10,6 +10,7 @@ namespace platform {
         char do_thousands_sep() const { return '.'; }
         string do_grouping() const { return "\03"; }
     };
+    
     string ReportConsole::headerLine(const string& text)
     {
         int n = MAXL - text.length() - 3;
@@ -38,7 +39,7 @@ namespace platform {
         cout << Colors::GREEN() << "Dataset                        Sampl. Feat. Cls Nodes     Edges     States    Score           Time               Hyperparameters" << endl;
         cout << "============================== ====== ===== === ========= ========= ========= =============== ================== ===============" << endl;
         json lastResult;
-        totalScore = 0;
+        double totalScore = 0.0;
         bool odd = true;
         for (const auto& r : data["results"]) {
             auto color = odd ? Colors::CYAN() : Colors::BLUE();
@@ -69,9 +70,11 @@ namespace platform {
             cout << headerLine(fVector("Train  times: ", lastResult["times_train"], 10, 3));
             cout << headerLine(fVector("Test   times: ", lastResult["times_test"], 10, 3));
             cout << string(MAXL, '*') << endl;
+        } else {
+            footer(totalScore);
         }
     }
-    void ReportConsole::footer()
+    void ReportConsole::footer(double totalScore)
     {
         cout << Colors::MAGENTA() << string(MAXL, '*') << endl;
         auto score = data["score_name"].get<string>();

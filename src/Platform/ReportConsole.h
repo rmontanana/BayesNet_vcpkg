@@ -16,7 +16,7 @@ namespace platform {
         string headerLine(const string& text);
         void header() override;
         void body() override;
-        void footer() override;
+        void footer(double totalScore);
     };
 };
 #endif

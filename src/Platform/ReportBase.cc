@@ -33,6 +33,5 @@ namespace platform {
     {
         header();
         body();
-        footer();
     }
 }
