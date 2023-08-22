@@ -16,7 +16,7 @@ namespace bayesnet {
     public:
         explicit KDB(int k, float theta = 0.03);
         virtual ~KDB() {};
-        void setHyperparameters(nlohmann::json& hyperparameters) override {};
+        void setHyperparameters(nlohmann::json& hyperparameters) override;
         vector<string> graph(const string& name = "KDB") const override;
     };
 }

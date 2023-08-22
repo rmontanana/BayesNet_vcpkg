@@ -4,6 +4,18 @@ namespace bayesnet {
     using namespace torch;
 
     KDB::KDB(int k, float theta) : Classifier(Network()), k(k), theta(theta) {}
+    void KDB::setHyperparameters(nlohmann::json& hyperparameters)
+    {
+        // Check if hyperparameters are valid
+        const vector<string> validKeys = { "k", "theta" };
+        checkHyperparameters(validKeys, hyperparameters);
+        if (hyperparameters.contains("k")) {
+            k = hyperparameters["k"];
+        }
+        if (hyperparameters.contains("theta")) {
+            theta = hyperparameters["theta"];
+        }
+    }
     void KDB::buildModel(const torch::Tensor& weights)
     {
         /*
