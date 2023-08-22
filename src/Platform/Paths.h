@@ -6,6 +6,7 @@ namespace platform {
     public:
         static std::string datasets() { return "datasets/"; }
         static std::string results() { return "results/"; }
+        static std::string excel() { return "excel/"; }
     };
 }
 #endif

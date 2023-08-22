@@ -42,7 +42,7 @@ namespace platform {
         vector<Result> files;
         void load(); // Loads the list of results
         void show() const;
-        void report(const int index) const;
+        void report(const int index, const bool excelReport) const;
         int getIndex(const string& intent) const;
         void menu();
         void sortList();

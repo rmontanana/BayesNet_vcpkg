@@ -1,7 +1,8 @@
 #include <filesystem>
 #include "platformUtils.h"
 #include "Results.h"
-#include "Report.h"
+#include "ReportConsole.h"
+#include "ReportExcel.h"
 #include "BestResult.h"
 #include "Colors.h"
 namespace platform {
@@ -94,21 +95,26 @@ namespace platform {
         cout << "Invalid index" << endl;
         return -1;
     }
-    void Results::report(const int index) const
+    void Results::report(const int index, const bool excelReport) const
     {
         cout << Colors::YELLOW() << "Reporting " << files.at(index).getFilename() << endl;
         auto data = files.at(index).load();
-        Report report(data);
-        report.show();
+        if (excelReport) {
+            ReportExcel report(data);
+            report.show();
+        } else {
+            ReportConsole report(data);
+            report.show();
+        }
     }
     void Results::menu()
     {
         char option;
         int index;
         bool finished = false;
-        string filename, line, options = "qldhsr";
+        string filename, line, options = "qldhsre";
         while (!finished) {
-            cout << Colors::RESET() << "Choose option (quit='q', list='l', delete='d', hide='h', sort='s', report='r'): ";
+            cout << Colors::RESET() << "Choose option (quit='q', list='l', delete='d', hide='h', sort='s', report='r', excel='e'): ";
             getline(cin, line);
             if (line.size() == 0)
                 continue;
@@ -119,12 +125,14 @@ namespace platform {
                 }
                 option = line[0];
             } else {
-                index = stoi(line);
-                if (index >= 0 && index < files.size()) {
-                    report(index);
-                } else {
-                    cout << "Invalid option" << endl;
+                if (all_of(line.begin(), line.end(), ::isdigit)) {
+                    index = stoi(line);
+                    if (index >= 0 && index < files.size()) {
+                        report(index, false);
+                        continue;
+                    }
                 }
+                cout << "Invalid option" << endl;
                 continue;
             }
             switch (option) {
@@ -164,7 +172,13 @@ namespace platform {
                     index = getIndex("report");
                     if (index == -1)
                         break;
-                    report(index);
+                    report(index, false);
+                    break;
+                case 'e':
+                    index = getIndex("excel");
+                    if (index == -1)
+                        break;
+                    report(index, true);
                     break;
                 default:
                     cout << "Invalid option" << endl;
