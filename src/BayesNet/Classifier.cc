@@ -152,4 +152,12 @@ namespace bayesnet {
     {
         model.dump_cpt();
     }
+    void Classifier::checkHyperparameters(const vector<string>& validKeys, nlohmann::json& hyperparameters)
+    {
+        for (const auto& item : hyperparameters.items()) {
+            if (find(validKeys.begin(), validKeys.end(), item.key()) == validKeys.end()) {
+                throw invalid_argument("Hyperparameter " + item.key() + " is not valid");
+            }
+        }
+    }
 }

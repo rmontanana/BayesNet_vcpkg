@@ -24,6 +24,7 @@ namespace bayesnet {
         void checkFitParameters();
         virtual void buildModel(const torch::Tensor& weights) = 0;
         void trainModel(const torch::Tensor& weights) override;
+        void checkHyperparameters(const vector<string>& validKeys, nlohmann::json& hyperparameters);
     public:
         Classifier(Network model);
         virtual ~Classifier() = default;

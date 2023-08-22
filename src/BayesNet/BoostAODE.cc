@@ -11,12 +11,8 @@ namespace bayesnet {
     void BoostAODE::setHyperparameters(nlohmann::json& hyperparameters)
     {
         // Check if hyperparameters are valid
-        auto validKeys = { "repeatSparent", "maxModels", "ascending" };
-        for (const auto& item : hyperparameters.items()) {
-            if (find(validKeys.begin(), validKeys.end(), item.key()) == validKeys.end()) {
-                throw invalid_argument("Hyperparameter " + item.key() + " is not valid");
-            }
-        }
+        const vector<string> validKeys = { "repeatSparent", "maxModels", "ascending" };
+        checkHyperparameters(validKeys, hyperparameters);
         if (hyperparameters.contains("repeatSparent")) {
             repeatSparent = hyperparameters["repeatSparent"];
         }
