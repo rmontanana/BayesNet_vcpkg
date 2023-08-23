@@ -3,7 +3,7 @@
 namespace bayesnet {
     using namespace torch;
 
-    Ensemble::Ensemble() : Classifier(Network()) {}
+    Ensemble::Ensemble() : Classifier(Network()), n_models(0) {}
 
     void Ensemble::trainModel(const torch::Tensor& weights)
     {

@@ -3,7 +3,7 @@
 namespace bayesnet {
     using namespace std;
     TANLd::TANLd() : TAN(), Proposal(dataset, features, className) {}
-    TANLd& TANLd::fit(torch::Tensor& X_, torch::Tensor& y_, vector<string>& features_, string className_, map<string, vector<int>>& states_)
+    TANLd& TANLd::fit(torch::Tensor& X_, torch::Tensor& y_, const vector<string>& features_, const string& className_, map<string, vector<int>>& states_)
     {
         // This first part should go in a Classifier method called fit_local_discretization o fit_float...
         features = features_;

@@ -3,8 +3,8 @@
 #include "Network.h"
 #include "bayesnetUtils.h"
 namespace bayesnet {
-    Network::Network() : features(vector<string>()), className(""), classNumStates(0), fitted(false) {}
-    Network::Network(float maxT) : features(vector<string>()), className(""), classNumStates(0), maxThreads(maxT), fitted(false) {}
+    Network::Network() : features(vector<string>()), className(""), classNumStates(0), fitted(false), laplaceSmoothing(0) {}
+    Network::Network(float maxT) : features(vector<string>()), className(""), classNumStates(0), maxThreads(maxT), fitted(false), laplaceSmoothing(0) {}
     Network::Network(Network& other) : laplaceSmoothing(other.laplaceSmoothing), features(other.features), className(other.className), classNumStates(other.getClassNumStates()), maxThreads(other.
         getmaxThreads()), fitted(other.fitted)
     {
@@ -399,7 +399,6 @@ namespace bayesnet {
         auto result = features;
         result.erase(remove(result.begin(), result.end(), className), result.end());
         bool ending{ false };
-        int idx = 0;
         while (!ending) {
             ending = true;
             for (auto feature : features) {

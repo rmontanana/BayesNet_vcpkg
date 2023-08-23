@@ -11,7 +11,7 @@ namespace bayesnet {
     class Classifier : public BaseClassifier {
     private:
         void buildDataset(torch::Tensor& y);
-        Classifier& build(vector<string>& features, string className, map<string, vector<int>>& states, const torch::Tensor& weights);
+        Classifier& build(const vector<string>& features, const string& className, map<string, vector<int>>& states, const torch::Tensor& weights);
     protected:
         bool fitted;
         int m, n; // m: number of samples, n: number of features
@@ -28,10 +28,10 @@ namespace bayesnet {
     public:
         Classifier(Network model);
         virtual ~Classifier() = default;
-        Classifier& fit(vector<vector<int>>& X, vector<int>& y, vector<string>& features, string className, map<string, vector<int>>& states) override;
-        Classifier& fit(torch::Tensor& X, torch::Tensor& y, vector<string>& features, string className, map<string, vector<int>>& states) override;
-        Classifier& fit(torch::Tensor& dataset, vector<string>& features, string className, map<string, vector<int>>& states) override;
-        Classifier& fit(torch::Tensor& dataset, vector<string>& features, string className, map<string, vector<int>>& states, const torch::Tensor& weights) override;
+        Classifier& fit(vector<vector<int>>& X, vector<int>& y, const vector<string>& features, const string& className, map<string, vector<int>>& states) override;
+        Classifier& fit(torch::Tensor& X, torch::Tensor& y, const vector<string>& features, const string& className, map<string, vector<int>>& states) override;
+        Classifier& fit(torch::Tensor& dataset, const vector<string>& features, const string& className, map<string, vector<int>>& states) override;
+        Classifier& fit(torch::Tensor& dataset, const vector<string>& features, const string& className, map<string, vector<int>>& states, const torch::Tensor& weights) override;
         void addNodes();
         int getNumberOfNodes() const override;
         int getNumberOfEdges() const override;

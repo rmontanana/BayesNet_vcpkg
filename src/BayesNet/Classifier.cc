@@ -5,7 +5,7 @@ namespace bayesnet {
     using namespace torch;
 
     Classifier::Classifier(Network model) : model(model), m(0), n(0), metrics(Metrics()), fitted(false) {}
-    Classifier& Classifier::build(vector<string>& features, string className, map<string, vector<int>>& states, const torch::Tensor& weights)
+    Classifier& Classifier::build(const vector<string>& features, const string& className, map<string, vector<int>>& states, const torch::Tensor& weights)
     {
         this->features = features;
         this->className = className;
@@ -39,7 +39,7 @@ namespace bayesnet {
         model.fit(dataset, weights, features, className, states);
     }
     // X is nxm where n is the number of features and m the number of samples
-    Classifier& Classifier::fit(torch::Tensor& X, torch::Tensor& y, vector<string>& features, string className, map<string, vector<int>>& states)
+    Classifier& Classifier::fit(torch::Tensor& X, torch::Tensor& y, const vector<string>& features, const string& className, map<string, vector<int>>& states)
     {
         dataset = X;
         buildDataset(y);
@@ -47,7 +47,7 @@ namespace bayesnet {
         return build(features, className, states, weights);
     }
     // X is nxm where n is the number of features and m the number of samples
-    Classifier& Classifier::fit(vector<vector<int>>& X, vector<int>& y, vector<string>& features, string className, map<string, vector<int>>& states)
+    Classifier& Classifier::fit(vector<vector<int>>& X, vector<int>& y, const vector<string>& features, const string& className, map<string, vector<int>>& states)
     {
         dataset = torch::zeros({ static_cast<int>(X.size()), static_cast<int>(X[0].size()) }, kInt32);
         for (int i = 0; i < X.size(); ++i) {
@@ -58,13 +58,13 @@ namespace bayesnet {
         const torch::Tensor weights = torch::full({ dataset.size(1) }, 1.0 / dataset.size(1), torch::kDouble);
         return build(features, className, states, weights);
     }
-    Classifier& Classifier::fit(torch::Tensor& dataset, vector<string>& features, string className, map<string, vector<int>>& states)
+    Classifier& Classifier::fit(torch::Tensor& dataset, const vector<string>& features, const string& className, map<string, vector<int>>& states)
     {
         this->dataset = dataset;
         const torch::Tensor weights = torch::full({ dataset.size(1) }, 1.0 / dataset.size(1), torch::kDouble);
         return build(features, className, states, weights);
     }
-    Classifier& Classifier::fit(torch::Tensor& dataset, vector<string>& features, string className, map<string, vector<int>>& states, const torch::Tensor& weights)
+    Classifier& Classifier::fit(torch::Tensor& dataset, const vector<string>& features, const string& className, map<string, vector<int>>& states, const torch::Tensor& weights)
     {
         this->dataset = dataset;
         return build(features, className, states, weights);

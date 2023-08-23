@@ -10,7 +10,7 @@ namespace bayesnet {
     public:
         explicit KDBLd(int k);
         virtual ~KDBLd() = default;
-        KDBLd& fit(torch::Tensor& X, torch::Tensor& y, vector<string>& features, string className, map<string, vector<int>>& states) override;
+        KDBLd& fit(torch::Tensor& X, torch::Tensor& y, const vector<string>& features, const string& className, map<string, vector<int>>& states) override;
         vector<string> graph(const string& name = "KDB") const override;
         Tensor predict(Tensor& X) override;
         void setHyperparameters(nlohmann::json& hyperparameters) override {};

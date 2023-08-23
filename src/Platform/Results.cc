@@ -100,11 +100,11 @@ namespace platform {
         cout << Colors::YELLOW() << "Reporting " << files.at(index).getFilename() << endl;
         auto data = files.at(index).load();
         if (excelReport) {
-            ReportExcel report(data);
-            report.show();
+            ReportExcel reporter(data);
+            reporter.show();
         } else {
-            ReportConsole report(data);
-            report.show();
+            ReportConsole reporter(data);
+            reporter.show();
         }
     }
     void Results::menu()

@@ -47,11 +47,11 @@ namespace platform {
 
     void ReportExcel::body()
     {
-        auto header = vector<string>(
+        auto head = vector<string>(
             { "Dataset", "Samples", "Features", "Classes", "Nodes", "Edges", "States", "Score", "Score Std.", "Time",
              "Time Std.", "Hyperparameters" });
         int col = 1;
-        for (const auto& item : header) {
+        for (const auto& item : head) {
             wks.cell(8, col++).value() = item;
         }
         int row = 9;

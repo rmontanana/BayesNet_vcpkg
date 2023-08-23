@@ -37,7 +37,6 @@ namespace bayesnet {
         // Step 0: Set the finish condition
         // if not repeatSparent a finish condition is run out of features
         // n_models == maxModels
-        int numClasses = states[className].size();
         while (!exitCondition) {
             // Step 1: Build ranking with mutual information
             auto featureSelection = metrics.SelectKBestWeighted(weights_, ascending, n); // Get all the features sorted

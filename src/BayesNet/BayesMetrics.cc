@@ -77,7 +77,6 @@ namespace bayesnet {
         auto source = vector<string>(features);
         source.push_back(className);
         auto combinations = doCombinations(source);
-        double totalWeight = weights.sum().item<double>();
         // Compute class prior
         auto margin = torch::zeros({ classNumStates }, torch::kFloat);
         for (int value = 0; value < classNumStates; ++value) {

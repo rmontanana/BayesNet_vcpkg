@@ -12,7 +12,7 @@ namespace bayesnet {
         void buildModel(const torch::Tensor& weights) override;
     public:
         AODELd();
-        AODELd& fit(torch::Tensor& X_, torch::Tensor& y_, vector<string>& features_, string className_, map<string, vector<int>>& states_) override;
+        AODELd& fit(torch::Tensor& X_, torch::Tensor& y_, const vector<string>& features_, const string& className_, map<string, vector<int>>& states_) override;
         virtual ~AODELd() = default;
         vector<string> graph(const string& name = "AODE") const override;
         static inline string version() { return "0.0.1"; };
