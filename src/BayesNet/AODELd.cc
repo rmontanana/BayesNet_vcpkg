@@ -26,6 +26,7 @@ namespace bayesnet {
             models.push_back(std::make_unique<SPODELd>(i));
         }
         n_models = models.size();
+        significanceModels = vector<double>(n_models, 1.0);
     }
     void AODELd::trainModel(const torch::Tensor& weights)
     {

@@ -10,7 +10,7 @@
                 "-d",
                 "iris",
                 "-m",
-                "KDB",
+                "TANLd",
                 "-s",
                 "271",
                 "-p",
@@ -25,15 +25,14 @@
             "program": "${workspaceFolder}/build/src/Platform/main",
             "args": [
                 "-m",
-                "BoostAODE",
+                "AODELd",
                 "-p",
                 "/Users/rmontanana/Code/discretizbench/datasets",
-                "--discretize",
                 "--stratified",
                 "-d",
-                "glass",
-                "--hyperparameters",
-                "{\"repeatSparent\": true, \"maxModels\": 12}"
+                "wine"
+                // "--hyperparameters",
+                // "{\"repeatSparent\": true, \"maxModels\": 12}"
             ],
             "cwd": "/Users/rmontanana/Code/discretizbench",
         },
