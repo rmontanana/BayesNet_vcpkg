@@ -5,7 +5,7 @@ namespace bayesnet {
     KDBLd::KDBLd(int k) : KDB(k), Proposal(dataset, features, className) {}
     KDBLd& KDBLd::fit(torch::Tensor& X_, torch::Tensor& y_, const vector<string>& features_, const string& className_, map<string, vector<int>>& states_)
     {
-        // This first part should go in a Classifier method called fit_local_discretization o fit_float...
+        checkInput(X_, y_);
         features = features_;
         className = className_;
         Xf = X_;

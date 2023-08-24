@@ -14,9 +14,8 @@ namespace bayesnet {
         AODELd();
         AODELd& fit(torch::Tensor& X_, torch::Tensor& y_, const vector<string>& features_, const string& className_, map<string, vector<int>>& states_) override;
         virtual ~AODELd() = default;
-        vector<string> graph(const string& name = "AODE") const override;
+        vector<string> graph(const string& name = "AODELd") const override;
         static inline string version() { return "0.0.1"; };
-        void setHyperparameters(nlohmann::json& hyperparameters) override {};
     };
 }
 #endif // !AODELD_H

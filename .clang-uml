@@ -1,0 +1,19 @@
+compilation_database_dir: build
+output_directory: puml
+diagrams:
+  myproject_class:
+    type: class
+    glob:
+      - src/bayesnet/*.cc
+      - src/platform/*.cc
+    using_namespace: bayesnet
+    include:
+      namespaces:
+        - bayesnet
+        - platform
+    exclude:
+      namespaces:
+        - myproject::detail
+    plantuml:
+      after:
+        - 'note left of {{ alias("MyProjectMain") }}: Main class of myproject library.'

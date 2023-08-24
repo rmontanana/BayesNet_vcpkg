@@ -11,7 +11,6 @@ namespace bayesnet {
         TAN();
         virtual ~TAN() {};
         vector<string> graph(const string& name = "TAN") const override;
-        void setHyperparameters(nlohmann::json& hyperparameters) override {};
     };
 }
 #endif

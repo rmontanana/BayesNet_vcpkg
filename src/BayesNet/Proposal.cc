@@ -9,6 +9,15 @@ namespace bayesnet {
             delete value;
         }
     }
+    void Proposal::checkInput(const torch::Tensor& X, const torch::Tensor& y)
+    {
+        if (!torch::is_floating_point(X)) {
+            throw std::invalid_argument("X must be a floating point tensor");
+        }
+        if (torch::is_floating_point(y)) {
+            throw std::invalid_argument("y must be an integer tensor");
+        }
+    }
     map<string, vector<int>> Proposal::localDiscretizationProposal(const map<string, vector<int>>& oldStates, Network& model)
     {
         // order of local discretization is important. no good 0, 1, 2...

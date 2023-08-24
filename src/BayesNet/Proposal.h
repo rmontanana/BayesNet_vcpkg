@@ -13,6 +13,7 @@ namespace bayesnet {
         Proposal(torch::Tensor& pDataset, vector<string>& features_, string& className_);
         virtual ~Proposal();
     protected:
+        void checkInput(const torch::Tensor& X, const torch::Tensor& y);
         torch::Tensor prepareX(torch::Tensor& X);
         map<string, vector<int>> localDiscretizationProposal(const map<string, vector<int>>& states, Network& model);
         map<string, vector<int>> fit_local_discretization(const torch::Tensor& y);

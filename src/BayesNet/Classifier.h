@@ -43,6 +43,7 @@ namespace bayesnet {
         vector<string> show() const override;
         vector<string> topological_order()  override;
         void dump_cpt() const override;
+        void setHyperparameters(nlohmann::json& hyperparameters) override;
     };
 }
 #endif

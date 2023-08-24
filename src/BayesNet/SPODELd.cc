@@ -5,7 +5,7 @@ namespace bayesnet {
     SPODELd::SPODELd(int root) : SPODE(root), Proposal(dataset, features, className) {}
     SPODELd& SPODELd::fit(torch::Tensor& X_, torch::Tensor& y_, const vector<string>& features_, const string& className_, map<string, vector<int>>& states_)
     {
-        // This first part should go in a Classifier method called fit_local_discretization o fit_float...
+        checkInput(X_, y_);
         features = features_;
         className = className_;
         Xf = X_;
@@ -20,9 +20,11 @@ namespace bayesnet {
     }
     SPODELd& SPODELd::fit(torch::Tensor& dataset, const vector<string>& features_, const string& className_, map<string, vector<int>>& states_)
     {
+        if (!torch::is_floating_point(dataset)) {
+            throw std::runtime_error("Dataset must be a floating point tensor");
+        }
         Xf = dataset.index({ torch::indexing::Slice(0, dataset.size(0) - 1), "..." }).clone();
         y = dataset.index({ -1, "..." }).clone();
-        // This first part should go in a Classifier method called fit_local_discretization o fit_float...
         features = features_;
         className = className_;
         // Fills vectors Xv & yv with the data from tensors X_ (discretized) & y

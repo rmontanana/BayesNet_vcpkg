@@ -71,6 +71,9 @@ namespace bayesnet {
     }
     void Classifier::checkFitParameters()
     {
+        if (torch::is_floating_point(dataset)) {
+            throw invalid_argument("dataset (X, y) must be of type Integer");
+        }
         if (n != features.size()) {
             throw invalid_argument("X " + to_string(n) + " and features " + to_string(features.size()) + " must have the same number of features");
         }
@@ -159,5 +162,11 @@ namespace bayesnet {
                 throw invalid_argument("Hyperparameter " + item.key() + " is not valid");
             }
         }
+    }
+    void Classifier::setHyperparameters(nlohmann::json& hyperparameters)
+    {
+        // Check if hyperparameters are valid, default is no hyperparameters
+        const vector<string> validKeys = { };
+        checkHyperparameters(validKeys, hyperparameters);
     }
 }
