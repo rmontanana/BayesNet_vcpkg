@@ -1,6 +1,7 @@
 #include "Datasets.h"
 #include "platformUtils.h"
 #include "ArffFiles.h"
+#include <fstream>
 namespace platform {
     void Datasets::load()
     {

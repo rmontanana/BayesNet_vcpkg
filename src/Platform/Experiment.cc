@@ -2,7 +2,7 @@
 #include "Datasets.h"
 #include "Models.h"
 #include "ReportConsole.h"
-
+#include <fstream>
 namespace platform {
     using json = nlohmann::json;
     string get_date()

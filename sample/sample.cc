@@ -10,7 +10,7 @@
 #include "Folding.h"
 #include "Models.h"
 #include "modelRegister.h"
-
+#include <fstream>
 
 using namespace std;
 
@@ -195,11 +195,11 @@ int main(int argc, char** argv)
         Xt.index_put_({ i, "..." }, torch::tensor(Xd[i], torch::kInt32));
     }
     float total_score = 0, total_score_train = 0, score_train, score_test;
-    Fold* fold;
+    platform::Fold* fold;
     if (stratified)
-        fold = new StratifiedKFold(nFolds, y, seed);
+        fold = new platform::StratifiedKFold(nFolds, y, seed);
     else
-        fold = new KFold(nFolds, y.size(), seed);
+        fold = new platform::KFold(nFolds, y.size(), seed);
     for (auto i = 0; i < nFolds; ++i) {
         auto [train, test] = fold->getFold(i);
         cout << "Fold: " << i + 1 << endl;

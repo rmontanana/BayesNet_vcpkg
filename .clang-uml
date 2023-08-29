@@ -1,19 +1,31 @@
 compilation_database_dir: build
 output_directory: puml
 diagrams:
-  myproject_class:
+  BayesNet:
     type: class
     glob:
-      - src/bayesnet/*.cc
-      - src/platform/*.cc
+      - src/BayesNet/*.cc
+      - src/Platform/*.cc
     using_namespace: bayesnet
     include:
       namespaces:
         - bayesnet
         - platform
-    exclude:
-      namespaces:
-        - myproject::detail
     plantuml:
       after:
-        - 'note left of {{ alias("MyProjectMain") }}: Main class of myproject library.'
+        - "note left of {{ alias(\"MyProjectMain\") }}: Main class of myproject library."
+  sequence:
+    type: sequence
+    glob:
+      - src/Platform/main.cc
+    combine_free_functions_into_file_participants: true
+    using_namespace:
+      - std
+      - bayesnet
+      - platform
+    include:
+      paths:
+        - src/BayesNet
+        - src/Platform
+    start_from:
+      - function: main(int,const char **)

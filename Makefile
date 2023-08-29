@@ -32,6 +32,9 @@ clean: ## Clean the debug info
 	find . -name "*.gcda" -print0 | xargs -0 rm
 	@echo ">>> Done";
 
+clang-uml: ## Create uml class and sequence diagrams
+	clang-uml -p --add-compile-flag -I /usr/lib/gcc/x86_64-redhat-linux/8/include/
+
 debug: ## Build a debug version of the project
 	@echo ">>> Building Debug BayesNet ...";
 	@if [ -d ./build ]; then rm -rf ./build; fi

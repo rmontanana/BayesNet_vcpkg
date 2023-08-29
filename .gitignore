@@ -35,3 +35,4 @@ build/
 *.dSYM/**
 cmake-build*/**
 .idea
+puml/**
