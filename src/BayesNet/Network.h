@@ -27,6 +27,7 @@ namespace bayesnet {
         Network();
         explicit Network(float);
         explicit Network(Network&);
+        ~Network() = default;
         torch::Tensor& getSamples();
         float getmaxThreads();
         void addNode(const string&);

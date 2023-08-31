@@ -26,7 +26,7 @@ namespace platform {
             instance = it->second();
         // wrap instance in a shared ptr and return
         if (instance != nullptr)
-            return shared_ptr<bayesnet::BaseClassifier>(instance);
+            return unique_ptr<bayesnet::BaseClassifier>(instance);
         else
             return nullptr;
     }

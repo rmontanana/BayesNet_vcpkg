@@ -25,12 +25,13 @@
             "program": "${workspaceFolder}/build/src/Platform/main",
             "args": [
                 "-m",
-                "AODELd",
+                "AODE",
                 "-p",
                 "/Users/rmontanana/Code/discretizbench/datasets",
                 "--stratified",
                 "-d",
-                "wine"
+                "letter",
+                "--discretize"
                 // "--hyperparameters",
                 // "{\"repeatSparent\": true, \"maxModels\": 12}"
             ],

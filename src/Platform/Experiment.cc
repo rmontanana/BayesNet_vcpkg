@@ -179,6 +179,7 @@ namespace platform {
                 result.addTimeTrain(train_time[item].item<double>());
                 result.addTimeTest(test_time[item].item<double>());
                 item++;
+                clf.reset();
             }
             cout << "end. " << flush;
         }
