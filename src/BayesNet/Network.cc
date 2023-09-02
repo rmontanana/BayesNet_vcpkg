@@ -174,42 +174,10 @@ namespace bayesnet {
     {
         setStates(states);
         laplaceSmoothing = 1.0 / samples.size(1); // To use in CPT computation
-        int maxThreadsRunning = static_cast<int>(std::thread::hardware_concurrency() * maxThreads);
-        if (maxThreadsRunning < 1) {
-            maxThreadsRunning = 1;
+        for (auto& node : nodes) {
+            node.second->computeCPT(samples, features, laplaceSmoothing, weights);
+            fitted = true;
         }
-        vector<thread> threads;
-        mutex mtx;
-        condition_variable cv;
-        int activeThreads = 0;
-        int nextNodeIndex = 0;
-        while (nextNodeIndex < nodes.size()) {
-            unique_lock<mutex> lock(mtx);
-            cv.wait(lock, [&activeThreads, &maxThreadsRunning]() { return activeThreads < maxThreadsRunning; });
-            threads.emplace_back([this, &nextNodeIndex, &mtx, &cv, &activeThreads, &weights]() {
-                while (true) {
-                    unique_lock<mutex> lock(mtx);
-                    if (nextNodeIndex >= nodes.size()) {
-                        break;  // No more work remaining
-                    }
-                    auto& pair = *std::next(nodes.begin(), nextNodeIndex);
-                    ++nextNodeIndex;
-                    lock.unlock();
-                    pair.second->computeCPT(samples, features, laplaceSmoothing, weights);
-                    lock.lock();
-                    nodes[pair.first] = std::move(pair.second);
-                    lock.unlock();
-                }
-                lock_guard<mutex> lock(mtx);
-                --activeThreads;
-                cv.notify_one();
-                });
-            ++activeThreads;
-        }
-        for (auto& thread : threads) {
-            thread.join();
-        }
-        fitted = true;
     }
     torch::Tensor Network::predict_tensor(const torch::Tensor& samples, const bool proba)
     {

@@ -213,10 +213,11 @@ namespace platform {
     {
         for (int i = 0; i < features.size(); ++i) {
             states[features[i]] = vector<int>(*max_element(Xd[i].begin(), Xd[i].end()) + 1);
-            iota(begin(states[features[i]]), end(states[features[i]]), 0);
+            auto item = states.at(features[i]);
+            iota(begin(item), end(item), 0);
         }
         states[className] = vector<int>(*max_element(yv.begin(), yv.end()) + 1);
-        iota(begin(states[className]), end(states[className]), 0);
+        iota(begin(states.at(className)), end(states.at(className)), 0);
     }
     void Dataset::load_arff()
     {

@@ -53,15 +53,6 @@ namespace bayesnet {
             auto xvf_ptr = Xf.index({ index }).data_ptr<float>();
             auto xvf = vector<mdlp::precision_t>(xvf_ptr, xvf_ptr + Xf.size(1));
             discretizers[feature]->fit(xvf, yxv);
-            //
-            //
-            //
-            // auto tmp = discretizers[feature]->transform(xvf);
-            // Xv[index] = tmp;
-            // auto xStates = vector<int>(discretizers[pFeatures[index]]->getCutPoints().size() + 1);
-            // iota(xStates.begin(), xStates.end(), 0);
-            // //Update new states of the feature/node
-            // states[feature] = xStates;
         }
         if (upgrade) {
             // Discretize again X (only the affected indices) with the new fitted discretizers

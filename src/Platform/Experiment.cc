@@ -179,8 +179,10 @@ namespace platform {
                 result.addTimeTrain(train_time[item].item<double>());
                 result.addTimeTest(test_time[item].item<double>());
                 item++;
+                clf.reset();
             }
             cout << "end. " << flush;
+            delete fold;
         }
         result.setScoreTest(torch::mean(accuracy_test).item<double>()).setScoreTrain(torch::mean(accuracy_train).item<double>());
         result.setScoreTestStd(torch::std(accuracy_test).item<double>()).setScoreTrainStd(torch::std(accuracy_train).item<double>());

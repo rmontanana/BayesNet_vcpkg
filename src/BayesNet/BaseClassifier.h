@@ -25,7 +25,7 @@ namespace bayesnet {
         int virtual getNumberOfStates() const = 0;
         vector<string> virtual show() const = 0;
         vector<string> virtual graph(const string& title = "") const = 0;
-        const string inline getVersion() const { return "0.1.0"; };
+        const string inline getVersion() const { return "0.2.0"; };
         vector<string> virtual topological_order() = 0;
         void virtual dump_cpt()const = 0;
         virtual void setHyperparameters(nlohmann::json& hyperparameters) = 0;

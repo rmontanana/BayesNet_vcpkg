@@ -100,7 +100,7 @@ namespace bayesnet {
         }
         int name_index = pos - features.begin();
         for (int n_sample = 0; n_sample < dataset.size(1); ++n_sample) {
-            torch::List<c10::optional<torch::Tensor>> coordinates;
+            c10::List<c10::optional<at::Tensor>> coordinates;
             coordinates.push_back(dataset.index({ name_index, n_sample }));
             for (auto parent : parents) {
                 pos = find(features.begin(), features.end(), parent->getName());
@@ -118,10 +118,10 @@ namespace bayesnet {
     }
     float Node::getFactorValue(map<string, int>& evidence)
     {
-        torch::List<c10::optional<torch::Tensor>> coordinates;
+        c10::List<c10::optional<at::Tensor>> coordinates;
         // following predetermined order of indices in the cpTable (see Node.h)
-        coordinates.push_back(torch::tensor(evidence[name]));
-        transform(parents.begin(), parents.end(), back_inserter(coordinates), [&evidence](const auto& parent) { return torch::tensor(evidence[parent->getName()]); });
+        coordinates.push_back(at::tensor(evidence[name]));
+        transform(parents.begin(), parents.end(), back_inserter(coordinates), [&evidence](const auto& parent) { return at::tensor(evidence[parent->getName()]); });
         return cpTable.index({ coordinates }).item<float>();
     }
     vector<string> Node::graph(const string& className)

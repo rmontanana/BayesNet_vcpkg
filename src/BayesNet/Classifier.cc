@@ -13,7 +13,7 @@ namespace bayesnet {
         m = dataset.size(1);
         n = dataset.size(0) - 1;
         checkFitParameters();
-        auto n_classes = states[className].size();
+        auto n_classes = states.at(className).size();
         metrics = Metrics(dataset, features, className, n_classes);
         model.initialize();
         buildModel(weights);
