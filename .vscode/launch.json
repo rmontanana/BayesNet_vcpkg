@@ -27,15 +27,15 @@
                 "-m",
                 "AODE",
                 "-p",
-                "/Users/rmontanana/Code/discretizbench/datasets",
+                "/home/rmontanana/Code/discretizbench/datasets",
                 "--stratified",
                 "-d",
-                "letter",
+                "mfeat-morphological",
                 "--discretize"
                 // "--hyperparameters",
                 // "{\"repeatSparent\": true, \"maxModels\": 12}"
             ],
-            "cwd": "/Users/rmontanana/Code/discretizbench",
+            "cwd": "/home/rmontanana/Code/discretizbench",
         },
         {
             "type": "lldb",

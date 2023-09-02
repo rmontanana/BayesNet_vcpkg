@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 project(BayesNet
-  VERSION 0.1.0
+  VERSION 0.2.0
   DESCRIPTION "Bayesian Network and basic classifiers Library."
   HOMEPAGE_URL "https://github.com/rmontanana/bayesnet"
   LANGUAGES CXX
@@ -40,8 +40,7 @@ if (CODE_COVERAGE)
     enable_testing()
     include(CodeCoverage)
     MESSAGE("Code coverage enabled")
-    set(CMAKE_C_FLAGS " ${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage")
-    set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
+    set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage -O0")
     SET(GCC_COVERAGE_LINK_FLAGS " ${GCC_COVERAGE_LINK_FLAGS} -lgcov --coverage")
 endif (CODE_COVERAGE)
 

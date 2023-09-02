@@ -69,11 +69,12 @@ tuple<Tensor, Tensor, vector<string>, string, map<string, vector<int>>> loadData
         Xd = torch::zeros({ static_cast<int>(Xr[0].size()), static_cast<int>(Xr.size()) }, torch::kInt32);
         for (int i = 0; i < features.size(); ++i) {
             states[features[i]] = vector<int>(*max_element(Xr[i].begin(), Xr[i].end()) + 1);
-            iota(begin(states[features[i]]), end(states[features[i]]), 0);
+            auto item = states.at(features[i]);
+            iota(begin(item), end(item), 0);
             Xd.index_put_({ "...", i }, torch::tensor(Xr[i], torch::kInt32));
         }
         states[className] = vector<int>(*max_element(y.begin(), y.end()) + 1);
-        iota(begin(states[className]), end(states[className]), 0);
+        iota(begin(states.at(className)), end(states.at(className)), 0);
     } else {
         Xd = torch::zeros({ static_cast<int>(X[0].size()), static_cast<int>(X.size()) }, torch::kFloat32);
         for (int i = 0; i < features.size(); ++i) {
