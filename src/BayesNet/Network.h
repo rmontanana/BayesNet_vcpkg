@@ -53,7 +53,7 @@ namespace bayesnet {
         vector<string> graph(const string& title) const; // Returns a vector of strings representing the graph in graphviz format
         void initialize();
         void dump_cpt() const;
-        inline string version() { return "0.1.0"; }
+        inline string version() { return "0.2.0"; }
     };
 }
 #endif
