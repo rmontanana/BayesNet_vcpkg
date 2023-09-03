@@ -40,7 +40,7 @@ if (CODE_COVERAGE)
     enable_testing()
     include(CodeCoverage)
     MESSAGE("Code coverage enabled")
-    set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage -O0")
+    set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage -O0 -g")
     SET(GCC_COVERAGE_LINK_FLAGS " ${GCC_COVERAGE_LINK_FLAGS} -lgcov --coverage")
 endif (CODE_COVERAGE)
 
@@ -73,8 +73,7 @@ file(GLOB Platform_SOURCES CONFIGURE_DEPENDS ${BayesNet_SOURCE_DIR}/src/Platform
 
 if (ENABLE_TESTING)
   MESSAGE("Testing enabled")
-  add_git_submodule("lib/catch2")
-  
+  add_git_submodule("lib/catch2")  
   include(CTest)
   add_subdirectory(tests)
 endif (ENABLE_TESTING)

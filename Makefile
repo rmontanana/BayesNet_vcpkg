@@ -40,7 +40,7 @@ debug: ## Build a debug version of the project
 	@if [ -d ./build ]; then rm -rf ./build; fi
 	@mkdir build; 
 	cmake -S . -B build -D CMAKE_BUILD_TYPE=Debug -D ENABLE_TESTING=ON -D CODE_COVERAGE=ON; \
-	cmake --build build -j 32;
+	cmake --build build -t main -t BayesNetSample -t manage -t list  unit_tests -j 32;
 	@echo ">>> Done";
 
 release: ## Build a Release version of the project

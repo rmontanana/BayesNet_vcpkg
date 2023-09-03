@@ -12,6 +12,7 @@ argparse::ArgumentParser manageArguments(int argc, char** argv)
     program.add_argument("-n", "--number").default_value(0).help("Number of results to show (0 = all)").scan<'i', int>();
     program.add_argument("-m", "--model").default_value("any").help("Filter results of the selected model)");
     program.add_argument("-s", "--score").default_value("any").help("Filter results of the score name supplied");
+    program.add_argument("--complete").help("Show only results with all datasets").default_value(false).implicit_value(true);
     try {
         program.parse_args(argc, argv);
         auto number = program.get<int>("number");
@@ -20,6 +21,7 @@ argparse::ArgumentParser manageArguments(int argc, char** argv)
         }
         auto model = program.get<string>("model");
         auto score = program.get<string>("score");
+        auto complete = program.get<bool>("complete");
     }
     catch (const exception& err) {
         cerr << err.what() << endl;
@@ -35,7 +37,8 @@ int main(int argc, char** argv)
     auto number = program.get<int>("number");
     auto model = program.get<string>("model");
     auto score = program.get<string>("score");
-    auto results = platform::Results(platform::Paths::results(), number, model, score);
+    auto complete = program.get<bool>("complete");
+    auto results = platform::Results(platform::Paths::results(), number, model, score, complete);
     results.manage();
     return 0;
 }

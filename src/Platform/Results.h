@@ -20,6 +20,7 @@ namespace platform {
         double getDuration() const { return duration; };
         string getModel() const { return model; };
         string getScoreName() const { return scoreName; };
+        bool isComplete() const { return complete; };
     private:
         string path;
         string filename;
@@ -29,16 +30,18 @@ namespace platform {
         double duration;
         string model;
         string scoreName;
+        bool complete;
     };
     class Results {
     public:
-        Results(const string& path, const int max, const string& model, const string& score) : path(path), max(max), model(model), scoreName(score) { load(); };
+        Results(const string& path, const int max, const string& model, const string& score, bool complete) : path(path), max(max), model(model), scoreName(score), complete(complete) { load(); };
         void manage();
     private:
         string path;
         int max;
         string model;
         string scoreName;
+        bool complete;
         vector<Result> files;
         void load(); // Loads the list of results
         void show() const;

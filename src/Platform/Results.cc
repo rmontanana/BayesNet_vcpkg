@@ -23,6 +23,7 @@ namespace platform {
         title = data["title"];
         duration = data["duration"];
         model = data["model"];
+        complete = data["results"].size() > 1;
     }
     json Result::load() const
     {
@@ -41,7 +42,7 @@ namespace platform {
             if (filename.find(".json") != string::npos && filename.find("results_") == 0) {
                 auto result = Result(path, filename);
                 bool addResult = true;
-                if (model != "any" && result.getModel() != model || scoreName != "any" && scoreName != result.getScoreName())
+                if (model != "any" && result.getModel() != model || scoreName != "any" && scoreName != result.getScoreName() || complete && !result.isComplete())
                     addResult = false;
                 if (addResult)
                     files.push_back(result);
@@ -55,6 +56,8 @@ namespace platform {
         oss << setw(12) << left << model << " ";
         oss << setw(11) << left << scoreName << " ";
         oss << right << setw(11) << setprecision(7) << fixed << score << " ";
+        auto completeString = isComplete() ? "C" : "P";
+        oss << setw(1) << " " << completeString << "  ";
         oss << setw(9) << setprecision(3) << fixed << duration << " ";
         oss << setw(50) << left << title << " ";
         return  oss.str();
@@ -64,8 +67,8 @@ namespace platform {
         cout << Colors::GREEN() << "Results found: " << files.size() << endl;
         cout << "-------------------" << endl;
         auto i = 0;
-        cout << " #  Date       Model        Score Name  Score       Duration  Title" << endl;
-        cout << "=== ========== ============ =========== =========== ========= =============================================================" << endl;
+        cout << " #  Date       Model        Score Name  Score       C/P Duration  Title" << endl;
+        cout << "=== ========== ============ =========== =========== === ========= =============================================================" << endl;
         bool odd = true;
         for (const auto& result : files) {
             auto color = odd ? Colors::BLUE() : Colors::CYAN();
