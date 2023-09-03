@@ -159,17 +159,20 @@ namespace platform {
                 auto y_train = y.index({ train_t });
                 auto X_test = X.index({ "...", test_t });
                 auto y_test = y.index({ test_t });
-                cout << nfold + 1 << ", " << flush;
+                cout << nfold + 1 << "(a)" << flush;
                 // Train model
                 clf->fit(X_train, y_train, features, className, states);
+                cout << "\b\bb)" << flush;
                 nodes[item] = clf->getNumberOfNodes();
                 edges[item] = clf->getNumberOfEdges();
                 num_states[item] = clf->getNumberOfStates();
                 train_time[item] = train_timer.getDuration();
                 auto accuracy_train_value = clf->score(X_train, y_train);
+                cout << "\b\bc)" << flush;
                 // Test model
                 test_timer.start();
                 auto accuracy_test_value = clf->score(X_test, y_test);
+                cout << "\b\b\b, " << flush;
                 test_time[item] = test_timer.getDuration();
                 accuracy_train[item] = accuracy_train_value;
                 accuracy_test[item] = accuracy_test_value;
