@@ -10,14 +10,14 @@ namespace platform {
         char do_thousands_sep() const { return '.'; }
         string do_grouping() const { return "\03"; }
     };
-    
+
     string ReportConsole::headerLine(const string& text)
     {
         int n = MAXL - text.length() - 3;
         n = n < 0 ? 0 : n;
         return "* " + text + string(n, ' ') + "*\n";
     }
-    
+
     void ReportConsole::header()
     {
         locale mylocale(cout.getloc(), new separated);
@@ -36,14 +36,21 @@ namespace platform {
     }
     void ReportConsole::body()
     {
-        cout << Colors::GREEN() << "Dataset                        Sampl. Feat. Cls Nodes     Edges     States    Score           Time               Hyperparameters" << endl;
-        cout << "============================== ====== ===== === ========= ========= ========= =============== ================== ===============" << endl;
+        cout << Colors::GREEN() << " #  Dataset                        Sampl. Feat. Cls Nodes     Edges     States    Score           Time               Hyperparameters" << endl;
+        cout << "=== ============================== ====== ===== === ========= ========= ========= =============== ================== ===============" << endl;
         json lastResult;
         double totalScore = 0.0;
         bool odd = true;
+        int index = 0;
         for (const auto& r : data["results"]) {
+            if (selectedIndex != -1 && index != selectedIndex) {
+                index++;
+                continue;
+            }
             auto color = odd ? Colors::CYAN() : Colors::BLUE();
-            cout << color << setw(30) << left << r["dataset"].get<string>() << " ";
+            cout << color;
+            cout << setw(3) << index++ << " ";
+            cout << setw(30) << left << r["dataset"].get<string>() << " ";
             cout << setw(6) << right << r["samples"].get<int>() << " ";
             cout << setw(5) << right << r["features"].get<int>() << " ";
             cout << setw(3) << right << r["classes"].get<int>() << " ";
@@ -63,7 +70,7 @@ namespace platform {
             totalScore += r["score"].get<double>();
             odd = !odd;
         }
-        if (data["results"].size() == 1) {
+        if (data["results"].size() == 1 || selectedIndex != -1) {
             cout << string(MAXL, '*') << endl;
             cout << headerLine(fVector("Train scores: ", lastResult["scores_train"], 14, 12));
             cout << headerLine(fVector("Test  scores: ", lastResult["scores_test"], 14, 12));

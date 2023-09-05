@@ -42,10 +42,12 @@ namespace platform {
         string model;
         string scoreName;
         bool complete;
+        bool indexList = true;
         vector<Result> files;
         void load(); // Loads the list of results
         void show() const;
         void report(const int index, const bool excelReport) const;
+        void showIndex(const int index, const int idx) const;
         int getIndex(const string& intent) const;
         void menu();
         void sortList();

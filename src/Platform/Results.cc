@@ -110,6 +110,17 @@ namespace platform {
             reporter.show();
         }
     }
+    void Results::showIndex(const int index, const int idx) const
+    {
+        auto data = files.at(index).load();
+        if (idx < 0 or idx >= static_cast<int>(data["results"].size())) {
+            cout << "Invalid index" << endl;
+            return;
+        }
+        cout << Colors::YELLOW() << "Showing " << files.at(index).getFilename() << endl;
+        ReportConsole reporter(data, idx);
+        reporter.show();
+    }
     void Results::menu()
     {
         char option;
@@ -129,9 +140,16 @@ namespace platform {
                 option = line[0];
             } else {
                 if (all_of(line.begin(), line.end(), ::isdigit)) {
-                    index = stoi(line);
-                    if (index >= 0 && index < files.size()) {
-                        report(index, false);
+                    int idx = stoi(line);
+                    if (indexList) {
+                        index = idx;
+                        if (index >= 0 && index < files.size()) {
+                            report(index, false);
+                            indexList = false;
+                            continue;
+                        }
+                    } else {
+                        showIndex(index, idx);
                         continue;
                     }
                 }
@@ -144,6 +162,7 @@ namespace platform {
                     break;
                 case 'l':
                     show();
+                    indexList = true;
                     break;
                 case 'd':
                     index = getIndex("delete");
@@ -155,6 +174,7 @@ namespace platform {
                     files.erase(files.begin() + index);
                     cout << "File: " + filename + " deleted!" << endl;
                     show();
+                    indexList = true;
                     break;
                 case 'h':
                     index = getIndex("hide");
@@ -166,21 +186,25 @@ namespace platform {
                     files.erase(files.begin() + index);
                     show();
                     menu();
+                    indexList = true;
                     break;
                 case 's':
                     sortList();
+                    indexList = true;
                     show();
                     break;
                 case 'r':
                     index = getIndex("report");
                     if (index == -1)
                         break;
+                    indexList = false;
                     report(index, false);
                     break;
                 case 'e':
                     index = getIndex("excel");
                     if (index == -1)
                         break;
+                    indexList = true;
                     report(index, true);
                     break;
                 default:

@@ -7,12 +7,13 @@
 
 namespace platform {
     using namespace std;
-    const int MAXL = 128;
-    class ReportConsole : public ReportBase{
+    const int MAXL = 132;
+    class ReportConsole : public ReportBase {
     public:
-        explicit ReportConsole(json data_) : ReportBase(data_) {};
+        explicit ReportConsole(json data_, int index = -1) : ReportBase(data_), selectedIndex(index) {};
         virtual ~ReportConsole() = default;
     private:
+        int selectedIndex;
         string headerLine(const string& text);
         void header() override;
         void body() override;
