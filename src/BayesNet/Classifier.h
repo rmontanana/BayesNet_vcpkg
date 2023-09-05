@@ -21,6 +21,7 @@ namespace bayesnet {
         string className;
         map<string, vector<int>> states;
         Tensor dataset; // (n+1)xm tensor
+        status_t status = NORMAL;
         void checkFitParameters();
         virtual void buildModel(const torch::Tensor& weights) = 0;
         void trainModel(const torch::Tensor& weights) override;
@@ -37,6 +38,7 @@ namespace bayesnet {
         int getNumberOfEdges() const override;
         int getNumberOfStates() const override;
         Tensor predict(Tensor& X) override;
+        status_t getStatus() const override { return status; }
         vector<int> predict(vector<vector<int>>& X) override;
         float score(Tensor& X, Tensor& y) override;
         float score(vector<vector<int>>& X, vector<int>& y) override;

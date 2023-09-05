@@ -111,6 +111,26 @@ namespace platform {
         }
     }
 
+    string getColor(bayesnet::status_t status)
+    {
+        switch (status) {
+            case bayesnet::NORMAL:
+                return Colors::GREEN();
+            case bayesnet::WARNING:
+                return Colors::YELLOW();
+            case bayesnet::ERROR:
+                return Colors::RED();
+            default:
+                return Colors::RESET();
+        }
+    }
+
+    void showProgress(int fold, const string& color, const string& phase)
+    {
+        string prefix = phase == "a" ? "" : "\b\b\b\b";
+        cout << prefix << color << fold << Colors::RESET() << "(" << color << phase << Colors::RESET() << ")" << flush;
+
+    }
     void Experiment::cross_validation(const string& path, const string& fileName)
     {
         auto datasets = platform::Datasets(path, discretized, platform::ARFF);
@@ -159,23 +179,24 @@ namespace platform {
                 auto y_train = y.index({ train_t });
                 auto X_test = X.index({ "...", test_t });
                 auto y_test = y.index({ test_t });
-                cout << nfold + 1 << "(a)" << flush;
+                showProgress(nfold + 1, getColor(clf->getStatus()), "a");
                 // Train model
                 clf->fit(X_train, y_train, features, className, states);
-                cout << "\b\bb)" << flush;
+                showProgress(nfold + 1, getColor(clf->getStatus()), "b");
                 nodes[item] = clf->getNumberOfNodes();
                 edges[item] = clf->getNumberOfEdges();
                 num_states[item] = clf->getNumberOfStates();
                 train_time[item] = train_timer.getDuration();
+                // Score train
                 auto accuracy_train_value = clf->score(X_train, y_train);
-                cout << "\b\bc)" << flush;
                 // Test model
+                showProgress(nfold + 1, getColor(clf->getStatus()), "c");
                 test_timer.start();
                 auto accuracy_test_value = clf->score(X_test, y_test);
-                cout << "\b\b\b, " << flush;
                 test_time[item] = test_timer.getDuration();
                 accuracy_train[item] = accuracy_train_value;
                 accuracy_test[item] = accuracy_test_value;
+                cout << "\b\b\b, " << flush;
                 // Store results and times in vector
                 result.addScoreTrain(accuracy_train_value);
                 result.addScoreTest(accuracy_test_value);

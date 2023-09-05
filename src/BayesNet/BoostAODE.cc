@@ -1,6 +1,7 @@
 #include "BoostAODE.h"
 #include <set>
 #include "BayesMetrics.h"
+#include "Colors.h"
 
 namespace bayesnet {
     BoostAODE::BoostAODE() : Ensemble() {}
@@ -64,22 +65,26 @@ namespace bayesnet {
             auto ypred = model->predict(X_);
             // Step 3.1: Compute the classifier amout of say
             auto mask_wrong = ypred != y_;
+            auto mask_right = ypred == y_;
             auto masked_weights = weights_ * mask_wrong.to(weights_.dtype());
-            double wrongWeights = masked_weights.sum().item<double>();
-            double significance = wrongWeights == 0 ? 1 : 0.5 * log((1 - wrongWeights) / wrongWeights);
+            double epsilon_t = masked_weights.sum().item<double>();
+            double wt = (1 - epsilon_t) / epsilon_t;
+            double alpha_t = epsilon_t == 0 ? 1 : 0.5 * log(wt);
             // Step 3.2: Update weights for next classifier
             // Step 3.2.1: Update weights of wrong samples
-            weights_ += mask_wrong.to(weights_.dtype()) * exp(significance) * weights_;
+            weights_ += mask_wrong.to(weights_.dtype()) * exp(alpha_t) * weights_;
+            // Step 3.2.2: Update weights of right samples
+            weights_ += mask_right.to(weights_.dtype()) * exp(-alpha_t) * weights_;
             // Step 3.3: Normalise the weights
             double totalWeights = torch::sum(weights_).item<double>();
             weights_ = weights_ / totalWeights;
             // Step 3.4: Store classifier and its accuracy to weigh its future vote
             models.push_back(std::move(model));
-            significanceModels.push_back(significance);
-            exitCondition = n_models == maxModels && repeatSparent;
+            significanceModels.push_back(alpha_t);
+            exitCondition = n_models == maxModels && repeatSparent || epsilon_t > 0.5;
         }
         if (featuresUsed.size() != features.size()) {
-            cout << "Warning: BoostAODE did not use all the features" << endl;
+            status = WARNING;
         }
         weights.copy_(weights_);
     }

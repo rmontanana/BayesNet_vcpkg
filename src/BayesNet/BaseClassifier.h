@@ -5,6 +5,7 @@
 #include <vector>
 namespace bayesnet {
     using namespace std;
+    enum status_t { NORMAL, WARNING, ERROR };
     class BaseClassifier {
     protected:
         virtual void trainModel(const torch::Tensor& weights) = 0;
@@ -18,6 +19,7 @@ namespace bayesnet {
         virtual ~BaseClassifier() = default;
         torch::Tensor virtual predict(torch::Tensor& X) = 0;
         vector<int> virtual predict(vector<vector<int>>& X) = 0;
+        status_t virtual getStatus() const = 0;
         float virtual score(vector<vector<int>>& X, vector<int>& y) = 0;
         float virtual score(torch::Tensor& X, torch::Tensor& y) = 0;
         int virtual getNumberOfNodes()const = 0;
