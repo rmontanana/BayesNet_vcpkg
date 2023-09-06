@@ -10,7 +10,6 @@ using namespace torch;
 namespace bayesnet {
     class Classifier : public BaseClassifier {
     private:
-        void buildDataset(torch::Tensor& y);
         Classifier& build(const vector<string>& features, const string& className, map<string, vector<int>>& states, const torch::Tensor& weights);
     protected:
         bool fitted;
@@ -26,6 +25,7 @@ namespace bayesnet {
         virtual void buildModel(const torch::Tensor& weights) = 0;
         void trainModel(const torch::Tensor& weights) override;
         void checkHyperparameters(const vector<string>& validKeys, nlohmann::json& hyperparameters);
+        void buildDataset(torch::Tensor& y);
     public:
         Classifier(Network model);
         virtual ~Classifier() = default;

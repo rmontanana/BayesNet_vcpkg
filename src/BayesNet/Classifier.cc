@@ -75,7 +75,7 @@ namespace bayesnet {
             throw invalid_argument("dataset (X, y) must be of type Integer");
         }
         if (n != features.size()) {
-            throw invalid_argument("X " + to_string(n) + " and features " + to_string(features.size()) + " must have the same number of features");
+            throw invalid_argument("Classifier: X " + to_string(n) + " and features " + to_string(features.size()) + " must have the same number of features");
         }
         if (states.find(className) == states.end()) {
             throw invalid_argument("className not found in states");

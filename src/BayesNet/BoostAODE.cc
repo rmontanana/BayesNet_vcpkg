@@ -2,6 +2,7 @@
 #include <set>
 #include "BayesMetrics.h"
 #include "Colors.h"
+#include "Folding.h"
 
 namespace bayesnet {
     BoostAODE::BoostAODE() : Ensemble() {}
@@ -24,15 +25,35 @@ namespace bayesnet {
             ascending = hyperparameters["ascending"];
         }
     }
+    void BoostAODE::validationInit()
+    {
+        auto y_ = dataset.index({ -1, "..." });
+        auto fold = platform::StratifiedKFold(5, y_, 271);
+        // save input dataset
+        dataset_ = torch::clone(dataset);
+        auto [train, test] = fold.getFold(0);
+        auto train_t = torch::tensor(train);
+        auto test_t = torch::tensor(test);
+        // Get train and validation sets
+        X_train = dataset.index({ "...", train_t });
+        y_train = dataset.index({ -1, train_t });
+        X_test = dataset.index({ "...", test_t });
+        y_test = dataset.index({ -1, test_t });
+        // Build dataset with train data
+        dataset = X_train;
+        buildDataset(y_train);
+        m = X_train.size(1);
+        auto n_classes = states.at(className).size();
+        metrics = Metrics(dataset, features, className, n_classes);
+    }
     void BoostAODE::trainModel(const torch::Tensor& weights)
     {
         models.clear();
         n_models = 0;
         if (maxModels == 0)
             maxModels = .1 * n > 10 ? .1 * n : n;
+        validationInit();
         Tensor weights_ = torch::full({ m }, 1.0 / m, torch::kFloat64);
-        auto X_ = dataset.index({ torch::indexing::Slice(0, dataset.size(0) - 1), "..." });
-        auto y_ = dataset.index({ -1, "..." });
         bool exitCondition = false;
         unordered_set<int> featuresUsed;
         // Step 0: Set the finish condition
@@ -62,10 +83,10 @@ namespace bayesnet {
             model = std::make_unique<SPODE>(feature);
             n_models++;
             model->fit(dataset, features, className, states, weights_);
-            auto ypred = model->predict(X_);
+            auto ypred = model->predict(X_train);
             // Step 3.1: Compute the classifier amout of say
-            auto mask_wrong = ypred != y_;
-            auto mask_right = ypred == y_;
+            auto mask_wrong = ypred != y_train;
+            auto mask_right = ypred == y_train;
             auto masked_weights = weights_ * mask_wrong.to(weights_.dtype());
             double epsilon_t = masked_weights.sum().item<double>();
             double wt = (1 - epsilon_t) / epsilon_t;
