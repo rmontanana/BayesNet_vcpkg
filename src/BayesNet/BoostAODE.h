@@ -19,6 +19,7 @@ namespace bayesnet {
         bool repeatSparent = false;
         int maxModels = 0;
         bool ascending = false; //Process KBest features ascending or descending order
+        bool convergence = false; //if true, stop when the model does not improve
     };
 }
 #endif

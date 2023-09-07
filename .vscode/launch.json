@@ -25,9 +25,9 @@
             "program": "${workspaceFolder}/build/src/Platform/main",
             "args": [
                 "-m",
-                "AODE",
+                "BoostAODE",
                 "-p",
-                "/home/rmontanana/Code/discretizbench/datasets",
+                "/Users/rmontanana/Code/discretizbench/datasets",
                 "--stratified",
                 "-d",
                 "mfeat-morphological",
@@ -35,7 +35,7 @@
                 // "--hyperparameters",
                 // "{\"repeatSparent\": true, \"maxModels\": 12}"
             ],
-            "cwd": "/home/rmontanana/Code/discretizbench",
+            "cwd": "/Users/rmontanana/Code/discretizbench",
         },
         {
             "type": "lldb",
