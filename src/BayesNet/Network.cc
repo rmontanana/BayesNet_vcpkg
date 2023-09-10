@@ -132,9 +132,9 @@ namespace bayesnet {
     void Network::setStates(const map<string, vector<int>>& states)
     {
         // Set states to every Node in the network
-        for (int i = 0; i < features.size(); ++i) {
-            nodes.at(features.at(i))->setNumStates(states.at(features[i]).size());
-        }
+        for_each(features.begin(), features.end(), [this, &states](const string& feature) {
+            nodes.at(feature)->setNumStates(states.at(feature).size());
+            });
         classNumStates = nodes.at(className)->getNumStates();
     }
     // X comes in nxm, where n is the number of features and m the number of samples
