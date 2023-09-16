@@ -34,7 +34,7 @@ namespace platform {
     };
     class Results {
     public:
-        Results(const string& path, const int max, const string& model, const string& score, bool complete) : path(path), max(max), model(model), scoreName(score), complete(complete) { load(); };
+        Results(const string& path, const int max, const string& model, const string& score, bool complete, bool partial) : path(path), max(max), model(model), scoreName(score), complete(complete), partial(partial) { load(); };
         void manage();
     private:
         string path;
@@ -42,6 +42,7 @@ namespace platform {
         string model;
         string scoreName;
         bool complete;
+        bool partial;
         bool indexList = true;
         vector<Result> files;
         void load(); // Loads the list of results

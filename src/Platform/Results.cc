@@ -42,7 +42,7 @@ namespace platform {
             if (filename.find(".json") != string::npos && filename.find("results_") == 0) {
                 auto result = Result(path, filename);
                 bool addResult = true;
-                if (model != "any" && result.getModel() != model || scoreName != "any" && scoreName != result.getScoreName() || complete && !result.isComplete())
+                if (model != "any" && result.getModel() != model || scoreName != "any" && scoreName != result.getScoreName() || complete && !result.isComplete() || partial && result.isComplete())
                     addResult = false;
                 if (addResult)
                     files.push_back(result);
@@ -66,8 +66,14 @@ namespace platform {
     {
         cout << Colors::GREEN() << "Results found: " << files.size() << endl;
         cout << "-------------------" << endl;
+        if (complete) {
+            cout << Colors::MAGENTA() << "Only listing complete results" << endl;
+        }
+        if (partial) {
+            cout << Colors::MAGENTA() << "Only listing partial results" << endl;
+        }
         auto i = 0;
-        cout << " #  Date       Model        Score Name  Score       C/P Duration  Title" << endl;
+        cout << Colors::GREEN() << " #  Date       Model        Score Name  Score       C/P Duration  Title" << endl;
         cout << "=== ========== ============ =========== =========== === ========= =============================================================" << endl;
         bool odd = true;
         for (const auto& result : files) {
