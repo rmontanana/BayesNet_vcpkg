@@ -55,6 +55,7 @@ add_git_submodule("lib/mdlp")
 add_git_submodule("lib/argparse")
 add_git_submodule("lib/json")
 add_git_submodule("lib/openXLSX")
+#add_git_submodule("lib/libxlsxwriter")
 
 # Subdirectories
 # --------------
@@ -63,6 +64,9 @@ add_subdirectory(lib/Files)
 add_subdirectory(src/BayesNet)
 add_subdirectory(src/Platform)
 add_subdirectory(sample)
+
+#find_package(PkgConfig REQUIRED)
+#pkg_check_modules(Xlsxwriter REQUIRED IMPORTED_TARGET libxlsxwriter)
 
 file(GLOB BayesNet_HEADERS CONFIGURE_DEPENDS ${BayesNet_SOURCE_DIR}/src/BayesNet/*.h ${BayesNet_SOURCE_DIR}/BayesNet/*.hpp)
 file(GLOB BayesNet_SOURCES CONFIGURE_DEPENDS ${BayesNet_SOURCE_DIR}/src/BayesNet/*.cc ${BayesNet_SOURCE_DIR}/src/BayesNet/*.cpp)

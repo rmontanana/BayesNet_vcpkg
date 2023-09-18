@@ -13,3 +13,6 @@
 [submodule "lib/openXLSX"]
 	path = lib/openXLSX
 	url = https://github.com/troldal/OpenXLSX.git
+[submodule "lib/libxlsxwriter"]
+	path = lib/libxlsxwriter
+	url = https://github.com/jmcnamara/libxlsxwriter.git
