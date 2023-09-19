@@ -1,5 +1,6 @@
 #ifndef RESULTS_H
 #define RESULTS_H
+#include "xlsxwriter.h"
 #include <map>
 #include <vector>
 #include <string>
@@ -44,10 +45,12 @@ namespace platform {
         bool complete;
         bool partial;
         bool indexList = true;
+        bool openExcel = false;
+        lxw_workbook* workbook = NULL;
         vector<Result> files;
         void load(); // Loads the list of results
         void show() const;
-        void report(const int index, const bool excelReport) const;
+        void report(const int index, const bool excelReport);
         void showIndex(const int index, const int idx) const;
         int getIndex(const string& intent) const;
         void menu();

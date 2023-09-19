@@ -104,13 +104,15 @@ namespace platform {
         cout << "Invalid index" << endl;
         return -1;
     }
-    void Results::report(const int index, const bool excelReport) const
+    void Results::report(const int index, const bool excelReport)
     {
         cout << Colors::YELLOW() << "Reporting " << files.at(index).getFilename() << endl;
         auto data = files.at(index).load();
         if (excelReport) {
-            ReportExcel reporter(data);
+            ReportExcel reporter(data, workbook);
             reporter.show();
+            openExcel = true;
+            workbook = reporter.getWorkbook();
         } else {
             ReportConsole reporter(data);
             reporter.show();
@@ -281,6 +283,9 @@ namespace platform {
         sortDate();
         show();
         menu();
+        if (openExcel) {
+            workbook_close(workbook);
+        }
         cout << "Done!" << endl;
     }
 

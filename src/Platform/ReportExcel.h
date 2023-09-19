@@ -21,8 +21,8 @@ namespace platform {
     };
     class ReportExcel : public ReportBase {
     public:
-        explicit ReportExcel(json data_);
-        virtual ~ReportExcel() { closeFile(); };
+        explicit ReportExcel(json data_, lxw_workbook* workbook);
+        lxw_workbook* getWorkbook();
     private:
         void writeString(int row, int col, const string& text, const string& style = "");
         void writeInt(int row, int col, const int number, const string& style = "");

@@ -13,7 +13,8 @@ namespace platform {
 
         string do_grouping() const { return "\03"; }
     };
-    ReportExcel::ReportExcel(json data_) : ReportBase(data_), row(0)
+
+    ReportExcel::ReportExcel(json data_, lxw_workbook* workbook) : ReportBase(data_), row(0), workbook(workbook)
     {
         normalSize = 14; //font size for report body
         colorTitle = 0xB1A0C7;
@@ -21,6 +22,11 @@ namespace platform {
         colorEven = 0xFDE9D9;
         margin = .1; // margin to add to ZeroR comparison
         createFile();
+    }
+
+    lxw_workbook* ReportExcel::getWorkbook()
+    {
+        return workbook;
     }
 
     lxw_format* ReportExcel::efectiveStyle(const string& style)
@@ -169,9 +175,25 @@ namespace platform {
 
     void ReportExcel::createFile()
     {
-        workbook = workbook_new((Paths::excel() + fileName).c_str());
+        if (workbook == NULL) {
+            workbook = workbook_new((Paths::excel() + fileName).c_str());
+        }
         const string name = data["model"].get<string>();
-        worksheet = workbook_add_worksheet(workbook, name.c_str());
+        string suffix = "";
+        int num = 1;
+        // Create a sheet with the name of the model
+        while (true) {
+            string efectiveName = name + suffix;
+            worksheet = workbook_add_worksheet(workbook, efectiveName.c_str());
+            if (worksheet == NULL) {
+                suffix = to_string(++num);
+            } else {
+                break;
+            }
+            if (num > 100) {
+                throw invalid_argument("Couldn't create sheet " + efectiveName);
+            }
+        }
         setProperties();
         createFormats();
         formatColumns();
