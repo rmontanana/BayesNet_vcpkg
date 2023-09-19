@@ -156,7 +156,6 @@ namespace platform {
     {
         char line[data["title"].get<string>().size() + 1];
         strcpy(line, data["title"].get<string>().c_str());
-        /* Create a properties structure and set some of the fields. */
         lxw_doc_properties properties = {
             .title = line,
             .subject = "Machine learning results",
@@ -165,8 +164,6 @@ namespace platform {
             .company = "UCLM",
             .comments = "Created with libxlsxwriter and c++",
         };
-
-        /* Set the properties in the workbook. */
         workbook_set_properties(workbook, &properties);
     }
 
@@ -289,9 +286,12 @@ namespace platform {
             auto numClasses = dt.getNClasses(dataset);
             if (numClasses == 2) {
                 vector<int> distribution = dt.getClassesCounts(dataset);
+                double nSamples = dt.getNSamples(dataset);
                 vector<int>::iterator maxValue = max_element(distribution.begin(), distribution.end());
-                int maxCategory = distance(distribution.begin(), maxValue);
-                double mark = maxCategory * (1 + margin);
+                double mark = *maxValue / nSamples * (1 + margin);
+                if (mark > 1) {
+                    mark = 0.9995;
+                }
                 status = result < mark ? Symbols::cross : result > mark ? Symbols::upward_arrow : "=";
                 auto item = summary.find(status);
                 if (item != summary.end()) {
@@ -325,11 +325,11 @@ namespace platform {
     void ReportExcel::footer(double totalScore, int row)
     {
         showSummary();
-        row += 2 + summary.size();
+        row += 4 + summary.size();
         auto score = data["score_name"].get<string>();
         if (score == BestResult::scoreName()) {
-            worksheet_merge_range(worksheet, row + 2, 1, row + 2, 5, (score + " compared to " + BestResult::title() + " .:").c_str(), styles["text_even"]);
-            writeDouble(row + 2, 6, totalScore / BestResult::score(), "result");
+            worksheet_merge_range(worksheet, row, 1, row, 5, (score + " compared to " + BestResult::title() + " .:").c_str(), efectiveStyle("text"));
+            writeDouble(row, 6, totalScore / BestResult::score(), "result");
         }
     }
 }
