@@ -10,7 +10,7 @@ add_executable(manage manage.cc Results.cc ReportConsole.cc ReportExcel.cc Repor
 add_executable(list list.cc platformUtils Datasets.cc)
 target_link_libraries(main BayesNet ArffFiles mdlp "${TORCH_LIBRARIES}")
 if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux")
-    target_link_libraries(manage "${TORCH_LIBRARIES}" "${XLSXWRITER_LIB}" ArffFiles mdlp stdc++fs)
+    target_link_libraries(manage "${TORCH_LIBRARIES}" libxlsxwriter.so ArffFiles mdlp stdc++fs)
 else()
     target_link_libraries(manage "${TORCH_LIBRARIES}" "${XLSXWRITER_LIB}" ArffFiles mdlp)
 endif()
