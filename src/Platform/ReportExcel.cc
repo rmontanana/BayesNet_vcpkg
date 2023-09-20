@@ -93,12 +93,12 @@ namespace platform {
             format_set_num_format(style, "#,##0.000000");
         } else if (name == "ints") {
             format_set_font_size(style, normalSize);
-            format_set_num_format(style, "###,###");
+            format_set_num_format(style, "###,##0");
             format_set_border(style, LXW_BORDER_THIN);
         } else if (name == "floats") {
             format_set_border(style, LXW_BORDER_THIN);
             format_set_font_size(style, normalSize);
-            format_set_num_format(style, "#,###.00");
+            format_set_num_format(style, "#,##0.00");
         }
     }
 

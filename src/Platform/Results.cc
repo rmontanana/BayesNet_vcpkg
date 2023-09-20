@@ -126,7 +126,7 @@ namespace platform {
             return;
         }
         cout << Colors::YELLOW() << "Showing " << files.at(index).getFilename() << endl;
-        ReportConsole reporter(data, idx);
+        ReportConsole reporter(data, compare, idx);
         reporter.show();
     }
     void Results::menu()
@@ -134,9 +134,21 @@ namespace platform {
         char option;
         int index;
         bool finished = false;
+        string color, context;
         string filename, line, options = "qldhsre";
         while (!finished) {
-            cout << Colors::RESET() << "Choose option (quit='q', list='l', delete='d', hide='h', sort='s', report='r', excel='e'): ";
+            if (indexList) {
+                color = Colors::GREEN();
+                context = " (quit='q', list='l', delete='d', hide='h', sort='s', report='r', excel='e'): ";
+                options = "qldhsre";
+            } else {
+                color = Colors::MAGENTA();
+                context = " (quit='q', list='l'): ";
+                options = "ql";
+            }
+            cout << Colors::RESET() << color;
+
+            cout << "Choose option " << context;
             getline(cin, line);
             if (line.size() == 0)
                 continue;
