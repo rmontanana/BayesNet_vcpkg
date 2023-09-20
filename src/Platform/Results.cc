@@ -48,6 +48,9 @@ namespace platform {
                     files.push_back(result);
             }
         }
+        if (max == 0) {
+            max = files.size();
+        }
     }
     string Result::to_string() const
     {
@@ -164,7 +167,7 @@ namespace platform {
                     if (indexList) {
                         // The value is about the files list
                         index = idx;
-                        if (index >= 0 && index < files.size()) {
+                        if (index >= 0 && index < max) {
                             report(index, false);
                             indexList = false;
                             continue;
