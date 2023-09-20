@@ -21,7 +21,7 @@ namespace platform {
     };
     class ReportBase {
     public:
-        explicit ReportBase(json data_);
+        explicit ReportBase(json data_, bool compare);
         virtual ~ReportBase() = default;
         void show();
     protected:
@@ -35,6 +35,10 @@ namespace platform {
         map<string, int> summary;
         double margin;
         map<string, string> meaning;
+    private:
+        double bestResult(const string& dataset, const string& model);
+        bool compare;
+        json bestResults;
     };
 };
 #endif

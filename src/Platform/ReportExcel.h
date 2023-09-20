@@ -10,7 +10,7 @@ namespace platform {
 
     class ReportExcel : public ReportBase {
     public:
-        explicit ReportExcel(json data_, lxw_workbook* workbook);
+        explicit ReportExcel(json data_, bool compare, lxw_workbook* workbook);
         lxw_workbook* getWorkbook();
     private:
         void writeString(int row, int col, const string& text, const string& style = "");

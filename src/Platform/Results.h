@@ -35,7 +35,11 @@ namespace platform {
     };
     class Results {
     public:
-        Results(const string& path, const int max, const string& model, const string& score, bool complete, bool partial) : path(path), max(max), model(model), scoreName(score), complete(complete), partial(partial) { load(); };
+        Results(const string& path, const int max, const string& model, const string& score, bool complete, bool partial, bool compare) :
+            path(path), max(max), model(model), scoreName(score), complete(complete), partial(partial), compare(compare)
+        {
+            load();
+        };
         void manage();
     private:
         string path;
@@ -46,6 +50,7 @@ namespace platform {
         bool partial;
         bool indexList = true;
         bool openExcel = false;
+        bool compare;
         lxw_workbook* workbook = NULL;
         vector<Result> files;
         void load(); // Loads the list of results

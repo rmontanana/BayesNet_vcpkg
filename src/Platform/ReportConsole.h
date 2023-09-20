@@ -10,7 +10,7 @@ namespace platform {
     const int MAXL = 133;
     class ReportConsole : public ReportBase {
     public:
-        explicit ReportConsole(json data_, int index = -1) : ReportBase(data_), selectedIndex(index) {};
+        explicit ReportConsole(json data_, bool compare = false, int index = -1) : ReportBase(data_, compare), selectedIndex(index) {};
         virtual ~ReportConsole() = default;
     private:
         int selectedIndex;

@@ -13,7 +13,7 @@ namespace platform {
         string do_grouping() const { return "\03"; }
     };
 
-    ReportExcel::ReportExcel(json data_, lxw_workbook* workbook) : ReportBase(data_), row(0), workbook(workbook)
+    ReportExcel::ReportExcel(json data_, bool compare, lxw_workbook* workbook) : ReportBase(data_, compare), row(0), workbook(workbook)
     {
         normalSize = 14; //font size for report body
         colorTitle = 0xB1A0C7;
