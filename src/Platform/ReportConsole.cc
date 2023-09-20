@@ -104,6 +104,9 @@ namespace platform {
             oss << score << " compared to " << BestResult::title() << " .:  " << totalScore / BestResult::score();
             cout << headerLine(oss.str());
         }
+        if (!getExistBestFile() && compare) {
+            cout << headerLine("*** Best Results File not found. Couldn't compare any result!");
+        }
         cout << string(MAXL, '*') << endl << Colors::RESET();
     }
 }

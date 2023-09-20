@@ -300,7 +300,7 @@ namespace platform {
         if (openExcel) {
             workbook_close(workbook);
         }
-        cout << "Done!" << endl;
+        cout << Colors::RESET() << "Done!" << endl;
     }
 
 }

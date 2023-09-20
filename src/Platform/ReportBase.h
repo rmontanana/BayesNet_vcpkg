@@ -28,6 +28,7 @@ namespace platform {
         json data;
         string fromVector(const string& key);
         string fVector(const string& title, const json& data, const int width, const int precision);
+        bool getExistBestFile();
         virtual void header() = 0;
         virtual void body() = 0;
         virtual void showSummary() = 0;
@@ -35,10 +36,11 @@ namespace platform {
         map<string, int> summary;
         double margin;
         map<string, string> meaning;
+        bool compare;
     private:
         double bestResult(const string& dataset, const string& model);
-        bool compare;
         json bestResults;
+        bool existBestFile = true;
     };
 };
 #endif

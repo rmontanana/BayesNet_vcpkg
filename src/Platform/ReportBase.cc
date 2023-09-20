@@ -94,6 +94,8 @@ namespace platform {
             ifstream resultData(Paths::results() + "/" + fileName);
             if (resultData.is_open()) {
                 bestResults = json::parse(resultData);
+            } else {
+                existBestFile = false;
             }
         }
         try {
@@ -101,7 +103,12 @@ namespace platform {
         }
         catch (exception) {
             value = 1.0;
+
         }
         return value;
+    }
+    bool ReportBase::getExistBestFile()
+    {
+        return existBestFile;
     }
 }

@@ -326,5 +326,8 @@ namespace platform {
             worksheet_merge_range(worksheet, row, 1, row, 5, (score + " compared to " + BestResult::title() + " .:").c_str(), efectiveStyle("text"));
             writeDouble(row, 6, totalScore / BestResult::score(), "result");
         }
+        if (!getExistBestFile() && compare) {
+            worksheet_write_string(worksheet, row + 1, 0, "*** Best Results File not found. Couldn't compare any result!", styles["summaryStyle"]);
+        }
     }
 }
