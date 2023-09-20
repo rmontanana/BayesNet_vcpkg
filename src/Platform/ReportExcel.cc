@@ -162,11 +162,11 @@ namespace platform {
         strcpy(line, data["title"].get<string>().c_str());
         lxw_doc_properties properties = {
             .title = line,
-            .subject = "Machine learning results",
-            .author = "Ricardo Montañana Gómez",
-            .manager = "Dr. J. A. Gámez, Dr. J. M. Puerta",
-            .company = "UCLM",
-            .comments = "Created with libxlsxwriter and c++",
+            .subject = (char*)"Machine learning results",
+            .author = (char*)"Ricardo Montañana Gómez",
+            .manager = (char*)"Dr. J. A. Gámez, Dr. J. M. Puerta",
+            .company = (char*)"UCLM",
+            .comments = (char*)"Created with libxlsxwriter and c++",
         };
         workbook_set_properties(workbook, &properties);
     }

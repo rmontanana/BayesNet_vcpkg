@@ -21,7 +21,6 @@ namespace platform {
         void setProperties();
         void createFile();
         void closeFile();
-        void showSummary();
         lxw_workbook* workbook;
         lxw_worksheet* worksheet;
         map<string, lxw_format*> styles;
@@ -33,6 +32,7 @@ namespace platform {
         const string fileName = "some_results.xlsx";
         void header() override;
         void body() override;
+        void showSummary() override;
         void footer(double totalScore, int row);
         void createStyle(const string& name, lxw_format* style, bool odd);
         void addColor(lxw_format* style, bool odd);

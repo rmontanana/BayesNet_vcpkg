@@ -18,7 +18,7 @@ namespace platform {
         void header() override;
         void body() override;
         void footer(double totalScore);
-        void showSummary();
+        void showSummary() override;
     };
 };
 #endif
