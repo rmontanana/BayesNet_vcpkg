@@ -54,6 +54,7 @@ endif (ENABLE_CLANG_TIDY)
 add_git_submodule("lib/mdlp")
 add_git_submodule("lib/argparse")
 add_git_submodule("lib/json")
+find_library(XLSXWRITER_LIB libxlsxwriter.dylib PATHS /usr/local/lib)
 
 # Subdirectories
 # --------------
