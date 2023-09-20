@@ -14,6 +14,7 @@ argparse::ArgumentParser manageArguments(int argc, char** argv)
     program.add_argument("-s", "--score").default_value("any").help("Filter results of the score name supplied");
     program.add_argument("--complete").help("Show only results with all datasets").default_value(false).implicit_value(true);
     program.add_argument("--partial").help("Show only partial results").default_value(false).implicit_value(true);
+    program.add_argument("--compare").help("Compare with best results").default_value(false).implicit_value(true);
     try {
         program.parse_args(argc, argv);
         auto number = program.get<int>("number");
@@ -24,6 +25,7 @@ argparse::ArgumentParser manageArguments(int argc, char** argv)
         auto score = program.get<string>("score");
         auto complete = program.get<bool>("complete");
         auto partial = program.get<bool>("partial");
+        auto compare = program.get<bool>("compare");
     }
     catch (const exception& err) {
         cerr << err.what() << endl;
@@ -41,9 +43,10 @@ int main(int argc, char** argv)
     auto score = program.get<string>("score");
     auto complete = program.get<bool>("complete");
     auto partial = program.get<bool>("partial");
+    auto compare = program.get<bool>("compare");
     if (complete)
         partial = false;
-    auto results = platform::Results(platform::Paths::results(), number, model, score, complete, partial);
+    auto results = platform::Results(platform::Paths::results(), number, model, score, complete, partial, compare);
     results.manage();
     return 0;
 }

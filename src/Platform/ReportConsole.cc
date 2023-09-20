@@ -11,11 +11,11 @@ namespace platform {
         string do_grouping() const { return "\03"; }
     };
 
-    string ReportConsole::headerLine(const string& text)
+    string ReportConsole::headerLine(const string& text, int utf = 0)
     {
         int n = MAXL - text.length() - 3;
         n = n < 0 ? 0 : n;
-        return "* " + text + string(n, ' ') + "*\n";
+        return "* " + text + string(n + utf, ' ') + "*\n";
     }
 
     void ReportConsole::header()
@@ -36,8 +36,8 @@ namespace platform {
     }
     void ReportConsole::body()
     {
-        cout << Colors::GREEN() << " #  Dataset                        Sampl. Feat. Cls Nodes     Edges     States    Score           Time               Hyperparameters" << endl;
-        cout << "=== ============================== ====== ===== === ========= ========= ========= =============== ================== ===============" << endl;
+        cout << Colors::GREEN() << " #  Dataset                   Sampl. Feat. Cls Nodes     Edges     States    Score           Time                Hyperparameters" << endl;
+        cout << "=== ========================= ====== ===== === ========= ========= ========= =============== =================== ====================" << endl;
         json lastResult;
         double totalScore = 0.0;
         bool odd = true;
@@ -50,15 +50,17 @@ namespace platform {
             auto color = odd ? Colors::CYAN() : Colors::BLUE();
             cout << color;
             cout << setw(3) << index++ << " ";
-            cout << setw(30) << left << r["dataset"].get<string>() << " ";
+            cout << setw(25) << left << r["dataset"].get<string>() << " ";
             cout << setw(6) << right << r["samples"].get<int>() << " ";
             cout << setw(5) << right << r["features"].get<int>() << " ";
             cout << setw(3) << right << r["classes"].get<int>() << " ";
             cout << setw(9) << setprecision(2) << fixed << r["nodes"].get<float>() << " ";
             cout << setw(9) << setprecision(2) << fixed << r["leaves"].get<float>() << " ";
             cout << setw(9) << setprecision(2) << fixed << r["depth"].get<float>() << " ";
-            cout << setw(8) << right << setprecision(6) << fixed << r["score"].get<double>() << "±" << setw(6) << setprecision(4) << fixed << r["score_std"].get<double>() << " ";
-            cout << setw(11) << right << setprecision(6) << fixed << r["time"].get<double>() << "±" << setw(6) << setprecision(4) << fixed << r["time_std"].get<double>() << " ";
+            cout << setw(8) << right << setprecision(6) << fixed << r["score"].get<double>() << "±" << setw(6) << setprecision(4) << fixed << r["score_std"].get<double>();
+            const string status = compareResult(r["dataset"].get<string>(), r["score"].get<double>());
+            cout << status;
+            cout << setw(12) << right << setprecision(6) << fixed << r["time"].get<double>() << "±" << setw(6) << setprecision(4) << fixed << r["time_std"].get<double>() << " ";
             try {
                 cout << r["hyperparameters"].get<string>();
             }
@@ -81,9 +83,21 @@ namespace platform {
             footer(totalScore);
         }
     }
+    void ReportConsole::showSummary()
+    {
+        for (const auto& item : summary) {
+            stringstream oss;
+            oss << setw(3) << left << item.first;
+            oss << setw(3) << right << item.second << " ";
+            oss << left << meaning.at(item.first);
+            cout << headerLine(oss.str(), 2);
+        }
+    }
+
     void ReportConsole::footer(double totalScore)
     {
         cout << Colors::MAGENTA() << string(MAXL, '*') << endl;
+        showSummary();
         auto score = data["score_name"].get<string>();
         if (score == BestResult::scoreName()) {
             stringstream oss;

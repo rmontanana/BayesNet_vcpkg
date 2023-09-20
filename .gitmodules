@@ -10,6 +10,6 @@
 [submodule "lib/json"]
 	path = lib/json
 	url = https://github.com/nlohmann/json.git
-[submodule "lib/openXLSX"]
-	path = lib/openXLSX
-	url = https://github.com/troldal/OpenXLSX.git
+[submodule "lib/libxlsxwriter"]
+	path = lib/libxlsxwriter
+	url = https://github.com/jmcnamara/libxlsxwriter.git

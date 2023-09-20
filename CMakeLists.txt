@@ -54,7 +54,6 @@ endif (ENABLE_CLANG_TIDY)
 add_git_submodule("lib/mdlp")
 add_git_submodule("lib/argparse")
 add_git_submodule("lib/json")
-add_git_submodule("lib/openXLSX")
 
 # Subdirectories
 # --------------

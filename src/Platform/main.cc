@@ -87,7 +87,7 @@ int main(int argc, char** argv)
     auto stratified = program.get<bool>("stratified");
     auto n_folds = program.get<int>("folds");
     auto seeds = program.get<vector<int>>("seeds");
-    auto hyperparameters =program.get<string>("hyperparameters");
+    auto hyperparameters = program.get<string>("hyperparameters");
     vector<string> filesToTest;
     auto datasets = platform::Datasets(path, true, platform::ARFF);
     auto title = program.get<string>("title");
@@ -102,7 +102,7 @@ int main(int argc, char** argv)
         }
         filesToTest.push_back(file_name);
     } else {
-        filesToTest = platform::Datasets(path, true, platform::ARFF).getNames();
+        filesToTest = datasets.getNames();
         saveResults = true;
     }
     /*
