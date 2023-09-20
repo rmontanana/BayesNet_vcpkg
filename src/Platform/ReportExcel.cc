@@ -1,6 +1,5 @@
 #include <sstream>
 #include <locale>
-#include "Datasets.h"
 #include "ReportExcel.h"
 #include "BestResult.h"
 
@@ -20,7 +19,6 @@ namespace platform {
         colorTitle = 0xB1A0C7;
         colorOdd = 0xDCE6F1;
         colorEven = 0xFDE9D9;
-        margin = .1; // margin to add to ZeroR comparison
         createFile();
     }
 
@@ -308,43 +306,9 @@ namespace platform {
             footer(totalScore, row);
         }
     }
-    string ReportExcel::compareResult(const string& dataset, double result)
-    {
-        string status = " ";
-        if (data["score_name"].get<string>() == "accuracy") {
-            auto dt = Datasets(Paths::datasets(), false);
-            dt.loadDataset(dataset);
-            auto numClasses = dt.getNClasses(dataset);
-            if (numClasses == 2) {
-                vector<int> distribution = dt.getClassesCounts(dataset);
-                double nSamples = dt.getNSamples(dataset);
-                vector<int>::iterator maxValue = max_element(distribution.begin(), distribution.end());
-                double mark = *maxValue / nSamples * (1 + margin);
-                if (mark > 1) {
-                    mark = 0.9995;
-                }
-                status = result < mark ? Symbols::cross : result > mark ? Symbols::upward_arrow : "=";
-                auto item = summary.find(status);
-                if (item != summary.end()) {
-                    summary[status]++;
-                } else {
-                    summary[status] = 1;
-                }
-            }
-        }
-        return status;
-    }
+
     void ReportExcel::showSummary()
     {
-        stringstream oss;
-        oss << "Better than ZeroR + " << setprecision(1) << fixed << margin * 100 << "%";
-
-        map<string, string> meaning = {
-            {Symbols::equal_best, "Equal to best"},
-            {Symbols::better_best, "Better than best"},
-            {Symbols::cross, "Less than or equal to ZeroR"},
-            {Symbols::upward_arrow, oss.str()}
-        };
         for (const auto& item : summary) {
             worksheet_write_string(worksheet, row + 2, 1, item.first.c_str(), styles["summaryStyle"]);
             worksheet_write_number(worksheet, row + 2, 2, item.second, styles["summaryStyle"]);
