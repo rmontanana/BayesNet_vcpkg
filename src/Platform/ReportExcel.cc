@@ -180,20 +180,22 @@ namespace platform {
         }
         const string name = data["model"].get<string>();
         string suffix = "";
+        string efectiveName;
         int num = 1;
         // Create a sheet with the name of the model
         while (true) {
-            string efectiveName = name + suffix;
-            worksheet = workbook_add_worksheet(workbook, efectiveName.c_str());
-            if (worksheet == NULL) {
+            efectiveName = name + suffix;
+            if (workbook_get_worksheet_by_name(workbook, efectiveName.c_str())) {
                 suffix = to_string(++num);
             } else {
+                worksheet = workbook_add_worksheet(workbook, efectiveName.c_str());
                 break;
             }
             if (num > 100) {
                 throw invalid_argument("Couldn't create sheet " + efectiveName);
             }
         }
+        cout << "Adding sheet " << efectiveName << " to " << Paths::excel() + fileName << endl;
         setProperties();
         createFormats();
         formatColumns();
@@ -284,16 +286,23 @@ namespace platform {
 
         }
         // Set the right column width of hyperparameters with the maximum length
-        worksheet_set_column(worksheet, 12, 12, hypSize + 1, NULL);
+        worksheet_set_column(worksheet, 12, 12, hypSize + 5, NULL);
         // Show totals if only one dataset is present in the result
         if (data["results"].size() == 1) {
             for (const string& group : { "scores_train", "scores_test", "times_train", "times_test" }) {
                 row++;
                 col = 1;
-                writeString(row, col, group);
+                writeString(row, col, group, "text");
                 for (double item : lastResult[group]) {
-                    writeDouble(row, ++col, item);
+                    string style = group.find("scores") != string::npos ? "result" : "time";
+                    writeDouble(row, ++col, item, style);
                 }
+            }
+            // Set with of columns to show those totals completely
+            worksheet_set_column(worksheet, 1, 1, 12, NULL);
+            for (int i = 2; i < 7; ++i) {
+                // doesn't work with from col to col, so...
+                worksheet_set_column(worksheet, i, i, 15, NULL);
             }
         } else {
             footer(totalScore, row);
