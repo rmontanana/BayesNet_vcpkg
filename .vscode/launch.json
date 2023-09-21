@@ -40,6 +40,20 @@
         {
             "type": "lldb",
             "request": "launch",
+            "name": "best",
+            "program": "${workspaceFolder}/build/src/Platform/best",
+            "args": [
+                "-m",
+                "BoostAODE",
+                "-s",
+                "accuracy",
+                "--build",
+            ],
+            "cwd": "/Users/rmontanana/Code/discretizbench",
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
             "name": "manage",
             "program": "${workspaceFolder}/build/src/Platform/manage",
             "args": [
