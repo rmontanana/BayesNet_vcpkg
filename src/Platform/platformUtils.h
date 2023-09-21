@@ -8,7 +8,6 @@
 #include "ArffFiles.h"
 #include "CPPFImdlp.h"
 using namespace std;
-const string PATH = "../../data/";
 
 bool file_exists(const std::string& name);
 vector<string> split(const string& text, char delimiter);
