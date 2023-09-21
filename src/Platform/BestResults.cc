@@ -1,9 +1,8 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include "platformUtils.h"
 #include "BestResults.h"
-#include "Results.h"
+#include "Result.h"
 #include "Colors.h"
 
 namespace platform {
@@ -33,7 +32,8 @@ namespace platform {
             }
         }
         string bestFileName = path + "/" + bestResultFile();
-        if (file_exists(bestFileName)) {
+        if (FILE* fileTest = fopen(bestFileName.c_str(), "r")) {
+            fclose(fileTest);
             cout << Colors::MAGENTA() << "File " << bestFileName << " already exists and it shall be overwritten." << Colors::RESET();
         }
         ofstream file(bestFileName);
