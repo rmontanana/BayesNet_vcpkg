@@ -1,5 +1,6 @@
 #include <filesystem>
 #include <fstream>
+#include <sstream>
 #include "Result.h"
 #include "Colors.h"
 #include "BestScore.h"

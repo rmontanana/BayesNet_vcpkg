@@ -7,11 +7,12 @@
 
 namespace platform {
 
-    void BestResults::build()
+    string BestResults::build()
     {
         auto files = loadFiles();
         if (files.size() == 0) {
-            throw runtime_error("No result files were found!");
+            cerr << Colors::MAGENTA() << "No result files were found!" << Colors::RESET() << endl;
+            exit(1);
         }
         json bests;
         for (const auto& file : files) {
@@ -20,7 +21,7 @@ namespace platform {
             for (auto const& item : data.at("results")) {
                 bool update = false;
                 if (bests.contains(item.at("dataset").get<string>())) {
-                    if (item.at("score").get<double>() > bests["dataset"].at(0).get<double>()) {
+                    if (item.at("score").get<double>() > bests[item.at("dataset").get<string>()].at(0).get<double>()) {
                         update = true;
                     }
                 } else {
@@ -31,14 +32,15 @@ namespace platform {
                 }
             }
         }
-        string bestFileName = path + "/" + bestResultFile();
+        string bestFileName = path + bestResultFile();
         if (FILE* fileTest = fopen(bestFileName.c_str(), "r")) {
             fclose(fileTest);
-            cout << Colors::MAGENTA() << "File " << bestFileName << " already exists and it shall be overwritten." << Colors::RESET();
+            cout << Colors::MAGENTA() << "File " << bestFileName << " already exists and it shall be overwritten." << Colors::RESET() << endl;
         }
         ofstream file(bestFileName);
         file << bests;
         file.close();
+        return bestFileName;
     }
 
     string BestResults::bestResultFile()
@@ -60,9 +62,43 @@ namespace platform {
         }
         return files;
     }
+    json BestResults::loadFile(const string& fileName)
+    {
+        ifstream resultData(fileName);
+        if (resultData.is_open()) {
+            json data = json::parse(resultData);
+            return data;
+        }
+        throw invalid_argument("Unable to open result file. [" + fileName + "]");
+    }
 
     void BestResults::report()
     {
+        string bestFileName = path + bestResultFile();
+        if (FILE* fileTest = fopen(bestFileName.c_str(), "r")) {
+            fclose(fileTest);
+        } else {
+            cerr << Colors::MAGENTA() << "File " << bestFileName << " doesn't exist." << Colors::RESET() << endl;
+            exit(1);
+        }
+        auto data = loadFile(bestFileName);
+        cout << Colors::GREEN() << "Best results for " << model << " and " << score << endl;
+        cout << "------------------------------------------" << endl;
+        cout << Colors::GREEN() << " #  Dataset                   Score       File                                                               Hyperparameters" << endl;
+        cout << "=== ========================= =========== ================================================================== ================================================= " << endl;
+        auto i = 0;
+        bool odd = true;
+        for (auto const& item : data.items()) {
+            auto color = odd ? Colors::BLUE() : Colors::CYAN();
+            cout << color << setw(3) << fixed << right << i++ << " ";
+            cout << setw(25) << left << item.key() << " ";
+            cout << setw(11) << setprecision(9) << fixed << item.value().at(0).get<double>() << " ";
+            cout << setw(66) << item.value().at(2).get<string>() << " ";
+            cout << item.value().at(1) << " ";
+            cout << endl;
+            odd = !odd;
+        }
+
 
     }
 }
