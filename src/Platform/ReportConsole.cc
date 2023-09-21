@@ -1,7 +1,7 @@
 #include <sstream>
 #include <locale>
 #include "ReportConsole.h"
-#include "BestResult.h"
+#include "BestScore.h"
 
 
 namespace platform {
@@ -99,9 +99,9 @@ namespace platform {
         cout << Colors::MAGENTA() << string(MAXL, '*') << endl;
         showSummary();
         auto score = data["score_name"].get<string>();
-        if (score == BestResult::scoreName()) {
+        if (score == BestScore::scoreName()) {
             stringstream oss;
-            oss << score << " compared to " << BestResult::title() << " .:  " << totalScore / BestResult::score();
+            oss << score << " compared to " << BestScore::title() << " .:  " << totalScore / BestScore::score();
             cout << headerLine(oss.str());
         }
         if (!getExistBestFile() && compare) {

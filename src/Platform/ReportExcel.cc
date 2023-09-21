@@ -1,7 +1,7 @@
 #include <sstream>
 #include <locale>
 #include "ReportExcel.h"
-#include "BestResult.h"
+#include "BestScore.h"
 
 
 namespace platform {
@@ -322,9 +322,9 @@ namespace platform {
         showSummary();
         row += 4 + summary.size();
         auto score = data["score_name"].get<string>();
-        if (score == BestResult::scoreName()) {
-            worksheet_merge_range(worksheet, row, 1, row, 5, (score + " compared to " + BestResult::title() + " .:").c_str(), efectiveStyle("text"));
-            writeDouble(row, 6, totalScore / BestResult::score(), "result");
+        if (score == BestScore::scoreName()) {
+            worksheet_merge_range(worksheet, row, 1, row, 5, (score + " compared to " + BestScore::title() + " .:").c_str(), efectiveStyle("text"));
+            writeDouble(row, 6, totalScore / BestScore::score(), "result");
         }
         if (!getExistBestFile() && compare) {
             worksheet_write_string(worksheet, row + 1, 0, "*** Best Results File not found. Couldn't compare any result!", styles["summaryStyle"]);

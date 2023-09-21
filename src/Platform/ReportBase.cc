@@ -2,7 +2,7 @@
 #include <locale>
 #include "Datasets.h"
 #include "ReportBase.h"
-#include "BestResult.h"
+#include "BestScore.h"
 
 
 namespace platform {

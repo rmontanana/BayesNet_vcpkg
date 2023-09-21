@@ -3,7 +3,7 @@
 #include "Results.h"
 #include "ReportConsole.h"
 #include "ReportExcel.h"
-#include "BestResult.h"
+#include "BestScore.h"
 #include "Colors.h"
 namespace platform {
     Result::Result(const string& path, const string& filename)
@@ -17,8 +17,8 @@ namespace platform {
             score += result["score"].get<double>();
         }
         scoreName = data["score_name"];
-        if (scoreName == BestResult::scoreName()) {
-            score /= BestResult::score();
+        if (scoreName == BestScore::scoreName()) {
+            score /= BestScore::score();
         }
         title = data["title"];
         duration = data["duration"];
