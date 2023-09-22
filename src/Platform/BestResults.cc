@@ -9,7 +9,7 @@ namespace platform {
 
     string BestResults::build()
     {
-        auto files = loadFiles();
+        auto files = loadResultFiles();
         if (files.size() == 0) {
             cerr << Colors::MAGENTA() << "No result files were found!" << Colors::RESET() << endl;
             exit(1);
@@ -48,7 +48,7 @@ namespace platform {
         return "best_results_" + model + "_" + score + ".json";
     }
 
-    vector<string> BestResults::loadFiles()
+    vector<string> BestResults::loadResultFiles()
     {
         vector<string> files;
         using std::filesystem::directory_iterator;
@@ -56,7 +56,7 @@ namespace platform {
             auto fileName = file.path().filename().string();
             if (fileName.find(".json") != string::npos && fileName.find("results_") == 0
                 && fileName.find("_" + score + "_") != string::npos
-                && fileName.find("_" + model + "_") != string::npos) {
+                && (fileName.find("_" + model + "_") != string::npos || model == "any")) {
                 files.push_back(fileName);
             }
         }
@@ -71,8 +71,12 @@ namespace platform {
         }
         throw invalid_argument("Unable to open result file. [" + fileName + "]");
     }
+    void BestResults::reportAll()
+    {
 
-    void BestResults::report()
+    }
+
+    void BestResults::reportSingle()
     {
         string bestFileName = path + bestResultFile();
         if (FILE* fileTest = fopen(bestFileName.c_str(), "r")) {

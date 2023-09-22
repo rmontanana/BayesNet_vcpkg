@@ -9,9 +9,10 @@ namespace platform {
     public:
         explicit BestResults(const string& path, const string& score, const string& model) : path(path), score(score), model(model) {}
         string build();
-        void report();
+        void reportSingle();
+        void reportAll();
     private:
-        vector<string> loadFiles();
+        vector<string> loadResultFiles();
         string bestResultFile();
         json loadFile(const string& fileName);
         string path;

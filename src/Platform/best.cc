@@ -9,7 +9,7 @@ using namespace std;
 argparse::ArgumentParser manageArguments(int argc, char** argv)
 {
     argparse::ArgumentParser program("best");
-    program.add_argument("-m", "--model").default_value("").help("Filter results of the selected model)");
+    program.add_argument("-m", "--model").default_value("").help("Filter results of the selected model) (any for all models)");
     program.add_argument("-s", "--score").default_value("").help("Filter results of the score name supplied");
     program.add_argument("--build").help("build best score results file").default_value(false).implicit_value(true);
     program.add_argument("--report").help("report of best score results file").default_value(false).implicit_value(true);
@@ -43,13 +43,22 @@ int main(int argc, char** argv)
         cerr << program;
         exit(1);
     }
+    if (model == "any" && build) {
+        cerr << "Can't build best results file for all models. \"any\" is only valid for report" << endl;
+        cerr << program;
+        exit(1);
+    }
     auto results = platform::BestResults(platform::Paths::results(), model, score);
     if (build) {
         string fileName = results.build();
         cout << Colors::GREEN() << fileName << " created!" << Colors::RESET() << endl;
     }
     if (report) {
-        results.report();
+        if (model == "any") {
+            results.reportAll();
+        } else {
+            results.reportSingle();
+        }
     }
     return 0;
 }
