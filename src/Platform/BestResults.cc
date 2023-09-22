@@ -45,7 +45,7 @@ namespace platform {
 
     string BestResults::bestResultFile()
     {
-        return "best_results_" + score + "_" + model + ".json";
+        return "best_results_" + model + "_" + score + ".json";
     }
 
     vector<string> BestResults::loadFiles()
