@@ -43,15 +43,14 @@ int main(int argc, char** argv)
         cerr << program;
         exit(1);
     }
-    if (model == "any" && build) {
-        cerr << "Can't build best results file for all models. \"any\" is only valid for report" << endl;
-        cerr << program;
-        exit(1);
-    }
-    auto results = platform::BestResults(platform::Paths::results(), model, score);
+    auto results = platform::BestResults(platform::Paths::results(), score, model);
     if (build) {
-        string fileName = results.build();
-        cout << Colors::GREEN() << fileName << " created!" << Colors::RESET() << endl;
+        if (model == "any") {
+            results.buildAll();
+        } else {
+            string fileName = results.build();
+            cout << Colors::GREEN() << fileName << " created!" << Colors::RESET() << endl;
+        }
     }
     if (report) {
         if (model == "any") {
