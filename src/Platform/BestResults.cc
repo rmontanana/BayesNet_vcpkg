@@ -227,7 +227,7 @@ namespace platform {
             }
             // sort the ranksOrder vector by value
             sort(ranksOrder.begin(), ranksOrder.end(), [](const pair<string, double>& a, const pair<string, double>& b) {
-                return a.second < b.second;
+                return a.second > b.second;
                 });
             // Assign the ranks
             for (int i = 0; i < ranksOrder.size(); i++) {
