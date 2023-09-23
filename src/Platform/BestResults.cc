@@ -252,14 +252,34 @@ namespace platform {
         }
         cout << endl;
         cout << Colors::GREEN() << setw(30) << "    Totals...................";
+        double max = 0.0;
+        for (const auto& total : totals) {
+            if (total.second > max) {
+                max = total.second;
+            }
+        }
         for (const auto& model : models) {
-            cout << setw(12) << setprecision(9) << fixed << totals[model] << " ";
+            string efectiveColor = Colors::GREEN();
+            if (totals[model] == max) {
+                efectiveColor = Colors::RED();
+            }
+            cout << efectiveColor << setw(12) << setprecision(9) << fixed << totals[model] << " ";
         }
         // Output the averaged ranks
         cout << endl;
+        int min = 1;
+        for (const auto& rank : ranks) {
+            if (rank.second < min) {
+                min = rank.second;
+            }
+        }
         cout << Colors::GREEN() << setw(30) << "    Averaged ranks...........";
         for (const auto& model : models) {
-            cout << setw(12) << setprecision(10) << fixed << (double)ranks[model] / (double)origin.size() << " ";
+            string efectiveColor = Colors::GREEN();
+            if (ranks[model] == min) {
+                efectiveColor = Colors::RED();
+            }
+            cout << efectiveColor << setw(12) << setprecision(10) << fixed << (double)ranks[model] / (double)origin.size() << " ";
         }
         cout << endl;
     }
