@@ -1,10 +1,29 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <set>
 #include "BestResults.h"
 #include "Result.h"
 #include "Colors.h"
+
+
+
+namespace fs = std::filesystem;
+// function ftime_to_string, Code taken from 
+// https://stackoverflow.com/a/58237530/1389271
+template <typename TP>
+std::string ftime_to_string(TP tp)
+{
+    using namespace std::chrono;
+    auto sctp = time_point_cast<system_clock::duration>(tp - TP::clock::now()
+        + system_clock::now());
+    auto tt = system_clock::to_time_t(sctp);
+    std::tm* gmt = std::gmtime(&tt);
+    std::stringstream buffer;
+    buffer << std::put_time(gmt, "%Y-%m-%d %H:%M");
+    return buffer.str();
+}
 
 namespace platform {
 
@@ -97,21 +116,6 @@ namespace platform {
         }
         string fileModel, fileScore;
         for (const auto& file : files) {
-            // take the model from the file name and add it to a vector of models 
-            // set model to the name of the first model in the vector
-            // filter files and build the best results file of this model
-            // repeat for all models
-            // another for loop to read the best results file of each model and print al together
-            // each row is a dataset and each column is a model
-            // the score is the score of the best result of each model for that dataset
-            // the rows are datasets the columns are models and the cells are the scores
-            // the first row is the header with the model names
-            // the first column is the dataset names
-            // the last column is the average score of each dataset
-            // the last row is the average score of each model
-            // the last cell is the average score of all models
-            // the last row and column are in bold
-
             // extract the model from the file name
             tie(fileModel, fileScore) = getModelScore(file);
             // add the model to the vector of models
@@ -140,9 +144,10 @@ namespace platform {
             cerr << Colors::MAGENTA() << "File " << bestFileName << " doesn't exist." << Colors::RESET() << endl;
             exit(1);
         }
+        auto date = ftime_to_string(filesystem::last_write_time(bestFileName));
         auto data = loadFile(bestFileName);
-        cout << Colors::GREEN() << "Best results for " << model << " and " << score << endl;
-        cout << "------------------------------------------" << endl;
+        cout << Colors::GREEN() << "Best results for " << model << " and " << score << " as of " << date << endl;
+        cout << "--------------------------------------------------------" << endl;
         cout << Colors::GREEN() << " #  Dataset                   Score       File                                                               Hyperparameters" << endl;
         cout << "=== ========================= =========== ================================================================== ================================================= " << endl;
         auto i = 0;
@@ -164,6 +169,7 @@ namespace platform {
         bool first = true;
         json origin;
         json table;
+        auto maxDate = filesystem::file_time_type::max();
         for (const auto& model : models) {
             this->model = model;
             string bestFileName = path + bestResultFile();
@@ -172,6 +178,10 @@ namespace platform {
             } else {
                 cerr << Colors::MAGENTA() << "File " << bestFileName << " doesn't exist." << Colors::RESET() << endl;
                 exit(1);
+            }
+            auto dateWrite = filesystem::last_write_time(bestFileName);
+            if (dateWrite < maxDate) {
+                maxDate = dateWrite;
             }
             auto data = loadFile(bestFileName);
             if (first) {
@@ -187,12 +197,13 @@ namespace platform {
             }
             table[model] = data;
         }
+        table["dateTable"] = ftime_to_string(maxDate);
         return table;
     }
     void BestResults::printTableResults(set<string> models, json table)
     {
-        cout << Colors::GREEN() << "Best results for " << score << endl;
-        cout << "------------------------------------------" << endl;
+        cout << Colors::GREEN() << "Best results for " << score << " as of " << table.at("dateTable").get<string>() << endl;
+        cout << "------------------------------------------------" << endl;
         cout << Colors::GREEN() << " #  Dataset                   ";
         for (const auto& model : models) {
             cout << setw(12) << left << model << " ";
