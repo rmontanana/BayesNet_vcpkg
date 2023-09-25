@@ -1,7 +1,7 @@
-#ifndef BESTRESULT_H
-#define BESTRESULT_H
+#ifndef BESTSCORE_H
+#define BESTSCORE_H
 #include <string>
-class BestResult {
+class BestScore {
 public:
     static std::string title() { return "STree_default (linear-ovo)"; }
     static double score() { return 22.109799; }
