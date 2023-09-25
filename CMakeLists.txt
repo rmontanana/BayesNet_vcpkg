@@ -30,6 +30,17 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 option(ENABLE_CLANG_TIDY "Enable to add clang tidy."              OFF)
 option(ENABLE_TESTING "Unit testing build"                        OFF)
 option(CODE_COVERAGE "Collect coverage from test library"         OFF)
+
+# Boost Library
+set(Boost_USE_STATIC_LIBS OFF) 
+set(Boost_USE_MULTITHREADED ON)  
+set(Boost_USE_STATIC_RUNTIME OFF) 
+find_package(Boost 1.81.0 REQUIRED) 
+if(Boost_FOUND)
+    message("Boost_INCLUDE_DIRS=${Boost_INCLUDE_DIRS}")
+    include_directories(${Boost_INCLUDE_DIRS}) 
+endif()
+
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 # CMakes modules
 # --------------

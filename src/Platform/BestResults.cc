@@ -6,7 +6,7 @@
 #include "BestResults.h"
 #include "Result.h"
 #include "Colors.h"
-
+#include <boost/math/distributions/chi_squared.hpp>
 
 
 namespace fs = std::filesystem;
@@ -228,6 +228,45 @@ namespace platform {
         }
         return ranks;
     }
+    void friedmanTest(int nModels, int nDatasets, map<string, float> ranks, double significance = 0.05)
+    {
+        // Friedman test
+        // Calculate the Friedman statistic
+        double sum = 0.0;
+        if (nModels < 3 || nDatasets < 3) {
+            cout << "Can't make the Friedman test with less than 3 models and/or less than 3 datasets." << endl;
+            return;
+        }
+        cout << Colors::BLUE() << "Friedman test: H0: 'There is no significant differences between all the classifiers.'" << endl;
+        cout << "N datasets: " << nDatasets << endl;
+        cout << "N models: " << nModels << endl;
+        cout << "Significance: " << significance << endl;
+        cout << "Nº Ranks: " << ranks.size() << endl;
+        for (const auto& rank : ranks) {
+            sum += rank.second;
+        }
+        double degreesOfFreedom = nModels - 1.0;
+        double sumSquared = 0;
+        for (const auto& rank : ranks) {
+            sumSquared += rank.second * rank.second;
+        }
+        cout << "Sum Squared: " << sumSquared << endl;
+        cout << "Degrees of freedom: " << degreesOfFreedom << endl;
+        double friedman = 12.0 / (nModels * nDatasets * (nModels + 1)) * sumSquared - 3 * nDatasets * (nModels + 1);
+        cout << "Friedman statistic: " << friedman << endl;
+        // Calculate the critical value
+        boost::math::chi_squared chiSquared(degreesOfFreedom);
+        long double p_value = (long double)1.0 - cdf(chiSquared, friedman);
+        double criticalValue = quantile(chiSquared, 1 - significance);
+        std::cout << "Critical Chi-Square Value for df=" << degreesOfFreedom
+            << " and alpha=" << significance << ": " << criticalValue << std::endl;
+        cout << "p-value: " << scientific << p_value << endl;
+        if (friedman > criticalValue) {
+            cout << Colors::MAGENTA() << "The null hypothesis H0 is rejected." << endl;
+        } else {
+            cout << Colors::GREEN() << "The null hypothesis H0 is accepted." << endl;
+        }
+    }
     void BestResults::printTableResults(set<string> models, json table)
     {
         cout << Colors::GREEN() << "Best results for " << score << " as of " << table.at("dateTable").get<string>() << endl;
@@ -245,6 +284,8 @@ namespace platform {
         auto i = 0;
         bool odd = true;
         map<string, double> totals;
+        map<string, float> ranks;
+        map<string, float> ranksTotal;
         for (const auto& model : models) {
             totals[model] = 0.0;
         }
@@ -264,7 +305,14 @@ namespace platform {
                 ranksOrder.push_back({ model, value });
             }
             // Assign the ranks
-            auto ranks = assignRanks(ranksOrder);
+            ranks = assignRanks(ranksOrder);
+            if (ranksTotal.size() == 0) {
+                ranksTotal = ranks;
+            } else {
+                for (const auto& rank : ranks) {
+                    ranksTotal[rank.first] += rank.second;
+                }
+            }
             // Print the row with red colors on max values
             for (const auto& model : models) {
                 string efectiveColor = color;
@@ -300,20 +348,30 @@ namespace platform {
         // Output the averaged ranks
         cout << endl;
         int min = 1;
-        for (const auto& rank : ranks) {
+        for (const auto& rank : ranksTotal) {
             if (rank.second < min) {
                 min = rank.second;
             }
         }
+        cout << Colors::BLUE() << setw(30) << "    Ranks....................";
+        for (const auto& model : models) {
+            string efectiveColor = Colors::BLUE();
+            if (ranksTotal[model] == min) {
+                efectiveColor = Colors::RED();
+            }
+            cout << efectiveColor << setw(12) << setprecision(4) << fixed << (double)ranksTotal[model] << " ";
+        }
+        cout << endl;
         cout << Colors::GREEN() << setw(30) << "    Averaged ranks...........";
         for (const auto& model : models) {
             string efectiveColor = Colors::GREEN();
-            if (ranks[model] == min) {
+            if (ranksTotal[model] == min) {
                 efectiveColor = Colors::RED();
             }
-            cout << efectiveColor << setw(12) << setprecision(10) << fixed << (double)ranks[model] / (double)origin.size() << " ";
+            cout << efectiveColor << setw(12) << setprecision(9) << fixed << (double)ranksTotal[model] / (double)origin.size() << " ";
         }
         cout << endl;
+        friedmanTest(models.size(), table.begin().value().size(), ranksTotal, 0.05);
     }
     void BestResults::reportAll()
     {
