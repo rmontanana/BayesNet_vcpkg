@@ -200,6 +200,34 @@ namespace platform {
         table["dateTable"] = ftime_to_string(maxDate);
         return table;
     }
+    map<string, float> assignRanks(vector<pair<string, double>>& ranksOrder)
+    {
+        // sort the ranksOrder vector by value
+        sort(ranksOrder.begin(), ranksOrder.end(), [](const pair<string, double>& a, const pair<string, double>& b) {
+            return a.second > b.second;
+            });
+        //Assign ranks to  values and if they are the same they share the same averaged rank
+        map<string, float> ranks;
+        for (int i = 0; i < ranksOrder.size(); i++) {
+            ranks[ranksOrder[i].first] = i + 1.0;
+        }
+        int i = 0;
+        while (i < static_cast<int>(ranksOrder.size())) {
+            int j = i + 1;
+            int sumRanks = ranks[ranksOrder[i].first];
+            while (j < static_cast<int>(ranksOrder.size()) && ranksOrder[i].second == ranksOrder[j].second) {
+                sumRanks += ranks[ranksOrder[j++].first];
+            }
+            if (j > i + 1) {
+                float averageRank = (float)sumRanks / (j - i);
+                for (int k = i; k < j; k++) {
+                    ranks[ranksOrder[k].first] = averageRank;
+                }
+            }
+            i = j;
+        }
+        return ranks;
+    }
     void BestResults::printTableResults(set<string> models, json table)
     {
         cout << Colors::GREEN() << "Best results for " << score << " as of " << table.at("dateTable").get<string>() << endl;
@@ -217,7 +245,6 @@ namespace platform {
         auto i = 0;
         bool odd = true;
         map<string, double> totals;
-        map<string, int> ranks;
         for (const auto& model : models) {
             totals[model] = 0.0;
         }
@@ -236,14 +263,8 @@ namespace platform {
                 }
                 ranksOrder.push_back({ model, value });
             }
-            // sort the ranksOrder vector by value
-            sort(ranksOrder.begin(), ranksOrder.end(), [](const pair<string, double>& a, const pair<string, double>& b) {
-                return a.second > b.second;
-                });
             // Assign the ranks
-            for (int i = 0; i < ranksOrder.size(); i++) {
-                ranks[ranksOrder[i].first] = i + 1;
-            }
+            auto ranks = assignRanks(ranksOrder);
             // Print the row with red colors on max values
             for (const auto& model : models) {
                 string efectiveColor = color;
