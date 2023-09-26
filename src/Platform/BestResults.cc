@@ -237,11 +237,9 @@ namespace platform {
             cout << "Can't make the Friedman test with less than 3 models and/or less than 3 datasets." << endl;
             return;
         }
-        cout << Colors::BLUE() << "Friedman test: H0: 'There is no significant differences between all the classifiers.'" << endl;
-        cout << "N datasets: " << nDatasets << endl;
-        cout << "N models: " << nModels << endl;
-        cout << "Significance: " << significance << endl;
-        cout << "Nº Ranks: " << ranks.size() << endl;
+        cout << Colors::BLUE() << endl;
+        cout << "*************************************************************************************" << endl;
+        cout << "Friedman test: H0: 'There is no significant differences between all the classifiers.'" << endl;
         for (const auto& rank : ranks) {
             sum += rank.second;
         }
@@ -250,22 +248,21 @@ namespace platform {
         for (const auto& rank : ranks) {
             sumSquared += rank.second * rank.second;
         }
-        cout << "Sum Squared: " << sumSquared << endl;
-        cout << "Degrees of freedom: " << degreesOfFreedom << endl;
-        double friedman = 12.0 / (nModels * nDatasets * (nModels + 1)) * sumSquared - 3 * nDatasets * (nModels + 1);
-        cout << "Friedman statistic: " << friedman << endl;
+        double friedmanQ = 12.0 / (nModels * nDatasets * (nModels + 1)) * sumSquared - 3 * nDatasets * (nModels + 1);
+        cout << "Friedman statistic: " << friedmanQ << endl;
         // Calculate the critical value
         boost::math::chi_squared chiSquared(degreesOfFreedom);
-        long double p_value = (long double)1.0 - cdf(chiSquared, friedman);
+        long double p_value = (long double)1.0 - cdf(chiSquared, friedmanQ);
         double criticalValue = quantile(chiSquared, 1 - significance);
-        std::cout << "Critical Chi-Square Value for df=" << degreesOfFreedom
+        std::cout << "Critical Chi-Square Value for df=" << fixed << (int)degreesOfFreedom
             << " and alpha=" << significance << ": " << criticalValue << std::endl;
         cout << "p-value: " << scientific << p_value << endl;
-        if (friedman > criticalValue) {
+        if (friedmanQ > criticalValue) {
             cout << Colors::MAGENTA() << "The null hypothesis H0 is rejected." << endl;
         } else {
             cout << Colors::GREEN() << "The null hypothesis H0 is accepted." << endl;
         }
+        cout << Colors::BLUE() << "*************************************************************************************" << endl;
     }
     void BestResults::printTableResults(set<string> models, json table)
     {
@@ -371,7 +368,9 @@ namespace platform {
             cout << efectiveColor << setw(12) << setprecision(9) << fixed << (double)ranksTotal[model] / (double)origin.size() << " ";
         }
         cout << endl;
-        friedmanTest(models.size(), table.begin().value().size(), ranksTotal, 0.05);
+        if (friedman) {
+            friedmanTest(models.size(), table.begin().value().size(), ranksTotal, 0.05);
+        }
     }
     void BestResults::reportAll()
     {
