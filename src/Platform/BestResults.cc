@@ -239,7 +239,7 @@ namespace platform {
         }
         cout << Colors::BLUE() << endl;
         cout << "*************************************************************************************" << endl;
-        cout << "Friedman test: H0: 'There is no significant differences between all the classifiers.'" << endl;
+        cout << Colors::GREEN() << "Friedman test: H0: 'There is no significant differences between all the classifiers.'" << Colors::BLUE() << endl;
         for (const auto& rank : ranks) {
             sum += rank.second;
         }
@@ -255,7 +255,7 @@ namespace platform {
         long double p_value = (long double)1.0 - cdf(chiSquared, friedmanQ);
         double criticalValue = quantile(chiSquared, 1 - significance);
         std::cout << "Critical Chi-Square Value for df=" << fixed << (int)degreesOfFreedom
-            << " and alpha=" << significance << ": " << criticalValue << std::endl;
+            << " and alpha=" << setprecision(2) << fixed << significance << ": " << setprecision(7) << scientific << criticalValue << std::endl;
         cout << "p-value: " << scientific << p_value << endl;
         if (friedmanQ > criticalValue) {
             cout << Colors::MAGENTA() << "The null hypothesis H0 is rejected." << endl;
