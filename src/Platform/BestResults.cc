@@ -2,7 +2,6 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <set>
 #include "BestResults.h"
 #include "Result.h"
 #include "Colors.h"

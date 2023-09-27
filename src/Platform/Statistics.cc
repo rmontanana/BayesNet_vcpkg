@@ -1,5 +1,6 @@
 #include "Statistics.h"
 #include "Colors.h"
+#include "Symbols.h"
 #include <boost/math/distributions/chi_squared.hpp>
 #include <boost/math/distributions/normal.hpp>
 
@@ -24,7 +25,7 @@ namespace platform {
         computeWTL();
         fitted = true;
     }
-    map<string, float> assignRanks2(vector<pair<string, double>>& ranksOrder)
+    map<string, float> assignRanks(vector<pair<string, double>>& ranksOrder)
     {
         // sort the ranksOrder vector by value
         sort(ranksOrder.begin(), ranksOrder.end(), [](const pair<string, double>& a, const pair<string, double>& b) {
@@ -62,7 +63,7 @@ namespace platform {
                 ranksOrder.push_back({ model, value });
             }
             // Assign the ranks
-            ranksLine = assignRanks2(ranksOrder);
+            ranksLine = assignRanks(ranksOrder);
             if (ranks.size() == 0) {
                 ranks = ranksLine;
             } else {
@@ -139,13 +140,13 @@ namespace platform {
             p_value = max(before, p_value);
             statsOrder[i] = { item.first, p_value };
         }
-        auto color = friedmanResult ? Colors::GREEN() : Colors::YELLOW();
+        auto color = friedmanResult ? Colors::CYAN() : Colors::YELLOW();
         cout << color;
         cout << "  *************************************************************************************************************" << endl;
         cout << "  Post-hoc Holm test: H0: 'There is no significant differences between the control model and the other models.'" << endl;
         cout << "  Control model: " << models[controlIdx] << endl;
-        cout << "  Model        p-value      rank      win tie loss" << endl;
-        cout << "  ============ ============ ========= === === ====" << endl;
+        cout << "  Model        p-value      rank      win tie loss Status" << endl;
+        cout << "  ============ ============ ========= === === ==== =============" << endl;
         // sort ranks from lowest to highest
         vector<pair<string, float>> ranksOrder;
         for (const auto& rank : ranks) {
@@ -165,10 +166,14 @@ namespace platform {
                     pvalue = stat.second;
                 }
             }
-            cout << "  " << left << setw(12) << item.first << " " << setprecision(10) << fixed << pvalue << setprecision(7) << " " << item.second;
-            cout << " " << right << setw(3) << wtl.at(idx).win << " " << setw(3) << wtl.at(idx).tie << " " << setw(4) << wtl.at(idx).loss << endl;
+            auto colorStatus = pvalue > significance ? Colors::GREEN() : Colors::MAGENTA();
+            auto status = pvalue > significance ? Symbols::check_mark : Symbols::cross;
+            auto textStatus = pvalue > significance ? " accepted H0" : " rejected H0";
+            cout << "  " << colorStatus << left << setw(12) << item.first << " " << setprecision(6) << scientific << pvalue << setprecision(7) << fixed << " " << item.second;
+            cout << " " << right << setw(3) << wtl.at(idx).win << " " << setw(3) << wtl.at(idx).tie << " " << setw(4) << wtl.at(idx).loss;
+            cout << " " << status << textStatus << endl;
         }
-        cout << "  *************************************************************************************************************" << endl;
+        cout << color << "  *************************************************************************************************************" << endl;
         cout << Colors::RESET();
     }
     bool Statistics::friedmanTest()
