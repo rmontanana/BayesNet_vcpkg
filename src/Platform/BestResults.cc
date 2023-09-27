@@ -306,7 +306,15 @@ namespace platform {
         cout << "  Control model: " << models[controlIdx] << endl;
         cout << "  Model        p-value      rank      win tie loss" << endl;
         cout << "  ============ ============ ========= === === ====" << endl;
-        for (const auto& item : ranks) {
+        // sort ranks from lowest to highest
+        vector<pair<string, float>> ranksOrder;
+        for (const auto& rank : ranks) {
+            ranksOrder.push_back({ rank.first, rank.second });
+        }
+        sort(ranksOrder.begin(), ranksOrder.end(), [](const pair<string, float>& a, const pair<string, float>& b) {
+            return a.second < b.second;
+            });
+        for (const auto& item : ranksOrder) {
             if (item.first == models.at(controlIdx)) {
                 continue;
             }
@@ -349,13 +357,12 @@ namespace platform {
         std::cout << "Critical Chi-Square Value for df=" << fixed << (int)degreesOfFreedom
             << " and alpha=" << setprecision(2) << fixed << significance << ": " << setprecision(7) << scientific << criticalValue << std::endl;
         cout << "p-value: " << scientific << p_value << " is " << (p_value < significance ? "less" : "greater") << " than " << setprecision(2) << fixed << significance << endl;
-        //if (friedmanQ > criticalValue) { (original)
         bool result;
         if (p_value < significance) {
-            cout << Colors::MAGENTA() << "The null hypothesis H0 is rejected." << endl;
+            cout << Colors::GREEN() << "The null hypothesis H0 is rejected." << endl;
             result = true;
         } else {
-            cout << Colors::GREEN() << "The null hypothesis H0 is accepted." << endl;
+            cout << Colors::YELLOW() << "The null hypothesis H0 is accepted. Computed p-values will not be significant." << endl;
             result = false;
         }
         cout << Colors::BLUE() << "***************************************************************************************************************" << endl;
@@ -416,8 +423,8 @@ namespace platform {
                     efectiveColor = Colors::RED();
                 }
                 totals[model] += value;
-                // cout << efectiveColor << setw(12) << setprecision(10) << fixed << value << " ";
-                cout << efectiveColor << setw(12) << setprecision(10) << fixed << ranks[model] << " ";
+                cout << efectiveColor << setw(12) << setprecision(10) << fixed << value << " ";
+                // cout << efectiveColor << setw(12) << setprecision(10) << fixed << ranks[model] << " ";
             }
             cout << endl;
             odd = !odd;
@@ -471,12 +478,11 @@ namespace platform {
         if (friedman) {
             double significance = 0.05;
             vector<string> vModels(models.begin(), models.end());
-            if (friedmanTest(vModels, nDatasets, ranksTotal, significance)) {
-                // Stablish the control model as the one with the lowest averaged rank
-                int controlIdx = distance(ranks.begin(), min_element(ranks.begin(), ranks.end(), [](const auto& l, const auto& r) { return l.second < r.second; }));
-                auto wtl = computeWTL(controlIdx, vModels, table);
-                postHocHolm(controlIdx, vModels, nDatasets, ranksTotal, significance, wtl);
-            }
+            friedmanTest(vModels, nDatasets, ranksTotal, significance);
+            // Stablish the control model as the one with the lowest averaged rank
+            int controlIdx = distance(ranks.begin(), min_element(ranks.begin(), ranks.end(), [](const auto& l, const auto& r) { return l.second < r.second; }));
+            auto wtl = computeWTL(controlIdx, vModels, table);
+            postHocHolm(controlIdx, vModels, nDatasets, ranksTotal, significance, wtl);
         }
     }
     void BestResults::reportAll()
