@@ -7,6 +7,8 @@
 #include "Result.h"
 #include "Colors.h"
 #include <boost/math/distributions/chi_squared.hpp>
+#include <boost/math/distributions/normal.hpp>
+
 
 
 namespace fs = std::filesystem;
@@ -24,6 +26,11 @@ std::string ftime_to_string(TP tp)
     buffer << std::put_time(gmt, "%Y-%m-%d %H:%M");
     return buffer.str();
 }
+struct WTL {
+    int win;
+    int tie;
+    int loss;
+};
 
 namespace platform {
 
@@ -228,33 +235,110 @@ namespace platform {
         }
         return ranks;
     }
-    void friedmanTest(int nModels, int nDatasets, map<string, float> ranks, double significance = 0.05)
+
+    map<int, WTL> computeWTL(int controlIdx, vector<string> models, json table)
+    {
+        // Compute the WTL matrix
+        map<int, WTL> wtl;
+        int nModels = models.size();
+        for (int i = 0; i < nModels; ++i) {
+            wtl[i] = { 0, 0, 0 };
+        }
+        json origin = table.begin().value();
+        for (auto const& item : origin.items()) {
+            auto controlModel = models.at(controlIdx);
+            double controlValue = table[controlModel].at(item.key()).at(0).get<double>();
+            for (int i = 0; i < nModels; ++i) {
+                if (i == controlIdx) {
+                    continue;
+                }
+                double value = table[models[i]].at(item.key()).at(0).get<double>();
+                if (value < controlValue) {
+                    wtl[i].win++;
+                } else if (value == controlValue) {
+                    wtl[i].tie++;
+                } else {
+                    wtl[i].loss++;
+                }
+            }
+        }
+        return wtl;
+    }
+
+    void postHocHolm(int controlIdx, vector<string> models, int nDatasets, map<string, float> ranks, double significance, map<int, WTL> wtl)
+    {
+        // Reference https://link.springer.com/article/10.1007/s44196-022-00083-8
+        // Post-hoc Holm test
+        // Calculate the p-value for the models paired with the control model
+        int nModels = models.size();
+        map<int, double> stats; // p-value of each model paired with the control model
+        boost::math::normal dist(0.0, 1.0);
+        double diff = sqrt(nModels * (nModels + 1) / (6.0 * nDatasets));
+        for (int i = 0; i < nModels; i++) {
+            if (i == controlIdx) {
+                stats[i] = 0.0;
+                continue;
+            }
+            double z = abs(ranks.at(models[controlIdx]) - ranks.at(models[i])) / diff;
+            double p_value = (long double)2 * (1 - cdf(dist, z));
+            stats[i] = p_value;
+        }
+        // Sort the models by p-value
+        vector<pair<int, double>> statsOrder;
+        for (const auto& stat : stats) {
+            statsOrder.push_back({ stat.first, stat.second });
+        }
+        sort(statsOrder.begin(), statsOrder.end(), [](const pair<int, double>& a, const pair<int, double>& b) {
+            return a.second < b.second;
+            });
+
+        // Holm adjustment
+        for (int i = 0; i < statsOrder.size(); ++i) {
+            auto item = statsOrder.at(i);
+            double before = i == 0 ? 0.0 : statsOrder.at(i - 1).second;
+            double p_value = min((double)1.0, item.second * (nModels - i));
+            p_value = max(before, p_value);
+            statsOrder[i] = { item.first, p_value };
+        }
+        cout << Colors::CYAN();
+        cout << "  *************************************************************************************************************" << endl;
+        cout << "  Post-hoc Holm test: H0: 'There is no significant differences between the control model and the other models.'" << endl;
+        cout << "  Control model: " << models[controlIdx] << endl;
+        cout << "  Model        p-value      rank      win tie loss" << endl;
+        cout << "  ============ ============ ========= === === ====" << endl;
+        for (const auto& item : ranks) {
+            if (item.first == models.at(controlIdx)) {
+                continue;
+            }
+            auto idx = distance(models.begin(), find(models.begin(), models.end(), item.first));
+            double pvalue = 0.0;
+            for (const auto& stat : statsOrder) {
+                if (stat.first == idx) {
+                    pvalue = stat.second;
+                }
+            }
+            cout << "  " << left << setw(12) << item.first << " " << setprecision(10) << fixed << pvalue << setprecision(7) << " " << item.second;
+            cout << " " << right << setw(3) << wtl.at(idx).win << " " << setw(3) << wtl.at(idx).tie << " " << setw(4) << wtl.at(idx).loss << endl;
+        }
+        cout << "  *************************************************************************************************************" << endl;
+        cout << Colors::RESET();
+    }
+    bool friedmanTest(vector<string> models, int nDatasets, map<string, float> ranks, double significance = 0.05)
     {
         // Friedman test
         // Calculate the Friedman statistic
-        double sum = 0.0;
+        int nModels = models.size();
         if (nModels < 3 || nDatasets < 3) {
-            cout << "Can't make the Friedman test with less than 3 models and/or less than 3 datasets." << endl;
-            return;
+            throw runtime_error("Can't make the Friedman test with less than 3 models and/or less than 3 datasets.");
         }
         cout << Colors::BLUE() << endl;
-        cout << "*************************************************************************************" << endl;
+        cout << "***************************************************************************************************************" << endl;
         cout << Colors::GREEN() << "Friedman test: H0: 'There is no significant differences between all the classifiers.'" << Colors::BLUE() << endl;
-        for (const auto& rank : ranks) {
-            sum += rank.second;
-        }
         double degreesOfFreedom = nModels - 1.0;
         double sumSquared = 0;
-        // For original Friedman test
-        // for (const auto& rank : ranks) {
-        //     sumSquared += rank.second * rank.second;
-        // }
         for (const auto& rank : ranks) {
-            sumSquared += pow(rank.second / nDatasets, 2);
+            sumSquared += pow(rank.second, 2);
         }
-        cout << "Sum of ranks: " << sum << endl;
-        cout << "Sum of squared ranks: " << sumSquared << endl;
-        // (original) double friedmanQ = 12.0 / (nModels * nDatasets * (nModels + 1)) * sumSquared - 3 * nDatasets * (nModels + 1);
         // Compute the Friedman statistic as in https://link.springer.com/article/10.1007/s44196-022-00083-8
         double friedmanQ = 12.0 * nDatasets / (nModels * (nModels + 1)) * (sumSquared - (nModels * pow(nModels + 1, 2)) / 4);
         cout << "Friedman statistic: " << friedmanQ << endl;
@@ -264,14 +348,18 @@ namespace platform {
         double criticalValue = quantile(chiSquared, 1 - significance);
         std::cout << "Critical Chi-Square Value for df=" << fixed << (int)degreesOfFreedom
             << " and alpha=" << setprecision(2) << fixed << significance << ": " << setprecision(7) << scientific << criticalValue << std::endl;
-        cout << "p-value: " << scientific << p_value << endl;
+        cout << "p-value: " << scientific << p_value << " is " << (p_value < significance ? "less" : "greater") << " than " << setprecision(2) << fixed << significance << endl;
         //if (friedmanQ > criticalValue) { (original)
+        bool result;
         if (p_value < significance) {
             cout << Colors::MAGENTA() << "The null hypothesis H0 is rejected." << endl;
+            result = true;
         } else {
             cout << Colors::GREEN() << "The null hypothesis H0 is accepted." << endl;
+            result = false;
         }
-        cout << Colors::BLUE() << "*************************************************************************************" << endl;
+        cout << Colors::BLUE() << "***************************************************************************************************************" << endl;
+        return result;
     }
     void BestResults::printTableResults(set<string> models, json table)
     {
@@ -292,6 +380,7 @@ namespace platform {
         map<string, double> totals;
         map<string, float> ranks;
         map<string, float> ranksTotal;
+        int nDatasets = table.begin().value().size();
         for (const auto& model : models) {
             totals[model] = 0.0;
         }
@@ -355,10 +444,11 @@ namespace platform {
         // Output the averaged ranks
         cout << endl;
         int min = 1;
-        for (const auto& rank : ranksTotal) {
+        for (auto& rank : ranksTotal) {
             if (rank.second < min) {
                 min = rank.second;
             }
+            rank.second /= nDatasets;
         }
         cout << Colors::BLUE() << setw(30) << "    Ranks....................";
         for (const auto& model : models) {
@@ -375,11 +465,18 @@ namespace platform {
             if (ranksTotal[model] == min) {
                 efectiveColor = Colors::RED();
             }
-            cout << efectiveColor << setw(12) << setprecision(9) << fixed << (double)ranksTotal[model] / (double)origin.size() << " ";
+            cout << efectiveColor << setw(12) << setprecision(9) << fixed << (double)ranksTotal[model] << " ";
         }
         cout << endl;
         if (friedman) {
-            friedmanTest(models.size(), table.begin().value().size(), ranksTotal, 0.05);
+            double significance = 0.05;
+            vector<string> vModels(models.begin(), models.end());
+            if (friedmanTest(vModels, nDatasets, ranksTotal, significance)) {
+                // Stablish the control model as the one with the lowest averaged rank
+                int controlIdx = distance(ranks.begin(), min_element(ranks.begin(), ranks.end(), [](const auto& l, const auto& r) { return l.second < r.second; }));
+                auto wtl = computeWTL(controlIdx, vModels, table);
+                postHocHolm(controlIdx, vModels, nDatasets, ranksTotal, significance, wtl);
+            }
         }
     }
     void BestResults::reportAll()
