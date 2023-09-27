@@ -245,10 +245,18 @@ namespace platform {
         }
         double degreesOfFreedom = nModels - 1.0;
         double sumSquared = 0;
+        // For original Friedman test
+        // for (const auto& rank : ranks) {
+        //     sumSquared += rank.second * rank.second;
+        // }
         for (const auto& rank : ranks) {
-            sumSquared += rank.second * rank.second;
+            sumSquared += pow(rank.second / nDatasets, 2);
         }
-        double friedmanQ = 12.0 / (nModels * nDatasets * (nModels + 1)) * sumSquared - 3 * nDatasets * (nModels + 1);
+        cout << "Sum of ranks: " << sum << endl;
+        cout << "Sum of squared ranks: " << sumSquared << endl;
+        // (original) double friedmanQ = 12.0 / (nModels * nDatasets * (nModels + 1)) * sumSquared - 3 * nDatasets * (nModels + 1);
+        // Compute the Friedman statistic as in https://link.springer.com/article/10.1007/s44196-022-00083-8
+        double friedmanQ = 12.0 * nDatasets / (nModels * (nModels + 1)) * (sumSquared - (nModels * pow(nModels + 1, 2)) / 4);
         cout << "Friedman statistic: " << friedmanQ << endl;
         // Calculate the critical value
         boost::math::chi_squared chiSquared(degreesOfFreedom);
@@ -257,7 +265,8 @@ namespace platform {
         std::cout << "Critical Chi-Square Value for df=" << fixed << (int)degreesOfFreedom
             << " and alpha=" << setprecision(2) << fixed << significance << ": " << setprecision(7) << scientific << criticalValue << std::endl;
         cout << "p-value: " << scientific << p_value << endl;
-        if (friedmanQ > criticalValue) {
+        //if (friedmanQ > criticalValue) { (original)
+        if (p_value < significance) {
             cout << Colors::MAGENTA() << "The null hypothesis H0 is rejected." << endl;
         } else {
             cout << Colors::GREEN() << "The null hypothesis H0 is accepted." << endl;
@@ -318,7 +327,8 @@ namespace platform {
                     efectiveColor = Colors::RED();
                 }
                 totals[model] += value;
-                cout << efectiveColor << setw(12) << setprecision(10) << fixed << value << " ";
+                // cout << efectiveColor << setw(12) << setprecision(10) << fixed << value << " ";
+                cout << efectiveColor << setw(12) << setprecision(10) << fixed << ranks[model] << " ";
             }
             cout << endl;
             odd = !odd;
