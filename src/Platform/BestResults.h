@@ -14,10 +14,10 @@ namespace platform {
         void reportAll();
         void buildAll();
     private:
-        set<string> getModels();
+        vector<string> getModels();
         vector<string> loadResultFiles();
-        json buildTableResults(set<string> models);
-        void printTableResults(set<string> models, json table);
+        json buildTableResults(vector<string> models);
+        void printTableResults(vector<string> models, json table);
         string bestResultFile();
         json loadFile(const string& fileName);
         string path;

@@ -102,7 +102,7 @@ namespace platform {
         }
     }
 
-    void Statistics::postHocHolmTest()
+    void Statistics::postHocHolmTest(bool friedmanResult)
     {
         if (!fitted) {
             fit();
@@ -139,7 +139,8 @@ namespace platform {
             p_value = max(before, p_value);
             statsOrder[i] = { item.first, p_value };
         }
-        cout << Colors::MAGENTA();
+        auto color = friedmanResult ? Colors::GREEN() : Colors::YELLOW();
+        cout << color;
         cout << "  *************************************************************************************************************" << endl;
         cout << "  Post-hoc Holm test: H0: 'There is no significant differences between the control model and the other models.'" << endl;
         cout << "  Control model: " << models[controlIdx] << endl;
@@ -203,7 +204,7 @@ namespace platform {
             cout << Colors::YELLOW() << "The null hypothesis H0 is accepted. Computed p-values will not be significant." << endl;
             result = false;
         }
-        cout << Colors::BLUE() << "***************************************************************************************************************" << endl;
+        cout << Colors::BLUE() << "***************************************************************************************************************" << Colors::RESET() << endl;
         return result;
     }
 } // namespace platform

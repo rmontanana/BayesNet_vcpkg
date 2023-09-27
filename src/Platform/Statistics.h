@@ -17,7 +17,7 @@ namespace platform {
     public:
         Statistics(vector<string>& models, vector<string>& datasets, json data, double significance = 0.05);
         bool friedmanTest();
-        void postHocHolmTest();
+        void postHocHolmTest(bool friedmanResult);
     private:
         void fit();
         void computeRanks();
