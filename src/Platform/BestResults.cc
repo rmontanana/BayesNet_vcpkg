@@ -6,6 +6,7 @@
 #include "BestResults.h"
 #include "Result.h"
 #include "Colors.h"
+#include "Statistics.h"
 #include <boost/math/distributions/chi_squared.hpp>
 #include <boost/math/distributions/normal.hpp>
 
@@ -475,15 +476,23 @@ namespace platform {
             cout << efectiveColor << setw(12) << setprecision(9) << fixed << (double)ranksTotal[model] << " ";
         }
         cout << endl;
+        vector<string> vModels(models.begin(), models.end());
+        vector<string> datasets;
+        for (const auto& dataset : table.begin().value().items()) {
+            datasets.push_back(dataset.key());
+        }
+        double significance = 0.05;
         if (friedman) {
-            double significance = 0.05;
-            vector<string> vModels(models.begin(), models.end());
             friedmanTest(vModels, nDatasets, ranksTotal, significance);
             // Stablish the control model as the one with the lowest averaged rank
             int controlIdx = distance(ranks.begin(), min_element(ranks.begin(), ranks.end(), [](const auto& l, const auto& r) { return l.second < r.second; }));
             auto wtl = computeWTL(controlIdx, vModels, table);
             postHocHolm(controlIdx, vModels, nDatasets, ranksTotal, significance, wtl);
         }
+
+        Statistics stats(vModels, datasets, table, significance);
+        stats.friedmanTest();
+        stats.postHocHolmTest();
     }
     void BestResults::reportAll()
     {
