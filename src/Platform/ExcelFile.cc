@@ -38,12 +38,20 @@ namespace platform {
     }
     lxw_format* ExcelFile::efectiveStyle(const string& style)
     {
-        lxw_format* efectiveStyle;
-        if (style == "") {
-            efectiveStyle = NULL;
-        } else {
+        lxw_format* efectiveStyle = NULL;
+        if (style != "") {
             string suffix = row % 2 ? "_odd" : "_even";
-            efectiveStyle = styles.at(style + suffix);
+            try {
+                efectiveStyle = styles.at(style + suffix);
+            }
+            catch (const out_of_range& oor) {
+                try {
+                    efectiveStyle = styles.at(style);
+                }
+                catch (const out_of_range& oor) {
+                    throw invalid_argument("Style " + style + " not found");
+                }
+            }
         }
         return efectiveStyle;
     }

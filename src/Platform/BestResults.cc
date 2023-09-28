@@ -283,6 +283,7 @@ namespace platform {
     }
     void BestResults::reportAll(bool excel)
     {
+        double significance = 0.05;
         auto models = getModels();
         // Build the table of results
         json table = buildTableResults(models);
@@ -295,13 +296,12 @@ namespace platform {
         printTableResults(models, table);
         // Compute the Friedman test
         if (friedman) {
-            double significance = 0.05;
             Statistics stats(models, datasets, table, significance);
             auto result = stats.friedmanTest();
             stats.postHocHolmTest(result);
         }
         if (excel) {
-            BestResultsExcel excel(score, models, datasets, table, friedman);
+            BestResultsExcel excel(score, models, datasets, table, friedman, significance);
             excel.build();
         }
     }

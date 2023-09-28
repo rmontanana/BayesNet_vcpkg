@@ -1,3 +1,4 @@
+#include <sstream>
 #include "Statistics.h"
 #include "Colors.h"
 #include "Symbols.h"
@@ -6,7 +7,8 @@
 
 namespace platform {
 
-    Statistics::Statistics(vector<string>& models, vector<string>& datasets, json data, double significance) : models(models), datasets(datasets), data(data), significance(significance)
+    Statistics::Statistics(vector<string>& models, vector<string>& datasets, json data, double significance, bool output) :
+        models(models), datasets(datasets), data(data), significance(significance), output(output)
     {
         nModels = models.size();
         nDatasets = datasets.size();
@@ -110,6 +112,7 @@ namespace platform {
         if (!fitted) {
             fit();
         }
+        stringstream oss;
         // Reference https://link.springer.com/article/10.1007/s44196-022-00083-8
         // Post-hoc Holm test
         // Calculate the p-value for the models paired with the control model
@@ -142,13 +145,14 @@ namespace platform {
             p_value = max(before, p_value);
             statsOrder[i] = { item.first, p_value };
         }
+        holmResult.model = models.at(controlIdx);
         auto color = friedmanResult ? Colors::CYAN() : Colors::YELLOW();
-        cout << color;
-        cout << "  *************************************************************************************************************" << endl;
-        cout << "  Post-hoc Holm test: H0: 'There is no significant differences between the control model and the other models.'" << endl;
-        cout << "  Control model: " << models[controlIdx] << endl;
-        cout << "  " << left << setw(maxModelName) << string("Model") << " p-value      rank      win tie loss Status" << endl;
-        cout << "  " << string(maxModelName, '=') << " ============ ========= === === ==== =============" << endl;
+        oss << color;
+        oss << "  *************************************************************************************************************" << endl;
+        oss << "  Post-hoc Holm test: H0: 'There is no significant differences between the control model and the other models.'" << endl;
+        oss << "  Control model: " << models.at(controlIdx) << endl;
+        oss << "  " << left << setw(maxModelName) << string("Model") << " p-value      rank      win tie loss Status" << endl;
+        oss << "  " << string(maxModelName, '=') << " ============ ========= === === ==== =============" << endl;
         // sort ranks from lowest to highest
         vector<pair<string, float>> ranksOrder;
         for (const auto& rank : ranks) {
@@ -171,23 +175,28 @@ namespace platform {
             auto colorStatus = pvalue > significance ? Colors::GREEN() : Colors::MAGENTA();
             auto status = pvalue > significance ? Symbols::check_mark : Symbols::cross;
             auto textStatus = pvalue > significance ? " accepted H0" : " rejected H0";
-            cout << "  " << colorStatus << left << setw(maxModelName) << item.first << " " << setprecision(6) << scientific << pvalue << setprecision(7) << fixed << " " << item.second;
-            cout << " " << right << setw(3) << wtl.at(idx).win << " " << setw(3) << wtl.at(idx).tie << " " << setw(4) << wtl.at(idx).loss;
-            cout << " " << status << textStatus << endl;
+            oss << "  " << colorStatus << left << setw(maxModelName) << item.first << " " << setprecision(6) << scientific << pvalue << setprecision(7) << fixed << " " << item.second;
+            oss << " " << right << setw(3) << wtl.at(idx).win << " " << setw(3) << wtl.at(idx).tie << " " << setw(4) << wtl.at(idx).loss;
+            oss << " " << status << textStatus << endl;
+            holmResult.holmLines.push_back({ item.first, pvalue, item.second, wtl.at(idx), pvalue < significance });
         }
-        cout << color << "  *************************************************************************************************************" << endl;
-        cout << Colors::RESET();
+        oss << color << "  *************************************************************************************************************" << endl;
+        oss << Colors::RESET();
+        if (output) {
+            cout << oss.str();
+        }
     }
     bool Statistics::friedmanTest()
     {
         if (!fitted) {
             fit();
         }
+        stringstream oss;
         // Friedman test
         // Calculate the Friedman statistic
-        cout << Colors::BLUE() << endl;
-        cout << "***************************************************************************************************************" << endl;
-        cout << Colors::GREEN() << "Friedman test: H0: 'There is no significant differences between all the classifiers.'" << Colors::BLUE() << endl;
+        oss << Colors::BLUE() << endl;
+        oss << "***************************************************************************************************************" << endl;
+        oss << Colors::GREEN() << "Friedman test: H0: 'There is no significant differences between all the classifiers.'" << Colors::BLUE() << endl;
         double degreesOfFreedom = nModels - 1.0;
         double sumSquared = 0;
         for (const auto& rank : ranks) {
@@ -195,23 +204,35 @@ namespace platform {
         }
         // Compute the Friedman statistic as in https://link.springer.com/article/10.1007/s44196-022-00083-8
         double friedmanQ = 12.0 * nDatasets / (nModels * (nModels + 1)) * (sumSquared - (nModels * pow(nModels + 1, 2)) / 4);
-        cout << "Friedman statistic: " << friedmanQ << endl;
         // Calculate the critical value
         boost::math::chi_squared chiSquared(degreesOfFreedom);
         long double p_value = (long double)1.0 - cdf(chiSquared, friedmanQ);
         double criticalValue = quantile(chiSquared, 1 - significance);
-        std::cout << "Critical Chi-Square Value for df=" << fixed << (int)degreesOfFreedom
+        oss << "Friedman statistic: " << friedmanQ << endl;
+        oss << "Critical χ2 Value for df=" << fixed << (int)degreesOfFreedom
             << " and alpha=" << setprecision(2) << fixed << significance << ": " << setprecision(7) << scientific << criticalValue << std::endl;
-        cout << "p-value: " << scientific << p_value << " is " << (p_value < significance ? "less" : "greater") << " than " << setprecision(2) << fixed << significance << endl;
+        oss << "p-value: " << scientific << p_value << " is " << (p_value < significance ? "less" : "greater") << " than " << setprecision(2) << fixed << significance << endl;
         bool result;
         if (p_value < significance) {
-            cout << Colors::GREEN() << "The null hypothesis H0 is rejected." << endl;
+            oss << Colors::GREEN() << "The null hypothesis H0 is rejected." << endl;
             result = true;
         } else {
-            cout << Colors::YELLOW() << "The null hypothesis H0 is accepted. Computed p-values will not be significant." << endl;
+            oss << Colors::YELLOW() << "The null hypothesis H0 is accepted. Computed p-values will not be significant." << endl;
             result = false;
         }
-        cout << Colors::BLUE() << "***************************************************************************************************************" << Colors::RESET() << endl;
+        oss << Colors::BLUE() << "***************************************************************************************************************" << Colors::RESET() << endl;
+        if (output) {
+            cout << oss.str();
+        }
+        friedmanResult = { friedmanQ, criticalValue, p_value, result };
         return result;
+    }
+    FriedmanResult& Statistics::getFriedmanResult()
+    {
+        return friedmanResult;
+    }
+    HolmResult& Statistics::getHolmResult()
+    {
+        return holmResult;
     }
 } // namespace platform

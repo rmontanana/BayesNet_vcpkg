@@ -8,9 +8,10 @@ using namespace std;
 using json = nlohmann::json;
 
 namespace platform {
+
     class BestResultsExcel : ExcelFile {
     public:
-        BestResultsExcel(string score, vector<string> models, vector<string> datasets, json table, bool friedman);
+        BestResultsExcel(string score, vector<string> models, vector<string> datasets, json table, bool friedman, double significance);
         ~BestResultsExcel();
         void build();
     private:
@@ -24,6 +25,7 @@ namespace platform {
         vector<string> datasets;
         json table;
         bool friedman;
+        double significance;
         int modelNameSize = 12; // Min size of the column
         int datasetNameSize = 25; // Min size of the column
     };
