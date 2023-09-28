@@ -12,7 +12,7 @@ add_executable(best best.cc BestResults.cc Result.cc Statistics.cc BestResultsEx
 target_link_libraries(main BayesNet ArffFiles mdlp "${TORCH_LIBRARIES}")
 if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux")
     target_link_libraries(manage "${TORCH_LIBRARIES}" libxlsxwriter.so ArffFiles mdlp stdc++fs)
-    target_link_libraries(best Boost::boost "${XLSXWRITER_LIB}" stdc++fs)
+    target_link_libraries(best Boost::boost libxlsxwriter.so stdc++fs)
 else()
     target_link_libraries(manage "${TORCH_LIBRARIES}" "${XLSXWRITER_LIB}" ArffFiles mdlp)
     target_link_libraries(best Boost::boost "${XLSXWRITER_LIB}")
