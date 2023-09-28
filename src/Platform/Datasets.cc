@@ -5,7 +5,7 @@
 namespace platform {
     void Datasets::load()
     {
-        ifstream catalog(path + "/all.txt");
+        ifstream catalog(path + "all.txt");
         if (catalog.is_open()) {
             string line;
             while (getline(catalog, line)) {
@@ -16,7 +16,7 @@ namespace platform {
             }
             catalog.close();
         } else {
-            throw invalid_argument("Unable to open catalog file. [" + path + "/all.txt" + "]");
+            throw invalid_argument("Unable to open catalog file. [" + path + "all.txt" + "]");
         }
     }
     vector<string> Datasets::getNames()
