@@ -2,10 +2,10 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <set>
 #include "BestResults.h"
 #include "Result.h"
 #include "Colors.h"
+#include "Statistics.h"
 
 
 
@@ -24,7 +24,6 @@ std::string ftime_to_string(TP tp)
     buffer << std::put_time(gmt, "%Y-%m-%d %H:%M");
     return buffer.str();
 }
-
 namespace platform {
 
     string BestResults::build()
@@ -106,9 +105,10 @@ namespace platform {
         }
         throw invalid_argument("Unable to open result file. [" + fileName + "]");
     }
-    set<string> BestResults::getModels()
+    vector<string> BestResults::getModels()
     {
         set<string> models;
+        vector<string> result;
         auto files = loadResultFiles();
         if (files.size() == 0) {
             cerr << Colors::MAGENTA() << "No result files were found!" << Colors::RESET() << endl;
@@ -121,7 +121,8 @@ namespace platform {
             // add the model to the vector of models
             models.insert(fileModel);
         }
-        return models;
+        result = vector<string>(models.begin(), models.end());
+        return result;
     }
 
     void BestResults::buildAll()
@@ -163,7 +164,7 @@ namespace platform {
             odd = !odd;
         }
     }
-    json BestResults::buildTableResults(set<string> models)
+    json BestResults::buildTableResults(vector<string> models)
     {
         int numberOfDatasets = 0;
         bool first = true;
@@ -200,35 +201,8 @@ namespace platform {
         table["dateTable"] = ftime_to_string(maxDate);
         return table;
     }
-    map<string, float> assignRanks(vector<pair<string, double>>& ranksOrder)
-    {
-        // sort the ranksOrder vector by value
-        sort(ranksOrder.begin(), ranksOrder.end(), [](const pair<string, double>& a, const pair<string, double>& b) {
-            return a.second > b.second;
-            });
-        //Assign ranks to  values and if they are the same they share the same averaged rank
-        map<string, float> ranks;
-        for (int i = 0; i < ranksOrder.size(); i++) {
-            ranks[ranksOrder[i].first] = i + 1.0;
-        }
-        int i = 0;
-        while (i < static_cast<int>(ranksOrder.size())) {
-            int j = i + 1;
-            int sumRanks = ranks[ranksOrder[i].first];
-            while (j < static_cast<int>(ranksOrder.size()) && ranksOrder[i].second == ranksOrder[j].second) {
-                sumRanks += ranks[ranksOrder[j++].first];
-            }
-            if (j > i + 1) {
-                float averageRank = (float)sumRanks / (j - i);
-                for (int k = i; k < j; k++) {
-                    ranks[ranksOrder[k].first] = averageRank;
-                }
-            }
-            i = j;
-        }
-        return ranks;
-    }
-    void BestResults::printTableResults(set<string> models, json table)
+
+    void BestResults::printTableResults(vector<string> models, json table)
     {
         cout << Colors::GREEN() << "Best results for " << score << " as of " << table.at("dateTable").get<string>() << endl;
         cout << "------------------------------------------------" << endl;
@@ -245,6 +219,7 @@ namespace platform {
         auto i = 0;
         bool odd = true;
         map<string, double> totals;
+        int nDatasets = table.begin().value().size();
         for (const auto& model : models) {
             totals[model] = 0.0;
         }
@@ -254,17 +229,13 @@ namespace platform {
             cout << color << setw(3) << fixed << right << i++ << " ";
             cout << setw(25) << left << item.key() << " ";
             double maxValue = 0;
-            vector<pair<string, double>> ranksOrder;
             // Find out the max value for this dataset
             for (const auto& model : models) {
                 double value = table[model].at(item.key()).at(0).get<double>();
                 if (value > maxValue) {
                     maxValue = value;
                 }
-                ranksOrder.push_back({ model, value });
             }
-            // Assign the ranks
-            auto ranks = assignRanks(ranksOrder);
             // Print the row with red colors on max values
             for (const auto& model : models) {
                 string efectiveColor = color;
@@ -297,22 +268,6 @@ namespace platform {
             }
             cout << efectiveColor << setw(12) << setprecision(9) << fixed << totals[model] << " ";
         }
-        // Output the averaged ranks
-        cout << endl;
-        int min = 1;
-        for (const auto& rank : ranks) {
-            if (rank.second < min) {
-                min = rank.second;
-            }
-        }
-        cout << Colors::GREEN() << setw(30) << "    Averaged ranks...........";
-        for (const auto& model : models) {
-            string efectiveColor = Colors::GREEN();
-            if (ranks[model] == min) {
-                efectiveColor = Colors::RED();
-            }
-            cout << efectiveColor << setw(12) << setprecision(10) << fixed << (double)ranks[model] / (double)origin.size() << " ";
-        }
         cout << endl;
     }
     void BestResults::reportAll()
@@ -322,5 +277,16 @@ namespace platform {
         json table = buildTableResults(models);
         // Print the table of results
         printTableResults(models, table);
+        // Compute the Friedman test
+        if (friedman) {
+            vector<string> datasets;
+            for (const auto& dataset : table.begin().value().items()) {
+                datasets.push_back(dataset.key());
+            }
+            double significance = 0.05;
+            Statistics stats(models, datasets, table, significance);
+            auto result = stats.friedmanTest();
+            stats.postHocHolmTest(result);
+        }
     }
 }

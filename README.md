@@ -4,9 +4,13 @@ Bayesian Network Classifier with libtorch from scratch
 
 ## 0. Setup
 
-### libxlswriter
-
 Before compiling BayesNet.
+
+### boost library
+
+[Getting Started](<https://www.boost.org/doc/libs/1_83_0/more/getting_started/index.html>)
+
+### libxlswriter
 
 ```bash
 cd lib/libxlsxwriter

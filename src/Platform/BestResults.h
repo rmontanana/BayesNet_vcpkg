@@ -8,21 +8,22 @@ using json = nlohmann::json;
 namespace platform {
     class BestResults {
     public:
-        explicit BestResults(const string& path, const string& score, const string& model) : path(path), score(score), model(model) {}
+        explicit BestResults(const string& path, const string& score, const string& model, bool friedman) : path(path), score(score), model(model), friedman(friedman) {}
         string build();
         void reportSingle();
         void reportAll();
         void buildAll();
     private:
-        set<string> getModels();
+        vector<string> getModels();
         vector<string> loadResultFiles();
-        json buildTableResults(set<string> models);
-        void printTableResults(set<string> models, json table);
+        json buildTableResults(vector<string> models);
+        void printTableResults(vector<string> models, json table);
         string bestResultFile();
         json loadFile(const string& fileName);
         string path;
         string score;
         string model;
+        bool friedman;
     };
 }
 #endif //BESTRESULTS_H
