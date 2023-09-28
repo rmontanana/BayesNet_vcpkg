@@ -12,14 +12,28 @@ setup: ## Install dependencies for tests and coverage
 	fi
 
 dest ?= ../discretizbench
+dest2 ?= ../covbench
+dest3 ?= ../odtebench
 copy: ## Copy binary files to selected folder
 	@echo "Destination folder: $(dest)"
+	@echo "Destination folder: $(dest2)"
+	@echo "Destination folder: $(dest3)"
 	make build
 	@echo ">>> Copying files to $(dest)"
 	@cp build/src/Platform/main $(dest)
 	@cp build/src/Platform/list $(dest)
 	@cp build/src/Platform/manage $(dest)
 	@cp build/src/Platform/best $(dest)
+	@echo ">>> Copying files to $(dest2)"
+	@cp build/src/Platform/main $(dest2)
+	@cp build/src/Platform/list $(dest2)
+	@cp build/src/Platform/manage $(dest2)
+	@cp build/src/Platform/best $(dest2)
+	@echo ">>> Copying files to $(dest3)"
+	@cp build/src/Platform/main $(dest3)
+	@cp build/src/Platform/list $(dest3)
+	@cp build/src/Platform/manage $(dest3)
+	@cp build/src/Platform/best $(dest3)
 	@echo ">>> Done"
 
 dependency: ## Create a dependency graph diagram of the project (build/dependency.png)

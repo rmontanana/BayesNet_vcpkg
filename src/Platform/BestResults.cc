@@ -1,4 +1,5 @@
 #include <filesystem>
+#include <set>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -6,7 +7,7 @@
 #include "Result.h"
 #include "Colors.h"
 #include "Statistics.h"
-
+#include "BestResultsExcel.h"
 
 
 namespace fs = std::filesystem;
@@ -124,6 +125,14 @@ namespace platform {
         result = vector<string>(models.begin(), models.end());
         return result;
     }
+    vector<string> BestResults::getDatasets(json table)
+    {
+        vector<string> datasets;
+        for (const auto& dataset : table.items()) {
+            datasets.push_back(dataset.key());
+        }
+        return datasets;
+    }
 
     void BestResults::buildAll()
     {
@@ -147,16 +156,18 @@ namespace platform {
         }
         auto date = ftime_to_string(filesystem::last_write_time(bestFileName));
         auto data = loadFile(bestFileName);
+        auto datasets = getDatasets(data);
+        int maxDatasetName = (*max_element(datasets.begin(), datasets.end(), [](const string& a, const string& b) { return a.size() < b.size(); })).size();
         cout << Colors::GREEN() << "Best results for " << model << " and " << score << " as of " << date << endl;
         cout << "--------------------------------------------------------" << endl;
-        cout << Colors::GREEN() << " #  Dataset                   Score       File                                                               Hyperparameters" << endl;
-        cout << "=== ========================= =========== ================================================================== ================================================= " << endl;
+        cout << Colors::GREEN() << " #  " << setw(maxDatasetName + 1) << left << string("Dataset") << "Score       File                                                               Hyperparameters" << endl;
+        cout << "=== " << string(maxDatasetName, '=') << " =========== ================================================================== ================================================= " << endl;
         auto i = 0;
         bool odd = true;
         for (auto const& item : data.items()) {
             auto color = odd ? Colors::BLUE() : Colors::CYAN();
             cout << color << setw(3) << fixed << right << i++ << " ";
-            cout << setw(25) << left << item.key() << " ";
+            cout << setw(maxDatasetName) << left << item.key() << " ";
             cout << setw(11) << setprecision(9) << fixed << item.value().at(0).get<double>() << " ";
             cout << setw(66) << item.value().at(2).get<string>() << " ";
             cout << item.value().at(1) << " ";
@@ -206,14 +217,14 @@ namespace platform {
     {
         cout << Colors::GREEN() << "Best results for " << score << " as of " << table.at("dateTable").get<string>() << endl;
         cout << "------------------------------------------------" << endl;
-        cout << Colors::GREEN() << " #  Dataset                   ";
+        cout << Colors::GREEN() << " #  " << setw(maxDatasetName + 1) << left << string("Dataset");
         for (const auto& model : models) {
-            cout << setw(12) << left << model << " ";
+            cout << setw(maxModelName) << left << model << " ";
         }
         cout << endl;
-        cout << "=== ========================= ";
+        cout << "=== " << string(maxDatasetName, '=') << " ";
         for (const auto& model : models) {
-            cout << "============ ";
+            cout << string(maxModelName, '=') << " ";
         }
         cout << endl;
         auto i = 0;
@@ -227,7 +238,7 @@ namespace platform {
         for (auto const& item : origin.items()) {
             auto color = odd ? Colors::BLUE() : Colors::CYAN();
             cout << color << setw(3) << fixed << right << i++ << " ";
-            cout << setw(25) << left << item.key() << " ";
+            cout << setw(maxDatasetName) << left << item.key() << " ";
             double maxValue = 0;
             // Find out the max value for this dataset
             for (const auto& model : models) {
@@ -244,17 +255,17 @@ namespace platform {
                     efectiveColor = Colors::RED();
                 }
                 totals[model] += value;
-                cout << efectiveColor << setw(12) << setprecision(10) << fixed << value << " ";
+                cout << efectiveColor << setw(maxModelName) << setprecision(maxModelName - 2) << fixed << value << " ";
             }
             cout << endl;
             odd = !odd;
         }
-        cout << Colors::GREEN() << "=== ========================= ";
+        cout << Colors::GREEN() << "=== " << string(maxDatasetName, '=') << " ";
         for (const auto& model : models) {
-            cout << "============ ";
+            cout << string(maxModelName, '=') << " ";
         }
         cout << endl;
-        cout << Colors::GREEN() << setw(30) << "    Totals...................";
+        cout << Colors::GREEN() << setw(5 + maxDatasetName) << "    Totals...................";
         double max = 0.0;
         for (const auto& total : totals) {
             if (total.second > max) {
@@ -266,27 +277,32 @@ namespace platform {
             if (totals[model] == max) {
                 efectiveColor = Colors::RED();
             }
-            cout << efectiveColor << setw(12) << setprecision(9) << fixed << totals[model] << " ";
+            cout << efectiveColor << right << setw(maxModelName) << setprecision(maxModelName - 4) << fixed << totals[model] << " ";
         }
         cout << endl;
     }
-    void BestResults::reportAll()
+    void BestResults::reportAll(bool excel)
     {
         auto models = getModels();
         // Build the table of results
         json table = buildTableResults(models);
+        vector<string> datasets = getDatasets(table.begin().value());
+        maxModelName = (*max_element(models.begin(), models.end(), [](const string& a, const string& b) { return a.size() < b.size(); })).size();
+        maxModelName = max(12, maxModelName);
+        maxDatasetName = (*max_element(datasets.begin(), datasets.end(), [](const string& a, const string& b) { return a.size() < b.size(); })).size();
+        maxDatasetName = max(25, maxDatasetName);
         // Print the table of results
         printTableResults(models, table);
         // Compute the Friedman test
         if (friedman) {
-            vector<string> datasets;
-            for (const auto& dataset : table.begin().value().items()) {
-                datasets.push_back(dataset.key());
-            }
             double significance = 0.05;
             Statistics stats(models, datasets, table, significance);
             auto result = stats.friedmanTest();
             stats.postHocHolmTest(result);
+        }
+        if (excel) {
+            BestResultsExcel excel(models, datasets, table, friedman);
+            excel.build();
         }
     }
 }

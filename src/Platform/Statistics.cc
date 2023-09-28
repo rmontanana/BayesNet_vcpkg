@@ -23,6 +23,8 @@ namespace platform {
         // Set the control model as the one with the lowest average rank
         controlIdx = distance(ranks.begin(), min_element(ranks.begin(), ranks.end(), [](const auto& l, const auto& r) { return l.second < r.second; }));
         computeWTL();
+        maxModelName = (*max_element(models.begin(), models.end(), [](const string& a, const string& b) { return a.size() < b.size(); })).size();
+        maxDatasetName = (*max_element(datasets.begin(), datasets.end(), [](const string& a, const string& b) { return a.size() < b.size(); })).size();
         fitted = true;
     }
     map<string, float> assignRanks(vector<pair<string, double>>& ranksOrder)
@@ -145,8 +147,8 @@ namespace platform {
         cout << "  *************************************************************************************************************" << endl;
         cout << "  Post-hoc Holm test: H0: 'There is no significant differences between the control model and the other models.'" << endl;
         cout << "  Control model: " << models[controlIdx] << endl;
-        cout << "  Model        p-value      rank      win tie loss Status" << endl;
-        cout << "  ============ ============ ========= === === ==== =============" << endl;
+        cout << "  " << left << setw(maxModelName) << string("Model") << " p-value      rank      win tie loss Status" << endl;
+        cout << "  " << string(maxModelName, '=') << " ============ ========= === === ==== =============" << endl;
         // sort ranks from lowest to highest
         vector<pair<string, float>> ranksOrder;
         for (const auto& rank : ranks) {
@@ -169,7 +171,7 @@ namespace platform {
             auto colorStatus = pvalue > significance ? Colors::GREEN() : Colors::MAGENTA();
             auto status = pvalue > significance ? Symbols::check_mark : Symbols::cross;
             auto textStatus = pvalue > significance ? " accepted H0" : " rejected H0";
-            cout << "  " << colorStatus << left << setw(12) << item.first << " " << setprecision(6) << scientific << pvalue << setprecision(7) << fixed << " " << item.second;
+            cout << "  " << colorStatus << left << setw(maxModelName) << item.first << " " << setprecision(6) << scientific << pvalue << setprecision(7) << fixed << " " << item.second;
             cout << " " << right << setw(3) << wtl.at(idx).win << " " << setw(3) << wtl.at(idx).tie << " " << setw(4) << wtl.at(idx).loss;
             cout << " " << status << textStatus << endl;
         }

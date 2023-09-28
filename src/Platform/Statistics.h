@@ -32,6 +32,8 @@ namespace platform {
         int controlIdx = 0;
         map<int, WTL> wtl;
         map<string, float> ranks;
+        int maxModelName = 0;
+        int maxDatasetName = 0;
     };
 }
 #endif // !STATISTICS_H

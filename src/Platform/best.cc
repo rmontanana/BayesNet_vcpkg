@@ -14,6 +14,7 @@ argparse::ArgumentParser manageArguments(int argc, char** argv)
     program.add_argument("--build").help("build best score results file").default_value(false).implicit_value(true);
     program.add_argument("--report").help("report of best score results file").default_value(false).implicit_value(true);
     program.add_argument("--friedman").help("Friedman test").default_value(false).implicit_value(true);
+    program.add_argument("--excel").help("Output to excel").default_value(false).implicit_value(true);
     try {
         program.parse_args(argc, argv);
         auto model = program.get<string>("model");
@@ -21,8 +22,24 @@ argparse::ArgumentParser manageArguments(int argc, char** argv)
         auto build = program.get<bool>("build");
         auto report = program.get<bool>("report");
         auto friedman = program.get<bool>("friedman");
+        auto excel = program.get<bool>("excel");
         if (model == "" || score == "") {
             throw runtime_error("Model and score name must be supplied");
+        }
+        if (friedman && model != "any") {
+            cerr << "Friedman test can only be used with all models" << endl;
+            cerr << program;
+            exit(1);
+        }
+        if (excel && model != "any") {
+            cerr << "Excel ourput can only be used with all models" << endl;
+            cerr << program;
+            exit(1);
+        }
+        if (!report && !build) {
+            cerr << "Either build, report or both, have to be selected to do anything!" << endl;
+            cerr << program;
+            exit(1);
         }
     }
     catch (const exception& err) {
@@ -41,16 +58,7 @@ int main(int argc, char** argv)
     auto build = program.get<bool>("build");
     auto report = program.get<bool>("report");
     auto friedman = program.get<bool>("friedman");
-    if (friedman && model != "any") {
-        cerr << "Friedman test can only be used with all models" << endl;
-        cerr << program;
-        exit(1);
-    }
-    if (!report && !build) {
-        cerr << "Either build, report or both, have to be selected to do anything!" << endl;
-        cerr << program;
-        exit(1);
-    }
+    auto excel = program.get<bool>("excel");
     auto results = platform::BestResults(platform::Paths::results(), score, model, friedman);
     if (build) {
         if (model == "any") {
@@ -62,7 +70,7 @@ int main(int argc, char** argv)
     }
     if (report) {
         if (model == "any") {
-            results.reportAll();
+            results.reportAll(excel);
         } else {
             results.reportSingle();
         }
