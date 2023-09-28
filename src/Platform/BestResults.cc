@@ -301,7 +301,7 @@ namespace platform {
             stats.postHocHolmTest(result);
         }
         if (excel) {
-            BestResultsExcel excel(models, datasets, table, friedman);
+            BestResultsExcel excel(score, models, datasets, table, friedman);
             excel.build();
         }
     }

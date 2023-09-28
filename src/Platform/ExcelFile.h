@@ -1,11 +1,19 @@
 #ifndef EXCELFILE_H
 #define EXCELFILE_H
+#include <locale>
 #include <string>
 #include <map>
 #include "xlsxwriter.h"
 
 using namespace std;
 namespace platform {
+    struct separated : numpunct<char> {
+        char do_decimal_point() const { return ','; }
+
+        char do_thousands_sep() const { return '.'; }
+
+        string do_grouping() const { return "\03"; }
+    };
     class ExcelFile {
     public:
         ExcelFile();

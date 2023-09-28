@@ -10,7 +10,7 @@ using json = nlohmann::json;
 namespace platform {
     class BestResultsExcel : ExcelFile {
     public:
-        BestResultsExcel(vector<string> models, vector<string> datasets, json table, bool friedman);
+        BestResultsExcel(string score, vector<string> models, vector<string> datasets, json table, bool friedman);
         ~BestResultsExcel();
         void build();
     private:
@@ -19,11 +19,13 @@ namespace platform {
         void footer();
         void formatColumns();
         const string fileName = "BestResults.xlsx";
+        string score;
         vector<string> models;
         vector<string> datasets;
         json table;
         bool friedman;
-
+        int modelNameSize = 12; // Min size of the column
+        int datasetNameSize = 25; // Min size of the column
     };
 }
 #endif //BESTRESULTS_EXCEL_H

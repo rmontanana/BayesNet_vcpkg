@@ -7,8 +7,6 @@
 #include "Colors.h"
 namespace platform {
     using namespace std;
-    const int MAXLL = 128;
-
     class ReportExcel : public ReportBase, public ExcelFile {
     public:
         explicit ReportExcel(json data_, bool compare, lxw_workbook* workbook);
