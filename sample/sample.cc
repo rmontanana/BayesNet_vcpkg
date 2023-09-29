@@ -58,52 +58,6 @@ pair<vector<vector<int>>, vector<int>> extract_indices(vector<int> indices, vect
 
 int main(int argc, char** argv)
 {
-    torch::Tensor weights_ = torch::full({ 10 }, 1.0 / 10, torch::kFloat64);
-    torch::Tensor y_ = torch::tensor({ 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 }, torch::kInt32);
-    torch::Tensor ypred = torch::tensor({ 1, 1, 1, 0, 0, 1, 1, 1, 1, 0 }, torch::kInt32);
-    cout << "Initial weights_: " << endl;
-    for (int i = 0; i < 10; i++) {
-        cout << weights_.index({ i }).item<double>() << ", ";
-    }
-    cout << "end." << endl;
-    cout << "y_: " << endl;
-    for (int i = 0; i < 10; i++) {
-        cout << y_.index({ i }).item<int>() << ", ";
-    }
-    cout << "end." << endl;
-    cout << "ypred: " << endl;
-    for (int i = 0; i < 10; i++) {
-        cout << ypred.index({ i }).item<int>() << ", ";
-    }
-    cout << "end." << endl;
-    auto mask_wrong = ypred != y_;
-    auto mask_right = ypred == y_;
-    auto masked_weights = weights_ * mask_wrong.to(weights_.dtype());
-    double epsilon_t = masked_weights.sum().item<double>();
-    cout << "epsilon_t: " << epsilon_t << endl;
-    double wt = (1 - epsilon_t) / epsilon_t;
-    cout << "wt: " << wt << endl;
-    double alpha_t = epsilon_t == 0 ? 1 : 0.5 * log(wt);
-    cout << "alpha_t: " << alpha_t << endl;
-    // Step 3.2: Update weights for next classifier
-    // Step 3.2.1: Update weights of wrong samples
-    cout << "exp(alpha_t): " << exp(alpha_t) << endl;
-    cout << "exp(-alpha_t): " << exp(-alpha_t) << endl;
-    weights_ += mask_wrong.to(weights_.dtype()) * exp(alpha_t) * weights_;
-    // Step 3.2.2: Update weights of right samples
-    weights_ += mask_right.to(weights_.dtype()) * exp(-alpha_t) * weights_;
-    // Step 3.3: Normalise the weights
-    double totalWeights = torch::sum(weights_).item<double>();
-    cout << "totalWeights: " << totalWeights << endl;
-    cout << "Before normalization: " << endl;
-    for (int i = 0; i < 10; i++) {
-        cout << weights_.index({ i }).item<double>() << endl;
-    }
-    weights_ = weights_ / totalWeights;
-    cout << "After normalization: " << endl;
-    for (int i = 0; i < 10; i++) {
-        cout << weights_.index({ i }).item<double>() << endl;
-    }
     map<string, bool> datasets = {
             {"diabetes",           true},
             {"ecoli",              true},
