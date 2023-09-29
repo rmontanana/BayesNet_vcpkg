@@ -9,7 +9,6 @@
 #include "TAN.h"
 #include "SPODE.h"
 #include "AODE.h"
-#include "platformUtils.h"
 
 TEST_CASE("Test Bayesian Classifiers score", "[BayesNet]")
 {

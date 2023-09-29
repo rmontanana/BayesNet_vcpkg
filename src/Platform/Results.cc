@@ -1,5 +1,4 @@
 #include <filesystem>
-#include "platformUtils.h"
 #include "Results.h"
 #include "ReportConsole.h"
 #include "ReportExcel.h"

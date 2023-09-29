@@ -4,7 +4,7 @@
 #include <map>
 #include <fstream>
 #include <sstream>
-#include "platformUtils.h"
+#include "Dataset.h"
 namespace platform {
     class DotEnv {
     private:
@@ -51,7 +51,7 @@ namespace platform {
             auto seeds_str = env["seeds"];
             seeds_str = trim(seeds_str);
             seeds_str = seeds_str.substr(1, seeds_str.size() - 2);
-            auto seeds_str_split = split(seeds_str, ',');
+            auto seeds_str_split = Dataset::split(seeds_str, ',');
             transform(seeds_str_split.begin(), seeds_str_split.end(), back_inserter(seeds), [](const std::string& str) {
                 return stoi(str);
                 });

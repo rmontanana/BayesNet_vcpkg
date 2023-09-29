@@ -1,7 +1,6 @@
 #include <iostream>
 #include <argparse/argparse.hpp>
 #include <nlohmann/json.hpp>
-#include "platformUtils.h"
 #include "Experiment.h"
 #include "Datasets.h"
 #include "DotEnv.h"
@@ -19,9 +18,6 @@ argparse::ArgumentParser manageArguments(int argc, char** argv)
     argparse::ArgumentParser program("main");
     program.add_argument("-d", "--dataset").default_value("").help("Dataset file name");
     program.add_argument("--hyperparameters").default_value("{}").help("Hyperparamters passed to the model in Experiment");
-    program.add_argument("-p", "--path")
-        .help("folder where the data files are located, default")
-        .default_value(string{ platform::Paths::datasets() });
     program.add_argument("-m", "--model")
         .help("Model to use " + platform::Models::instance()->toString())
         .action([](const std::string& value) {
@@ -55,13 +51,11 @@ argparse::ArgumentParser manageArguments(int argc, char** argv)
     try {
         program.parse_args(argc, argv);
         auto file_name = program.get<string>("dataset");
-        auto path = program.get<string>("path");
         auto model_name = program.get<string>("model");
         auto discretize_dataset = program.get<bool>("discretize");
         auto stratified = program.get<bool>("stratified");
         auto n_folds = program.get<int>("folds");
         auto seeds = program.get<vector<int>>("seeds");
-        auto complete_file_name = path + file_name + ".arff";
         auto title = program.get<string>("title");
         auto hyperparameters = program.get<string>("hyperparameters");
         auto saveResults = program.get<bool>("save");
@@ -81,7 +75,6 @@ int main(int argc, char** argv)
 {
     auto program = manageArguments(argc, argv);
     auto file_name = program.get<string>("dataset");
-    auto path = program.get<string>("path");
     auto model_name = program.get<string>("model");
     auto discretize_dataset = program.get<bool>("discretize");
     auto stratified = program.get<bool>("stratified");
@@ -120,7 +113,7 @@ int main(int argc, char** argv)
     }
     platform::Timer timer;
     timer.start();
-    experiment.go(filesToTest, path);
+    experiment.go(filesToTest);
     experiment.setDuration(timer.getDuration());
     if (saveResults) {
         experiment.save(platform::Paths::results());

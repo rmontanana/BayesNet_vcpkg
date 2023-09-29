@@ -108,8 +108,8 @@ namespace platform {
         Experiment& setHyperparameters(const json& hyperparameters) { this->hyperparameters = hyperparameters; return *this; }
         string get_file_name();
         void save(const string& path);
-        void cross_validation(const string& path, const string& fileName);
-        void go(vector<string> filesToProcess, const string& path);
+        void cross_validation(const string& fileName);
+        void go(vector<string> filesToProcess);
         void show();
         void report();
     };

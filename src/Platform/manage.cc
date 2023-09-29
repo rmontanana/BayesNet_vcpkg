@@ -1,6 +1,5 @@
 #include <iostream>
 #include <argparse/argparse.hpp>
-#include "platformUtils.h"
 #include "Paths.h"
 #include "Results.h"
 

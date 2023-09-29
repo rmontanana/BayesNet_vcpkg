@@ -22,26 +22,24 @@
             "type": "lldb",
             "request": "launch",
             "name": "experiment",
-            "program": "${workspaceFolder}/build/src/Platform/main",
+            "program": "${workspaceFolder}/build/src/Platform/b_main",
             "args": [
                 "-m",
-                "BoostAODE",
-                "-p",
-                "/Users/rmontanana/Code/discretizbench/datasets",
+                "TAN",
                 "--stratified",
                 "-d",
-                "mfeat-morphological",
+                "zoo",
                 "--discretize"
                 // "--hyperparameters",
                 // "{\"repeatSparent\": true, \"maxModels\": 12}"
             ],
-            "cwd": "/Users/rmontanana/Code/discretizbench",
+            "cwd": "/Users/rmontanana/Code/odtebench",
         },
         {
             "type": "lldb",
             "request": "launch",
             "name": "best",
-            "program": "${workspaceFolder}/build/src/Platform/best",
+            "program": "${workspaceFolder}/build/src/Platform/b_best",
             "args": [
                 "-m",
                 "BoostAODE",
@@ -55,7 +53,7 @@
             "type": "lldb",
             "request": "launch",
             "name": "manage",
-            "program": "${workspaceFolder}/build/src/Platform/manage",
+            "program": "${workspaceFolder}/build/src/Platform/b_manage",
             "args": [
                 "-n",
                 "20"
@@ -66,7 +64,7 @@
             "type": "lldb",
             "request": "launch",
             "name": "list",
-            "program": "${workspaceFolder}/build/src/Platform/list",
+            "program": "${workspaceFolder}/build/src/Platform/b_list",
             "args": [],
             "cwd": "/Users/rmontanana/Code/discretizbench",
         },

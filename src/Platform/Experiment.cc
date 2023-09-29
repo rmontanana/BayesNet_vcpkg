@@ -102,12 +102,12 @@ namespace platform {
         cout << data.dump(4) << endl;
     }
 
-    void Experiment::go(vector<string> filesToProcess, const string& path)
+    void Experiment::go(vector<string> filesToProcess)
     {
         cout << "*** Starting experiment: " << title << " ***" << endl;
         for (auto fileName : filesToProcess) {
             cout << "- " << setw(20) << left << fileName << " " << right << flush;
-            cross_validation(path, fileName);
+            cross_validation(fileName);
             cout << endl;
         }
     }
@@ -132,7 +132,7 @@ namespace platform {
         cout << prefix << color << fold << Colors::RESET() << "(" << color << phase << Colors::RESET() << ")" << flush;
 
     }
-    void Experiment::cross_validation(const string& path, const string& fileName)
+    void Experiment::cross_validation(const string& fileName)
     {
         auto env = platform::DotEnv();
         auto datasets = platform::Datasets(discretized, env.get("source_data"));
