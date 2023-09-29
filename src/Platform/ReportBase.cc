@@ -3,7 +3,7 @@
 #include "Datasets.h"
 #include "ReportBase.h"
 #include "BestScore.h"
-
+#include "DotEnv.h"
 
 namespace platform {
     ReportBase::ReportBase(json data_, bool compare) : data(data_), compare(compare), margin(0.1)
@@ -58,7 +58,8 @@ namespace platform {
             }
         } else {
             if (data["score_name"].get<string>() == "accuracy") {
-                auto dt = Datasets(Paths::datasets(), false);
+                auto env = platform::DotEnv();
+                auto dt = Datasets(false, env.get("source_data"));
                 dt.loadDataset(dataset);
                 auto numClasses = dt.getNClasses(dataset);
                 if (numClasses == 2) {

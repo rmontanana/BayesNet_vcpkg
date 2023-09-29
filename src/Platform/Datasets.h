@@ -6,7 +6,36 @@
 #include <string>
 namespace platform {
     using namespace std;
-    enum fileType_t { CSV, ARFF };
+    enum fileType_t { CSV, ARFF, RDATA };
+    class SourceData {
+    public:
+        SourceData(string source)
+        {
+            if (source == "Surcov") {
+                path = "datasets/";
+                fileType = CSV;
+            } else if (source == "Arff") {
+                path = "datasets/";
+                fileType = ARFF;
+            } else if (source == "Tanveer") {
+                path = "data/";
+                fileType = RDATA;
+            } else {
+                throw invalid_argument("Unknown source.");
+            }
+        }
+        string getPath()
+        {
+            return path;
+        }
+        fileType_t getFileType()
+        {
+            return fileType;
+        }
+    private:
+        string path;
+        fileType_t fileType;
+    };
     class Dataset {
     private:
         string path;
@@ -25,6 +54,7 @@ namespace platform {
         void buildTensors();
         void load_csv();
         void load_arff();
+        void load_rdata();
         void computeStates();
     public:
         Dataset(const string& path, const string& name, const string& className, bool discretize, fileType_t fileType) : path(path), name(name), className(className), discretize(discretize), loaded(false), fileType(fileType) {};
@@ -45,11 +75,12 @@ namespace platform {
     private:
         string path;
         fileType_t fileType;
+        string sfileType;
         map<string, unique_ptr<Dataset>> datasets;
         bool discretize;
         void load(); // Loads the list of datasets
     public:
-        explicit Datasets(const string& path, bool discretize = false, fileType_t fileType = ARFF) : path(path), discretize(discretize), fileType(fileType) { load(); };
+        explicit Datasets(bool discretize, string sfileType) : discretize(discretize), sfileType(sfileType) { load(); };
         vector<string> getNames();
         vector<string> getFeatures(const string& name) const;
         int getNSamples(const string& name) const;

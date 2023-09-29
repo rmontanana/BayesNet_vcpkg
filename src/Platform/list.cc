@@ -3,6 +3,7 @@
 #include "Paths.h"
 #include "Colors.h"
 #include "Datasets.h"
+#include "DotEnv.h"
 
 using namespace std;
 const int BALANCE_LENGTH = 75;
@@ -27,7 +28,8 @@ void outputBalance(const string& balance)
 
 int main(int argc, char** argv)
 {
-    auto data = platform::Datasets(platform::Paths().datasets(), false);
+    auto env = platform::DotEnv();
+    auto data = platform::Datasets(false, env.get("source_data"));
     locale mylocale(cout.getloc(), new separated);
     locale::global(mylocale);
     cout.imbue(mylocale);

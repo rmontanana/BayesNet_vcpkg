@@ -5,13 +5,25 @@
 namespace platform {
     void Datasets::load()
     {
+        auto sd = SourceData(sfileType);
+        fileType = sd.getFileType();
+        path = sd.getPath();
         ifstream catalog(path + "all.txt");
         if (catalog.is_open()) {
             string line;
             while (getline(catalog, line)) {
+                if (line.empty() || line[0] == '#') {
+                    continue;
+                }
                 vector<string> tokens = split(line, ',');
                 string name = tokens[0];
-                string className = tokens[1];
+                string className;
+                try {
+                    className = tokens[1];
+                }
+                catch (exception e) {
+                    className = "-1";
+                }
                 datasets[name] = make_unique<Dataset>(path, name, className, discretize, fileType);
             }
             catalog.close();
@@ -193,7 +205,9 @@ namespace platform {
             getline(file, line);
             vector<string> tokens = split(line, ',');
             features = vector<string>(tokens.begin(), tokens.end() - 1);
-            className = tokens.back();
+            if (className == "-1") {
+                className = tokens.back();
+            }
             for (auto i = 0; i < features.size(); ++i) {
                 Xv.push_back(vector<float>());
             }
@@ -231,6 +245,53 @@ namespace platform {
         auto attributes = arff.getAttributes();
         transform(attributes.begin(), attributes.end(), back_inserter(features), [](const auto& attribute) { return attribute.first; });
     }
+    vector<string> tokenize(string line)
+    {
+        vector<string> tokens;
+        for (auto i = 0; i < line.size(); ++i) {
+            if (line[i] == ' ' || line[i] == '\t' || line[i] == '\n') {
+                string token = line.substr(0, i);
+                tokens.push_back(token);
+                line.erase(line.begin(), line.begin() + i + 1);
+                i = 0;
+                while (line[i] == ' ' || line[i] == '\t' || line[i] == '\n')
+                    line.erase(line.begin(), line.begin() + i + 1);
+            }
+        }
+        if (line.size() > 0) {
+            tokens.push_back(line);
+        }
+        return tokens;
+    }
+    void Dataset::load_rdata()
+    {
+        ifstream file(path + "/" + name + "_R.dat");
+        if (file.is_open()) {
+            string line;
+            getline(file, line);
+            line = ArffFiles::trim(line);
+            vector<string> tokens = tokenize(line);
+            transform(tokens.begin(), tokens.end() - 1, back_inserter(features), [](const auto& attribute) { return ArffFiles::trim(attribute); });
+            if (className == "-1") {
+                className = ArffFiles::trim(tokens.back());
+            }
+            for (auto i = 0; i < features.size(); ++i) {
+                Xv.push_back(vector<float>());
+            }
+            while (getline(file, line)) {
+                tokens = tokenize(line);
+                // We have to skip the first token, which is the instance number.
+                for (auto i = 1; i < features.size() + 1; ++i) {
+                    const float value = stof(tokens[i]);
+                    Xv[i - 1].push_back(value);
+                }
+                yv.push_back(stoi(tokens.back()));
+            }
+            file.close();
+        } else {
+            throw invalid_argument("Unable to open dataset file.");
+        }
+    }
     void Dataset::load()
     {
         if (loaded) {
@@ -240,6 +301,8 @@ namespace platform {
             load_csv();
         } else if (fileType == ARFF) {
             load_arff();
+        } else if (fileType == RDATA) {
+            load_rdata();
         }
         if (discretize) {
             Xd = discretizeDataset(Xv, yv);

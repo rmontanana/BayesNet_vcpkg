@@ -89,7 +89,8 @@ int main(int argc, char** argv)
     auto seeds = program.get<vector<int>>("seeds");
     auto hyperparameters = program.get<string>("hyperparameters");
     vector<string> filesToTest;
-    auto datasets = platform::Datasets(path, true, platform::ARFF);
+    auto env = platform::DotEnv();
+    auto datasets = platform::Datasets(discretize_dataset, env.get("source_data"));
     auto title = program.get<string>("title");
     auto saveResults = program.get<bool>("save");
     if (file_name != "") {
@@ -108,7 +109,7 @@ int main(int argc, char** argv)
     /*
     * Begin Processing
     */
-    auto env = platform::DotEnv();
+
     auto experiment = platform::Experiment();
     experiment.setTitle(title).setLanguage("cpp").setLanguageVersion("14.0.3");
     experiment.setDiscretized(discretize_dataset).setModel(model_name).setPlatform(env.get("platform"));
