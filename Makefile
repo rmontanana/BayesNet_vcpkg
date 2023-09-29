@@ -11,36 +11,21 @@ setup: ## Install dependencies for tests and coverage
 		pip install gcovr; \
 	fi
 
-dest ?= ../discretizbench
-dest2 ?= ../covbench
-dest3 ?= ../odtebench
-copy: ## Copy binary files to selected folder
+dest ?= ${HOME}/bin
+install: ## Copy binary files to bin folder
 	@echo "Destination folder: $(dest)"
-	@echo "Destination folder: $(dest2)"
-	@echo "Destination folder: $(dest3)"
 	make build
 	@echo ">>> Copying files to $(dest)"
-	@cp build/src/Platform/main $(dest)
-	@cp build/src/Platform/list $(dest)
-	@cp build/src/Platform/manage $(dest)
-	@cp build/src/Platform/best $(dest)
-	@echo ">>> Copying files to $(dest2)"
-	@cp build/src/Platform/main $(dest2)
-	@cp build/src/Platform/list $(dest2)
-	@cp build/src/Platform/manage $(dest2)
-	@cp build/src/Platform/best $(dest2)
-	@echo ">>> Copying files to $(dest3)"
-	@cp build/src/Platform/main $(dest3)
-	@cp build/src/Platform/list $(dest3)
-	@cp build/src/Platform/manage $(dest3)
-	@cp build/src/Platform/best $(dest3)
-	@echo ">>> Done"
+	@cp build/src/Platform/b_main $(dest)
+	@cp build/src/Platform/b_list $(dest)
+	@cp build/src/Platform/b_manage $(dest)
+	@cp build/src/Platform/b_best $(dest)
 
 dependency: ## Create a dependency graph diagram of the project (build/dependency.png)
 	cd build && cmake .. --graphviz=dependency.dot && dot -Tpng dependency.dot -o dependency.png
 
 build: ## Build the main and BayesNetSample
-	cmake --build build -t main -t BayesNetSample -t manage -t list -t best -j 32
+	cmake --build build -t b_main -t BayesNetSample -t b_manage -t b_list -t b_best -j 32
 
 clean: ## Clean the debug info
 	@echo ">>> Cleaning Debug BayesNet ...";
@@ -55,7 +40,7 @@ debug: ## Build a debug version of the project
 	@if [ -d ./build ]; then rm -rf ./build; fi
 	@mkdir build; 
 	cmake -S . -B build -D CMAKE_BUILD_TYPE=Debug -D ENABLE_TESTING=ON -D CODE_COVERAGE=ON; \
-	cmake --build build -t main -t BayesNetSample -t manage -t list -t best -t unit_tests -j 32;
+	cmake --build build -t b_main -t BayesNetSample -t b_manage -t b_list -t b_best -t unit_tests -j 32;
 	@echo ">>> Done";
 
 release: ## Build a Release version of the project
@@ -63,7 +48,7 @@ release: ## Build a Release version of the project
 	@if [ -d ./build ]; then rm -rf ./build; fi
 	@mkdir build; 
 	cmake -S . -B build -D CMAKE_BUILD_TYPE=Release; \
-	cmake --build build -t main -t BayesNetSample -t manage -t list -t best -j 32;
+	cmake --build build -t b_main -t BayesNetSample -t b_manage -t b_list -t b_best -j 32;
 	@echo ">>> Done";	
 
 test: ## Run tests
