@@ -43,7 +43,7 @@ namespace platform {
         }
         std::string get(const std::string& key)
         {
-            return env[key];
+            return env.at(key);
         }
         std::vector<int> getSeeds()
         {

@@ -16,11 +16,10 @@ namespace platform {
                 vector<string> tokens = Dataset::split(line, ',');
                 string name = tokens[0];
                 string className;
-                try {
-                    className = tokens[1];
-                }
-                catch (exception e) {
+                if (tokens.size() == 1) {
                     className = "-1";
+                } else {
+                    className = tokens[1];
                 }
                 datasets[name] = make_unique<Dataset>(path, name, className, discretize, fileType);
             }
