@@ -271,7 +271,6 @@ namespace platform {
     }
     void BestResults::reportAll(bool excel)
     {
-        double significance = 0.05;
         auto models = getModels();
         // Build the table of results
         json table = buildTableResults(models);

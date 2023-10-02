@@ -15,6 +15,20 @@ argparse::ArgumentParser manageArguments(int argc, char** argv)
     program.add_argument("--report").help("report of best score results file").default_value(false).implicit_value(true);
     program.add_argument("--friedman").help("Friedman test").default_value(false).implicit_value(true);
     program.add_argument("--excel").help("Output to excel").default_value(false).implicit_value(true);
+    program.add_argument("--level").help("significance level").default_value(0.05).scan<'g', double>().action([](const string& value) {
+        try {
+            auto k = stod(value);
+            if (k < 0.01 || k > 0.15) {
+                throw runtime_error("Significance level hast to be a number in [0.01, 0.15]");
+            }
+            return k;
+        }
+        catch (const runtime_error& err) {
+            throw runtime_error(err.what());
+        }
+        catch (...) {
+            throw runtime_error("Number of folds must be an decimal number");
+        }});
     try {
         program.parse_args(argc, argv);
         auto model = program.get<string>("model");
@@ -23,6 +37,7 @@ argparse::ArgumentParser manageArguments(int argc, char** argv)
         auto report = program.get<bool>("report");
         auto friedman = program.get<bool>("friedman");
         auto excel = program.get<bool>("excel");
+        auto level = program.get<double>("level");
         if (model == "" || score == "") {
             throw runtime_error("Model and score name must be supplied");
         }
@@ -59,7 +74,8 @@ int main(int argc, char** argv)
     auto report = program.get<bool>("report");
     auto friedman = program.get<bool>("friedman");
     auto excel = program.get<bool>("excel");
-    auto results = platform::BestResults(platform::Paths::results(), score, model, friedman);
+    auto level = program.get<double>("level");
+    auto results = platform::BestResults(platform::Paths::results(), score, model, friedman, level);
     if (build) {
         if (model == "any") {
             results.buildAll();

@@ -7,7 +7,7 @@ using json = nlohmann::json;
 namespace platform {
     class BestResults {
     public:
-        explicit BestResults(const string& path, const string& score, const string& model, bool friedman) : path(path), score(score), model(model), friedman(friedman) {}
+        explicit BestResults(const string& path, const string& score, const string& model, bool friedman, double significance = 0.05) : path(path), score(score), model(model), friedman(friedman), significance(significance) {}
         string build();
         void reportSingle();
         void reportAll(bool excel);
@@ -24,6 +24,7 @@ namespace platform {
         string score;
         string model;
         bool friedman;
+        double significance;
         int maxModelName = 0;
         int maxDatasetName = 0;
     };
