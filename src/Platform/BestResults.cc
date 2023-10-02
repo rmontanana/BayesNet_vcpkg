@@ -40,15 +40,17 @@ namespace platform {
             auto data = result.load();
             for (auto const& item : data.at("results")) {
                 bool update = false;
-                if (bests.contains(item.at("dataset").get<string>())) {
-                    if (item.at("score").get<double>() > bests[item.at("dataset").get<string>()].at(0).get<double>()) {
+                // Check if results file contains only one dataset
+                auto datasetName = item.at("dataset").get<string>();
+                if (bests.contains(datasetName)) {
+                    if (item.at("score").get<double>() > bests[datasetName].at(0).get<double>()) {
                         update = true;
                     }
                 } else {
                     update = true;
                 }
                 if (update) {
-                    bests[item.at("dataset").get<string>()] = { item.at("score").get<double>(), item.at("hyperparameters"), file };
+                    bests[datasetName] = { item.at("score").get<double>(), item.at("hyperparameters"), file };
                 }
             }
         }
@@ -177,9 +179,6 @@ namespace platform {
     }
     json BestResults::buildTableResults(vector<string> models)
     {
-        int numberOfDatasets = 0;
-        bool first = true;
-        json origin;
         json table;
         auto maxDate = filesystem::file_time_type::max();
         for (const auto& model : models) {
@@ -196,17 +195,6 @@ namespace platform {
                 maxDate = dateWrite;
             }
             auto data = loadFile(bestFileName);
-            if (first) {
-                // Get the number of datasets of the first file and check that is the same for all the models
-                first = false;
-                numberOfDatasets = data.size();
-                origin = data;
-            } else {
-                if (numberOfDatasets != data.size()) {
-                    cerr << Colors::MAGENTA() << "The number of datasets in the best results files is not the same for all the models." << Colors::RESET() << endl;
-                    exit(1);
-                }
-            }
             table[model] = data;
         }
         table["dateTable"] = ftime_to_string(maxDate);
@@ -234,15 +222,15 @@ namespace platform {
         for (const auto& model : models) {
             totals[model] = 0.0;
         }
-        json origin = table.begin().value();
-        for (auto const& item : origin.items()) {
+        auto datasets = getDatasets(table.begin().value());
+        for (auto const& dataset : datasets) {
             auto color = odd ? Colors::BLUE() : Colors::CYAN();
             cout << color << setw(3) << fixed << right << i++ << " ";
-            cout << setw(maxDatasetName) << left << item.key() << " ";
+            cout << setw(maxDatasetName) << left << dataset << " ";
             double maxValue = 0;
             // Find out the max value for this dataset
             for (const auto& model : models) {
-                double value = table[model].at(item.key()).at(0).get<double>();
+                double value = table[model].at(dataset).at(0).get<double>();
                 if (value > maxValue) {
                     maxValue = value;
                 }
@@ -250,7 +238,7 @@ namespace platform {
             // Print the row with red colors on max values
             for (const auto& model : models) {
                 string efectiveColor = color;
-                double value = table[model].at(item.key()).at(0).get<double>();
+                double value = table[model].at(dataset).at(0).get<double>();
                 if (value == maxValue) {
                     efectiveColor = Colors::RED();
                 }
