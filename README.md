@@ -10,6 +10,18 @@ Before compiling BayesNet.
 
 [Getting Started](<https://www.boost.org/doc/libs/1_83_0/more/getting_started/index.html>)
 
+The best option is install the packages that the Linux distribution have in its repository. If this is the case:
+
+```bash
+sudo dnf install boost-devel
+```
+
+If this is not possible and the compressed packaged is installed, the following environment variable has to be set:
+
+```bash
+export BOOST_ROOT=/path/to/library/
+```
+
 ### libxlswriter
 
 ```bash

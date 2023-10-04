@@ -14,6 +14,7 @@ namespace platform {
         BestResultsExcel(string score, vector<string> models, vector<string> datasets, json table, bool friedman, double significance);
         ~BestResultsExcel();
         void build();
+        string getFileName();
     private:
         void header();
         void body();

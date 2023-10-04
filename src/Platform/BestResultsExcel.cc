@@ -37,6 +37,10 @@ namespace platform {
         body();
         footer();
     }
+    string BestResultsExcel::getFileName()
+    {
+        return Paths::excel() + fileName;
+    }
     void BestResultsExcel::header()
     {
         row = 0;
@@ -123,14 +127,27 @@ namespace platform {
             writeString(row, 6, "Loss", "bodyHeader");
             writeString(row, 7, "Reject H0", "bodyHeader");
             row++;
+            bool first = true;
             for (const auto& item : holmResult.holmLines) {
                 writeString(row, 1, item.model, "text");
-                writeDouble(row, 2, item.pvalue, "result");
-                writeDouble(row, 3, item.rank, "result");
-                writeInt(row, 4, item.wtl.win, "ints");
-                writeInt(row, 5, item.wtl.tie, "ints");
-                writeInt(row, 6, item.wtl.loss, "ints");
-                writeString(row, 7, item.reject ? "Yes" : "No", "textCentered");
+                if (first) {
+                    // Control model info
+                    first = false;
+                    writeString(row, 2, "", "text");
+                    writeDouble(row, 3, item.rank, "result");
+                    writeString(row, 4, "", "text");
+                    writeString(row, 5, "", "text");
+                    writeString(row, 6, "", "text");
+                    writeString(row, 7, "", "textCentered");
+                } else {
+                    // Rest of the models info
+                    writeDouble(row, 2, item.pvalue, "result");
+                    writeDouble(row, 3, item.rank, "result");
+                    writeInt(row, 4, item.wtl.win, "ints");
+                    writeInt(row, 5, item.wtl.tie, "ints");
+                    writeInt(row, 6, item.wtl.loss, "ints");
+                    writeString(row, 7, item.reject ? "Yes" : "No", "textCentered");
+                }
                 row++;
             }
         }

@@ -161,10 +161,10 @@ namespace platform {
         sort(ranksOrder.begin(), ranksOrder.end(), [](const pair<string, float>& a, const pair<string, float>& b) {
             return a.second < b.second;
             });
+        // Show the control model info.
+        oss << "  " << Colors::BLUE() << left << setw(maxModelName) << ranksOrder.at(0).first << " ";
+        oss << setw(12) << " " << setprecision(7) << fixed << " " << ranksOrder.at(0).second << endl;
         for (const auto& item : ranksOrder) {
-            if (item.first == models.at(controlIdx)) {
-                continue;
-            }
             auto idx = distance(models.begin(), find(models.begin(), models.end(), item.first));
             double pvalue = 0.0;
             for (const auto& stat : statsOrder) {
@@ -172,13 +172,17 @@ namespace platform {
                     pvalue = stat.second;
                 }
             }
+            holmResult.holmLines.push_back({ item.first, pvalue, item.second, wtl.at(idx), pvalue < significance });
+            if (item.first == models.at(controlIdx)) {
+                continue;
+            }
             auto colorStatus = pvalue > significance ? Colors::GREEN() : Colors::MAGENTA();
             auto status = pvalue > significance ? Symbols::check_mark : Symbols::cross;
             auto textStatus = pvalue > significance ? " accepted H0" : " rejected H0";
-            oss << "  " << colorStatus << left << setw(maxModelName) << item.first << " " << setprecision(6) << scientific << pvalue << setprecision(7) << fixed << " " << item.second;
+            oss << "  " << colorStatus << left << setw(maxModelName) << item.first << " ";
+            oss << setprecision(6) << scientific << pvalue << setprecision(7) << fixed << " " << item.second;
             oss << " " << right << setw(3) << wtl.at(idx).win << " " << setw(3) << wtl.at(idx).tie << " " << setw(4) << wtl.at(idx).loss;
             oss << " " << status << textStatus << endl;
-            holmResult.holmLines.push_back({ item.first, pvalue, item.second, wtl.at(idx), pvalue < significance });
         }
         oss << color << "  *************************************************************************************************************" << endl;
         oss << Colors::RESET();

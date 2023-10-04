@@ -290,6 +290,7 @@ namespace platform {
         if (excel) {
             BestResultsExcel excel(score, models, datasets, table, friedman, significance);
             excel.build();
+            cout << Colors::YELLOW() << "** Excel file generated: " << excel.getFileName() << Colors::RESET() << endl;
         }
     }
 }
