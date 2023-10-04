@@ -2,6 +2,7 @@
 #include <catch2/catch_approx.hpp>
 #include <catch2/generators/catch_generators.hpp>
 #include <string>
+#include "TestUtils.h"
 #include "KDB.h"
 
 TEST_CASE("Test Bayesian Network")
