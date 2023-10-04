@@ -6,7 +6,7 @@ class Paths {
 public:
     static string datasets()
     {
-        return "../data/";
+        return "../../data/";
     }
 };
 
@@ -62,19 +62,19 @@ tuple<Tensor, Tensor, vector<string>, string, map<string, vector<int>>> loadData
     auto states = map<string, vector<int>>();
     if (discretize_dataset) {
         auto Xr = discretizeDataset(X, y);
-        Xd = torch::zeros({ static_cast<int>(Xr[0].size()), static_cast<int>(Xr.size()) }, torch::kInt32);
+        Xd = torch::zeros({ static_cast<int>(Xr.size()), static_cast<int>(Xr[0].size()) }, torch::kInt32);
         for (int i = 0; i < features.size(); ++i) {
             states[features[i]] = vector<int>(*max_element(Xr[i].begin(), Xr[i].end()) + 1);
             auto item = states.at(features[i]);
             iota(begin(item), end(item), 0);
-            Xd.index_put_({ "...", i }, torch::tensor(Xr[i], torch::kInt32));
+            Xd.index_put_({ i, "..." }, torch::tensor(Xr[i], torch::kInt32));
         }
         states[className] = vector<int>(*max_element(y.begin(), y.end()) + 1);
         iota(begin(states.at(className)), end(states.at(className)), 0);
     } else {
-        Xd = torch::zeros({ static_cast<int>(X[0].size()), static_cast<int>(X.size()) }, torch::kFloat32);
+        Xd = torch::zeros({ static_cast<int>(X.size()), static_cast<int>(X[0].size()) }, torch::kFloat32);
         for (int i = 0; i < features.size(); ++i) {
-            Xd.index_put_({ "...", i }, torch::tensor(X[i]));
+            Xd.index_put_({ i, "..." }, torch::tensor(X[i]));
         }
     }
     return { Xd, torch::tensor(y, torch::kInt32), features, className, states };

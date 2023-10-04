@@ -1,7 +1,7 @@
 #include "BayesMetrics.h"
 #include "Mst.h"
 namespace bayesnet {
-    //samples is nxm tensor used to fit the model
+    //samples is n+1xm tensor used to fit the model
     Metrics::Metrics(const torch::Tensor& samples, const vector<string>& features, const string& className, const int classNumStates)
         : samples(samples)
         , features(features)
