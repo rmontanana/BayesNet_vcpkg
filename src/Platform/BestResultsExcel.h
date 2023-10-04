@@ -12,25 +12,26 @@ namespace platform {
 
     class BestResultsExcel : ExcelFile {
     public:
-        BestResultsExcel(const string& score, const vector<string>& models, const vector<string>& datasets, const json& table, bool friedman, double significance);
+        BestResultsExcel(const string& score, const vector<string>& models, const vector<string>& datasets, const json& table, const map<string, map<string, float>>& ranks, bool friedman, double significance);
         ~BestResultsExcel();
         void build();
         string getFileName();
     private:
-        void header();
-        void body();
-        void footer();
+        void header(bool ranks);
+        void body(bool ranks);
+        void footer(bool ranks);
         void formatColumns();
+        void doFriedman();
         const string fileName = "BestResults.xlsx";
-        const string& score;
-        const vector<string>& models;
-        const vector<string>& datasets;
-        const json& table;
+        string score;
+        vector<string> models;
+        vector<string> datasets;
+        json table;
+        map<string, map<string, float>> ranksModels;
         bool friedman;
         double significance;
         int modelNameSize = 12; // Min size of the column
         int datasetNameSize = 25; // Min size of the column
-        // map<string, map<string, float>>& ranksModels;
     };
 }
 #endif //BESTRESULTS_EXCEL_H
