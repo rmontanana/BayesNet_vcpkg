@@ -282,12 +282,15 @@ namespace platform {
         // Print the table of results
         printTableResults(models, table);
         // Compute the Friedman test
+        map<string, map<string, float>> ranksModels;
         if (friedman) {
             Statistics stats(models, datasets, table, significance);
             auto result = stats.friedmanTest();
             stats.postHocHolmTest(result);
+            ranksModels = stats.getRanks();
         }
         if (excel) {
+            // BestResultsExcel excel(score, models, datasets, ranksModels, table, friedman, significance);
             BestResultsExcel excel(score, models, datasets, table, friedman, significance);
             excel.build();
             cout << Colors::YELLOW() << "** Excel file generated: " << excel.getFileName() << Colors::RESET() << endl;

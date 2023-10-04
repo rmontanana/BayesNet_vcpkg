@@ -4,7 +4,8 @@
 #include "Statistics.h"
 
 namespace platform {
-    BestResultsExcel::BestResultsExcel(string score, vector<string> models, vector<string> datasets, json table, bool friedman, double significance) : score(score), models(models), datasets(datasets), table(table), friedman(friedman), significance(significance)
+    BestResultsExcel::BestResultsExcel(const string& score, const vector<string>& models, const vector<string>& datasets, const json& table, bool friedman, double significance) :
+        score(score), models(models), datasets(datasets), table(table), friedman(friedman), significance(significance)
     {
         workbook = workbook_new((Paths::excel() + fileName).c_str());
         worksheet = workbook_add_worksheet(workbook, "Best Results");

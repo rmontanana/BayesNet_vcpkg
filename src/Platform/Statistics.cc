@@ -7,7 +7,7 @@
 
 namespace platform {
 
-    Statistics::Statistics(vector<string>& models, vector<string>& datasets, json data, double significance, bool output) :
+    Statistics::Statistics(const vector<string>& models, const vector<string>& datasets, const json& data, double significance, bool output) :
         models(models), datasets(datasets), data(data), significance(significance), output(output)
     {
         nModels = models.size();
@@ -21,6 +21,7 @@ namespace platform {
             cerr << "nDatasets: " << nDatasets << endl;
             throw runtime_error("Can't make the Friedman test with less than 3 models and/or less than 3 datasets.");
         }
+        ranksModels.clear();
         computeRanks();
         // Set the control model as the one with the lowest average rank
         controlIdx = distance(ranks.begin(), min_element(ranks.begin(), ranks.end(), [](const auto& l, const auto& r) { return l.second < r.second; }));
@@ -68,6 +69,8 @@ namespace platform {
             }
             // Assign the ranks
             ranksLine = assignRanks(ranksOrder);
+            // Store the ranks of the dataset
+            ranksModels[dataset] = ranksLine;
             if (ranks.size() == 0) {
                 ranks = ranksLine;
             } else {
@@ -238,5 +241,9 @@ namespace platform {
     HolmResult& Statistics::getHolmResult()
     {
         return holmResult;
+    }
+    map<string, map<string, float>>& Statistics::getRanks()
+    {
+        return ranksModels;
     }
 } // namespace platform

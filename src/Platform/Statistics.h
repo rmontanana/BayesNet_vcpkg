@@ -2,6 +2,7 @@
 #define STATISTICS_H
 #include <iostream>
 #include <vector>
+#include <map>
 #include <nlohmann/json.hpp>
 
 using namespace std;
@@ -32,18 +33,19 @@ namespace platform {
     };
     class Statistics {
     public:
-        Statistics(vector<string>& models, vector<string>& datasets, json data, double significance = 0.05, bool output = true);
+        Statistics(const vector<string>& models, const vector<string>& datasets, const json& data, double significance = 0.05, bool output = true);
         bool friedmanTest();
         void postHocHolmTest(bool friedmanResult);
         FriedmanResult& getFriedmanResult();
         HolmResult& getHolmResult();
+        map<string, map<string, float>>& getRanks();
     private:
         void fit();
         void computeRanks();
         void computeWTL();
-        vector<string> models;
-        vector<string> datasets;
-        json data;
+        const vector<string>& models;
+        const vector<string>& datasets;
+        const json& data;
         double significance;
         bool output;
         bool fitted = false;
@@ -56,6 +58,7 @@ namespace platform {
         int maxDatasetName = 0;
         FriedmanResult friedmanResult;
         HolmResult holmResult;
+        map<string, map<string, float>> ranksModels;
     };
 }
 #endif // !STATISTICS_H
