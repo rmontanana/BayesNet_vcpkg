@@ -60,7 +60,8 @@ test: ## Run tests (opt="-s") to verbose output the tests, (opt="-c='Test Maximu
 coverage: ## Run tests and generate coverage report (build/index.html)
 	@echo ">>> Building tests with coverage...";
 	$(MAKE) test
-	@gcovr
+	@cd build ; \
+	gcovr --config ../gcovr.cfg
 	@echo ">>> Done";	
 
 define ClearTests =
