@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
-.PHONY: coverage setup help build test
+.PHONY: coverage setup help build test clean debug release
 
 setup: ## Install dependencies for tests and coverage
 	@if [ "$(shell uname)" = "Darwin" ]; then \
@@ -28,45 +28,47 @@ build: ## Build the main and BayesNetSample
 	cmake --build build -t b_main -t BayesNetSample -t b_manage -t b_list -t b_best -j 32
 
 clean: ## Clean the debug info
-	@echo ">>> Cleaning Debug BayesNet ...";
-	find . -name "*.gcda" -print0 | xargs -0 rm
+	@echo ">>> Cleaning Debug BayesNet...";
+	$(call ClearTests)
 	@echo ">>> Done";
 
 clang-uml: ## Create uml class and sequence diagrams
 	clang-uml -p --add-compile-flag -I /usr/lib/gcc/x86_64-redhat-linux/8/include/
 
 debug: ## Build a debug version of the project
-	@echo ">>> Building Debug BayesNet ...";
+	@echo ">>> Building Debug BayesNet...";
 	@if [ -d ./build ]; then rm -rf ./build; fi
 	@mkdir build; 
-	cmake -S . -B build -D CMAKE_BUILD_TYPE=Debug -D ENABLE_TESTING=ON -D CODE_COVERAGE=ON; \
-	cmake --build build -t b_main -t BayesNetSample -t b_manage -t b_list -t b_best -t unit_tests -j 32;
+	@cmake -S . -B build -D CMAKE_BUILD_TYPE=Debug -D ENABLE_TESTING=ON -D CODE_COVERAGE=ON;
 	@echo ">>> Done";
 
 release: ## Build a Release version of the project
-	@echo ">>> Building Release BayesNet ...";
+	@echo ">>> Building Release BayesNet...";
 	@if [ -d ./build ]; then rm -rf ./build; fi
 	@mkdir build; 
-	cmake -S . -B build -D CMAKE_BUILD_TYPE=Release; \
-	cmake --build build -t b_main -t BayesNetSample -t b_manage -t b_list -t b_best -j 32;
+	@cmake -S . -B build -D CMAKE_BUILD_TYPE=Release; 
 	@echo ">>> Done";	
 
 test: ## Run tests
-	@echo "* Running tests...";
-	find . -name "*.gcda" -print0 | xargs -0 rm
-	@cd build; \
-	cmake --build . --target unit_tests ;
-	@cd build/tests; \
-	./unit_tests;
+	@echo ">>> Running tests...";
+	$(MAKE) clean
+	@cmake --build build --target unit_tests ; 
+	@if [ -f build/tests/unit_tests ]; then cd build/tests ; ./unit_tests ; fi ; 
+	@echo ">>> Done";	
 
 coverage: ## Run tests and generate coverage report (build/index.html)
-	@echo "*Building tests...";
-	find . -name "*.gcda" -print0 | xargs -0 rm
-	@cd build; \
-	cmake --build . --target unit_tests ;
-	@cd build/tests; \
-	./unit_tests;
-	gcovr ;
+	@echo ">>> Building tests with coverage...";
+	$(MAKE) test
+	@gcovr
+	@echo ">>> Done";	
+
+define ClearTests =
+	$(eval nfiles=$(find . -name "*.gcda" -print))
+	@if [ -f build/tests/unit_tests ]; then rm -f build/tests/unit_tests ; fi ; 
+	@if test "${nfiles}" != "" ; then \
+		find . -name "*.gcda" -print0 | xargs -0 rm 2>/dev/null ;\
+	fi ; 
+endef
 
 help: ## Show help message
 	@IFS=$$'\n' ; \
