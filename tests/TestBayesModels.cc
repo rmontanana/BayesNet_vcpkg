@@ -116,7 +116,7 @@ TEST_CASE("Test Bayesian Classifiers score", "[BayesNet]")
     //     cout << "{{\"" << scores.first.first << "\", \"" << scores.first.second << "\"}, " << scores.second << "}, ";
     // }
 }
-TEST_CASE("Models featuresDisc")
+TEST_CASE("Models features", "[BayesNet]")
 {
     auto graph = vector<string>({ "digraph BayesNet {\nlabel=<BayesNet Test>\nfontsize=30\nfontcolor=blue\nlabelloc=t\nlayout=circo\n",
         "class [shape=circle, fontcolor=red, fillcolor=lightblue, style=filled ] \n",
@@ -134,7 +134,7 @@ TEST_CASE("Models featuresDisc")
     REQUIRE(clf.show() == vector<string>{"class -> sepallength, sepalwidth, petallength, petalwidth, ", "petallength -> sepallength, ", "petalwidth -> ", "sepallength -> sepalwidth, ", "sepalwidth -> petalwidth, "});
     REQUIRE(clf.graph("Test") == graph);
 }
-TEST_CASE("Get num featuresDisc & num edges")
+TEST_CASE("Get num features & num edges", "[BayesNet]")
 {
     auto [XDisc, yDisc, featuresDisc, classNameDisc, statesDisc] = loadFile("iris");
     auto clf = bayesnet::KDB(2);

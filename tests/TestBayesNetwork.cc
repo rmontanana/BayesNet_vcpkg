@@ -5,7 +5,7 @@
 #include "TestUtils.h"
 #include "KDB.h"
 
-TEST_CASE("Test Bayesian Network")
+TEST_CASE("Test Bayesian Network", "[BayesNet]")
 {
     auto [Xd, y, features, className, states] = loadFile("iris");
 

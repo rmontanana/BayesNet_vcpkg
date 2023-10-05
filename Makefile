@@ -49,11 +49,12 @@ release: ## Build a Release version of the project
 	@cmake -S . -B build -D CMAKE_BUILD_TYPE=Release; 
 	@echo ">>> Done";	
 
-test: ## Run tests
+opt = ""
+test: ## Run tests (opt="-s") to verbose output the tests, (opt="-c='Test Maximum Spanning Tree'") to run only that section
 	@echo ">>> Running tests...";
 	$(MAKE) clean
 	@cmake --build build --target unit_tests ; 
-	@if [ -f build/tests/unit_tests ]; then cd build/tests ; ./unit_tests ; fi ; 
+	@if [ -f build/tests/unit_tests ]; then cd build/tests ; ./unit_tests $(opt) ; fi ; 
 	@echo ">>> Done";	
 
 coverage: ## Run tests and generate coverage report (build/index.html)
