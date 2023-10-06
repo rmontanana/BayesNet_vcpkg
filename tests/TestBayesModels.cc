@@ -34,83 +34,81 @@ TEST_CASE("Test Bayesian Classifiers score", "[BayesNet]")
     };
 
     string file_name = GENERATE("glass", "iris", "ecoli", "diabetes");
-    auto [XCont, yCont, featuresCont, classNameCont, statesCont] = loadDataset(file_name, true, false);
-    auto [XDisc, yDisc, featuresDisc, classNameDisc, statesDisc] = loadFile(file_name);
-    double epsilon = 1e-5;
+    auto raw = RawDatasets(file_name, false);
 
     SECTION("Test TAN classifier (" + file_name + ")")
     {
         auto clf = bayesnet::TAN();
-        clf.fit(XDisc, yDisc, featuresDisc, classNameDisc, statesDisc);
-        auto score = clf.score(XDisc, yDisc);
+        clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
+        auto score = clf.score(raw.Xv, raw.yv);
         //scores[{file_name, "TAN"}] = score;
-        REQUIRE(score == Catch::Approx(scores[{file_name, "TAN"}]).epsilon(epsilon));
+        REQUIRE(score == Catch::Approx(scores[{file_name, "TAN"}]).epsilon(raw.epsilon));
     }
     SECTION("Test TANLd classifier (" + file_name + ")")
     {
         auto clf = bayesnet::TANLd();
-        clf.fit(XCont, yCont, featuresCont, classNameCont, statesCont);
-        auto score = clf.score(XCont, yCont);
+        clf.fit(raw.Xt, raw.yt, raw.featurest, raw.classNamet, raw.statest);
+        auto score = clf.score(raw.Xt, raw.yt);
         //scores[{file_name, "TANLd"}] = score;
-        REQUIRE(score == Catch::Approx(scores[{file_name, "TANLd"}]).epsilon(epsilon));
+        REQUIRE(score == Catch::Approx(scores[{file_name, "TANLd"}]).epsilon(raw.epsilon));
     }
     SECTION("Test KDB classifier (" + file_name + ")")
     {
         auto clf = bayesnet::KDB(2);
-        clf.fit(XDisc, yDisc, featuresDisc, classNameDisc, statesDisc);
-        auto score = clf.score(XDisc, yDisc);
+        clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
+        auto score = clf.score(raw.Xv, raw.yv);
         //scores[{file_name, "KDB"}] = score;
         REQUIRE(score == Catch::Approx(scores[{file_name, "KDB"
-        }]).epsilon(epsilon));
+        }]).epsilon(raw.epsilon));
     }
     SECTION("Test KDBLd classifier (" + file_name + ")")
     {
         auto clf = bayesnet::KDBLd(2);
-        clf.fit(XCont, yCont, featuresCont, classNameCont, statesCont);
-        auto score = clf.score(XCont, yCont);
+        clf.fit(raw.Xt, raw.yt, raw.featurest, raw.classNamet, raw.statest);
+        auto score = clf.score(raw.Xt, raw.yt);
         //scores[{file_name, "KDBLd"}] = score;
         REQUIRE(score == Catch::Approx(scores[{file_name, "KDBLd"
-        }]).epsilon(epsilon));
+        }]).epsilon(raw.epsilon));
     }
     SECTION("Test SPODE classifier (" + file_name + ")")
     {
         auto clf = bayesnet::SPODE(1);
-        clf.fit(XDisc, yDisc, featuresDisc, classNameDisc, statesDisc);
-        auto score = clf.score(XDisc, yDisc);
+        clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
+        auto score = clf.score(raw.Xv, raw.yv);
         // scores[{file_name, "SPODE"}] = score;
-        REQUIRE(score == Catch::Approx(scores[{file_name, "SPODE"}]).epsilon(epsilon));
+        REQUIRE(score == Catch::Approx(scores[{file_name, "SPODE"}]).epsilon(raw.epsilon));
     }
     SECTION("Test SPODELd classifier (" + file_name + ")")
     {
         auto clf = bayesnet::SPODELd(1);
-        clf.fit(XCont, yCont, featuresCont, classNameCont, statesCont);
-        auto score = clf.score(XCont, yCont);
+        clf.fit(raw.Xt, raw.yt, raw.featurest, raw.classNamet, raw.statest);
+        auto score = clf.score(raw.Xt, raw.yt);
         // scores[{file_name, "SPODELd"}] = score;
-        REQUIRE(score == Catch::Approx(scores[{file_name, "SPODELd"}]).epsilon(epsilon));
+        REQUIRE(score == Catch::Approx(scores[{file_name, "SPODELd"}]).epsilon(raw.epsilon));
     }
     SECTION("Test AODE classifier (" + file_name + ")")
     {
         auto clf = bayesnet::AODE();
-        clf.fit(XDisc, yDisc, featuresDisc, classNameDisc, statesDisc);
-        auto score = clf.score(XDisc, yDisc);
+        clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
+        auto score = clf.score(raw.Xv, raw.yv);
         // scores[{file_name, "AODE"}] = score;
-        REQUIRE(score == Catch::Approx(scores[{file_name, "AODE"}]).epsilon(epsilon));
+        REQUIRE(score == Catch::Approx(scores[{file_name, "AODE"}]).epsilon(raw.epsilon));
     }
     SECTION("Test AODELd classifier (" + file_name + ")")
     {
         auto clf = bayesnet::AODELd();
-        clf.fit(XCont, yCont, featuresCont, classNameCont, statesCont);
-        auto score = clf.score(XCont, yCont);
+        clf.fit(raw.Xt, raw.yt, raw.featurest, raw.classNamet, raw.statest);
+        auto score = clf.score(raw.Xt, raw.yt);
         // scores[{file_name, "AODELd"}] = score;
-        REQUIRE(score == Catch::Approx(scores[{file_name, "AODELd"}]).epsilon(epsilon));
+        REQUIRE(score == Catch::Approx(scores[{file_name, "AODELd"}]).epsilon(raw.epsilon));
     }
     SECTION("Test BoostAODE classifier (" + file_name + ")")
     {
         auto clf = bayesnet::BoostAODE();
-        clf.fit(XDisc, yDisc, featuresDisc, classNameDisc, statesDisc);
-        auto score = clf.score(XDisc, yDisc);
+        clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
+        auto score = clf.score(raw.Xv, raw.yv);
         // scores[{file_name, "BoostAODE"}] = score;
-        REQUIRE(score == Catch::Approx(scores[{file_name, "BoostAODE"}]).epsilon(epsilon));
+        REQUIRE(score == Catch::Approx(scores[{file_name, "BoostAODE"}]).epsilon(raw.epsilon));
     }
     // for (auto scores : scores) {
     //     cout << "{{\"" << scores.first.first << "\", \"" << scores.first.second << "\"}, " << scores.second << "}, ";
@@ -125,10 +123,9 @@ TEST_CASE("Models features", "[BayesNet]")
         "sepallength -> sepalwidth", "sepalwidth [shape=circle] \n", "sepalwidth -> petalwidth", "}\n"
         }
     );
-
+    auto raw = RawDatasets("iris", true);
     auto clf = bayesnet::TAN();
-    auto [XDisc, yDisc, featuresDisc, classNameDisc, statesDisc] = loadFile("iris");
-    clf.fit(XDisc, yDisc, featuresDisc, classNameDisc, statesDisc);
+    clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
     REQUIRE(clf.getNumberOfNodes() == 6);
     REQUIRE(clf.getNumberOfEdges() == 7);
     REQUIRE(clf.show() == vector<string>{"class -> sepallength, sepalwidth, petallength, petalwidth, ", "petallength -> sepallength, ", "petalwidth -> ", "sepallength -> sepalwidth, ", "sepalwidth -> petalwidth, "});
@@ -136,9 +133,9 @@ TEST_CASE("Models features", "[BayesNet]")
 }
 TEST_CASE("Get num features & num edges", "[BayesNet]")
 {
-    auto [XDisc, yDisc, featuresDisc, classNameDisc, statesDisc] = loadFile("iris");
+    auto raw = RawDatasets("iris", true);
     auto clf = bayesnet::KDB(2);
-    clf.fit(XDisc, yDisc, featuresDisc, classNameDisc, statesDisc);
+    clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
     REQUIRE(clf.getNumberOfNodes() == 6);
     REQUIRE(clf.getNumberOfEdges() == 8);
 }

@@ -34,7 +34,7 @@ namespace bayesnet {
     void Graph::kruskal_algorithm()
     {
         // sort the edges ordered on decreasing weight
-        sort(G.begin(), G.end(), [](const auto& left, const auto& right) {return left.first > right.first;});
+        stable_sort(G.begin(), G.end(), [](const auto& left, const auto& right) {return left.first > right.first;});
         for (int i = 0; i < G.size(); i++) {
             int uSt, vEd;
             uSt = find_set(G[i].second.first);
