@@ -29,10 +29,12 @@ namespace platform {
         vector<int> y;
         vector<vector<int>> stratified_indices;
         void build();
+        bool faulty = false; // Only true if the number of samples of any class is less than the number of folds.
     public:
         StratifiedKFold(int k, const vector<int>& y, int seed = -1);
         StratifiedKFold(int k, torch::Tensor& y, int seed = -1);
         pair<vector<int>, vector<int>> getFold(int nFold) override;
+        bool isFaulty() { return faulty; }
     };
 }
 #endif

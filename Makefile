@@ -15,10 +15,7 @@ define ClearTests
 			rm -f $(f_debug)/tests/$$t ; \
 		fi ; \
 	done
-	$(eval nfiles=$(find . -name "*.gcda" -print))
-	@if test "${nfiles}" != "" ; then \
-		find . -name "*.gcda" -print0 | xargs -0 rm 2>/dev/null ;\
-	fi ; 
+	@find . -name "*.gcda" -print0 | xargs -0 rm 2>/dev/null ;
 endef
 
 
@@ -106,8 +103,8 @@ testb: ## Run BayesNet tests (opt="-s") to verbose output the tests, (opt="-c='T
 coverage: ## Run tests and generate coverage report (build/index.html)
 	@echo ">>> Building tests with coverage...";
 	@$(MAKE) test
-	@cd $(f_debug) ; 
-	@gcovr --config ../gcovr.cfg ;
+	@cd $(f_debug) ; \
+	gcovr --config ../gcovr.cfg tests ;
 	@echo ">>> Done";	
 
 

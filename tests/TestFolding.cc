@@ -66,27 +66,28 @@ TEST_CASE("StratifiedKFold Test", "[Platform][StratifiedKFold]")
             auto [train_indicesv, test_indicesv] = stratified_kfoldv.getFold(fold);
             REQUIRE(train_indicest == train_indicesv);
             REQUIRE(test_indicest == test_indicesv);
-            bool result = train_indicest.size() == number || train_indicest.size() == number + 1;
-            REQUIRE(result);
-            REQUIRE(train_indicest.size() + test_indicest.size() == raw.nSamples);
+            // In the worst case scenario, the number of samples in the training set is number + raw.classNumStates
+            // because in that fold can come one remainder sample from each class.
+            REQUIRE(train_indicest.size() <= number + raw.classNumStates);
+            // If the number of samples in any class is less than the number of folds, then the fold is faulty.
+            // and the number of samples in the training set + test set will be less than nSamples 
+            if (!stratified_kfoldt.isFaulty()) {
+                REQUIRE(train_indicest.size() + test_indicest.size() == raw.nSamples);
+            } else {
+                REQUIRE(train_indicest.size() + test_indicest.size() <= raw.nSamples);
+            }
             auto train_t = torch::tensor(train_indicest);
             auto ytrain = raw.yt.index({ train_t });
-            cout << "dataset=" << file_name << endl;
-            cout << "nSamples=" << raw.nSamples << endl;;
-            cout << "number=" << number << endl;
-            cout << "train_indices.size()=" << train_indicest.size() << endl;
-            cout << "test_indices.size()=" << test_indicest.size() << endl;
-            cout << "Class Name = " << raw.classNamet << endl;
             // Check that the class labels have been equally assign to each fold
             for (const auto& idx : train_indicest) {
-                counts[fold][ytrain[idx].item<int>()]++;
+                counts[fold][raw.yt[idx].item<int>()]++;
             }
         }
         // Test the fold counting of every class
         for (int fold = 0; fold < nFolds; ++fold) {
             for (int j = 1; j < nFolds - 1; ++j) {
                 for (int k = 0; k < raw.classNumStates; ++k) {
-                    REQUIRE(abs(counts.at(fold).at(k) - counts.at(fold).at(j)) <= 1);
+                    REQUIRE(abs(counts.at(fold).at(k) - counts.at(j).at(k)) <= 1);
                 }
             }
         }
