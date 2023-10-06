@@ -8,7 +8,13 @@ using namespace std;
 
 TEST_CASE("Metrics Test", "[BayesNet]")
 {
-    string file_name = GENERATE("glass", "iris", "ecoli", "diabetes");
+    // string file_name = GENERATE("glass", "iris", "ecoli", "diabetes");
+    string file_name = "glass";
+    //
+    //
+    // OJO CAMBIAR
+    //
+    //
     map<string, pair<int, vector<int>>> resultsKBest = {
         {"glass", {7, { 0, 1, 7, 6, 3, 5, 2 }}},
         {"iris", {3, { 0, 3, 2 }} },
@@ -52,6 +58,13 @@ TEST_CASE("Metrics Test", "[BayesNet]")
     SECTION("Test Maximum Spanning Tree")
     {
         auto weights_matrix = metrics.conditionalEdge(raw.weights);
+        cout << "Weights matrix: " << endl;
+        for (int i = 0; i < static_cast<int>(raw.featurest.size()); ++i) {
+            for (int j = 0; j < static_cast<int>(raw.featurest.size()); ++j) {
+                cout << setw(10) << setprecision(7) << fixed << weights_matrix[i][j].item<float>() << ",  ";
+            }
+            cout << endl;
+        }
         auto result = metrics.maximumSpanningTree(raw.featurest, weights_matrix, 0);
         REQUIRE(result == resultsMST.at(file_name));
     }

@@ -108,6 +108,7 @@ namespace bayesnet {
         }
         g.kruskal_algorithm();
         auto mst = g.get_mst();
+        g.display_mst();
         return reorder(mst, root);
     }
 
