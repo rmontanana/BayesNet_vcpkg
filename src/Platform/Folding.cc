@@ -74,10 +74,11 @@ namespace platform {
             auto chosen = vector<bool>(k, false);
             while (remainder_samples_to_take > 0) {
                 int fold = (rand() % static_cast<int>(k));
+                cout << "-candidate: " << fold << endl;
                 if (chosen.at(fold)) {
                     continue;
                 }
-                chosen[k] = true;
+                chosen[fold] = true;
                 cout << "One goes to fold " << fold << " that had " << stratified_indices[fold].size() << " elements before" << endl;
                 auto it = next(class_indices[label].begin(), 1);
                 stratified_indices[fold].push_back(*class_indices[label].begin());
