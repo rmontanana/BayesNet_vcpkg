@@ -31,7 +31,9 @@
 *.exe
 *.out
 *.app
-build/
+build/**
+build_debug/**
+build_release/**
 *.dSYM/**
 cmake-build*/**
 .idea

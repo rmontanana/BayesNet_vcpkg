@@ -2,6 +2,26 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := help
 .PHONY: coverage setup help build test clean debug release
 
+f_release = build_release
+f_debug = build_debug
+app_targets = b_best b_list b_main b_manage
+test_targets = unit_tests_bayesnet unit_tests_platform
+n_procs = -j 16
+
+define ClearTests
+	@for t in $(test_targets); do \
+		if [ -f $(f_debug)/tests/$$t ]; then \
+			echo ">>> Cleaning $$t..." ; \
+			rm -f $(f_debug)/tests/$$t ; \
+		fi ; \
+	done
+	$(eval nfiles=$(find . -name "*.gcda" -print))
+	@if test "${nfiles}" != "" ; then \
+		find . -name "*.gcda" -print0 | xargs -0 rm 2>/dev/null ;\
+	fi ; 
+endef
+
+
 setup: ## Install dependencies for tests and coverage
 	@if [ "$(shell uname)" = "Darwin" ]; then \
 		brew install gcovr; \
@@ -16,22 +36,24 @@ install: ## Copy binary files to bin folder
 	@echo "Destination folder: $(dest)"
 	make buildr
 	@echo ">>> Copying files to $(dest)"
-	@cp build_release/src/Platform/b_main $(dest)
-	@cp build_release/src/Platform/b_list $(dest)
-	@cp build_release/src/Platform/b_manage $(dest)
-	@cp build_release/src/Platform/b_best $(dest)
+	@cp $(f_release)/src/Platform/b_main $(dest)
+	@cp $(f_release)/src/Platform/b_list $(dest)
+	@cp $(f_release)/src/Platform/b_manage $(dest)
+	@cp $(f_release)/src/Platform/b_best $(dest)
 
 dependency: ## Create a dependency graph diagram of the project (build/dependency.png)
-	cd build && cmake .. --graphviz=dependency.dot && dot -Tpng dependency.dot -o dependency.png
+	@echo ">>> Creating dependency graph diagram of the project...";
+	$(MAKE) debug
+	cd $(f_debug) && cmake .. --graphviz=dependency.dot && dot -Tpng dependency.dot -o dependency.png
 
 buildd: ## Build the debug targets
-	cmake --build build_debug -t b_main -t BayesNetSample -t b_manage -t b_list -t b_best -j 32
+	cmake --build $(f_debug) -t $(app_targets) $(n_procs)
 
 buildr: ## Build the release targets
-	cmake --build build_release -t b_main -t BayesNetSample -t b_manage -t b_list -t b_best -j 32
+	cmake --build $(f_release) -t $(app_targets) $(n_procs)
 
-clean: ## Clean the debug info
-	@echo ">>> Cleaning Debug BayesNet...";
+clean: ## Clean the tests info
+	@echo ">>> Cleaning Debug BayesNet tests...";
 	$(call ClearTests)
 	@echo ">>> Done";
 
@@ -40,58 +62,54 @@ clang-uml: ## Create uml class and sequence diagrams
 
 debug: ## Build a debug version of the project
 	@echo ">>> Building Debug BayesNet...";
-	@if [ -d ./build_debug ]; then rm -rf ./build_debug; fi
-	@mkdir build_debug; 
-	@cmake -S . -B build_Debug -D CMAKE_BUILD_TYPE=Debug -D ENABLE_TESTING=ON -D CODE_COVERAGE=ON;
+	@if [ -d ./$(f_debug) ]; then rm -rf ./$(f_debug); fi
+	@mkdir $(f_debug); 
+	@cmake -S . -B $(f_debug) -D CMAKE_BUILD_TYPE=Debug -D ENABLE_TESTING=ON -D CODE_COVERAGE=ON;
 	@echo ">>> Done";
 
 release: ## Build a Release version of the project
 	@echo ">>> Building Release BayesNet...";
-	@if [ -d ./build_release ]; then rm -rf ./build_release; fi
-	@mkdir build_release; 
-	@cmake -S . -B build_release -D CMAKE_BUILD_TYPE=Release; 
+	@if [ -d ./$(f_release) ]; then rm -rf ./$(f_release); fi
+	@mkdir $(f_release); 
+	@cmake -S . -B $(f_release) -D CMAKE_BUILD_TYPE=Release; 
 	@echo ">>> Done";	
 
 opt = ""
 test: ## Run tests (opt="-s") to verbose output the tests, (opt="-c='Test Maximum Spanning Tree'") to run only that section
 	@echo ">>> Running BayesNet & Platform tests...";
-	$(MAKE) clean
-	@cmake --build build_debug --target unit_tests_bayesnet --target unit_tests_platform ; 
-	@if [ -f build_debug/tests/unit_tests_bayesnet ]; then cd build_debug/tests ; ./unit_tests_bayesnet $(opt) ; fi ; 
-	@if [ -f build_debug/tests/unit_tests_platform ]; then cd build_debug/tests ; ./unit_tests_platform $(opt) ; fi ; 
+	@$(MAKE) clean
+	@cmake --build $(f_debug) -t $(test_targets) $(n_procs)
+	@for t in $(test_targets); do \
+		if [ -f $(f_debug)/tests/$$t ]; then \
+			cd $(f_debug)/tests ; \
+			./$$t $(opt) ; \
+		fi ; \
+	done
 	@echo ">>> Done";
 
 opt = ""
 testp: ## Run platform tests (opt="-s") to verbose output the tests, (opt="-c='Stratified Fold Test'") to run only that section
 	@echo ">>> Running Platform tests...";
-	$(MAKE) clean
-	@cmake --build build_debug --target unit_tests_platform ; 
-	@if [ -f build_debug/tests/unit_tests_platform ]; then cd build_debug/tests ; ./unit_tests_platform $(opt) ; fi ; 
+	@$(MAKE) clean
+	@cmake --build $(f_debug) --target unit_tests_platform ; 
+	@if [ -f $(f_debug)/tests/unit_tests_platform ]; then cd $(f_debug)/tests ; ./unit_tests_platform $(opt) ; fi ; 
 	@echo ">>> Done";
 
 opt = ""
 testb: ## Run BayesNet tests (opt="-s") to verbose output the tests, (opt="-c='Test Maximum Spanning Tree'") to run only that section
 	@echo ">>> Running BayesNet tests...";
-	$(MAKE) clean
-	@cmake --build build_debug --target unit_tests_bayesnet ; 
-	@if [ -f build_debug/tests/unit_tests_bayesnet ]; then cd build_debug/tests ; ./unit_tests_bayesnet $(opt) ; fi ; 
+	@$(MAKE) clean
+	@cmake --build $(f_debug) --target unit_tests_bayesnet ; 
+	@if [ -f $(f_debug)/tests/unit_tests_bayesnet ]; then cd $(f_debug)/tests ; ./unit_tests_bayesnet $(opt) ; fi ; 
 	@echo ">>> Done";
 
 coverage: ## Run tests and generate coverage report (build/index.html)
 	@echo ">>> Building tests with coverage...";
-	$(MAKE) test
-	@cd build_debug ; \
-	gcovr --config ../gcovr.cfg
+	@$(MAKE) test
+	@cd $(f_debug) ; 
+	@gcovr --config ../gcovr.cfg ;
 	@echo ">>> Done";	
 
-define ClearTests =
-	$(eval nfiles=$(find . -name "*.gcda" -print))
-	@if [ -f build_debug/tests/unit_tests_bayesnet ]; then rm -f build_debug/tests/unit_tests_bayesnet ; fi ; 
-	@if [ -f build_debug/tests/unit_tests_platform ]; then rm -f build_debug/tests/unit_tests_platform ; fi ; 
-	@if test "${nfiles}" != "" ; then \
-		find . -name "*.gcda" -print0 | xargs -0 rm 2>/dev/null ;\
-	fi ; 
-endef
 
 help: ## Show help message
 	@IFS=$$'\n' ; \
