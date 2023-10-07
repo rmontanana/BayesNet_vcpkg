@@ -1,5 +1,6 @@
 #include "Mst.h"
 #include <vector>
+#include <list>
 /*
     Based on the code from https://www.softwaretestinghelp.com/minimum-spanning-tree-tutorial/
 
@@ -55,15 +56,24 @@ namespace bayesnet {
         }
     }
 
+    void insertElement(list<int>& variables, int variable)
+    {
+        if (find(variables.begin(), variables.end(), variable) == variables.end()) {
+            variables.push_front(variable);
+        }
+    }
+
     vector<pair<int, int>> reorder(vector<pair<float, pair<int, int>>> T, int root_original)
     {
+        // Create the edges of a DAG from the MST
+        // replacing unordered_set with list because unordered_set cannot guarantee the order of the elements inserted
         auto result = vector<pair<int, int>>();
         auto visited = vector<int>();
-        auto nextVariables = unordered_set<int>();
-        nextVariables.emplace(root_original);
+        auto nextVariables = list<int>();
+        nextVariables.push_front(root_original);
         while (nextVariables.size() > 0) {
-            int root = *nextVariables.begin();
-            nextVariables.erase(nextVariables.begin());
+            int root = nextVariables.front();
+            nextVariables.pop_front();
             for (int i = 0; i < T.size(); ++i) {
                 auto [weight, edge] = T[i];
                 auto [from, to] = edge;
@@ -71,10 +81,10 @@ namespace bayesnet {
                     visited.insert(visited.begin(), i);
                     if (from == root) {
                         result.push_back({ from, to });
-                        nextVariables.emplace(to);
+                        insertElement(nextVariables, to);
                     } else {
                         result.push_back({ to, from });
-                        nextVariables.emplace(from);
+                        insertElement(nextVariables, from);
                     }
                 }
             }
@@ -99,7 +109,6 @@ namespace bayesnet {
     {
         auto num_features = features.size();
         Graph g(num_features);
-
         // Make a complete graph
         for (int i = 0; i < num_features - 1; ++i) {
             for (int j = i + 1; j < num_features; ++j) {
@@ -108,7 +117,6 @@ namespace bayesnet {
         }
         g.kruskal_algorithm();
         auto mst = g.get_mst();
-        g.display_mst();
         return reorder(mst, root);
     }
 

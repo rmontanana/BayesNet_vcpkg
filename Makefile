@@ -15,7 +15,10 @@ define ClearTests
 			rm -f $(f_debug)/tests/$$t ; \
 		fi ; \
 	done
-	@find . -name "*.gcda" -print0 | xargs -0 rm 2>/dev/null ;
+	$(eval nfiles=$(find . -name "*.gcda" -print))
+	@if test "${nfiles}" != "" ; then \
+		find . -name "*.gcda" -print0 | xargs -0 rm 2>/dev/null ;\
+	fi ; 
 endef
 
 
@@ -61,14 +64,14 @@ debug: ## Build a debug version of the project
 	@echo ">>> Building Debug BayesNet...";
 	@if [ -d ./$(f_debug) ]; then rm -rf ./$(f_debug); fi
 	@mkdir $(f_debug); 
-	@cmake -S . -B $(f_debug) -D CMAKE_BUILD_TYPE=Debug -D ENABLE_TESTING=ON -D CODE_COVERAGE=ON;
+	@cmake -S . -B $(f_debug) -D CMAKE_BUILD_TYPE=Debug -D ENABLE_TESTING=ON -D CODE_COVERAGE=ON $(n_procs) ;
 	@echo ">>> Done";
 
 release: ## Build a Release version of the project
 	@echo ">>> Building Release BayesNet...";
 	@if [ -d ./$(f_release) ]; then rm -rf ./$(f_release); fi
 	@mkdir $(f_release); 
-	@cmake -S . -B $(f_release) -D CMAKE_BUILD_TYPE=Release; 
+	@cmake -S . -B $(f_release) -D CMAKE_BUILD_TYPE=Release $(n_procs); 
 	@echo ">>> Done";	
 
 opt = ""
@@ -88,7 +91,7 @@ opt = ""
 testp: ## Run platform tests (opt="-s") to verbose output the tests, (opt="-c='Stratified Fold Test'") to run only that section
 	@echo ">>> Running Platform tests...";
 	@$(MAKE) clean
-	@cmake --build $(f_debug) --target unit_tests_platform ; 
+	@cmake --build $(f_debug) --target unit_tests_platform $(n_procs) ; 
 	@if [ -f $(f_debug)/tests/unit_tests_platform ]; then cd $(f_debug)/tests ; ./unit_tests_platform $(opt) ; fi ; 
 	@echo ">>> Done";
 
@@ -96,7 +99,7 @@ opt = ""
 testb: ## Run BayesNet tests (opt="-s") to verbose output the tests, (opt="-c='Test Maximum Spanning Tree'") to run only that section
 	@echo ">>> Running BayesNet tests...";
 	@$(MAKE) clean
-	@cmake --build $(f_debug) --target unit_tests_bayesnet ; 
+	@cmake --build $(f_debug) --target unit_tests_bayesnet $(n_procs) ; 
 	@if [ -f $(f_debug)/tests/unit_tests_bayesnet ]; then cd $(f_debug)/tests ; ./unit_tests_bayesnet $(opt) ; fi ; 
 	@echo ">>> Done";
 
