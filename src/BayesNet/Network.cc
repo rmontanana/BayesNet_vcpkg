@@ -157,7 +157,7 @@ namespace bayesnet {
         completeFit(states, weights);
     }
     // input_data comes in nxm, where n is the number of features and m the number of samples
-    void Network::fit(const vector<vector<int>>& input_data, const vector<int>& labels, const vector<float>& weights_, const vector<string>& featureNames, const string& className, const map<string, vector<int>>& states)
+    void Network::fit(const vector<vector<int>>& input_data, const vector<int>& labels, const vector<double>& weights_, const vector<string>& featureNames, const string& className, const map<string, vector<int>>& states)
     {
         const torch::Tensor weights = torch::tensor(weights_, torch::kFloat64);
         checkFitData(input_data[0].size(), input_data.size(), labels.size(), featureNames, className, states, weights);

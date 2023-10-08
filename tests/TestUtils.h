@@ -27,10 +27,12 @@ public:
         dataset = torch::cat({ Xt, yresized }, 0);
         nSamples = dataset.size(1);
         weights = torch::full({ nSamples }, 1.0 / nSamples, torch::kDouble);
+        weightsv = vector<double>(nSamples, 1.0 / nSamples);
         classNumStates = discretize ? statest.at(classNamet).size() : 0;
     }
     torch::Tensor Xt, yt, dataset, weights;
     vector<vector<int>> Xv;
+    vector<double> weightsv;
     vector<int> yv;
     vector<string> featurest, featuresv;
     map<string, vector<int>> statest, statesv;

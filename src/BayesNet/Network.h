@@ -39,7 +39,7 @@ namespace bayesnet {
         int getNumEdges() const;
         int getClassNumStates() const;
         string getClassName() const;
-        void fit(const vector<vector<int>>& input_data, const vector<int>& labels, const vector<float>& weights, const vector<string>& featureNames, const string& className, const map<string, vector<int>>& states);
+        void fit(const vector<vector<int>>& input_data, const vector<int>& labels, const vector<double>& weights, const vector<string>& featureNames, const string& className, const map<string, vector<int>>& states);
         void fit(const torch::Tensor& X, const torch::Tensor& y, const torch::Tensor& weights, const vector<string>& featureNames, const string& className, const map<string, vector<int>>& states);
         void fit(const torch::Tensor& samples, const torch::Tensor& weights, const vector<string>& featureNames, const string& className, const map<string, vector<int>>& states);
         vector<int> predict(const vector<vector<int>>&); // Return mx1 vector of predictions
