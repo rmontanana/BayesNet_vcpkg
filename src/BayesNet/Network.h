@@ -39,6 +39,9 @@ namespace bayesnet {
         int getNumEdges() const;
         int getClassNumStates() const;
         string getClassName() const;
+        /*
+        Notice: Nodes have to be inserted in the same order as they are in the dataset, i.e., first node is first column and so on.
+        */
         void fit(const vector<vector<int>>& input_data, const vector<int>& labels, const vector<double>& weights, const vector<string>& featureNames, const string& className, const map<string, vector<int>>& states);
         void fit(const torch::Tensor& X, const torch::Tensor& y, const torch::Tensor& weights, const vector<string>& featureNames, const string& className, const map<string, vector<int>>& states);
         void fit(const torch::Tensor& samples, const torch::Tensor& weights, const vector<string>& featureNames, const string& className, const map<string, vector<int>>& states);

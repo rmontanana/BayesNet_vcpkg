@@ -47,10 +47,10 @@ dependency: ## Create a dependency graph diagram of the project (build/dependenc
 	cd $(f_debug) && cmake .. --graphviz=dependency.dot && dot -Tpng dependency.dot -o dependency.png
 
 buildd: ## Build the debug targets
-	cmake --build $(f_debug) -t $(app_targets) $(n_procs)
+	cmake --build $(f_debug) -t $(app_targets) -j $(n_procs)
 
 buildr: ## Build the release targets
-	cmake --build $(f_release) -t $(app_targets) $(n_procs)
+	cmake --build $(f_release) -t $(app_targets) -j $(n_procs)
 
 clean: ## Clean the tests info
 	@echo ">>> Cleaning Debug BayesNet tests...";
@@ -64,21 +64,21 @@ debug: ## Build a debug version of the project
 	@echo ">>> Building Debug BayesNet...";
 	@if [ -d ./$(f_debug) ]; then rm -rf ./$(f_debug); fi
 	@mkdir $(f_debug); 
-	@cmake -S . -B $(f_debug) -D CMAKE_BUILD_TYPE=Debug -D ENABLE_TESTING=ON -D CODE_COVERAGE=ON $(n_procs) ;
+	@cmake -S . -B $(f_debug) -D CMAKE_BUILD_TYPE=Debug -D ENABLE_TESTING=ON -D CODE_COVERAGE=ON
 	@echo ">>> Done";
 
 release: ## Build a Release version of the project
 	@echo ">>> Building Release BayesNet...";
 	@if [ -d ./$(f_release) ]; then rm -rf ./$(f_release); fi
 	@mkdir $(f_release); 
-	@cmake -S . -B $(f_release) -D CMAKE_BUILD_TYPE=Release $(n_procs); 
+	@cmake -S . -B $(f_release) -D CMAKE_BUILD_TYPE=Release
 	@echo ">>> Done";	
 
 opt = ""
 test: ## Run tests (opt="-s") to verbose output the tests, (opt="-c='Test Maximum Spanning Tree'") to run only that section
 	@echo ">>> Running BayesNet & Platform tests...";
 	@$(MAKE) clean
-	@cmake --build $(f_debug) -t $(test_targets) $(n_procs)
+	@cmake --build $(f_debug) -t $(test_targets) -j $(n_procs)
 	@for t in $(test_targets); do \
 		if [ -f $(f_debug)/tests/$$t ]; then \
 			cd $(f_debug)/tests ; \
@@ -91,7 +91,7 @@ opt = ""
 testp: ## Run platform tests (opt="-s") to verbose output the tests, (opt="-c='Stratified Fold Test'") to run only that section
 	@echo ">>> Running Platform tests...";
 	@$(MAKE) clean
-	@cmake --build $(f_debug) --target unit_tests_platform $(n_procs) ; 
+	@cmake --build $(f_debug) --target unit_tests_platform -j $(n_procs)
 	@if [ -f $(f_debug)/tests/unit_tests_platform ]; then cd $(f_debug)/tests ; ./unit_tests_platform $(opt) ; fi ; 
 	@echo ">>> Done";
 
@@ -99,7 +99,7 @@ opt = ""
 testb: ## Run BayesNet tests (opt="-s") to verbose output the tests, (opt="-c='Test Maximum Spanning Tree'") to run only that section
 	@echo ">>> Running BayesNet tests...";
 	@$(MAKE) clean
-	@cmake --build $(f_debug) --target unit_tests_bayesnet $(n_procs) ; 
+	@cmake --build $(f_debug) --target unit_tests_bayesnet -j $(n_procs)
 	@if [ -f $(f_debug)/tests/unit_tests_bayesnet ]; then cd $(f_debug)/tests ; ./unit_tests_bayesnet $(opt) ; fi ; 
 	@echo ">>> Done";
 

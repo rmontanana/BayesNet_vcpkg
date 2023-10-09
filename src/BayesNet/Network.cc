@@ -201,8 +201,7 @@ namespace bayesnet {
         }
         if (proba)
             return result;
-        else
-            return result.argmax(1);
+        return result.argmax(1);
     }
     // Return mxn tensor of probabilities
     Tensor Network::predict_proba(const Tensor& samples)
