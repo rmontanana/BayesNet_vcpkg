@@ -4,6 +4,8 @@
 #include "Result.h"
 #include "Colors.h"
 #include "BestScore.h"
+#include "CLocale.h"
+
 namespace platform {
     Result::Result(const string& path, const string& filename)
         : path(path)
@@ -37,14 +39,17 @@ namespace platform {
 
     string Result::to_string() const
     {
+        auto tmp = ConfigLocale();
         stringstream oss;
+        double durationShow = duration > 3600 ? duration / 3600 : duration > 60 ? duration / 60 : duration;
+        string durationUnit = duration > 3600 ? "h" : duration > 60 ? "m" : "s";
         oss << date << " ";
         oss << setw(12) << left << model << " ";
         oss << setw(11) << left << scoreName << " ";
         oss << right << setw(11) << setprecision(7) << fixed << score << " ";
         auto completeString = isComplete() ? "C" : "P";
         oss << setw(1) << " " << completeString << "  ";
-        oss << setw(9) << setprecision(3) << fixed << duration << " ";
+        oss << setw(7) << setprecision(2) << fixed << durationShow << " " << durationUnit << " ";
         oss << setw(50) << left << title << " ";
         return  oss.str();
     }

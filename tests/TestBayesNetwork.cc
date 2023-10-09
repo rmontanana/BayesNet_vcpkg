@@ -159,7 +159,6 @@ TEST_CASE("Test Bayesian Network", "[BayesNet]")
         net.addEdge("A", "C");
         auto str = net.graph("Test Graph");
         REQUIRE(str.size() == 7);
-        cout << str << endl;
         REQUIRE(str[0] == "digraph BayesNet {\nlabel=<BayesNet Test Graph>\nfontsize=30\nfontcolor=blue\nlabelloc=t\nlayout=circo\n");
         REQUIRE(str[1] == "A [shape=circle] \n");
         REQUIRE(str[2] == "A -> B");

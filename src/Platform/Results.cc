@@ -4,6 +4,7 @@
 #include "ReportExcel.h"
 #include "BestScore.h"
 #include "Colors.h"
+#include "CLocale.h"
 namespace platform {
     void Results::load()
     {
@@ -25,6 +26,7 @@ namespace platform {
     }
     void Results::show() const
     {
+        auto temp = ConfigLocale();
         cout << Colors::GREEN() << "Results found: " << files.size() << endl;
         cout << "-------------------" << endl;
         if (complete) {

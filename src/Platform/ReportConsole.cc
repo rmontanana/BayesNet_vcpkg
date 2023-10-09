@@ -2,15 +2,9 @@
 #include <locale>
 #include "ReportConsole.h"
 #include "BestScore.h"
-
+#include "CLocale.h"
 
 namespace platform {
-    struct separated : numpunct<char> {
-        char do_decimal_point() const { return ','; }
-        char do_thousands_sep() const { return '.'; }
-        string do_grouping() const { return "\03"; }
-    };
-
     string ReportConsole::headerLine(const string& text, int utf = 0)
     {
         int n = MAXL - text.length() - 3;
@@ -20,9 +14,6 @@ namespace platform {
 
     void ReportConsole::header()
     {
-        locale mylocale(cout.getloc(), new separated);
-        locale::global(mylocale);
-        cout.imbue(mylocale);
         stringstream oss;
         cout << Colors::MAGENTA() << string(MAXL, '*') << endl;
         cout << headerLine("Report " + data["model"].get<string>() + " ver. " + data["version"].get<string>() + " with " + to_string(data["folds"].get<int>()) + " Folds cross validation and " + to_string(data["seeds"].size()) + " random seeds. " + data["date"].get<string>() + " " + data["time"].get<string>());
@@ -36,6 +27,7 @@ namespace platform {
     }
     void ReportConsole::body()
     {
+        auto tmp = ConfigLocale();
         cout << Colors::GREEN() << " #  Dataset                   Sampl. Feat. Cls Nodes     Edges     States    Score           Time                Hyperparameters" << endl;
         cout << "=== ========================= ====== ===== === ========= ========= ========= =============== =================== ====================" << endl;
         json lastResult;

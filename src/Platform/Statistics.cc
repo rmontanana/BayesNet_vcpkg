@@ -4,6 +4,8 @@
 #include "Symbols.h"
 #include <boost/math/distributions/chi_squared.hpp>
 #include <boost/math/distributions/normal.hpp>
+#include "CLocale.h"
+
 
 namespace platform {
 
@@ -12,6 +14,7 @@ namespace platform {
     {
         nModels = models.size();
         nDatasets = datasets.size();
+        auto temp = ConfigLocale();
     };
 
     void Statistics::fit()

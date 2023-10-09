@@ -8,6 +8,7 @@
 #include "Colors.h"
 #include "Statistics.h"
 #include "BestResultsExcel.h"
+#include "CLocale.h"
 
 
 namespace fs = std::filesystem;
@@ -156,6 +157,7 @@ namespace platform {
             cerr << Colors::MAGENTA() << "File " << bestFileName << " doesn't exist." << Colors::RESET() << endl;
             exit(1);
         }
+        auto temp = ConfigLocale();
         auto date = ftime_to_string(filesystem::last_write_time(bestFileName));
         auto data = loadFile(bestFileName);
         auto datasets = getDatasets(data);
