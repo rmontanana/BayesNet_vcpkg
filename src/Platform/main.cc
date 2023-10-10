@@ -12,7 +12,7 @@
 using namespace std;
 using json = nlohmann::json;
 
-argparse::ArgumentParser manageArguments(int argc, char** argv)
+argparse::ArgumentParser manageArguments()
 {
     auto env = platform::DotEnv();
     argparse::ArgumentParser program("main");
@@ -48,43 +48,40 @@ argparse::ArgumentParser manageArguments(int argc, char** argv)
         }});
     auto seed_values = env.getSeeds();
     program.add_argument("-s", "--seeds").nargs(1, 10).help("Random seeds. Set to -1 to have pseudo random").scan<'i', int>().default_value(seed_values);
+    return program;
+}
+
+int main(int argc, char** argv)
+{
+    string file_name, model_name, title;
+    json hyperparameters_json;
+    bool discretize_dataset, stratified, saveResults;
+    vector<int> seeds;
+    vector<string> filesToTest;
+    int n_folds;
+    auto program = manageArguments();
     try {
         program.parse_args(argc, argv);
-        auto file_name = program.get<string>("dataset");
-        auto model_name = program.get<string>("model");
-        auto discretize_dataset = program.get<bool>("discretize");
-        auto stratified = program.get<bool>("stratified");
-        auto n_folds = program.get<int>("folds");
-        auto seeds = program.get<vector<int>>("seeds");
-        auto title = program.get<string>("title");
+        file_name = program.get<string>("dataset");
+        model_name = program.get<string>("model");
+        discretize_dataset = program.get<bool>("discretize");
+        stratified = program.get<bool>("stratified");
+        n_folds = program.get<int>("folds");
+        seeds = program.get<vector<int>>("seeds");
         auto hyperparameters = program.get<string>("hyperparameters");
-        auto saveResults = program.get<bool>("save");
+        hyperparameters_json = json::parse(hyperparameters);
+        title = program.get<string>("title");
         if (title == "" && file_name == "") {
             throw runtime_error("title is mandatory if dataset is not provided");
         }
+        saveResults = program.get<bool>("save");
     }
     catch (const exception& err) {
         cerr << err.what() << endl;
         cerr << program;
         exit(1);
     }
-    return program;
-}
-
-int main(int argc, char** argv)
-{
-    auto program = manageArguments(argc, argv);
-    auto file_name = program.get<string>("dataset");
-    auto model_name = program.get<string>("model");
-    auto discretize_dataset = program.get<bool>("discretize");
-    auto stratified = program.get<bool>("stratified");
-    auto n_folds = program.get<int>("folds");
-    auto seeds = program.get<vector<int>>("seeds");
-    auto hyperparameters = program.get<string>("hyperparameters");
-    vector<string> filesToTest;
     auto datasets = platform::Datasets(discretize_dataset, platform::Paths::datasets());
-    auto title = program.get<string>("title");
-    auto saveResults = program.get<bool>("save");
     if (file_name != "") {
         if (!datasets.isDataset(file_name)) {
             cerr << "Dataset " << file_name << " not found" << endl;
@@ -106,7 +103,7 @@ int main(int argc, char** argv)
     experiment.setTitle(title).setLanguage("cpp").setLanguageVersion("14.0.3");
     experiment.setDiscretized(discretize_dataset).setModel(model_name).setPlatform(env.get("platform"));
     experiment.setStratified(stratified).setNFolds(n_folds).setScoreName("accuracy");
-    experiment.setHyperparameters(json::parse(hyperparameters));
+    experiment.setHyperparameters(hyperparameters_json);
     for (auto seed : seeds) {
         experiment.addRandomSeed(seed);
     }

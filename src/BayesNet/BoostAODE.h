@@ -15,7 +15,6 @@ namespace bayesnet {
     private:
         torch::Tensor dataset_;
         torch::Tensor X_train, y_train, X_test, y_test;
-        void validationInit();
         void initializeModels();
         // Hyperparameters
         bool repeatSparent = false; // if true, a feature can be selected more than once

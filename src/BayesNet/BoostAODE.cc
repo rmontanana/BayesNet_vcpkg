@@ -11,30 +11,7 @@ namespace bayesnet {
     void BoostAODE::buildModel(const torch::Tensor& weights)
     {
         // Models shall be built in trainModel
-    }
-    void BoostAODE::setHyperparameters(nlohmann::json& hyperparameters)
-    {
-        // Check if hyperparameters are valid
-        const vector<string> validKeys = { "repeatSparent", "maxModels", "ascending", "convergence" };
-        checkHyperparameters(validKeys, hyperparameters);
-        if (hyperparameters.contains("repeatSparent")) {
-            repeatSparent = hyperparameters["repeatSparent"];
-        }
-        if (hyperparameters.contains("maxModels")) {
-            maxModels = hyperparameters["maxModels"];
-        }
-        if (hyperparameters.contains("ascending")) {
-            ascending = hyperparameters["ascending"];
-        }
-        if (hyperparameters.contains("convergence")) {
-            convergence = hyperparameters["convergence"];
-        }
-        if (hyperparameters.contains("cfs")) {
-            cfs = hyperparameters["cfs"];
-        }
-    }
-    void BoostAODE::validationInit()
-    {
+        // Prepare the validation dataset
         auto y_ = dataset.index({ -1, "..." });
         if (convergence) {
             // Prepare train & validation sets from train data
@@ -60,12 +37,43 @@ namespace bayesnet {
             X_train = dataset.index({ torch::indexing::Slice(0, dataset.size(0) - 1), "..." });
             y_train = y_;
         }
-
+        if (cfs != "") {
+            initializeModels();
+        }
+    }
+    void BoostAODE::setHyperparameters(nlohmann::json& hyperparameters)
+    {
+        // Check if hyperparameters are valid
+        const vector<string> validKeys = { "repeatSparent", "maxModels", "ascending", "convergence", "cfs" };
+        checkHyperparameters(validKeys, hyperparameters);
+        if (hyperparameters.contains("repeatSparent")) {
+            repeatSparent = hyperparameters["repeatSparent"];
+        }
+        if (hyperparameters.contains("maxModels")) {
+            maxModels = hyperparameters["maxModels"];
+        }
+        if (hyperparameters.contains("ascending")) {
+            ascending = hyperparameters["ascending"];
+        }
+        if (hyperparameters.contains("convergence")) {
+            convergence = hyperparameters["convergence"];
+        }
+        if (hyperparameters.contains("cfs")) {
+            cfs = hyperparameters["cfs"];
+        }
     }
     void BoostAODE::initializeModels()
     {
         ifstream file(cfs + ".json");
         if (file.is_open()) {
+            nlohmann::json data;
+            file >> data;
+            file.close();
+            auto model = "iris"; // has to come in when building object
+            auto features = data[model];
+            cout << "features: " << features.dump() << endl;
+        } else {
+            throw runtime_error("File " + cfs + ".json not found");
         }
     }
     void BoostAODE::trainModel(const torch::Tensor& weights)
@@ -74,11 +82,7 @@ namespace bayesnet {
         n_models = 0;
         if (maxModels == 0)
             maxModels = .1 * n > 10 ? .1 * n : n;
-        validationInit();
         Tensor weights_ = torch::full({ m }, 1.0 / m, torch::kFloat64);
-        if (cfs != "") {
-            initializeModels();
-        }
         bool exitCondition = false;
         unordered_set<int> featuresUsed;
         // Variables to control the accuracy finish condition
