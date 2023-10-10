@@ -1,10 +1,12 @@
-#include "BoostAODE.h"
 #include <set>
+#include <functional>
+#include <limits.h>
+#include "BoostAODE.h"
 #include "BayesMetrics.h"
 #include "Colors.h"
 #include "Folding.h"
-#include <limits.h>
 #include "Paths.h"
+#include <openssl/evp.h>
 
 namespace bayesnet {
     BoostAODE::BoostAODE() : Ensemble() {}
@@ -13,6 +15,8 @@ namespace bayesnet {
         // Models shall be built in trainModel
         // Prepare the validation dataset
         auto y_ = dataset.index({ -1, "..." });
+        int nSamples = dataset.size(1);
+        int nFeatures = dataset.size(0) - 1;
         if (convergence) {
             // Prepare train & validation sets from train data
             auto fold = platform::StratifiedKFold(5, y_, 271);
@@ -38,7 +42,7 @@ namespace bayesnet {
             y_train = y_;
         }
         if (cfs != "") {
-            initializeModels();
+            initializeModels(nSamples, nFeatures);
         }
     }
     void BoostAODE::setHyperparameters(nlohmann::json& hyperparameters)
@@ -62,18 +66,52 @@ namespace bayesnet {
             cfs = hyperparameters["cfs"];
         }
     }
-    void BoostAODE::initializeModels()
+    string sha256(const string& input)
     {
-        ifstream file(cfs + ".json");
+        EVP_MD_CTX* mdctx;
+        const EVP_MD* md;
+        unsigned char hash[EVP_MAX_MD_SIZE];
+        unsigned int hash_len;
+
+        OpenSSL_add_all_digests();
+        md = EVP_get_digestbyname("sha256");
+        mdctx = EVP_MD_CTX_new();
+        EVP_DigestInit_ex(mdctx, md, nullptr);
+        EVP_DigestUpdate(mdctx, input.c_str(), input.size());
+        EVP_DigestFinal_ex(mdctx, hash, &hash_len);
+        EVP_MD_CTX_free(mdctx);
+        stringstream oss;
+        for (unsigned int i = 0; i < hash_len; i++) {
+            oss << hex << (int)hash[i];
+        }
+        return oss.str();
+    }
+
+    void BoostAODE::initializeModels(int nSamples, int nFeatures)
+    {
+        // Read the CFS features
+        string output = "[", prefix = "";
+        bool first = true;
+        for (const auto& feature : features) {
+            output += prefix + feature;
+            if (first) {
+                prefix = ", ";
+                first = false;
+            }
+        }
+        output += "]";
+        // std::size_t str_hash = std::hash<std::string>{}(output);
+        string str_hash = sha256(output);
+        stringstream oss;
+        oss << "cfs/" << str_hash << ".json";
+        string name = oss.str();
+        ifstream file(name);
         if (file.is_open()) {
-            nlohmann::json data;
-            file >> data;
+            nlohmann::json features = nlohmann::json::parse(file);
             file.close();
-            auto model = "iris"; // has to come in when building object
-            auto features = data[model];
             cout << "features: " << features.dump() << endl;
         } else {
-            throw runtime_error("File " + cfs + ".json not found");
+            throw runtime_error("File " + name + " not found");
         }
     }
     void BoostAODE::trainModel(const torch::Tensor& weights)
