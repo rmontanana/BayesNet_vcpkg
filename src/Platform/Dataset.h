@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include "CPPFImdlp.h"
+#include "Utils.h"
 namespace platform {
     using namespace std;
 
@@ -62,7 +63,6 @@ namespace platform {
     public:
         Dataset(const string& path, const string& name, const string& className, bool discretize, fileType_t fileType) : path(path), name(name), className(className), discretize(discretize), loaded(false), fileType(fileType) {};
         explicit Dataset(const Dataset&);
-        static vector<string> split(const string& text, char delimiter);
         string getName() const;
         string getClassName() const;
         vector<string> getFeatures() const;

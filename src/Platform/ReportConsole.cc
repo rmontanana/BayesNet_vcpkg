@@ -56,10 +56,12 @@ namespace platform {
             try {
                 cout << r["hyperparameters"].get<string>();
             }
-            catch (const exception& err) {
-                cout << r["hyperparameters"];
+            catch (...) {
+                //cout << r["hyperparameters"];
+                cout << "Arrggggghhhh!" << endl;
             }
             cout << endl;
+            cout << flush;
             lastResult = r;
             totalScore += r["score"].get<double>();
             odd = !odd;

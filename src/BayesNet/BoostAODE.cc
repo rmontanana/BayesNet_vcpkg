@@ -4,6 +4,7 @@
 #include "Colors.h"
 #include "Folding.h"
 #include <limits.h>
+#include "Paths.h"
 
 namespace bayesnet {
     BoostAODE::BoostAODE() : Ensemble() {}
@@ -27,6 +28,9 @@ namespace bayesnet {
         }
         if (hyperparameters.contains("convergence")) {
             convergence = hyperparameters["convergence"];
+        }
+        if (hyperparameters.contains("cfs")) {
+            cfs = hyperparameters["cfs"];
         }
     }
     void BoostAODE::validationInit()
@@ -58,6 +62,12 @@ namespace bayesnet {
         }
 
     }
+    void BoostAODE::initializeModels()
+    {
+        ifstream file(cfs + ".json");
+        if (file.is_open()) {
+        }
+    }
     void BoostAODE::trainModel(const torch::Tensor& weights)
     {
         models.clear();
@@ -66,6 +76,9 @@ namespace bayesnet {
             maxModels = .1 * n > 10 ? .1 * n : n;
         validationInit();
         Tensor weights_ = torch::full({ m }, 1.0 / m, torch::kFloat64);
+        if (cfs != "") {
+            initializeModels();
+        }
         bool exitCondition = false;
         unordered_set<int> featuresUsed;
         // Variables to control the accuracy finish condition

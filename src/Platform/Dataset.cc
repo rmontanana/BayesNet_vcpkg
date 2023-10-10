@@ -212,14 +212,4 @@ namespace platform {
         }
         return Xd;
     }
-    vector<string> Dataset::split(const string& text, char delimiter)
-    {
-        vector<string> result;
-        stringstream ss(text);
-        string token;
-        while (getline(ss, token, delimiter)) {
-            result.push_back(token);
-        }
-        return result;
-    }
 }

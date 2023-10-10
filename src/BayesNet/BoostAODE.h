@@ -16,10 +16,13 @@ namespace bayesnet {
         torch::Tensor dataset_;
         torch::Tensor X_train, y_train, X_test, y_test;
         void validationInit();
-        bool repeatSparent = false;
+        void initializeModels();
+        // Hyperparameters
+        bool repeatSparent = false; // if true, a feature can be selected more than once
         int maxModels = 0;
         bool ascending = false; //Process KBest features ascending or descending order
         bool convergence = false; //if true, stop when the model does not improve
+        string cfs = ""; // if not empty, use CFS to select features
     };
 }
 #endif
