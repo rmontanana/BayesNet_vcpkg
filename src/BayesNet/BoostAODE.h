@@ -1,6 +1,7 @@
 #ifndef BOOSTAODE_H
 #define BOOSTAODE_H
 #include "Ensemble.h"
+#include <map>
 #include "SPODE.h"
 namespace bayesnet {
     class BoostAODE : public Ensemble {
@@ -15,7 +16,7 @@ namespace bayesnet {
     private:
         torch::Tensor dataset_;
         torch::Tensor X_train, y_train, X_test, y_test;
-        void initializeModels();
+        unordered_set<int> initializeModels();
         // Hyperparameters
         bool repeatSparent = false; // if true, a feature can be selected more than once
         int maxModels = 0;
