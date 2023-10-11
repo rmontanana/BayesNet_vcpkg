@@ -14,8 +14,8 @@ namespace bayesnet {
         int numStates; // number of states of the variable
         torch::Tensor cpTable; // Order of indices is 0-> node variable, 1-> 1st parent, 2-> 2nd parent, ...
         vector<int64_t> dimensions; // dimensions of the cpTable
-    public:
         vector<pair<string, string>> combinations(const vector<string>&);
+    public:
         explicit Node(const string&);
         void clear();
         void addParent(Node*);

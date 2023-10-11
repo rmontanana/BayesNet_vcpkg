@@ -8,20 +8,22 @@ namespace bayesnet {
     using namespace torch;
     class Metrics {
     private:
-        Tensor samples; // nxm tensor used to fit the model
-        vector<string> features;
-        string className;
         int classNumStates = 0;
         vector<double> scoresKBest;
         vector<int> featuresKBest; // sorted indices of the features
-        double entropy(const Tensor& feature, const Tensor& weights);
         double conditionalEntropy(const Tensor& firstFeature, const Tensor& secondFeature, const Tensor& weights);
-        vector<pair<string, string>> doCombinations(const vector<string>&);
+    protected:
+        Tensor samples; // n+1xm tensor used to fit the model where samples[-1] is the y vector
+        string className;
+        double entropy(const Tensor& feature, const Tensor& weights);
+        vector<string> features;
+        template <class T>
+        vector<pair<T, T>> doCombinations(const vector<T>& source);
     public:
         Metrics() = default;
         Metrics(const torch::Tensor& samples, const vector<string>& features, const string& className, const int classNumStates);
         Metrics(const vector<vector<int>>& vsamples, const vector<int>& labels, const vector<string>& features, const string& className, const int classNumStates);
-        vector<int> SelectKBestWeighted(const torch::Tensor& weights, bool ascending=false, unsigned k = 0);
+        vector<int> SelectKBestWeighted(const torch::Tensor& weights, bool ascending = false, unsigned k = 0);
         vector<double> getScoresKBest() const;
         double mutualInformation(const Tensor& firstFeature, const Tensor& secondFeature, const Tensor& weights);
         vector<float> conditionalEdgeWeights(vector<float>& weights); // To use in Python

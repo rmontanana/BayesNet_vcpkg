@@ -60,11 +60,12 @@ namespace bayesnet {
     {
         return scoresKBest;
     }
-    vector<pair<string, string>> Metrics::doCombinations(const vector<string>& source)
+    template <class T>
+    vector<pair<T, T>> Metrics::doCombinations(const vector<T>& source)
     {
-        vector<pair<string, string>> result;
+        vector<pair<T, T>> result;
         for (int i = 0; i < source.size(); ++i) {
-            string temp = source[i];
+            T temp = source[i];
             for (int j = i + 1; j < source.size(); ++j) {
                 result.push_back({ temp, source[j] });
             }
@@ -76,7 +77,7 @@ namespace bayesnet {
         auto result = vector<double>();
         auto source = vector<string>(features);
         source.push_back(className);
-        auto combinations = doCombinations(source);
+        auto combinations = doCombinations<string>(source);
         // Compute class prior
         auto margin = torch::zeros({ classNumStates }, torch::kFloat);
         for (int value = 0; value < classNumStates; ++value) {
