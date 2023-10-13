@@ -17,14 +17,22 @@ namespace bayesnet {
         */
         auto x = samples.index({ a, "..." });
         auto y = samples.index({ b, "..." });
-        return 2.0 * mutualInformation(y, x, weights) / (entropy(x, weights) + entropy(y, weights));
+        auto mu = mutualInformation(x, y, weights);
+        // cout << "Mutual Information: (" << a << ", " << b << ") = " << mu << endl;
+        auto hx = entropy(x, weights);
+        // cout << "Entropy X: " << hx << endl;
+        auto hy = entropy(y, weights);
+        // cout << "Entropy Y: " << hy << endl;
+        return 2.0 * mu / (hx + hy);
     }
     void CFS::computeSuLabels()
     {
         // Compute Simmetrical Uncertainty between features and labels
         // https://en.wikipedia.org/wiki/Symmetric_uncertainty
+        // cout << "SuLabels" << endl;
         for (int i = 0; i < features.size(); ++i) {
-            suLabels[i] = symmetricalUncertainty(i, -1);
+            suLabels.push_back(symmetricalUncertainty(i, -1));
+            // cout << i << " -> " << suLabels[i] << endl;
         }
 
     }
@@ -44,7 +52,7 @@ namespace bayesnet {
         }
         double rff = 0;
         int n = cfsFeatures.size();
-        for (const auto& item : doCombinations<int>(cfsFeatures)) {
+        for (const auto& item : doCombinations(cfsFeatures)) {
             rff += computeSuFeatures(item.first, item.second);
         }
         return rcf / sqrt(n + (n * n - n) * rff);
@@ -58,24 +66,57 @@ namespace bayesnet {
         auto feature = featureOrder[0];
         cfsFeatures.push_back(feature);
         cfsScores.push_back(suLabels[feature]);
+        cfsFeatures.erase(cfsFeatures.begin());
         while (continueCondition) {
             double merit = numeric_limits<double>::lowest();
             int bestFeature = -1;
             for (auto feature : featureOrder) {
                 cfsFeatures.push_back(feature);
                 auto meritNew = computeMerit(); // Compute merit with cfsFeatures
+                //cout << "MeritNew: " << meritNew << " Merit: " << merit << endl;
                 if (meritNew > merit) {
                     merit = meritNew;
                     bestFeature = feature;
                 }
                 cfsFeatures.pop_back();
             }
+            if (bestFeature == -1) {
+                throw runtime_error("Feature not found");
+            }
             cfsFeatures.push_back(bestFeature);
             cfsScores.push_back(merit);
-            featureOrder.erase(remove(featureOrder.begin(), featureOrder.end(), feature), featureOrder.end());
+            featureOrder.erase(remove(featureOrder.begin(), featureOrder.end(), bestFeature), featureOrder.end());
             continueCondition = computeContinueCondition(featureOrder);
         }
         fitted = true;
+    }
+    void CFS::test()
+    {
+        cout << "H(y): " << entropy(samples.index({ -1, "..." }), weights) << endl;
+        cout << "y: ";
+        auto y = samples.index({ -1, "..." });
+        for (int i = 0; i < y.size(0); ++i) {
+            cout << y[i].item<double>() << ", ";
+        }
+        cout << endl;
+        computeSuLabels();
+        // cout << "Probabilites of features: " << endl;
+        // for (const auto& featureName : features) {
+        //     int featureIdx = find(features.begin(), features.end(), featureName) - features.begin();
+        //     cout << featureName << "(" << featureIdx << "): ";
+        //     auto feature = samples.index({ featureIdx, "..." });
+        //     torch::Tensor counts = feature.bincount(weights);
+        //     double totalWeight = counts.sum().item<double>();
+        //     torch::Tensor probs = counts.to(torch::kFloat) / totalWeight;
+        //     for (int i = 0; i < probs.size(0); ++i) {
+        //         cout << probs[i].item<double>() << ", ";
+        //     }
+        //     cout << endl;
+        //     // for (int i = 0; i < x.size(0); ++i) {
+        //     //     cout << x[i].item<double>() << ", ";
+        //     // }
+        //     // cout << endl;
+        // }
     }
     bool CFS::computeContinueCondition(const vector<int>& featureOrder)
     {

@@ -18,7 +18,17 @@ namespace bayesnet {
         double entropy(const Tensor& feature, const Tensor& weights);
         vector<string> features;
         template <class T>
-        vector<pair<T, T>> doCombinations(const vector<T>& source);
+        vector<pair<T, T>> doCombinations(const vector<T>& source)
+        {
+            vector<pair<T, T>> result;
+            for (int i = 0; i < source.size(); ++i) {
+                T temp = source[i];
+                for (int j = i + 1; j < source.size(); ++j) {
+                    result.push_back({ temp, source[j] });
+                }
+            }
+            return result;
+        }
     public:
         Metrics() = default;
         Metrics(const torch::Tensor& samples, const vector<string>& features, const string& className, const int classNumStates);

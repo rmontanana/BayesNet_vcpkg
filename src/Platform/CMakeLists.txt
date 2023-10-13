@@ -9,7 +9,7 @@ add_executable(b_main main.cc Folding.cc Experiment.cc Datasets.cc Dataset.cc Mo
 add_executable(b_manage manage.cc Results.cc Result.cc ReportConsole.cc ReportExcel.cc ReportBase.cc Datasets.cc Dataset.cc ExcelFile.cc)
 add_executable(b_list list.cc Datasets.cc Dataset.cc)
 add_executable(b_best best.cc BestResults.cc Result.cc Statistics.cc BestResultsExcel.cc ExcelFile.cc)
-add_executable(testx testx.cpp Datasets.cc Dataset.cc Folding.cc)
+add_executable(testx testx.cpp Datasets.cc Dataset.cc Folding.cc )
 target_link_libraries(b_main BayesNet ArffFiles mdlp "${TORCH_LIBRARIES}")
 if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux")
     target_link_libraries(b_manage "${TORCH_LIBRARIES}" libxlsxwriter.so ArffFiles mdlp stdc++fs)

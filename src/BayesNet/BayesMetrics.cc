@@ -60,24 +60,13 @@ namespace bayesnet {
     {
         return scoresKBest;
     }
-    template <class T>
-    vector<pair<T, T>> Metrics::doCombinations(const vector<T>& source)
-    {
-        vector<pair<T, T>> result;
-        for (int i = 0; i < source.size(); ++i) {
-            T temp = source[i];
-            for (int j = i + 1; j < source.size(); ++j) {
-                result.push_back({ temp, source[j] });
-            }
-        }
-        return result;
-    }
+
     torch::Tensor Metrics::conditionalEdge(const torch::Tensor& weights)
     {
         auto result = vector<double>();
         auto source = vector<string>(features);
         source.push_back(className);
-        auto combinations = doCombinations<string>(source);
+        auto combinations = doCombinations(source);
         // Compute class prior
         auto margin = torch::zeros({ classNumStates }, torch::kFloat);
         for (int value = 0; value < classNumStates; ++value) {
@@ -123,6 +112,11 @@ namespace bayesnet {
         torch::Tensor counts = feature.bincount(weights);
         double totalWeight = counts.sum().item<double>();
         torch::Tensor probs = counts.to(torch::kFloat) / totalWeight;
+        // cout << "Probs: ";
+        // for (int i = 0; i < probs.size(0); ++i) {
+        //     cout << probs[i].item<double>() << ", ";
+        // }
+        // cout << endl;
         torch::Tensor logProbs = torch::log(probs);
         torch::Tensor entropy = -probs * logProbs;
         return entropy.nansum().item<double>();

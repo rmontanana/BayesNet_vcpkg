@@ -11,6 +11,7 @@ namespace bayesnet {
         CFS(const torch::Tensor& samples, const vector<string>& features, const string& className, const int maxFeatures, const int classNumStates, const torch::Tensor& weights);
         virtual ~CFS() {};
         void fit();
+        void test();
         vector<int> getFeatures() const;
         vector<double> getScores() const;
     private:

@@ -7,6 +7,7 @@
 #include "Network.h"
 #include "ArffFiles.h"
 #include "CPPFImdlp.h"
+#include "CFS.h"
 
 using namespace std;
 using namespace platform;
@@ -191,22 +192,43 @@ int main()
     //     }
     //     cout << "***********************************************************************************************" << endl;
     // }
-    const string file_name = "iris";
-    auto net = bayesnet::Network();
+    // const string file_name = "iris";
+    // auto net = bayesnet::Network();
+    // auto dt = Datasets(true, "Arff");
+    // auto raw = RawDatasets("iris", true);
+    // auto [X, y] = dt.getVectors(file_name);
+    // cout << "Dataset dims " << raw.dataset.sizes() << endl;
+    // cout << "weights dims " << raw.weights.sizes() << endl;
+    // cout << "States dims " << raw.statest.size() << endl;
+    // cout << "features: ";
+    // for (const auto& feature : raw.featurest) {
+    //     cout << feature << ", ";
+    //     net.addNode(feature);
+    // }
+    // net.addNode(raw.classNamet);
+    // cout << endl;
+    // net.fit(raw.dataset, raw.weights, raw.featurest, raw.classNamet, raw.statest);
     auto dt = Datasets(true, "Arff");
-    auto raw = RawDatasets("iris", true);
-    auto [X, y] = dt.getVectors(file_name);
-    cout << "Dataset dims " << raw.dataset.sizes() << endl;
-    cout << "weights dims " << raw.weights.sizes() << endl;
-    cout << "States dims " << raw.statest.size() << endl;
-    cout << "features: ";
-    for (const auto& feature : raw.featurest) {
-        cout << feature << ", ";
-        net.addNode(feature);
+    for (const auto& name : dt.getNames()) {
+        //for (const auto& name : { "iris" }) {
+        auto [X, y] = dt.getTensors(name);
+        auto features = dt.getFeatures(name);
+        auto states = dt.getStates(name);
+        auto className = dt.getClassName(name);
+        int maxFeatures = 0;
+        auto classNumStates = states.at(className).size();
+        torch::Tensor weights = torch::full({ X.size(1) }, 1.0 / X.size(1), torch::kDouble);
+        auto dataset = X;
+        auto yresized = torch::transpose(y.view({ y.size(0), 1 }), 0, 1);
+        dataset = torch::cat({ dataset, yresized }, 0);
+        auto cfs = bayesnet::CFS(dataset, features, className, maxFeatures, classNumStates, weights);
+        cfs.fit();
+        cout << "Dataset: " << name << " CFS features: ";
+        for (const auto& feature : cfs.getFeatures()) {
+            cout << feature << ", ";
+        }
+        cout << "end." << endl;
     }
-    net.addNode(raw.classNamet);
-    cout << endl;
-    net.fit(raw.dataset, raw.weights, raw.featurest, raw.classNamet, raw.statest);
 
 }
 

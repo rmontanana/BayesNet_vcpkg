@@ -2,11 +2,11 @@
 #include <functional>
 #include <limits.h>
 #include "BoostAODE.h"
-#include "BayesMetrics.h"
 #include "Colors.h"
 #include "Folding.h"
 #include "Paths.h"
 #include <openssl/evp.h>
+#include "CFS.h"
 
 namespace bayesnet {
     BoostAODE::BoostAODE() : Ensemble() {}
@@ -98,13 +98,15 @@ namespace bayesnet {
             }
         }
         output += "]";
+        Tensor weights_ = torch::full({ m }, 1.0 / m, torch::kFloat64);
+        int maxFeatures = 0;
+        auto cfs = bayesnet::CFS(dataset, features, className, maxFeatures, states.at(className).size(), weights_);
         // std::size_t str_hash = std::hash<std::string>{}(output);
         string str_hash = sha256(output);
         stringstream oss;
         oss << platform::Paths::cfs() << str_hash << ".json";
         string name = oss.str();
         ifstream file(name);
-        Tensor weights_ = torch::full({ m }, 1.0 / m, torch::kFloat64);
         if (file.is_open()) {
             nlohmann::json cfsFeatures = nlohmann::json::parse(file);
             file.close();
