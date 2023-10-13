@@ -5,7 +5,6 @@
 #include "Colors.h"
 #include "Folding.h"
 #include "Paths.h"
-#include <openssl/evp.h>
 #include "CFS.h"
 
 namespace bayesnet {
@@ -63,27 +62,6 @@ namespace bayesnet {
             cfs = hyperparameters["cfs"];
         }
     }
-    string sha256(const string& input)
-    {
-        EVP_MD_CTX* mdctx;
-        const EVP_MD* md;
-        unsigned char hash[EVP_MAX_MD_SIZE];
-        unsigned int hash_len;
-
-        OpenSSL_add_all_digests();
-        md = EVP_get_digestbyname("sha256");
-        mdctx = EVP_MD_CTX_new();
-        EVP_DigestInit_ex(mdctx, md, nullptr);
-        EVP_DigestUpdate(mdctx, input.c_str(), input.size());
-        EVP_DigestFinal_ex(mdctx, hash, &hash_len);
-        EVP_MD_CTX_free(mdctx);
-        stringstream oss;
-        for (unsigned int i = 0; i < hash_len; i++) {
-            oss << hex << setfill('0') << setw(2) << (int)hash[i];
-        }
-        return oss.str();
-    }
-
     unordered_set<int> BoostAODE::initializeModels()
     {
         unordered_set<int> featuresUsed;
@@ -101,26 +79,16 @@ namespace bayesnet {
         Tensor weights_ = torch::full({ m }, 1.0 / m, torch::kFloat64);
         int maxFeatures = 0;
         auto cfs = bayesnet::CFS(dataset, features, className, maxFeatures, states.at(className).size(), weights_);
-        // std::size_t str_hash = std::hash<std::string>{}(output);
-        string str_hash = sha256(output);
-        stringstream oss;
-        oss << platform::Paths::cfs() << str_hash << ".json";
-        string name = oss.str();
-        ifstream file(name);
-        if (file.is_open()) {
-            nlohmann::json cfsFeatures = nlohmann::json::parse(file);
-            file.close();
-            for (const int& feature : cfsFeatures) {
-                // cout << "Feature: [" << feature << "] " << feature << " " << features.at(feature) << endl;
-                featuresUsed.insert(feature);
-                unique_ptr<Classifier> model = std::make_unique<SPODE>(feature);
-                model->fit(dataset, features, className, states, weights_);
-                models.push_back(std::move(model));
-                significanceModels.push_back(1.0);
-                n_models++;
-            }
-        } else {
-            throw runtime_error("File " + name + " not found");
+        cfs.fit();
+        auto cfsFeatures = cfs.getFeatures();
+        for (const int& feature : cfsFeatures) {
+            // cout << "Feature: [" << feature << "] " << feature << " " << features.at(feature) << endl;
+            featuresUsed.insert(feature);
+            unique_ptr<Classifier> model = std::make_unique<SPODE>(feature);
+            model->fit(dataset, features, className, states, weights_);
+            models.push_back(std::move(model));
+            significanceModels.push_back(1.0);
+            n_models++;
         }
         return featuresUsed;
     }

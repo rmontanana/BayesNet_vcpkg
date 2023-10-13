@@ -210,7 +210,7 @@ int main()
     // net.fit(raw.dataset, raw.weights, raw.featurest, raw.classNamet, raw.statest);
     auto dt = Datasets(true, "Arff");
     for (const auto& name : dt.getNames()) {
-        //for (const auto& name : { "iris" }) {
+        // for (const auto& name : { "iris" }) {
         auto [X, y] = dt.getTensors(name);
         auto features = dt.getFeatures(name);
         auto states = dt.getStates(name);
@@ -222,8 +222,8 @@ int main()
         auto yresized = torch::transpose(y.view({ y.size(0), 1 }), 0, 1);
         dataset = torch::cat({ dataset, yresized }, 0);
         auto cfs = bayesnet::CFS(dataset, features, className, maxFeatures, classNumStates, weights);
+        cout << "Dataset: " << name << " CFS features: " << flush;
         cfs.fit();
-        cout << "Dataset: " << name << " CFS features: ";
         for (const auto& feature : cfs.getFeatures()) {
             cout << feature << ", ";
         }

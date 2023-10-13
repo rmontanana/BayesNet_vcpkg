@@ -112,11 +112,6 @@ namespace bayesnet {
         torch::Tensor counts = feature.bincount(weights);
         double totalWeight = counts.sum().item<double>();
         torch::Tensor probs = counts.to(torch::kFloat) / totalWeight;
-        // cout << "Probs: ";
-        // for (int i = 0; i < probs.size(0); ++i) {
-        //     cout << probs[i].item<double>() << ", ";
-        // }
-        // cout << endl;
         torch::Tensor logProbs = torch::log(probs);
         torch::Tensor entropy = -probs * logProbs;
         return entropy.nansum().item<double>();

@@ -26,6 +26,7 @@ namespace bayesnet {
         vector<int> cfsFeatures;
         vector<double> cfsScores;
         vector<double> suLabels;
+        map<pair<int, int>, double> suFeatures;
         bool fitted = false;
     };
 }

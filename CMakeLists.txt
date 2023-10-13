@@ -45,7 +45,6 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 # CMakes modules
 # --------------
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
-find_package(OpenSSL REQUIRED)
 include(AddGitSubmodule)
 if (CODE_COVERAGE)
     enable_testing()
