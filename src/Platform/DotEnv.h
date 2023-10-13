@@ -4,6 +4,7 @@
 #include <map>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 #include <iostream>
 #include "Utils.h"
 
