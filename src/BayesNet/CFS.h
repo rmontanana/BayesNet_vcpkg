@@ -2,32 +2,20 @@
 #define CFS_H
 #include <torch/torch.h>
 #include <vector>
-#include "BayesMetrics.h"
+#include "FeatureSelect.h"
 using namespace std;
 namespace bayesnet {
-    class CFS : public Metrics {
+    class CFS : public FeatureSelect {
     public:
         // dataset is a n+1xm tensor of integers where dataset[-1] is the y vector
-        CFS(const torch::Tensor& samples, const vector<string>& features, const string& className, const int maxFeatures, const int classNumStates, const torch::Tensor& weights);
+        CFS(const torch::Tensor& samples, const vector<string>& features, const string& className, const int maxFeatures, const int classNumStates, const torch::Tensor& weights) :
+            FeatureSelect(samples, features, className, maxFeatures, classNumStates, weights)
+        {
+        }
         virtual ~CFS() {};
-        void fit();
-        void test();
-        vector<int> getFeatures() const;
-        vector<double> getScores() const;
+        void fit() override;
     private:
-        void computeSuLabels();
-        double computeSuFeatures(const int a, const int b);
-        double symmetricalUncertainty(int a, int b);
-        double computeMerit();
         bool computeContinueCondition(const vector<int>& featureOrder);
-        vector<pair<int, int>> combinations(const vector<int>& features);
-        const torch::Tensor& weights;
-        int maxFeatures;
-        vector<int> cfsFeatures;
-        vector<double> cfsScores;
-        vector<double> suLabels;
-        map<pair<int, int>, double> suFeatures;
-        bool fitted = false;
     };
 }
 #endif
