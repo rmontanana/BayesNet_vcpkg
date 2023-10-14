@@ -6,6 +6,8 @@
 #include "Folding.h"
 #include "Paths.h"
 #include "CFS.h"
+#include "FCBF.h"
+#include "IWSS.h"
 
 namespace bayesnet {
     BoostAODE::BoostAODE() : Ensemble() {}
@@ -44,7 +46,7 @@ namespace bayesnet {
     void BoostAODE::setHyperparameters(nlohmann::json& hyperparameters)
     {
         // Check if hyperparameters are valid
-        const vector<string> validKeys = { "repeatSparent", "maxModels", "ascending", "convergence", "cfs" };
+        const vector<string> validKeys = { "repeatSparent", "maxModels", "ascending", "convergence", "threshold", "select_features" };
         checkHyperparameters(validKeys, hyperparameters);
         if (hyperparameters.contains("repeatSparent")) {
             repeatSparent = hyperparameters["repeatSparent"];
@@ -58,29 +60,39 @@ namespace bayesnet {
         if (hyperparameters.contains("convergence")) {
             convergence = hyperparameters["convergence"];
         }
-        if (hyperparameters.contains("cfs")) {
-            cfs = hyperparameters["cfs"];
+        if (hyperparameters.contains("threshold")) {
+            threshold = hyperparameters["threshold"];
+        }
+        if (hyperparameters.contains("select_features")) {
+            auto selectedAlgorithm = hyperparameters["select_features"];
+            vector<string> algos = { "IWSS", "FCBF", "CFS" };
+            selectFeatures = true;
+            algorithm = selectedAlgorithm;
+            if (find(algos.begin(), algos.end(), selectedAlgorithm) == algos.end()) {
+                throw invalid_argument("Invalid selectFeatures value [IWSS, FCBF, CFS]");
+            }
         }
     }
     unordered_set<int> BoostAODE::initializeModels()
     {
         unordered_set<int> featuresUsed;
-        // Read the CFS features
-        string output = "[", prefix = "";
-        bool first = true;
-        for (const auto& feature : features) {
-            output += prefix + "'" + feature + "'";
-            if (first) {
-                prefix = ", ";
-                first = false;
-            }
-        }
-        output += "]";
         Tensor weights_ = torch::full({ m }, 1.0 / m, torch::kFloat64);
         int maxFeatures = 0;
-        auto cfs = bayesnet::CFS(dataset, features, className, maxFeatures, states.at(className).size(), weights_);
-        cfs.fit();
-        auto cfsFeatures = cfs.getFeatures();
+        if (algorithm == "CFS") {
+            featureSelector = new CFS(dataset, features, className, maxFeatures, states.at(className).size(), weights_);
+        } else if (algorithm == "IWSS") {
+            if (threshold < 0 || threshold >0.5) {
+                throw invalid_argument("Invalid threshold value for IWSS [0, 0.5]");
+            }
+            featureSelector = new IWSS(dataset, features, className, maxFeatures, states.at(className).size(), weights_, threshold);
+        } else if (algorithm == "FCBF") {
+            if (threshold < 1e-7 || threshold > 1) {
+                throw invalid_argument("Invalid threshold value [1e-7, 1]");
+            }
+            featureSelector = new FCBF(dataset, features, className, maxFeatures, states.at(className).size(), weights_, threshold);
+        }
+        featureSelector->fit();
+        auto cfsFeatures = featureSelector->getFeatures();
         for (const int& feature : cfsFeatures) {
             // cout << "Feature: [" << feature << "] " << feature << " " << features.at(feature) << endl;
             featuresUsed.insert(feature);
@@ -90,12 +102,13 @@ namespace bayesnet {
             significanceModels.push_back(1.0);
             n_models++;
         }
+        delete featureSelector;
         return featuresUsed;
     }
     void BoostAODE::trainModel(const torch::Tensor& weights)
     {
         unordered_set<int> featuresUsed;
-        if (cfs) {
+        if (selectFeatures) {
             featuresUsed = initializeModels();
         }
         if (maxModels == 0)

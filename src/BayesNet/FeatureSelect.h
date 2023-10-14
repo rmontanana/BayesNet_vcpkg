@@ -14,6 +14,7 @@ namespace bayesnet {
         vector<int> getFeatures() const;
         vector<double> getScores() const;
     protected:
+        void initialize();
         void computeSuLabels();
         double computeSuFeatures(const int a, const int b);
         double symmetricalUncertainty(int a, int b);

@@ -7,6 +7,11 @@ namespace bayesnet {
 
     {
     }
+    void FeatureSelect::initialize()
+    {
+        selectedFeatures.clear();
+        selectedScores.clear();
+    }
     double FeatureSelect::symmetricalUncertainty(int a, int b)
     {
         /*

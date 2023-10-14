@@ -3,6 +3,7 @@
 #include "Ensemble.h"
 #include <map>
 #include "SPODE.h"
+#include "FeatureSelect.h"
 namespace bayesnet {
     class BoostAODE : public Ensemble {
     public:
@@ -22,7 +23,10 @@ namespace bayesnet {
         int maxModels = 0;
         bool ascending = false; //Process KBest features ascending or descending order
         bool convergence = false; //if true, stop when the model does not improve
-        bool cfs = false; // if true use CFS to select features stored in cfs folder with sha256(features) file_name
+        bool selectFeatures = false; // if true, use feature selection
+        string algorithm = ""; // Selected feature selection algorithm
+        FeatureSelect* featureSelector = nullptr;
+        double threshold = -1;
     };
 }
 #endif

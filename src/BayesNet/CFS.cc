@@ -2,13 +2,9 @@
 #include <limits>
 #include "bayesnetUtils.h"
 namespace bayesnet {
-
-
-
-
     void CFS::fit()
     {
-        selectedFeatures.clear();
+        initialize();
         computeSuLabels();
         auto featureOrder = argsort(suLabels); // sort descending order
         auto continueCondition = true;
@@ -21,7 +17,8 @@ namespace bayesnet {
             int bestFeature = -1;
             for (auto feature : featureOrder) {
                 selectedFeatures.push_back(feature);
-                auto meritNew = computeMeritCFS(); // Compute merit with cfsFeatures
+                // Compute merit with selectedFeatures
+                auto meritNew = computeMeritCFS();
                 if (meritNew > merit) {
                     merit = meritNew;
                     bestFeature = feature;

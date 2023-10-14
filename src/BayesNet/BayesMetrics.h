@@ -29,6 +29,13 @@ namespace bayesnet {
             }
             return result;
         }
+        template <class T>
+        T pop_first(vector<T>& v)
+        {
+            T temp = v[0];
+            v.erase(v.begin());
+            return temp;
+        }
     public:
         Metrics() = default;
         Metrics(const torch::Tensor& samples, const vector<string>& features, const string& className, const int classNumStates);
