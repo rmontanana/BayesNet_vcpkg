@@ -18,7 +18,6 @@ namespace bayesnet {
         double computeSuFeatures(const int a, const int b);
         double symmetricalUncertainty(int a, int b);
         double computeMeritCFS();
-        vector<pair<int, int>> combinations(const vector<int>& features);
         const torch::Tensor& weights;
         int maxFeatures;
         vector<int> selectedFeatures;
