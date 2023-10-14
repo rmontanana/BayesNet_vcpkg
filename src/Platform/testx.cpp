@@ -1,5 +1,6 @@
 #include "Folding.h"
 #include <torch/torch.h>
+#include "nlohmann/json.hpp"
 #include "map"
 #include <iostream>
 #include <sstream>
@@ -8,6 +9,8 @@
 #include "ArffFiles.h"
 #include "CPPFImdlp.h"
 #include "CFS.h"
+#include "IWSS.h"
+#include "FCBF.h"
 
 using namespace std;
 using namespace platform;
@@ -209,6 +212,7 @@ int main()
     // cout << endl;
     // net.fit(raw.dataset, raw.weights, raw.featurest, raw.classNamet, raw.statest);
     auto dt = Datasets(true, "Arff");
+    nlohmann::json output;
     for (const auto& name : dt.getNames()) {
         // for (const auto& name : { "iris" }) {
         auto [X, y] = dt.getTensors(name);
@@ -222,13 +226,23 @@ int main()
         auto yresized = torch::transpose(y.view({ y.size(0), 1 }), 0, 1);
         dataset = torch::cat({ dataset, yresized }, 0);
         auto cfs = bayesnet::CFS(dataset, features, className, maxFeatures, classNumStates, weights);
-        cout << "Dataset: " << name << " CFS features: " << flush;
+        auto fcbf = bayesnet::FCBF(dataset, features, className, maxFeatures, classNumStates, weights, 1e-7);
+        auto iwss = bayesnet::IWSS(dataset, features, className, maxFeatures, classNumStates, weights, 0.5);
+        cout << "Dataset: " << setw(20) << name << flush;
         cfs.fit();
-        for (const auto& feature : cfs.getFeatures()) {
-            cout << feature << ", ";
-        }
-        cout << "end." << endl;
+        cout << " CFS: " << setw(4) << cfs.getFeatures().size() << flush;
+        fcbf.fit();
+        cout << " FCBF: " << setw(4) << fcbf.getFeatures().size() << flush;
+        iwss.fit();
+        cout << " IWSS: " << setw(4) << iwss.getFeatures().size() << flush;
+        cout << endl;
+        output[name]["CFS"] = cfs.getFeatures();
+        output[name]["FCBF"] = fcbf.getFeatures();
+        output[name]["IWSS"] = iwss.getFeatures();
     }
+    ofstream file("features_cpp.json");
+    file << output;
+    file.close();
 
 }
 
