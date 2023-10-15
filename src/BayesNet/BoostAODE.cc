@@ -1,36 +1,22 @@
-#include "BoostAODE.h"
 #include <set>
-#include "BayesMetrics.h"
+#include <functional>
+#include <limits.h>
+#include "BoostAODE.h"
 #include "Colors.h"
 #include "Folding.h"
-#include <limits.h>
+#include "Paths.h"
+#include "CFS.h"
+#include "FCBF.h"
+#include "IWSS.h"
 
 namespace bayesnet {
     BoostAODE::BoostAODE() : Ensemble() {}
     void BoostAODE::buildModel(const torch::Tensor& weights)
     {
         // Models shall be built in trainModel
-    }
-    void BoostAODE::setHyperparameters(nlohmann::json& hyperparameters)
-    {
-        // Check if hyperparameters are valid
-        const vector<string> validKeys = { "repeatSparent", "maxModels", "ascending", "convergence" };
-        checkHyperparameters(validKeys, hyperparameters);
-        if (hyperparameters.contains("repeatSparent")) {
-            repeatSparent = hyperparameters["repeatSparent"];
-        }
-        if (hyperparameters.contains("maxModels")) {
-            maxModels = hyperparameters["maxModels"];
-        }
-        if (hyperparameters.contains("ascending")) {
-            ascending = hyperparameters["ascending"];
-        }
-        if (hyperparameters.contains("convergence")) {
-            convergence = hyperparameters["convergence"];
-        }
-    }
-    void BoostAODE::validationInit()
-    {
+        models.clear();
+        n_models = 0;
+        // Prepare the validation dataset
         auto y_ = dataset.index({ -1, "..." });
         if (convergence) {
             // Prepare train & validation sets from train data
@@ -56,18 +42,79 @@ namespace bayesnet {
             X_train = dataset.index({ torch::indexing::Slice(0, dataset.size(0) - 1), "..." });
             y_train = y_;
         }
-
+    }
+    void BoostAODE::setHyperparameters(nlohmann::json& hyperparameters)
+    {
+        // Check if hyperparameters are valid
+        const vector<string> validKeys = { "repeatSparent", "maxModels", "ascending", "convergence", "threshold", "select_features" };
+        checkHyperparameters(validKeys, hyperparameters);
+        if (hyperparameters.contains("repeatSparent")) {
+            repeatSparent = hyperparameters["repeatSparent"];
+        }
+        if (hyperparameters.contains("maxModels")) {
+            maxModels = hyperparameters["maxModels"];
+        }
+        if (hyperparameters.contains("ascending")) {
+            ascending = hyperparameters["ascending"];
+        }
+        if (hyperparameters.contains("convergence")) {
+            convergence = hyperparameters["convergence"];
+        }
+        if (hyperparameters.contains("threshold")) {
+            threshold = hyperparameters["threshold"];
+        }
+        if (hyperparameters.contains("select_features")) {
+            auto selectedAlgorithm = hyperparameters["select_features"];
+            vector<string> algos = { "IWSS", "FCBF", "CFS" };
+            selectFeatures = true;
+            algorithm = selectedAlgorithm;
+            if (find(algos.begin(), algos.end(), selectedAlgorithm) == algos.end()) {
+                throw invalid_argument("Invalid selectFeatures value [IWSS, FCBF, CFS]");
+            }
+        }
+    }
+    unordered_set<int> BoostAODE::initializeModels()
+    {
+        unordered_set<int> featuresUsed;
+        Tensor weights_ = torch::full({ m }, 1.0 / m, torch::kFloat64);
+        int maxFeatures = 0;
+        if (algorithm == "CFS") {
+            featureSelector = new CFS(dataset, features, className, maxFeatures, states.at(className).size(), weights_);
+        } else if (algorithm == "IWSS") {
+            if (threshold < 0 || threshold >0.5) {
+                throw invalid_argument("Invalid threshold value for IWSS [0, 0.5]");
+            }
+            featureSelector = new IWSS(dataset, features, className, maxFeatures, states.at(className).size(), weights_, threshold);
+        } else if (algorithm == "FCBF") {
+            if (threshold < 1e-7 || threshold > 1) {
+                throw invalid_argument("Invalid threshold value [1e-7, 1]");
+            }
+            featureSelector = new FCBF(dataset, features, className, maxFeatures, states.at(className).size(), weights_, threshold);
+        }
+        featureSelector->fit();
+        auto cfsFeatures = featureSelector->getFeatures();
+        for (const int& feature : cfsFeatures) {
+            // cout << "Feature: [" << feature << "] " << feature << " " << features.at(feature) << endl;
+            featuresUsed.insert(feature);
+            unique_ptr<Classifier> model = std::make_unique<SPODE>(feature);
+            model->fit(dataset, features, className, states, weights_);
+            models.push_back(std::move(model));
+            significanceModels.push_back(1.0);
+            n_models++;
+        }
+        delete featureSelector;
+        return featuresUsed;
     }
     void BoostAODE::trainModel(const torch::Tensor& weights)
     {
-        models.clear();
-        n_models = 0;
+        unordered_set<int> featuresUsed;
+        if (selectFeatures) {
+            featuresUsed = initializeModels();
+        }
         if (maxModels == 0)
             maxModels = .1 * n > 10 ? .1 * n : n;
-        validationInit();
         Tensor weights_ = torch::full({ m }, 1.0 / m, torch::kFloat64);
         bool exitCondition = false;
-        unordered_set<int> featuresUsed;
         // Variables to control the accuracy finish condition
         double priorAccuracy = 0.0;
         double delta = 1.0;
@@ -86,16 +133,16 @@ namespace bayesnet {
             unique_ptr<Classifier> model;
             auto feature = featureSelection[0];
             if (!repeatSparent || featuresUsed.size() < featureSelection.size()) {
-                bool found = false;
-                for (auto feat : featureSelection) {
+                bool used = true;
+                for (const auto& feat : featureSelection) {
                     if (find(featuresUsed.begin(), featuresUsed.end(), feat) != featuresUsed.end()) {
                         continue;
                     }
-                    found = true;
+                    used = false;
                     feature = feat;
                     break;
                 }
-                if (!found) {
+                if (used) {
                     exitCondition = true;
                     continue;
                 }
@@ -135,7 +182,7 @@ namespace bayesnet {
                     count++;
                 }
             }
-            exitCondition = n_models == maxModels && repeatSparent || epsilon_t > 0.5 || count > tolerance;
+            exitCondition = n_models >= maxModels && repeatSparent || epsilon_t > 0.5 || count > tolerance;
         }
         if (featuresUsed.size() != features.size()) {
             status = WARNING;

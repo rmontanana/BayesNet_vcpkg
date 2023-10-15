@@ -13,7 +13,7 @@ namespace platform {
                 if (line.empty() || line[0] == '#') {
                     continue;
                 }
-                vector<string> tokens = Dataset::split(line, ',');
+                vector<string> tokens = split(line, ',');
                 string name = tokens[0];
                 string className;
                 if (tokens.size() == 1) {

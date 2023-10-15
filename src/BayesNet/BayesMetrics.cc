@@ -60,17 +60,7 @@ namespace bayesnet {
     {
         return scoresKBest;
     }
-    vector<pair<string, string>> Metrics::doCombinations(const vector<string>& source)
-    {
-        vector<pair<string, string>> result;
-        for (int i = 0; i < source.size(); ++i) {
-            string temp = source[i];
-            for (int j = i + 1; j < source.size(); ++j) {
-                result.push_back({ temp, source[j] });
-            }
-        }
-        return result;
-    }
+
     torch::Tensor Metrics::conditionalEdge(const torch::Tensor& weights)
     {
         auto result = vector<double>();

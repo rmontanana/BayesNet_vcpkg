@@ -58,8 +58,7 @@ namespace platform {
             }
         } else {
             if (data["score_name"].get<string>() == "accuracy") {
-                auto env = platform::DotEnv();
-                auto dt = Datasets(false, env.get("source_data"));
+                auto dt = Datasets(false, Paths::datasets());
                 dt.loadDataset(dataset);
                 auto numClasses = dt.getNClasses(dataset);
                 if (numClasses == 2) {

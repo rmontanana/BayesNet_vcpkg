@@ -53,13 +53,9 @@ namespace platform {
             const string status = compareResult(r["dataset"].get<string>(), r["score"].get<double>());
             cout << status;
             cout << setw(12) << right << setprecision(6) << fixed << r["time"].get<double>() << "±" << setw(6) << setprecision(4) << fixed << r["time_std"].get<double>() << " ";
-            try {
-                cout << r["hyperparameters"].get<string>();
-            }
-            catch (const exception& err) {
-                cout << r["hyperparameters"];
-            }
+            cout << r["hyperparameters"].dump();
             cout << endl;
+            cout << flush;
             lastResult = r;
             totalScore += r["score"].get<double>();
             odd = !odd;

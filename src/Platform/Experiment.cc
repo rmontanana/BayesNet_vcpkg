@@ -3,7 +3,7 @@
 #include "Datasets.h"
 #include "Models.h"
 #include "ReportConsole.h"
-#include "DotEnv.h"
+#include "Paths.h"
 namespace platform {
     using json = nlohmann::json;
     string get_date()
@@ -134,8 +134,7 @@ namespace platform {
     }
     void Experiment::cross_validation(const string& fileName)
     {
-        auto env = platform::DotEnv();
-        auto datasets = platform::Datasets(discretized, env.get("source_data"));
+        auto datasets = platform::Datasets(discretized, Paths::datasets());
         // Get dataset
         auto [X, y] = datasets.getTensors(fileName);
         auto states = datasets.getStates(fileName);

@@ -45,7 +45,6 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 # CMakes modules
 # --------------
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
-
 include(AddGitSubmodule)
 if (CODE_COVERAGE)
     enable_testing()
@@ -65,7 +64,11 @@ endif (ENABLE_CLANG_TIDY)
 add_git_submodule("lib/mdlp")
 add_git_submodule("lib/argparse")
 add_git_submodule("lib/json")
-find_library(XLSXWRITER_LIB libxlsxwriter.dylib PATHS /usr/local/lib)
+
+
+find_library(XLSXWRITER_LIB NAMES libxlsxwriter.dylib libxlsxwriter.so PATHS ${BayesNet_SOURCE_DIR}/lib/libxlsxwriter/lib)
+message("XLSXWRITER_LIB=${XLSXWRITER_LIB}")
+
 
 # Subdirectories
 # --------------
