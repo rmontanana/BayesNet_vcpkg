@@ -65,7 +65,10 @@ add_git_submodule("lib/mdlp")
 add_git_submodule("lib/argparse")
 add_git_submodule("lib/json")
 
-find_library(XLSXWRITER_LIB libxlsxwriter.dylib PATHS /usr/local/lib ${HOME}/lib/usr/local/lib)
+
+find_library(XLSXWRITER_LIB NAMES libxlsxwriter.dylib libxlsxwriter.so PATHS ${BayesNet_SOURCE_DIR}/lib/libxlsxwriter/lib)
+message("XLSXWRITER_LIB=${XLSXWRITER_LIB}")
+
 
 # Subdirectories
 # --------------

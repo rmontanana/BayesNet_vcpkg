@@ -27,10 +27,8 @@ export BOOST_ROOT=/path/to/library/
 ```bash
 cd lib/libxlsxwriter
 make
-sudo make install
+make install DESTDIR=/home/rmontanana/Code PREFIX=
 ```
-
-It has to be installed in /usr/local/lib otherwise CMakeLists.txt has to be modified accordingly
 
 Environment variable has to be set:
 
