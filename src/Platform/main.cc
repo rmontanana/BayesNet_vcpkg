@@ -30,6 +30,7 @@ argparse::ArgumentParser manageArguments()
     );
     program.add_argument("--title").default_value("").help("Experiment title");
     program.add_argument("--discretize").help("Discretize input dataset").default_value((bool)stoi(env.get("discretize"))).implicit_value(true);
+    program.add_argument("--quiet").help("Don't display detailed progress").default_value(false).implicit_value(true);
     program.add_argument("--save").help("Save result (always save if no dataset is supplied)").default_value(false).implicit_value(true);
     program.add_argument("--stratified").help("If Stratified KFold is to be done").default_value((bool)stoi(env.get("stratified"))).implicit_value(true);
     program.add_argument("-f", "--folds").help("Number of folds").default_value(stoi(env.get("n_folds"))).scan<'i', int>().action([](const string& value) {
@@ -55,7 +56,7 @@ int main(int argc, char** argv)
 {
     string file_name, model_name, title;
     json hyperparameters_json;
-    bool discretize_dataset, stratified, saveResults;
+    bool discretize_dataset, stratified, saveResults, quiet;
     vector<int> seeds;
     vector<string> filesToTest;
     int n_folds;
@@ -66,6 +67,7 @@ int main(int argc, char** argv)
         model_name = program.get<string>("model");
         discretize_dataset = program.get<bool>("discretize");
         stratified = program.get<bool>("stratified");
+        quiet = program.get<bool>("quiet");
         n_folds = program.get<int>("folds");
         seeds = program.get<vector<int>>("seeds");
         auto hyperparameters = program.get<string>("hyperparameters");
@@ -109,12 +111,13 @@ int main(int argc, char** argv)
     }
     platform::Timer timer;
     timer.start();
-    experiment.go(filesToTest);
+    experiment.go(filesToTest, quiet);
     experiment.setDuration(timer.getDuration());
     if (saveResults) {
         experiment.save(platform::Paths::results());
     }
-    experiment.report();
+    if (!quiet)
+        experiment.report();
     cout << "Done!" << endl;
     return 0;
 }
