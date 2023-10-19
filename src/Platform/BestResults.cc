@@ -27,7 +27,6 @@ std::string ftime_to_string(TP tp)
     return buffer.str();
 }
 namespace platform {
-
     string BestResults::build()
     {
         auto files = loadResultFiles();
@@ -65,12 +64,10 @@ namespace platform {
         file.close();
         return bestFileName;
     }
-
     string BestResults::bestResultFile()
     {
         return "best_results_" + score + "_" + model + ".json";
     }
-
     pair<string, string> getModelScore(string name)
     {
         // results_accuracy_BoostAODE_MacBookpro16_2023-09-06_12:27:00_1.json
@@ -82,7 +79,6 @@ namespace platform {
         string model = name.substr(pos2 + 1, pos - pos2 - 1);
         return { model, score };
     }
-
     vector<string> BestResults::loadResultFiles()
     {
         vector<string> files;
@@ -99,7 +95,6 @@ namespace platform {
         }
         return files;
     }
-
     json BestResults::loadFile(const string& fileName)
     {
         ifstream resultData(fileName);
@@ -136,7 +131,6 @@ namespace platform {
         }
         return datasets;
     }
-
     void BestResults::buildAll()
     {
         auto models = getModels();
@@ -147,8 +141,7 @@ namespace platform {
         }
         model = "any";
     }
-
-    void BestResults::reportSingle()
+    void BestResults::listFile()
     {
         string bestFileName = path + bestResultFile();
         if (FILE* fileTest = fopen(bestFileName.c_str(), "r")) {
@@ -162,22 +155,29 @@ namespace platform {
         auto data = loadFile(bestFileName);
         auto datasets = getDatasets(data);
         int maxDatasetName = (*max_element(datasets.begin(), datasets.end(), [](const string& a, const string& b) { return a.size() < b.size(); })).size();
-        cout << Colors::GREEN() << "Best results for " << model << " and " << score << " as of " << date << endl;
-        cout << "--------------------------------------------------------" << endl;
+        stringstream oss;
+        oss << Colors::GREEN() << "Best results for " << model << " as of " << date << endl;
+        cout << oss.str();
+        cout << string(oss.str().size() - 8, '-') << endl;
         cout << Colors::GREEN() << " #  " << setw(maxDatasetName + 1) << left << string("Dataset") << "Score       File                                                               Hyperparameters" << endl;
         cout << "=== " << string(maxDatasetName, '=') << " =========== ================================================================== ================================================= " << endl;
         auto i = 0;
         bool odd = true;
+        double total = 0;
         for (auto const& item : data.items()) {
             auto color = odd ? Colors::BLUE() : Colors::CYAN();
+            double value = item.value().at(0).get<double>();
             cout << color << setw(3) << fixed << right << i++ << " ";
             cout << setw(maxDatasetName) << left << item.key() << " ";
-            cout << setw(11) << setprecision(9) << fixed << item.value().at(0).get<double>() << " ";
+            cout << setw(11) << setprecision(9) << fixed << value << " ";
             cout << setw(66) << item.value().at(2).get<string>() << " ";
             cout << item.value().at(1) << " ";
             cout << endl;
+            total += value;
             odd = !odd;
         }
+        cout << Colors::GREEN() << "=== " << string(maxDatasetName, '=') << " ===========" << endl;
+        cout << setw(5 + maxDatasetName) << "Total.................. " << setw(11) << setprecision(8) << fixed << total << endl;
     }
     json BestResults::buildTableResults(vector<string> models)
     {
@@ -202,11 +202,12 @@ namespace platform {
         table["dateTable"] = ftime_to_string(maxDate);
         return table;
     }
-
     void BestResults::printTableResults(vector<string> models, json table)
     {
-        cout << Colors::GREEN() << "Best results for " << score << " as of " << table.at("dateTable").get<string>() << endl;
-        cout << "------------------------------------------------" << endl;
+        stringstream oss;
+        oss << Colors::GREEN() << "Best results for " << score << " as of " << table.at("dateTable").get<string>() << endl;
+        cout << oss.str();
+        cout << string(oss.str().size() - 8, '-') << endl;
         cout << Colors::GREEN() << " #  " << setw(maxDatasetName + 1) << left << string("Dataset");
         for (const auto& model : models) {
             cout << setw(maxModelName) << left << model << " ";
@@ -271,6 +272,19 @@ namespace platform {
         }
         cout << endl;
     }
+    void BestResults::reportSingle(bool excel)
+    {
+        listFile();
+        if (excel) {
+            auto models = getModels();
+            // Build the table of results
+            json table = buildTableResults(models);
+            vector<string> datasets = getDatasets(table.begin().value());
+            BestResultsExcel excel(score, datasets);
+            excel.reportSingle(model, path + bestResultFile());
+            messageExcelFile(excel.getFileName());
+        }
+    }
     void BestResults::reportAll(bool excel)
     {
         auto models = getModels();
@@ -292,9 +306,32 @@ namespace platform {
             ranksModels = stats.getRanks();
         }
         if (excel) {
-            BestResultsExcel excel(score, models, datasets, table, ranksModels, friedman, significance);
-            excel.build();
-            cout << Colors::YELLOW() << "** Excel file generated: " << excel.getFileName() << Colors::RESET() << endl;
+            BestResultsExcel excel(score, datasets);
+            excel.reportAll(models, table, ranksModels, friedman, significance);
+            if (friedman) {
+                int idx = -1;
+                double min = 2000;
+                // Find out the control model
+                auto totals = vector<double>(models.size(), 0.0);
+                for (const auto& dataset : datasets) {
+                    for (int i = 0; i < models.size(); ++i) {
+                        totals[i] += ranksModels[dataset][models[i]];
+                    }
+                }
+                for (int i = 0; i < models.size(); ++i) {
+                    if (totals[i] < min) {
+                        min = totals[i];
+                        idx = i;
+                    }
+                }
+                model = models.at(idx);
+                excel.reportSingle(model, path + bestResultFile());
+            }
+            messageExcelFile(excel.getFileName());
         }
+    }
+    void BestResults::messageExcelFile(const string& fileName)
+    {
+        cout << Colors::YELLOW() << "** Excel file generated: " << fileName << Colors::RESET() << endl;
     }
 }

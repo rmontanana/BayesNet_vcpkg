@@ -12,11 +12,13 @@ namespace platform {
 
     class BestResultsExcel : ExcelFile {
     public:
-        BestResultsExcel(const string& score, const vector<string>& models, const vector<string>& datasets, const json& table, const map<string, map<string, float>>& ranks, bool friedman, double significance);
+        BestResultsExcel(const string& score, const vector<string>& datasets);
         ~BestResultsExcel();
-        void build();
+        void reportAll(const vector<string>& models, const json& table, const map<string, map<string, float>>& ranks, bool friedman, double significance);
+        void reportSingle(const string& model, const string& fileName);
         string getFileName();
     private:
+        void build();
         void header(bool ranks);
         void body(bool ranks);
         void footer(bool ranks);

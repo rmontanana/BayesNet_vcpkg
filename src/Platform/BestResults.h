@@ -7,19 +7,24 @@ using json = nlohmann::json;
 namespace platform {
     class BestResults {
     public:
-        explicit BestResults(const string& path, const string& score, const string& model, bool friedman, double significance = 0.05) : path(path), score(score), model(model), friedman(friedman), significance(significance) {}
+        explicit BestResults(const string& path, const string& score, const string& model, bool friedman, double significance = 0.05)
+            : path(path), score(score), model(model), friedman(friedman), significance(significance)
+        {
+        }
         string build();
-        void reportSingle();
+        void reportSingle(bool excel);
         void reportAll(bool excel);
         void buildAll();
     private:
         vector<string> getModels();
         vector<string> getDatasets(json table);
         vector<string> loadResultFiles();
+        void messageExcelFile(const string& fileName);
         json buildTableResults(vector<string> models);
         void printTableResults(vector<string> models, json table);
         string bestResultFile();
         json loadFile(const string& fileName);
+        void listFile();
         string path;
         string score;
         string model;

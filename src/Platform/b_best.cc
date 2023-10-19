@@ -29,25 +29,29 @@ argparse::ArgumentParser manageArguments(int argc, char** argv)
         catch (...) {
             throw runtime_error("Number of folds must be an decimal number");
         }});
+    return program;
+}
+
+int main(int argc, char** argv)
+{
+    auto program = manageArguments(argc, argv);
+    string model, score;
+    bool build, report, friedman, excel;
+    double level;
     try {
         program.parse_args(argc, argv);
-        auto model = program.get<string>("model");
-        auto score = program.get<string>("score");
-        auto build = program.get<bool>("build");
-        auto report = program.get<bool>("report");
-        auto friedman = program.get<bool>("friedman");
-        auto excel = program.get<bool>("excel");
-        auto level = program.get<double>("level");
+        model = program.get<string>("model");
+        score = program.get<string>("score");
+        build = program.get<bool>("build");
+        report = program.get<bool>("report");
+        friedman = program.get<bool>("friedman");
+        excel = program.get<bool>("excel");
+        level = program.get<double>("level");
         if (model == "" || score == "") {
             throw runtime_error("Model and score name must be supplied");
         }
         if (friedman && model != "any") {
             cerr << "Friedman test can only be used with all models" << endl;
-            cerr << program;
-            exit(1);
-        }
-        if (excel && model != "any") {
-            cerr << "Excel ourput can only be used with all models" << endl;
             cerr << program;
             exit(1);
         }
@@ -62,19 +66,7 @@ argparse::ArgumentParser manageArguments(int argc, char** argv)
         cerr << program;
         exit(1);
     }
-    return program;
-}
-
-int main(int argc, char** argv)
-{
-    auto program = manageArguments(argc, argv);
-    auto model = program.get<string>("model");
-    auto score = program.get<string>("score");
-    auto build = program.get<bool>("build");
-    auto report = program.get<bool>("report");
-    auto friedman = program.get<bool>("friedman");
-    auto excel = program.get<bool>("excel");
-    auto level = program.get<double>("level");
+    // Generate report
     auto results = platform::BestResults(platform::Paths::results(), score, model, friedman, level);
     if (build) {
         if (model == "any") {
@@ -88,7 +80,7 @@ int main(int argc, char** argv)
         if (model == "any") {
             results.reportAll(excel);
         } else {
-            results.reportSingle();
+            results.reportSingle(excel);
         }
     }
     return 0;

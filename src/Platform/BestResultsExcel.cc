@@ -4,18 +4,87 @@
 #include "Statistics.h"
 
 namespace platform {
-    BestResultsExcel::BestResultsExcel(const string& score, const vector<string>& models, const vector<string>& datasets, const json& table, const map<string, map<string, float>>& ranksModels, bool friedman, double significance) :
-        score(score), models(models), datasets(datasets), table(table), ranksModels(ranksModels), friedman(friedman), significance(significance)
+    BestResultsExcel::BestResultsExcel(const string& score, const vector<string>& datasets) : score(score), datasets(datasets)
     {
         workbook = workbook_new((Paths::excel() + fileName).c_str());
-        worksheet = workbook_add_worksheet(workbook, "Best Results");
         setProperties("Best Results");
-        createFormats();
-        int maxModelName = (*max_element(models.begin(), models.end(), [](const string& a, const string& b) { return a.size() < b.size(); })).size();
-        modelNameSize = max(modelNameSize, maxModelName);
         int maxDatasetName = (*max_element(datasets.begin(), datasets.end(), [](const string& a, const string& b) { return a.size() < b.size(); })).size();
         datasetNameSize = max(datasetNameSize, maxDatasetName);
+        createFormats();
+    }
+    void BestResultsExcel::reportAll(const vector<string>& models, const json& table, const map<string, map<string, float>>& ranks, bool friedman, double significance)
+    {
+        this->table = table;
+        this->models = models;
+        ranksModels = ranks;
+        this->friedman = friedman;
+        this->significance = significance;
+        worksheet = workbook_add_worksheet(workbook, "Best Results");
+        int maxModelName = (*max_element(models.begin(), models.end(), [](const string& a, const string& b) { return a.size() < b.size(); })).size();
+        modelNameSize = max(modelNameSize, maxModelName);
         formatColumns();
+        build();
+    }
+    void BestResultsExcel::reportSingle(const string& model, const string& fileName)
+    {
+        worksheet = workbook_add_worksheet(workbook, "Report");
+        if (FILE* fileTest = fopen(fileName.c_str(), "r")) {
+            fclose(fileTest);
+        } else {
+            cerr << "File " << fileName << " doesn't exist." << endl;
+            exit(1);
+        }
+        json data;
+        ifstream resultData(fileName);
+        if (resultData.is_open()) {
+            data = json::parse(resultData);
+        } else {
+            throw invalid_argument("Unable to open result file. [" + fileName + "]");
+        }
+        string title = "Best results for " + model;
+        worksheet_merge_range(worksheet, 0, 0, 0, 4, title.c_str(), styles["headerFirst"]);
+        // Body header
+        row = 3;
+        int col = 1;
+        writeString(row, 0, "Nº", "bodyHeader");
+        writeString(row, 1, "Dataset", "bodyHeader");
+        writeString(row, 2, "Score", "bodyHeader");
+        writeString(row, 3, "File", "bodyHeader");
+        writeString(row, 4, "Hyperparameters", "bodyHeader");
+        auto i = 0;
+        string hyperparameters;
+        int hypSize = 0;
+        for (auto const& item : data.items()) {
+            row++;
+            writeInt(row, 0, i++, "ints");
+            writeString(row, 1, item.key().c_str(), "text");
+            writeDouble(row, 2, item.value().at(0).get<double>(), "result");
+            writeString(row, 3, item.value().at(2).get<string>(), "text");
+            try {
+                hyperparameters = item.value().at(1).get<string>();
+            }
+            catch (const exception& err) {
+                stringstream oss;
+                oss << item.value().at(1);
+                hyperparameters = oss.str();
+            }
+            if (hyperparameters.size() > hypSize) {
+                hypSize = hyperparameters.size();
+            }
+            writeString(row, 4, hyperparameters, "text");
+        }
+        row++;
+        // Set Totals
+        writeString(row, 1, "Total", "bodyHeader");
+        stringstream oss;
+        oss << "=sum(indirect(address(5, 3)):indirect(address(" << row << ", 3)))";
+        worksheet_write_formula(worksheet, row, 2, oss.str().c_str(), styles["bodyHeader_odd"]);
+        // Set format
+        worksheet_freeze_panes(worksheet, 4, 2);
+        vector<int> columns_sizes = { 5, datasetNameSize, modelNameSize, 66, hypSize + 1 };
+        for (int i = 0; i < columns_sizes.size(); ++i) {
+            worksheet_set_column(worksheet, i, i, columns_sizes.at(i), NULL);
+        }
     }
     BestResultsExcel::~BestResultsExcel()
     {
@@ -99,7 +168,7 @@ namespace platform {
             int col = 1;
             for (const auto& model : models) {
                 stringstream oss;
-                oss << "=sum(indirect(address(" << 5 << "," << col + 2 << ")):indirect(address(" << row - 1 << "," << col + 2 << ")))/" << datasets.size();
+                oss << "=sum(indirect(address(5, " << col + 2 << ")):indirect(address(" << row - 1 << "," << col + 2 << ")))/" << datasets.size();
                 worksheet_write_formula(worksheet, row, ++col, oss.str().c_str(), styles["bodyHeader_odd"]);
             }
         }
