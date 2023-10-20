@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <algorithm>
 #include "BestResults.h"
 #include "Result.h"
 #include "Colors.h"
@@ -155,12 +156,19 @@ namespace platform {
         auto data = loadFile(bestFileName);
         auto datasets = getDatasets(data);
         int maxDatasetName = (*max_element(datasets.begin(), datasets.end(), [](const string& a, const string& b) { return a.size() < b.size(); })).size();
+        int maxFileName = 0;
+        int maxHyper = 0;
+        for (auto const& item : data.items()) {
+            maxHyper = max(maxHyper, (int)item.value().at(1).dump().size());
+            maxFileName = max(maxFileName, (int)item.value().at(2).get<string>().size());
+        }
+        cout << "Hola" << endl;
         stringstream oss;
         oss << Colors::GREEN() << "Best results for " << model << " as of " << date << endl;
         cout << oss.str();
         cout << string(oss.str().size() - 8, '-') << endl;
         cout << Colors::GREEN() << " #  " << setw(maxDatasetName + 1) << left << string("Dataset") << "Score       File                                                               Hyperparameters" << endl;
-        cout << "=== " << string(maxDatasetName, '=') << " =========== ================================================================== ================================================= " << endl;
+        cout << "=== " << string(maxDatasetName, '=') << " =========== " << string(maxFileName, '=') << " " << string(maxHyper, '=') << endl;
         auto i = 0;
         bool odd = true;
         double total = 0;
@@ -170,7 +178,7 @@ namespace platform {
             cout << color << setw(3) << fixed << right << i++ << " ";
             cout << setw(maxDatasetName) << left << item.key() << " ";
             cout << setw(11) << setprecision(9) << fixed << value << " ";
-            cout << setw(66) << item.value().at(2).get<string>() << " ";
+            cout << setw(maxFileName) << item.value().at(2).get<string>() << " ";
             cout << item.value().at(1) << " ";
             cout << endl;
             total += value;

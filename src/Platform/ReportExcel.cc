@@ -115,14 +115,7 @@ namespace platform {
             writeString(row, col + 9, status, "textCentered");
             writeDouble(row, col + 10, r["time"].get<double>(), "time");
             writeDouble(row, col + 11, r["time_std"].get<double>(), "time");
-            try {
-                hyperparameters = r["hyperparameters"].get<string>();
-            }
-            catch (const exception& err) {
-                stringstream oss;
-                oss << r["hyperparameters"];
-                hyperparameters = oss.str();
-            }
+            hyperparameters = r["hyperparameters"].dump();
             if (hyperparameters.size() > hypSize) {
                 hypSize = hyperparameters.size();
             }
@@ -130,7 +123,6 @@ namespace platform {
             lastResult = r;
             totalScore += r["score"].get<double>();
             row++;
-
         }
         // Set the right column width of hyperparameters with the maximum length
         worksheet_set_column(worksheet, 12, 12, hypSize + 5, NULL);

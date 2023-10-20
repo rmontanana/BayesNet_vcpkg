@@ -28,8 +28,12 @@ namespace platform {
     void ReportConsole::body()
     {
         auto tmp = ConfigLocale();
+        int maxHyper = 0;
+        for (const auto& r : data["results"]) {
+            maxHyper = max(maxHyper, (int)r["hyperparameters"].dump().size());
+        }
         cout << Colors::GREEN() << " #  Dataset                   Sampl. Feat. Cls Nodes     Edges     States    Score           Time                Hyperparameters" << endl;
-        cout << "=== ========================= ====== ===== === ========= ========= ========= =============== =================== ====================" << endl;
+        cout << "=== ========================= ====== ===== === ========= ========= ========= =============== =================== " << string(maxHyper, '=') << endl;
         json lastResult;
         double totalScore = 0.0;
         bool odd = true;

@@ -60,14 +60,7 @@ namespace platform {
             writeString(row, 1, item.key().c_str(), "text");
             writeDouble(row, 2, item.value().at(0).get<double>(), "result");
             writeString(row, 3, item.value().at(2).get<string>(), "text");
-            try {
-                hyperparameters = item.value().at(1).get<string>();
-            }
-            catch (const exception& err) {
-                stringstream oss;
-                oss << item.value().at(1);
-                hyperparameters = oss.str();
-            }
+            hyperparameters = item.value().at(1).dump();
             if (hyperparameters.size() > hypSize) {
                 hypSize = hyperparameters.size();
             }
