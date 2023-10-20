@@ -157,7 +157,7 @@ namespace platform {
         auto datasets = getDatasets(data);
         int maxDatasetName = (*max_element(datasets.begin(), datasets.end(), [](const string& a, const string& b) { return a.size() < b.size(); })).size();
         int maxFileName = 0;
-        int maxHyper = 0;
+        int maxHyper = 15;
         for (auto const& item : data.items()) {
             maxHyper = max(maxHyper, (int)item.value().at(1).dump().size());
             maxFileName = max(maxFileName, (int)item.value().at(2).get<string>().size());
@@ -167,7 +167,7 @@ namespace platform {
         oss << Colors::GREEN() << "Best results for " << model << " as of " << date << endl;
         cout << oss.str();
         cout << string(oss.str().size() - 8, '-') << endl;
-        cout << Colors::GREEN() << " #  " << setw(maxDatasetName + 1) << left << string("Dataset") << "Score       File                                                               Hyperparameters" << endl;
+        cout << Colors::GREEN() << " #  " << setw(maxDatasetName + 1) << left << "Dataset" << "Score       " << setw(maxFileName) << "File" << " Hyperparameters" << endl;
         cout << "=== " << string(maxDatasetName, '=') << " =========== " << string(maxFileName, '=') << " " << string(maxHyper, '=') << endl;
         auto i = 0;
         bool odd = true;
