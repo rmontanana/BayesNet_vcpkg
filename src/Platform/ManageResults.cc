@@ -46,13 +46,14 @@ namespace platform {
             cout << Colors::MAGENTA() << "Only listing partial results" << endl;
         }
         auto i = 0;
-        cout << Colors::GREEN() << " #  Date       Model        Score Name  Score       C/P Duration  Title" << endl;
-        cout << "=== ========== ============ =========== =========== === ========= =============================================================" << endl;
+        int maxModel = results.maxModelSize();
+        cout << Colors::GREEN() << " #  Date       " << setw(maxModel) << left << "Model" << " Score Name  Score       C / P Duration  Title" << endl;
+        cout << "=== ========== " << string(maxModel, '=') << " =========== =========== === ========= =============================================================" << endl;
         bool odd = true;
         for (auto& result : results) {
             auto color = odd ? Colors::BLUE() : Colors::CYAN();
             cout << color << setw(3) << fixed << right << i++ << " ";
-            cout << result.to_string() << endl;
+            cout << result.to_string(maxModel) << endl;
             if (i == numFiles) {
                 break;
             }

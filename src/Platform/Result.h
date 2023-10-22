@@ -12,7 +12,7 @@ namespace platform {
     public:
         Result(const string& path, const string& filename);
         json load() const;
-        string to_string() const;
+        string to_string(int maxModel) const;
         string getFilename() const { return filename; };
         string getDate() const { return date; };
         double getScore() const { return score; };

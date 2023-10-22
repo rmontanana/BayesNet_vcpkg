@@ -29,11 +29,14 @@ namespace platform {
     {
         auto tmp = ConfigLocale();
         int maxHyper = 0;
+        int maxDataset = 0;
         for (const auto& r : data["results"]) {
             maxHyper = max(maxHyper, (int)r["hyperparameters"].dump().size());
+            maxDataset = max(maxDataset, (int)r["dataset"].get<string>().size());
+
         }
-        cout << Colors::GREEN() << " #  Dataset                   Sampl. Feat. Cls Nodes     Edges     States    Score           Time                Hyperparameters" << endl;
-        cout << "=== ========================= ====== ===== === ========= ========= ========= =============== =================== " << string(maxHyper, '=') << endl;
+        cout << Colors::GREEN() << " #  " << setw(maxDataset) << left << "Dataset" << " Sampl. Feat. Cls Nodes     Edges     States    Score           Time                Hyperparameters" << endl;
+        cout << "=== " << string(maxDataset, '=') << " ====== ===== === ========= ========= ========= =============== =================== " << string(maxHyper, '=') << endl;
         json lastResult;
         double totalScore = 0.0;
         bool odd = true;
@@ -45,8 +48,8 @@ namespace platform {
             }
             auto color = odd ? Colors::CYAN() : Colors::BLUE();
             cout << color;
-            cout << setw(3) << index++ << " ";
-            cout << setw(25) << left << r["dataset"].get<string>() << " ";
+            cout << setw(3) << right << index++ << " ";
+            cout << setw(maxDataset) << left << r["dataset"].get<string>() << " ";
             cout << setw(6) << right << r["samples"].get<int>() << " ";
             cout << setw(5) << right << r["features"].get<int>() << " ";
             cout << setw(3) << right << r["classes"].get<int>() << " ";

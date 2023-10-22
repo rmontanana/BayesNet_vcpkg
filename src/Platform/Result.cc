@@ -37,14 +37,14 @@ namespace platform {
         throw invalid_argument("Unable to open result file. [" + path + "/" + filename + "]");
     }
 
-    string Result::to_string() const
+    string Result::to_string(int maxModel) const
     {
         auto tmp = ConfigLocale();
         stringstream oss;
         double durationShow = duration > 3600 ? duration / 3600 : duration > 60 ? duration / 60 : duration;
         string durationUnit = duration > 3600 ? "h" : duration > 60 ? "m" : "s";
         oss << date << " ";
-        oss << setw(12) << left << model << " ";
+        oss << setw(maxModel) << left << model << " ";
         oss << setw(11) << left << scoreName << " ";
         oss << right << setw(11) << setprecision(7) << fixed << score << " ";
         auto completeString = isComplete() ? "C" : "P";
