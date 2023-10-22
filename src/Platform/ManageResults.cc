@@ -98,10 +98,6 @@ namespace platform {
     {
         // Show a dataset result inside a report
         auto data = results.at(index).load();
-        if (idx < 0 or idx >= static_cast<int>(data["results"].size())) {
-            cout << "Invalid index" << endl;
-            return;
-        }
         cout << Colors::YELLOW() << "Showing " << results.at(index).getFilename() << endl;
         ReportConsole reporter(data, compare, idx);
         reporter.show();
@@ -160,9 +156,9 @@ namespace platform {
         auto parser = CommandParser();
         while (!finished) {
             if (indexList) {
-                tie(option, index) = parser.parse(Colors::GREEN(), mainOptions, 'r');
+                tie(option, index) = parser.parse(Colors::GREEN(), mainOptions, 'r', numFiles - 1);
             } else {
-                tie(option, subIndex) = parser.parse(Colors::MAGENTA(), listOptions, 'r');
+                tie(option, subIndex) = parser.parse(Colors::MAGENTA(), listOptions, 'r', results.at(index).load()["results"].size() - 1);
             }
             switch (option) {
                 case 'q':

@@ -9,7 +9,7 @@ namespace platform {
     class CommandParser {
     public:
         CommandParser() = default;
-        pair<char, int> parse(const string& color, const vector<tuple<string, char, bool>>& options, const char defaultCommand);
+        pair<char, int> parse(const string& color, const vector<tuple<string, char, bool>>& options, const char defaultCommand, const int maxIndex);
         char getCommand() const { return command; };
         int getIndex() const { return index; };
     private:
