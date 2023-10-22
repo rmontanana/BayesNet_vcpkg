@@ -1,5 +1,7 @@
 # BayesNet
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 Bayesian Network Classifier with libtorch from scratch
 
 ## 0. Setup

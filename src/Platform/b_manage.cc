@@ -1,7 +1,6 @@
 #include <iostream>
 #include <argparse/argparse.hpp>
-#include "Paths.h"
-#include "Results.h"
+#include "ManageResults.h"
 
 using namespace std;
 
@@ -37,15 +36,15 @@ argparse::ArgumentParser manageArguments(int argc, char** argv)
 int main(int argc, char** argv)
 {
     auto program = manageArguments(argc, argv);
-    auto number = program.get<int>("number");
-    auto model = program.get<string>("model");
-    auto score = program.get<string>("score");
+    int number = program.get<int>("number");
+    string model = program.get<string>("model");
+    string score = program.get<string>("score");
     auto complete = program.get<bool>("complete");
     auto partial = program.get<bool>("partial");
     auto compare = program.get<bool>("compare");
     if (complete)
         partial = false;
-    auto results = platform::Results(platform::Paths::results(), number, model, score, complete, partial, compare);
-    results.manage();
+    auto manager = platform::ManageResults(number, model, score, complete, partial, compare);
+    manager.doMenu();
     return 0;
 }

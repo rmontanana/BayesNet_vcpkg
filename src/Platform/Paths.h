@@ -6,6 +6,7 @@ namespace platform {
     class Paths {
     public:
         static std::string results() { return "results/"; }
+        static std::string hiddenResults() { return "hidden_results/"; }
         static std::string excel() { return "excel/"; }
         static std::string cfs() { return "cfs/"; }
         static std::string datasets()
