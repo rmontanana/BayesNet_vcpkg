@@ -50,7 +50,7 @@ namespace platform {
         }
         auto i = 0;
         int maxModel = results.maxModelSize();
-        cout << Colors::GREEN() << " #  Date       " << setw(maxModel) << left << "Model" << " Score Name  Score       C / P Duration  Title" << endl;
+        cout << Colors::GREEN() << " #  Date       " << setw(maxModel) << left << "Model" << " Score Name  Score       C/P Duration  Title" << endl;
         cout << "=== ========== " << string(maxModel, '=') << " =========== =========== === ========= =============================================================" << endl;
         bool odd = true;
         for (auto& result : results) {
