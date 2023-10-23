@@ -137,7 +137,7 @@ namespace bayesnet {
     int Classifier::getNumberOfNodes() const
     {
         // Features does not include class
-        return fitted ? model.getFeatures().size() + 1 : 0;
+        return fitted ? model.getFeatures().size() : 0;
     }
     int Classifier::getNumberOfEdges() const
     {

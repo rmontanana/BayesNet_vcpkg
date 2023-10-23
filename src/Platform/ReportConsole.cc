@@ -29,8 +29,8 @@ namespace platform {
     void ReportConsole::body()
     {
         auto tmp = ConfigLocale();
-        int maxHyper = 0;
-        int maxDataset = 0;
+        int maxHyper = 15;
+        int maxDataset = 7;
         for (const auto& r : data["results"]) {
             maxHyper = max(maxHyper, (int)r["hyperparameters"].dump().size());
             maxDataset = max(maxDataset, (int)r["dataset"].get<string>().size());
