@@ -11,13 +11,13 @@ namespace platform {
 
     class Results {
     public:
-        Results(const string& path, const string& model, const string& score, bool complete, bool partial, bool compare);
+        Results(const string& path, const string& model, const string& score, bool complete, bool partial);
         void sortDate();
         void sortScore();
         void sortModel();
         void sortDuration();
         int maxModelSize() const { return maxModel; };
-        void hideResult(int index, const string& path);
+        void hideResult(int index, const string& pathHidden);
         void deleteResult(int index);
         int size() const;
         bool empty() const;
@@ -30,7 +30,6 @@ namespace platform {
         string scoreName;
         bool complete;
         bool partial;
-        bool compare;
         int maxModel;
         vector<Result> files;
         void load(); // Loads the list of results

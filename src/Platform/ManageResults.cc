@@ -11,7 +11,7 @@
 namespace platform {
 
     ManageResults::ManageResults(int numFiles, const string& model, const string& score, bool complete, bool partial, bool compare) :
-        numFiles{ numFiles }, complete{ complete }, partial{ partial }, compare{ compare }, results(Results(Paths::results(), model, score, complete, partial, compare))
+        numFiles{ numFiles }, complete{ complete }, partial{ partial }, compare{ compare }, results(Results(Paths::results(), model, score, complete, partial))
     {
         indexList = true;
         openExcel = false;
@@ -37,8 +37,11 @@ namespace platform {
             exit(0);
         }
         auto temp = ConfigLocale();
-        cout << Colors::GREEN() << "Results found: " << numFiles << endl;
-        cout << "-------------------" << endl;
+        string suffix = numFiles != results.size() ? " of " + to_string(results.size()) : "";
+        stringstream oss;
+        oss << "Results on screen: " << numFiles << suffix;
+        cout << Colors::GREEN() << oss.str() << endl;
+        cout << string(oss.str().size(), '-') << endl;
         if (complete) {
             cout << Colors::MAGENTA() << "Only listing complete results" << endl;
         }
