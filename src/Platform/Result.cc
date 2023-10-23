@@ -1,9 +1,10 @@
+#include "Result.h"
+#include "BestScore.h"
 #include <filesystem>
 #include <fstream>
 #include <sstream>
-#include "Result.h"
 #include "Colors.h"
-#include "BestScore.h"
+#include "DotEnv.h"
 #include "CLocale.h"
 
 namespace platform {
@@ -18,8 +19,9 @@ namespace platform {
             score += result["score"].get<double>();
         }
         scoreName = data["score_name"];
-        if (scoreName == BestScore::scoreName()) {
-            score /= BestScore::score();
+        auto best = BestScore::getScore(scoreName);
+        if (best.first != "") {
+            score /= best.second;
         }
         title = data["title"];
         duration = data["duration"];

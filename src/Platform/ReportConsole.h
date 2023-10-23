@@ -1,7 +1,6 @@
 #ifndef REPORTCONSOLE_H
 #define REPORTCONSOLE_H
 #include <string>
-#include <iostream>
 #include "ReportBase.h"
 #include "Colors.h"
 

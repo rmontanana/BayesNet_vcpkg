@@ -1,6 +1,5 @@
 #include "Results.h"
 #include <algorithm>
-#include "BestScore.h"
 
 namespace platform {
     Results::Results(const string& path, const string& model, const string& score, bool complete, bool partial, bool compare) :

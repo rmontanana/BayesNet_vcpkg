@@ -2,7 +2,6 @@
 #include <locale>
 #include "Datasets.h"
 #include "ReportBase.h"
-#include "BestScore.h"
 #include "DotEnv.h"
 
 namespace platform {

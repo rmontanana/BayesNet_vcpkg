@@ -1,3 +1,4 @@
+#include <iostream>
 #include <sstream>
 #include <locale>
 #include "ReportConsole.h"
@@ -94,9 +95,10 @@ namespace platform {
         cout << Colors::MAGENTA() << string(MAXL, '*') << endl;
         showSummary();
         auto score = data["score_name"].get<string>();
-        if (score == BestScore::scoreName()) {
+        auto best = BestScore::getScore(score);
+        if (best.first != "") {
             stringstream oss;
-            oss << score << " compared to " << BestScore::title() << " .:  " << totalScore / BestScore::score();
+            oss << score << " compared to " << best.first << " .:  " << totalScore / best.second;
             cout << headerLine(oss.str());
         }
         if (!getExistBestFile() && compare) {
