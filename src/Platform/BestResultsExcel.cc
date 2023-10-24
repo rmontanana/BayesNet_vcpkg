@@ -1,9 +1,23 @@
 #include <sstream>
 #include "BestResultsExcel.h"
 #include "Paths.h"
+#include <map>
+#include <nlohmann/json.hpp>
 #include "Statistics.h"
+#include "ReportExcel.h"
 
 namespace platform {
+    json loadResultData(const string& fileName)
+    {
+        json data;
+        ifstream resultData(fileName);
+        if (resultData.is_open()) {
+            data = json::parse(resultData);
+        } else {
+            throw invalid_argument("Unable to open result file. [" + fileName + "]");
+        }
+        return data;
+    }
     string getColumnName(int colNum)
     {
         string columnName = "";
@@ -47,13 +61,8 @@ namespace platform {
             cerr << "File " << fileName << " doesn't exist." << endl;
             exit(1);
         }
-        json data;
-        ifstream resultData(fileName);
-        if (resultData.is_open()) {
-            data = json::parse(resultData);
-        } else {
-            throw invalid_argument("Unable to open result file. [" + fileName + "]");
-        }
+        json data = loadResultData(fileName);
+
         string title = "Best results for " + model;
         worksheet_merge_range(worksheet, 0, 0, 0, 4, title.c_str(), styles["headerFirst"]);
         // Body header
@@ -67,12 +76,29 @@ namespace platform {
         auto i = 0;
         string hyperparameters;
         int hypSize = 0;
+        map<string, string> files; // map of files imported and their tabs
         for (auto const& item : data.items()) {
             row++;
             writeInt(row, 0, i++, "ints");
             writeString(row, 1, item.key().c_str(), "text");
             writeDouble(row, 2, item.value().at(0).get<double>(), "result");
-            writeString(row, 3, item.value().at(2).get<string>(), "text");
+            auto fileName = item.value().at(2).get<string>();
+            string hyperlink = "";
+            try {
+                hyperlink = files.at(fileName);
+            }
+            catch (const out_of_range& oor) {
+                auto tabName = "table_" + to_string(i);
+                auto worksheetNew = workbook_add_worksheet(workbook, tabName.c_str());
+                json data = loadResultData(Paths::results() + fileName);
+                auto report = ReportExcel(data, false, workbook, worksheetNew);
+                report.show();
+                hyperlink = "#table_" + to_string(i);
+                files[fileName] = hyperlink;
+            }
+            hyperlink += "!H" + to_string(i + 6);
+            string fileNameText = "=HYPERLINK(\"" + hyperlink + "\",\"" + fileName + "\")";
+            worksheet_write_formula(worksheet, row, 3, fileNameText.c_str(), efectiveStyle("text"));
             hyperparameters = item.value().at(1).dump();
             if (hyperparameters.size() > hypSize) {
                 hypSize = hyperparameters.size();
@@ -85,7 +111,6 @@ namespace platform {
         stringstream oss;
         auto colName = getColumnName(2);
         oss << "=sum(" << colName << "5:" << colName << row << ")";
-        cout << "[" << oss.str() << "]" << endl;
         worksheet_write_formula(worksheet, row, 2, oss.str().c_str(), styles["bodyHeader_odd"]);
         // Set format
         worksheet_freeze_panes(worksheet, 4, 2);

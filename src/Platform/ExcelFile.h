@@ -18,6 +18,7 @@ namespace platform {
     public:
         ExcelFile();
         ExcelFile(lxw_workbook* workbook);
+        ExcelFile(lxw_workbook* workbook, lxw_worksheet* worksheet);
         lxw_workbook* getWorkbook();
     protected:
         void setProperties(string title);

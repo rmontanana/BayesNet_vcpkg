@@ -14,6 +14,7 @@ namespace platform {
             auto env = platform::DotEnv();
             return env.get("source_data");
         }
+        static std::string excelResults() { return "some_results.xlsx"; }
     };
 }
 #endif

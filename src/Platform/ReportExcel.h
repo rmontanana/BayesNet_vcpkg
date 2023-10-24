@@ -9,11 +9,11 @@ namespace platform {
     using namespace std;
     class ReportExcel : public ReportBase, public ExcelFile {
     public:
-        explicit ReportExcel(json data_, bool compare, lxw_workbook* workbook);
+        explicit ReportExcel(json data_, bool compare, lxw_workbook* workbook, lxw_worksheet* worksheet = NULL);
     private:
-        const string fileName = "some_results.xlsx";
         void formatColumns();
         void createFile();
+        void createWorksheet();
         void closeFile();
         void header() override;
         void body() override;

@@ -93,6 +93,7 @@ namespace platform {
             reporter.show();
             openExcel = true;
             workbook = reporter.getWorkbook();
+            cout << "Adding sheet to " << Paths::excel() + Paths::excelResults() << endl;
         } else {
             ReportConsole reporter(data, compare);
             reporter.show();

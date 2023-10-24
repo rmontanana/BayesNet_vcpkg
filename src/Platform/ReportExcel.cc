@@ -6,7 +6,7 @@
 
 namespace platform {
 
-    ReportExcel::ReportExcel(json data_, bool compare, lxw_workbook* workbook) : ReportBase(data_, compare), ExcelFile(workbook)
+    ReportExcel::ReportExcel(json data_, bool compare, lxw_workbook* workbook, lxw_worksheet* worksheet) : ReportBase(data_, compare), ExcelFile(workbook, worksheet)
     {
         createFile();
     }
@@ -19,12 +19,8 @@ namespace platform {
             worksheet_set_column(worksheet, i, i, columns_sizes.at(i), NULL);
         }
     }
-
-    void ReportExcel::createFile()
+    void ReportExcel::createWorksheet()
     {
-        if (workbook == NULL) {
-            workbook = workbook_new((Paths::excel() + fileName).c_str());
-        }
         const string name = data["model"].get<string>();
         string suffix = "";
         string efectiveName;
@@ -42,7 +38,16 @@ namespace platform {
                 throw invalid_argument("Couldn't create sheet " + efectiveName);
             }
         }
-        cout << "Adding sheet " << efectiveName << " to " << Paths::excel() + fileName << endl;
+    }
+
+    void ReportExcel::createFile()
+    {
+        if (workbook == NULL) {
+            workbook = workbook_new((Paths::excel() + Paths::excelResults()).c_str());
+        }
+        if (worksheet == NULL) {
+            createWorksheet();
+        }
         setProperties(data["title"].get<string>());
         createFormats();
         formatColumns();

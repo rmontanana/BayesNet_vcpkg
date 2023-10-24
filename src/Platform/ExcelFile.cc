@@ -9,6 +9,10 @@ namespace platform {
     {
         setDefault();
     }
+    ExcelFile::ExcelFile(lxw_workbook* workbook, lxw_worksheet* worksheet) : workbook(workbook), worksheet(worksheet)
+    {
+        setDefault();
+    }
     void ExcelFile::setDefault()
     {
         normalSize = 14; //font size for report body
