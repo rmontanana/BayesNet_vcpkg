@@ -4,6 +4,19 @@
 #include "Statistics.h"
 
 namespace platform {
+    string getColumnName(int colNum)
+    {
+        string columnName = "";
+        int modulo;
+        if (colNum == 0)
+            return "A";
+        while (colNum > 0) {
+            modulo = colNum % 26;
+            columnName = char(65 + modulo) + columnName;
+            colNum = (int)((colNum - modulo) / 26);
+        }
+        return columnName;
+    }
     BestResultsExcel::BestResultsExcel(const string& score, const vector<string>& datasets) : score(score), datasets(datasets)
     {
         workbook = workbook_new((Paths::excel() + fileName).c_str());
@@ -70,7 +83,9 @@ namespace platform {
         // Set Totals
         writeString(row, 1, "Total", "bodyHeader");
         stringstream oss;
-        oss << "=sum(indirect(address(5, 3)):indirect(address(" << row << ", 3)))";
+        auto colName = getColumnName(2);
+        oss << "=sum(" << colName << "5:" << colName << row << ")";
+        cout << "[" << oss.str() << "]" << endl;
         worksheet_write_formula(worksheet, row, 2, oss.str().c_str(), styles["bodyHeader_odd"]);
         // Set format
         worksheet_freeze_panes(worksheet, 4, 2);
@@ -93,19 +108,6 @@ namespace platform {
         for (int i = 0; i < columns_sizes.size(); ++i) {
             worksheet_set_column(worksheet, i, i, columns_sizes.at(i), NULL);
         }
-    }
-    string getColumnName(int colNum)
-    {
-        string columnName = "";
-        int modulo;
-        if (colNum == 0)
-            return "A";
-        while (colNum > 0) {
-            modulo = colNum % 26;
-            columnName = char(65 + modulo) + columnName;
-            colNum = (int)((colNum - modulo) / 26);
-        }
-        return columnName;
     }
     void BestResultsExcel::addConditionalFormat(string formula)
     {
@@ -185,7 +187,8 @@ namespace platform {
         int col = 1;
         for (const auto& model : models) {
             stringstream oss;
-            oss << "=sum(indirect(address(" << 5 << "," << col + 2 << ")):indirect(address(" << row << "," << col + 2 << ")))";
+            auto colName = getColumnName(col + 1);
+            oss << "=SUM(" << colName << "5:" << colName << row << ")";
             worksheet_write_formula(worksheet, row, ++col, oss.str().c_str(), styles["bodyHeader_odd"]);
         }
         if (ranks) {
@@ -193,8 +196,9 @@ namespace platform {
             writeString(row, 1, "Average ranks", "bodyHeader");
             int col = 1;
             for (const auto& model : models) {
+                auto colName = getColumnName(col + 1);
                 stringstream oss;
-                oss << "=sum(indirect(address(5, " << col + 2 << ")):indirect(address(" << row - 1 << "," << col + 2 << ")))/" << datasets.size();
+                oss << "=SUM(" << colName << "5:" << colName << row - 1 << ")/" << datasets.size();
                 worksheet_write_formula(worksheet, row, ++col, oss.str().c_str(), styles["bodyHeader_odd"]);
             }
         }
