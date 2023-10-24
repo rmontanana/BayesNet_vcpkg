@@ -118,9 +118,9 @@ namespace platform {
         conditional_format->type = LXW_CONDITIONAL_TYPE_FORMULA;
         string col = getColumnName(models.size() + 1);
         stringstream oss;
-        oss << "=C5=" << formula << "(C5:" << col << "5)";
-        auto formulaValue = oss.str().c_str();
-        conditional_format->value_string = formulaValue;
+        oss << "=C5=" << formula << "($C5:$" << col << "5)";
+        auto formulaValue = oss.str();
+        conditional_format->value_string = formulaValue.c_str();
         conditional_format->format = custom_format;
         worksheet_conditional_format_range(worksheet, 4, 2, datasets.size() + 3, models.size() + 1, conditional_format);
     }
