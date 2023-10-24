@@ -94,11 +94,43 @@ namespace platform {
             worksheet_set_column(worksheet, i, i, columns_sizes.at(i), NULL);
         }
     }
+    string getColumnName(int colNum)
+    {
+        string columnName = "";
+        int modulo;
+        if (colNum == 0)
+            return "A";
+        while (colNum > 0) {
+            modulo = colNum % 26;
+            columnName = char(65 + modulo) + columnName;
+            colNum = (int)((colNum - modulo) / 26);
+        }
+        return columnName;
+    }
+    void BestResultsExcel::addConditionalFormat(string formula)
+    {
+        // Add conditional format for max/min values in scores/ranks sheets
+        lxw_format* custom_format = workbook_add_format(workbook);
+        format_set_bg_color(custom_format, 0xFFC7CE);
+        format_set_font_color(custom_format, 0x9C0006);
+        // Create a conditional format object. A static object would also work.
+        lxw_conditional_format* conditional_format = (lxw_conditional_format*)calloc(1, sizeof(lxw_conditional_format));
+        conditional_format->type = LXW_CONDITIONAL_TYPE_FORMULA;
+        string col = getColumnName(models.size() + 1);
+        stringstream oss;
+        oss << "=C5=" << formula << "(C5:" << col << "5)";
+        auto formulaValue = oss.str().c_str();
+        conditional_format->value_string = formulaValue;
+        conditional_format->format = custom_format;
+        worksheet_conditional_format_range(worksheet, 4, 2, datasets.size() + 3, models.size() + 1, conditional_format);
+    }
     void BestResultsExcel::build()
     {
         // Create Sheet with scores
         header(false);
         body(false);
+        // Add conditional format for max values
+        addConditionalFormat("max");
         footer(false);
         if (friedman) {
             // Create Sheet with ranks
@@ -106,6 +138,7 @@ namespace platform {
             formatColumns();
             header(true);
             body(true);
+            addConditionalFormat("min");
             footer(true);
             // Create Sheet with Friedman Test
             doFriedman();

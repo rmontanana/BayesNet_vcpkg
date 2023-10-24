@@ -24,6 +24,7 @@ namespace platform {
         void footer(bool ranks);
         void formatColumns();
         void doFriedman();
+        void addConditionalFormat(string formula);
         const string fileName = "BestResults.xlsx";
         string score;
         vector<string> models;
