@@ -75,7 +75,7 @@ namespace platform {
         writeString(row, 4, "Hyperparameters", "bodyHeader");
         auto i = 0;
         string hyperparameters;
-        int hypSize = 0;
+        int hypSize = 22;
         map<string, string> files; // map of files imported and their tabs
         for (auto const& item : data.items()) {
             row++;

@@ -1,12 +1,17 @@
 #include "Results.h"
 #include <algorithm>
+#include <iostream>
 
 namespace platform {
     Results::Results(const string& path, const string& model, const string& score, bool complete, bool partial) :
         path(path), model(model), scoreName(score), complete(complete), partial(partial)
     {
         load();
-        maxModel = (*max_element(files.begin(), files.end(), [](const Result& a, const Result& b) { return a.getModel().size() < b.getModel().size(); })).getModel().size();
+        if (!files.empty()) {
+            maxModel = (*max_element(files.begin(), files.end(), [](const Result& a, const Result& b) { return a.getModel().size() < b.getModel().size(); })).getModel().size();
+        } else {
+            maxModel = 0;
+        }
     };
     void Results::load()
     {

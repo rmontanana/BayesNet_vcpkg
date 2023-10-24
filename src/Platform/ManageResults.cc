@@ -22,6 +22,10 @@ namespace platform {
     }
     void ManageResults::doMenu()
     {
+        if (results.empty()) {
+            cout << Colors::MAGENTA() << "No results found!" << Colors::RESET() << endl;
+            return;
+        }
         results.sortDate();
         list();
         menu();
@@ -32,10 +36,6 @@ namespace platform {
     }
     void ManageResults::list()
     {
-        if (results.empty()) {
-            cout << Colors::MAGENTA() << "No results found!" << Colors::RESET() << endl;
-            exit(0);
-        }
         auto temp = ConfigLocale();
         string suffix = numFiles != results.size() ? " of " + to_string(results.size()) : "";
         stringstream oss;
