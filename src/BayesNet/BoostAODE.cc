@@ -125,7 +125,7 @@ namespace bayesnet {
         // Step 0: Set the finish condition
         // if not repeatSparent a finish condition is run out of features
         // n_models == maxModels
-        // epsiolon sub t > 0.5 => inverse the weights policy
+        // epsilon sub t > 0.5 => inverse the weights policy
         // validation error is not decreasing
         while (!exitCondition) {
             // Step 1: Build ranking with mutual information

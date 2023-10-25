@@ -162,7 +162,6 @@ namespace platform {
             maxHyper = max(maxHyper, (int)item.value().at(1).dump().size());
             maxFileName = max(maxFileName, (int)item.value().at(2).get<string>().size());
         }
-        cout << "Hola" << endl;
         stringstream oss;
         oss << Colors::GREEN() << "Best results for " << model << " as of " << date << endl;
         cout << oss.str();
