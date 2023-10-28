@@ -21,11 +21,10 @@ namespace platform {
     string getColumnName(int colNum)
     {
         string columnName = "";
-        int modulo;
         if (colNum == 0)
             return "A";
         while (colNum > 0) {
-            modulo = colNum % 26;
+            int modulo = colNum % 26;
             columnName = char(65 + modulo) + columnName;
             colNum = (int)((colNum - modulo) / 26);
         }
