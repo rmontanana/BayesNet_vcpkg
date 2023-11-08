@@ -2,15 +2,15 @@
 #include "Mst.h"
 namespace bayesnet {
     //samples is n+1xm tensor used to fit the model
-    Metrics::Metrics(const torch::Tensor& samples, const vector<string>& features, const string& className, const int classNumStates)
+    Metrics::Metrics(const torch::Tensor& samples, const std::vector<std::string>& features, const std::string& className, const int classNumStates)
         : samples(samples)
         , features(features)
         , className(className)
         , classNumStates(classNumStates)
     {
     }
-    //samples is nxm vector used to fit the model
-    Metrics::Metrics(const vector<vector<int>>& vsamples, const vector<int>& labels, const vector<string>& features, const string& className, const int classNumStates)
+    //samples is nxm std::vector used to fit the model
+    Metrics::Metrics(const std::vector<std::vector<int>>& vsamples, const std::vector<int>& labels, const std::vector<std::string>& features, const std::string& className, const int classNumStates)
         : features(features)
         , className(className)
         , classNumStates(classNumStates)
@@ -21,7 +21,7 @@ namespace bayesnet {
         }
         samples.index_put_({ -1, "..." }, torch::tensor(labels, torch::kInt32));
     }
-    vector<int> Metrics::SelectKBestWeighted(const torch::Tensor& weights, bool ascending, unsigned k)
+    std::vector<int> Metrics::SelectKBestWeighted(const torch::Tensor& weights, bool ascending, unsigned k)
     {
         // Return the K Best features 
         auto n = samples.size(0) - 1;
@@ -56,15 +56,15 @@ namespace bayesnet {
         }
         return featuresKBest;
     }
-    vector<double> Metrics::getScoresKBest() const
+    std::vector<double> Metrics::getScoresKBest() const
     {
         return scoresKBest;
     }
 
     torch::Tensor Metrics::conditionalEdge(const torch::Tensor& weights)
     {
-        auto result = vector<double>();
-        auto source = vector<string>(features);
+        auto result = std::vector<double>();
+        auto source = std::vector<std::string>(features);
         source.push_back(className);
         auto combinations = doCombinations(source);
         // Compute class prior
@@ -100,7 +100,7 @@ namespace bayesnet {
         return matrix;
     }
     // To use in Python
-    vector<float> Metrics::conditionalEdgeWeights(vector<float>& weights_)
+    std::vector<float> Metrics::conditionalEdgeWeights(std::vector<float>& weights_)
     {
         const torch::Tensor weights = torch::tensor(weights_);
         auto matrix = conditionalEdge(weights);
@@ -121,7 +121,7 @@ namespace bayesnet {
     {
         int numSamples = firstFeature.sizes()[0];
         torch::Tensor featureCounts = secondFeature.bincount(weights);
-        unordered_map<int, unordered_map<int, double>> jointCounts;
+        std::unordered_map<int, std::unordered_map<int, double>> jointCounts;
         double totalWeight = 0;
         for (auto i = 0; i < numSamples; i++) {
             jointCounts[secondFeature[i].item<int>()][firstFeature[i].item<int>()] += weights[i].item<double>();
@@ -155,7 +155,7 @@ namespace bayesnet {
     and the indices of the weights as nodes of this square matrix using
     Kruskal algorithm
     */
-    vector<pair<int, int>> Metrics::maximumSpanningTree(const vector<string>& features, const Tensor& weights, const int root)
+    std::vector<std::pair<int, int>> Metrics::maximumSpanningTree(const std::vector<std::string>& features, const torch::Tensor& weights, const int root)
     {
         auto mst = MST(features, weights, root);
         return mst.maximumSpanningTree();

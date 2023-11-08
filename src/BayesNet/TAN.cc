@@ -1,8 +1,6 @@
 #include "TAN.h"
 
 namespace bayesnet {
-    using namespace torch;
-
     TAN::TAN() : Classifier(Network()) {}
 
     void TAN::buildModel(const torch::Tensor& weights)
@@ -11,10 +9,10 @@ namespace bayesnet {
         addNodes();
         // 1. Compute mutual information between each feature and the class and set the root node
         // as the highest mutual information with the class
-        auto mi = vector <pair<int, float >>();
-        Tensor class_dataset = dataset.index({ -1, "..." });
+        auto mi = std::vector <std::pair<int, float >>();
+        torch::Tensor class_dataset = dataset.index({ -1, "..." });
         for (int i = 0; i < static_cast<int>(features.size()); ++i) {
-            Tensor feature_dataset = dataset.index({ i, "..." });
+            torch::Tensor feature_dataset = dataset.index({ i, "..." });
             auto mi_value = metrics.mutualInformation(class_dataset, feature_dataset, weights);
             mi.push_back({ i, mi_value });
         }
@@ -34,7 +32,7 @@ namespace bayesnet {
             model.addEdge(className, feature);
         }
     }
-    vector<string> TAN::graph(const string& title) const
+    std::vector<std::string> TAN::graph(const std::string& title) const
     {
         return model.graph(title);
     }

@@ -5,7 +5,6 @@
 #include "Colors.h"
 
 namespace platform {
-    using namespace std;
     const int MAXL = 133;
     class ReportConsole : public ReportBase {
     public:
@@ -13,7 +12,7 @@ namespace platform {
         virtual ~ReportConsole() = default;
     private:
         int selectedIndex;
-        string headerLine(const string& text, int utf);
+        std::string headerLine(const std::string& text, int utf);
         void header() override;
         void body() override;
         void footer(double totalScore);

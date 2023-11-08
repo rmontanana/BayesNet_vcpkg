@@ -5,18 +5,17 @@
 #include <map>
 #include <nlohmann/json.hpp>
 
-using namespace std;
 using json = nlohmann::json;
 
 namespace platform {
 
     class BestResultsExcel : ExcelFile {
     public:
-        BestResultsExcel(const string& score, const vector<string>& datasets);
+        BestResultsExcel(const std::string& score, const std::vector<std::string>& datasets);
         ~BestResultsExcel();
-        void reportAll(const vector<string>& models, const json& table, const map<string, map<string, float>>& ranks, bool friedman, double significance);
-        void reportSingle(const string& model, const string& fileName);
-        string getFileName();
+        void reportAll(const std::vector<std::string>& models, const json& table, const std::map<std::string, std::map<std::string, float>>& ranks, bool friedman, double significance);
+        void reportSingle(const std::string& model, const std::string& fileName);
+        std::string getFileName();
     private:
         void build();
         void header(bool ranks);
@@ -24,13 +23,13 @@ namespace platform {
         void footer(bool ranks);
         void formatColumns();
         void doFriedman();
-        void addConditionalFormat(string formula);
-        const string fileName = "BestResults.xlsx";
-        string score;
-        vector<string> models;
-        vector<string> datasets;
+        void addConditionalFormat(std::string formula);
+        const std::string fileName = "BestResults.xlsx";
+        std::string score;
+        std::vector<std::string> models;
+        std::vector<std::string> datasets;
         json table;
-        map<string, map<string, float>> ranksModels;
+        std::map<std::string, std::map<std::string, float>> ranksModels;
         bool friedman;
         double significance;
         int modelNameSize = 12; // Min size of the column

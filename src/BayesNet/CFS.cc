@@ -13,7 +13,7 @@ namespace bayesnet {
         selectedScores.push_back(suLabels[feature]);
         selectedFeatures.erase(selectedFeatures.begin());
         while (continueCondition) {
-            double merit = numeric_limits<double>::lowest();
+            double merit = std::numeric_limits<double>::lowest();
             int bestFeature = -1;
             for (auto feature : featureOrder) {
                 selectedFeatures.push_back(feature);
@@ -36,7 +36,7 @@ namespace bayesnet {
         }
         fitted = true;
     }
-    bool CFS::computeContinueCondition(const vector<int>& featureOrder)
+    bool CFS::computeContinueCondition(const std::vector<int>& featureOrder)
     {
         if (selectedFeatures.size() == maxFeatures || featureOrder.size() == 0) {
             return false;
@@ -49,11 +49,11 @@ namespace bayesnet {
             subsets show no improvement over the current best subset."
             as stated in Mark A.Hall Thesis
             */
-            double item_ant = numeric_limits<double>::lowest();
+            double item_ant = std::numeric_limits<double>::lowest();
             int num = 0;
-            vector<double> lastFive(selectedScores.end() - 5, selectedScores.end());
+            std::vector<double> lastFive(selectedScores.end() - 5, selectedScores.end());
             for (auto item : lastFive) {
-                if (item_ant == numeric_limits<double>::lowest()) {
+                if (item_ant == std::numeric_limits<double>::lowest()) {
                     item_ant = item;
                 }
                 if (item > item_ant) {

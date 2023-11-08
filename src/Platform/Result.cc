@@ -8,7 +8,7 @@
 #include "CLocale.h"
 
 namespace platform {
-    Result::Result(const string& path, const string& filename)
+    Result::Result(const std::string& path, const std::string& filename)
         : path(path)
         , filename(filename)
     {
@@ -31,28 +31,28 @@ namespace platform {
 
     json Result::load() const
     {
-        ifstream resultData(path + "/" + filename);
+        std::ifstream resultData(path + "/" + filename);
         if (resultData.is_open()) {
             json data = json::parse(resultData);
             return data;
         }
-        throw invalid_argument("Unable to open result file. [" + path + "/" + filename + "]");
+        throw std::invalid_argument("Unable to open result file. [" + path + "/" + filename + "]");
     }
 
-    string Result::to_string(int maxModel) const
+    std::string Result::to_string(int maxModel) const
     {
         auto tmp = ConfigLocale();
-        stringstream oss;
+        std::stringstream oss;
         double durationShow = duration > 3600 ? duration / 3600 : duration > 60 ? duration / 60 : duration;
-        string durationUnit = duration > 3600 ? "h" : duration > 60 ? "m" : "s";
+        std::string durationUnit = duration > 3600 ? "h" : duration > 60 ? "m" : "s";
         oss << date << " ";
-        oss << setw(maxModel) << left << model << " ";
-        oss << setw(11) << left << scoreName << " ";
-        oss << right << setw(11) << setprecision(7) << fixed << score << " ";
+        oss << std::setw(maxModel) << std::left << model << " ";
+        oss << std::setw(11) << std::left << scoreName << " ";
+        oss << std::right << std::setw(11) << std::setprecision(7) << std::fixed << score << " ";
         auto completeString = isComplete() ? "C" : "P";
-        oss << setw(1) << " " << completeString << "  ";
-        oss << setw(7) << setprecision(2) << fixed << durationShow << " " << durationUnit << " ";
-        oss << setw(50) << left << title << " ";
+        oss << std::setw(1) << " " << completeString << "  ";
+        oss << std::setw(7) << std::setprecision(2) << std::fixed << durationShow << " " << durationUnit << " ";
+        oss << std::setw(50) << std::left << title << " ";
         return  oss.str();
     }
 }

@@ -1,13 +1,13 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
 #include <catch2/generators/catch_generators.hpp>
-#include <string>
+#include <std::string>
 #include "TestUtils.h"
 #include "Network.h"
 
-void buildModel(bayesnet::Network& net, const vector<string>& features, const string& className)
+void buildModel(bayesnet::Network& net, const std::vector<std::string>& features, const std::std::string& className)
 {
-    vector<pair<int, int>> network = { {0, 1}, {0, 2}, {1, 3} };
+    std::vector<pair<int, int>> network = { {0, 1}, {0, 2}, {1, 3} };
     for (const auto& feature : features) {
         net.addNode(feature);
     }
@@ -30,9 +30,9 @@ TEST_CASE("Test Bayesian Network", "[BayesNet]")
     {
         net.addNode("A");
         net.addNode("B");
-        REQUIRE(net.getFeatures() == vector<string>{"A", "B"});
+        REQUIRE(net.getFeatures() == std::vector<std::string>{"A", "B"});
         net.addNode("C");
-        REQUIRE(net.getFeatures() == vector<string>{"A", "B", "C"});
+        REQUIRE(net.getFeatures() == std::vector<std::string>{"A", "B", "C"});
     }
     SECTION("Test get edges")
     {
@@ -41,10 +41,10 @@ TEST_CASE("Test Bayesian Network", "[BayesNet]")
         net.addNode("C");
         net.addEdge("A", "B");
         net.addEdge("B", "C");
-        REQUIRE(net.getEdges() == vector<pair<string, string>>{ {"A", "B"}, { "B", "C" } });
+        REQUIRE(net.getEdges() == std::vector<pair<std::string, std::string>>{ {"A", "B"}, { "B", "C" } });
         REQUIRE(net.getNumEdges() == 2);
         net.addEdge("A", "C");
-        REQUIRE(net.getEdges() == vector<pair<string, string>>{ {"A", "B"}, { "A", "C" }, { "B", "C" } });
+        REQUIRE(net.getEdges() == std::vector<pair<std::string, std::string>>{ {"A", "B"}, { "A", "C" }, { "B", "C" } });
         REQUIRE(net.getNumEdges() == 3);
     }
     SECTION("Test getNodes")
@@ -66,7 +66,7 @@ TEST_CASE("Test Bayesian Network", "[BayesNet]")
         buildModel(net, raw.featuresv, raw.classNamev);
         buildModel(net2, raw.featurest, raw.classNamet);
         buildModel(net3, raw.featurest, raw.classNamet);
-        vector<pair<string, string>> edges = {
+        std::vector<pair<std::string, std::string>> edges = {
             {"class", "sepallength"}, {"class", "sepalwidth"}, {"class", "petallength"},
             {"class", "petalwidth" }, {"sepallength", "sepalwidth"}, {"sepallength", "petallength"},
             {"sepalwidth", "petalwidth"}
@@ -74,7 +74,7 @@ TEST_CASE("Test Bayesian Network", "[BayesNet]")
         REQUIRE(net.getEdges() == edges);
         REQUIRE(net2.getEdges() == edges);
         REQUIRE(net3.getEdges() == edges);
-        vector<string> features = { "sepallength", "sepalwidth", "petallength", "petalwidth", "class" };
+        std::vector<std::string> features = { "sepallength", "sepalwidth", "petallength", "petalwidth", "class" };
         REQUIRE(net.getFeatures() == features);
         REQUIRE(net2.getFeatures() == features);
         REQUIRE(net3.getFeatures() == features);
@@ -84,7 +84,7 @@ TEST_CASE("Test Bayesian Network", "[BayesNet]")
         // Check Nodes parents & children
         for (const auto& feature : features) {
             // Parents
-            vector<string> parents, parents2, parents3, children, children2, children3;
+            std::vector<std::string> parents, parents2, parents3, children, children2, children3;
             auto nodeParents = nodes[feature]->getParents();
             auto nodeParents2 = nodes2[feature]->getParents();
             auto nodeParents3 = nodes3[feature]->getParents();
@@ -173,8 +173,8 @@ TEST_CASE("Test Bayesian Network", "[BayesNet]")
     // {
     //     auto net = bayesnet::Network();
     //     net.fit(raw.Xv, raw.yv, raw.weightsv, raw.featuresv, raw.classNamev, raw.statesv);
-    //     vector<vector<int>> test = { {1, 2, 0, 1}, {0, 1, 2, 0}, {1, 1, 1, 1}, {0, 0, 0, 0}, {2, 2, 2, 2} };
-    //     vector<int> y_test = { 0, 1, 1, 0, 2 };
+    //     std::vector<std::vector<int>> test = { {1, 2, 0, 1}, {0, 1, 2, 0}, {1, 1, 1, 1}, {0, 0, 0, 0}, {2, 2, 2, 2} };
+    //     std::vector<int> y_test = { 0, 1, 1, 0, 2 };
     //     auto y_pred = net.predict(test);
     //     REQUIRE(y_pred == y_test);
     // }
@@ -183,7 +183,7 @@ TEST_CASE("Test Bayesian Network", "[BayesNet]")
     //     {
     //         auto net = bayesnet::Network();
     //         net.fit(raw.Xv, raw.yv, raw.weightsv, raw.featuresv, raw.classNamev, raw.statesv);
-    //         vector<vector<int>> test = { {1, 2, 0, 1}, {0, 1, 2, 0}, {1, 1, 1, 1}, {0, 0, 0, 0}, {2, 2, 2, 2} };
+    //         std::vector<std::vector<int>> test = { {1, 2, 0, 1}, {0, 1, 2, 0}, {1, 1, 1, 1}, {0, 0, 0, 0}, {2, 2, 2, 2} };
     //         auto y_test = { 0, 1, 1, 0, 2 };
     //         auto y_pred = net.predict(test);
     //         REQUIRE(y_pred == y_test);

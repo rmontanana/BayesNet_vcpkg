@@ -7,22 +7,22 @@
 namespace bayesnet {
     class Network {
     private:
-        map<string, unique_ptr<Node>> nodes;
+        std::map<std::string, std::unique_ptr<Node>> nodes;
         bool fitted;
         float maxThreads = 0.95;
         int classNumStates;
-        vector<string> features; // Including classname
-        string className;
+        std::vector<std::string> features; // Including classname
+        std::string className;
         double laplaceSmoothing;
         torch::Tensor samples; // nxm tensor used to fit the model
         bool isCyclic(const std::string&, std::unordered_set<std::string>&, std::unordered_set<std::string>&);
-        vector<double> predict_sample(const vector<int>&);
-        vector<double> predict_sample(const torch::Tensor&);
-        vector<double> exactInference(map<string, int>&);
-        double computeFactor(map<string, int>&);
-        void completeFit(const map<string, vector<int>>& states, const torch::Tensor& weights);
-        void checkFitData(int n_features, int n_samples, int n_samples_y, const vector<string>& featureNames, const string& className, const map<string, vector<int>>& states, const torch::Tensor& weights);
-        void setStates(const map<string, vector<int>>&);
+        std::vector<double> predict_sample(const std::vector<int>&);
+        std::vector<double> predict_sample(const torch::Tensor&);
+        std::vector<double> exactInference(std::map<std::string, int>&);
+        double computeFactor(std::map<std::string, int>&);
+        void completeFit(const std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights);
+        void checkFitData(int n_features, int n_samples, int n_samples_y, const std::vector<std::string>& featureNames, const std::string& className, const std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights);
+        void setStates(const std::map<std::string, std::vector<int>>&);
     public:
         Network();
         explicit Network(float);
@@ -30,33 +30,33 @@ namespace bayesnet {
         ~Network() = default;
         torch::Tensor& getSamples();
         float getmaxThreads();
-        void addNode(const string&);
-        void addEdge(const string&, const string&);
-        map<string, std::unique_ptr<Node>>& getNodes();
-        vector<string> getFeatures() const;
+        void addNode(const std::string&);
+        void addEdge(const std::string&, const std::string&);
+        std::map<std::string, std::unique_ptr<Node>>& getNodes();
+        std::vector<std::string> getFeatures() const;
         int getStates() const;
-        vector<pair<string, string>> getEdges() const;
+        std::vector<std::pair<std::string, std::string>> getEdges() const;
         int getNumEdges() const;
         int getClassNumStates() const;
-        string getClassName() const;
+        std::string getClassName() const;
         /*
         Notice: Nodes have to be inserted in the same order as they are in the dataset, i.e., first node is first column and so on.
         */
-        void fit(const vector<vector<int>>& input_data, const vector<int>& labels, const vector<double>& weights, const vector<string>& featureNames, const string& className, const map<string, vector<int>>& states);
-        void fit(const torch::Tensor& X, const torch::Tensor& y, const torch::Tensor& weights, const vector<string>& featureNames, const string& className, const map<string, vector<int>>& states);
-        void fit(const torch::Tensor& samples, const torch::Tensor& weights, const vector<string>& featureNames, const string& className, const map<string, vector<int>>& states);
-        vector<int> predict(const vector<vector<int>>&); // Return mx1 vector of predictions
+        void fit(const std::vector<std::vector<int>>& input_data, const std::vector<int>& labels, const std::vector<double>& weights, const std::vector<std::string>& featureNames, const std::string& className, const std::map<std::string, std::vector<int>>& states);
+        void fit(const torch::Tensor& X, const torch::Tensor& y, const torch::Tensor& weights, const std::vector<std::string>& featureNames, const std::string& className, const std::map<std::string, std::vector<int>>& states);
+        void fit(const torch::Tensor& samples, const torch::Tensor& weights, const std::vector<std::string>& featureNames, const std::string& className, const std::map<std::string, std::vector<int>>& states);
+        std::vector<int> predict(const std::vector<std::vector<int>>&); // Return mx1 std::vector of predictions
         torch::Tensor predict(const torch::Tensor&); // Return mx1 tensor of predictions
         torch::Tensor predict_tensor(const torch::Tensor& samples, const bool proba);
-        vector<vector<double>> predict_proba(const vector<vector<int>>&); // Return mxn vector of probabilities
+        std::vector<std::vector<double>> predict_proba(const std::vector<std::vector<int>>&); // Return mxn std::vector of probabilities
         torch::Tensor predict_proba(const torch::Tensor&); // Return mxn tensor of probabilities
-        double score(const vector<vector<int>>&, const vector<int>&);
-        vector<string> topological_sort();
-        vector<string> show() const;
-        vector<string> graph(const string& title) const; // Returns a vector of strings representing the graph in graphviz format
+        double score(const std::vector<std::vector<int>>&, const std::vector<int>&);
+        std::vector<std::string> topological_sort();
+        std::vector<std::string> show() const;
+        std::vector<std::string> graph(const std::string& title) const; // Returns a std::vector of std::strings representing the graph in graphviz format
         void initialize();
         void dump_cpt() const;
-        inline string version() { return "0.2.0"; }
+        inline std::string version() { return "0.2.0"; }
     };
 }
 #endif

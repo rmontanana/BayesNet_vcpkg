@@ -4,34 +4,32 @@
 #include "Classifier.h"
 #include "BayesMetrics.h"
 #include "bayesnetUtils.h"
-using namespace std;
-using namespace torch;
 
 namespace bayesnet {
     class Ensemble : public Classifier {
     private:
-        Ensemble& build(vector<string>& features, string className, map<string, vector<int>>& states);
+        Ensemble& build(std::vector<std::string>& features, std::string className, std::map<std::string, std::vector<int>>& states);
     protected:
         unsigned n_models;
-        vector<unique_ptr<Classifier>> models;
-        vector<double> significanceModels;
+        std::vector<std::unique_ptr<Classifier>> models;
+        std::vector<double> significanceModels;
         void trainModel(const torch::Tensor& weights) override;
-        vector<int> voting(Tensor& y_pred);
+        std::vector<int> voting(torch::Tensor& y_pred);
     public:
         Ensemble();
         virtual ~Ensemble() = default;
-        Tensor predict(Tensor& X) override;
-        vector<int> predict(vector<vector<int>>& X) override;
-        float score(Tensor& X, Tensor& y) override;
-        float score(vector<vector<int>>& X, vector<int>& y) override;
+        torch::Tensor predict(torch::Tensor& X) override;
+        std::vector<int> predict(std::vector<std::vector<int>>& X) override;
+        float score(torch::Tensor& X, torch::Tensor& y) override;
+        float score(std::vector<std::vector<int>>& X, std::vector<int>& y) override;
         int getNumberOfNodes() const override;
         int getNumberOfEdges() const override;
         int getNumberOfStates() const override;
-        vector<string> show() const override;
-        vector<string> graph(const string& title) const override;
-        vector<string> topological_order()  override
+        std::vector<std::string> show() const override;
+        std::vector<std::string> graph(const std::string& title) const override;
+        std::vector<std::string> topological_order()  override
         {
-            return vector<string>();
+            return std::vector<std::string>();
         }
         void dump_cpt() const override
         {

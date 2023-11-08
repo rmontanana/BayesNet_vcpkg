@@ -5,33 +5,32 @@
 #include <vector>
 #include <string>
 namespace bayesnet {
-    using namespace std;
     class Node {
     private:
-        string name;
-        vector<Node*> parents;
-        vector<Node*> children;
+        std::string name;
+        std::vector<Node*> parents;
+        std::vector<Node*> children;
         int numStates; // number of states of the variable
         torch::Tensor cpTable; // Order of indices is 0-> node variable, 1-> 1st parent, 2-> 2nd parent, ...
-        vector<int64_t> dimensions; // dimensions of the cpTable
-        vector<pair<string, string>> combinations(const vector<string>&);
+        std::vector<int64_t> dimensions; // dimensions of the cpTable
+        std::vector<std::pair<std::string, std::string>> combinations(const std::vector<std::string>&);
     public:
-        explicit Node(const string&);
+        explicit Node(const std::string&);
         void clear();
         void addParent(Node*);
         void addChild(Node*);
         void removeParent(Node*);
         void removeChild(Node*);
-        string getName() const;
-        vector<Node*>& getParents();
-        vector<Node*>& getChildren();
+        std::string getName() const;
+        std::vector<Node*>& getParents();
+        std::vector<Node*>& getChildren();
         torch::Tensor& getCPT();
-        void computeCPT(const torch::Tensor& dataset, const vector<string>& features, const double laplaceSmoothing, const torch::Tensor& weights);
+        void computeCPT(const torch::Tensor& dataset, const std::vector<std::string>& features, const double laplaceSmoothing, const torch::Tensor& weights);
         int getNumStates() const;
         void setNumStates(int);
         unsigned minFill();
-        vector<string> graph(const string& clasName); // Returns a vector of strings representing the graph in graphviz format
-        float getFactorValue(map<string, int>&);
+        std::vector<std::string> graph(const std::string& clasName); // Returns a std::vector of std::strings representing the graph in graphviz format
+        float getFactorValue(std::map<std::string, int>&);
     };
 }
 #endif

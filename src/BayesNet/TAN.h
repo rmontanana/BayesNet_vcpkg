@@ -2,7 +2,6 @@
 #define TAN_H
 #include "Classifier.h"
 namespace bayesnet {
-    using namespace std;
     class TAN : public Classifier {
     private:
     protected:
@@ -10,7 +9,7 @@ namespace bayesnet {
     public:
         TAN();
         virtual ~TAN() {};
-        vector<string> graph(const string& name = "TAN") const override;
+        std::vector<std::string> graph(const std::string& name = "TAN") const override;
     };
 }
 #endif

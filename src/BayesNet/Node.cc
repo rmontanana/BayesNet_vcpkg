@@ -3,7 +3,7 @@
 namespace bayesnet {
 
     Node::Node(const std::string& name)
-        : name(name), numStates(0), cpTable(torch::Tensor()), parents(vector<Node*>()), children(vector<Node*>())
+        : name(name), numStates(0), cpTable(torch::Tensor()), parents(std::vector<Node*>()), children(std::vector<Node*>())
     {
     }
     void Node::clear()
@@ -14,7 +14,7 @@ namespace bayesnet {
         dimensions.clear();
         numStates = 0;
     }
-    string Node::getName() const
+    std::string Node::getName() const
     {
         return name;
     }
@@ -34,11 +34,11 @@ namespace bayesnet {
     {
         children.push_back(child);
     }
-    vector<Node*>& Node::getParents()
+    std::vector<Node*>& Node::getParents()
     {
         return parents;
     }
-    vector<Node*>& Node::getChildren()
+    std::vector<Node*>& Node::getChildren()
     {
         return children;
     }
@@ -63,28 +63,28 @@ namespace bayesnet {
     */
     unsigned Node::minFill()
     {
-        unordered_set<string> neighbors;
+        std::unordered_set<std::string> neighbors;
         for (auto child : children) {
             neighbors.emplace(child->getName());
         }
         for (auto parent : parents) {
             neighbors.emplace(parent->getName());
         }
-        auto source = vector<string>(neighbors.begin(), neighbors.end());
+        auto source = std::vector<std::string>(neighbors.begin(), neighbors.end());
         return combinations(source).size();
     }
-    vector<pair<string, string>> Node::combinations(const vector<string>& source)
+    std::vector<std::pair<std::string, std::string>> Node::combinations(const std::vector<std::string>& source)
     {
-        vector<pair<string, string>> result;
+        std::vector<std::pair<std::string, std::string>> result;
         for (int i = 0; i < source.size(); ++i) {
-            string temp = source[i];
+            std::string temp = source[i];
             for (int j = i + 1; j < source.size(); ++j) {
                 result.push_back({ temp, source[j] });
             }
         }
         return result;
     }
-    void Node::computeCPT(const torch::Tensor& dataset, const vector<string>& features, const double laplaceSmoothing, const torch::Tensor& weights)
+    void Node::computeCPT(const torch::Tensor& dataset, const std::vector<std::string>& features, const double laplaceSmoothing, const torch::Tensor& weights)
     {
         dimensions.clear();
         // Get dimensions of the CPT
@@ -96,7 +96,7 @@ namespace bayesnet {
         // Fill table with counts
         auto pos = find(features.begin(), features.end(), name);
         if (pos == features.end()) {
-            throw logic_error("Feature " + name + " not found in dataset");
+            throw std::logic_error("Feature " + name + " not found in dataset");
         }
         int name_index = pos - features.begin();
         for (int n_sample = 0; n_sample < dataset.size(1); ++n_sample) {
@@ -105,7 +105,7 @@ namespace bayesnet {
             for (auto parent : parents) {
                 pos = find(features.begin(), features.end(), parent->getName());
                 if (pos == features.end()) {
-                    throw logic_error("Feature parent " + parent->getName() + " not found in dataset");
+                    throw std::logic_error("Feature parent " + parent->getName() + " not found in dataset");
                 }
                 int parent_index = pos - features.begin();
                 coordinates.push_back(dataset.index({ parent_index, n_sample }));
@@ -116,17 +116,17 @@ namespace bayesnet {
         // Normalize the counts
         cpTable = cpTable / cpTable.sum(0);
     }
-    float Node::getFactorValue(map<string, int>& evidence)
+    float Node::getFactorValue(std::map<std::string, int>& evidence)
     {
         c10::List<c10::optional<at::Tensor>> coordinates;
         // following predetermined order of indices in the cpTable (see Node.h)
         coordinates.push_back(at::tensor(evidence[name]));
-        transform(parents.begin(), parents.end(), back_inserter(coordinates), [&evidence](const auto& parent) { return at::tensor(evidence[parent->getName()]); });
+        transform(parents.begin(), parents.end(), std::back_inserter(coordinates), [&evidence](const auto& parent) { return at::tensor(evidence[parent->getName()]); });
         return cpTable.index({ coordinates }).item<float>();
     }
-    vector<string> Node::graph(const string& className)
+    std::vector<std::string> Node::graph(const std::string& className)
     {
-        auto output = vector<string>();
+        auto output = std::vector<std::string>();
         auto suffix = name == className ? ", fontcolor=red, fillcolor=lightblue, style=filled " : "";
         output.push_back(name + " [shape=circle" + suffix + "] \n");
         transform(children.begin(), children.end(), back_inserter(output), [this](const auto& child) { return name + " -> " + child->getName(); });

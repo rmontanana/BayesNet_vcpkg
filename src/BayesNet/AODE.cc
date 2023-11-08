@@ -9,9 +9,9 @@ namespace bayesnet {
             models.push_back(std::make_unique<SPODE>(i));
         }
         n_models = models.size();
-        significanceModels = vector<double>(n_models, 1.0);
+        significanceModels = std::vector<double>(n_models, 1.0);
     }
-    vector<string> AODE::graph(const string& title) const
+    std::vector<std::string> AODE::graph(const std::string& title) const
     {
         return Ensemble::graph(title);
     }

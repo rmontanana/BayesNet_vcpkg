@@ -3,9 +3,7 @@
 #include <torch/torch.h>
 #include <vector>
 namespace bayesnet {
-    using namespace std;
-    using namespace torch;
-    vector<int> argsort(vector<double>& nums);
-    vector<vector<int>> tensorToVector(Tensor& tensor);
+    std::vector<int> argsort(std::vector<double>& nums);
+    std::vector<std::vector<int>> tensorToVector(torch::Tensor& tensor);
 }
 #endif //BAYESNET_UTILS_H

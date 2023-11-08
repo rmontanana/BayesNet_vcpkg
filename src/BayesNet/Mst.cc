@@ -7,8 +7,7 @@
 */
 
 namespace bayesnet {
-    using namespace std;
-    Graph::Graph(int V) : V(V), parent(vector<int>(V))
+    Graph::Graph(int V) : V(V), parent(std::vector<int>(V))
     {
         for (int i = 0; i < V; i++)
             parent[i] = i;
@@ -41,35 +40,35 @@ namespace bayesnet {
             uSt = find_set(G[i].second.first);
             vEd = find_set(G[i].second.second);
             if (uSt != vEd) {
-                T.push_back(G[i]); // add to mst vector
+                T.push_back(G[i]); // add to mst std::vector
                 union_set(uSt, vEd);
             }
         }
     }
     void Graph::display_mst()
     {
-        cout << "Edge :" << " Weight" << endl;
+        std::cout << "Edge :" << " Weight" << std::endl;
         for (int i = 0; i < T.size(); i++) {
-            cout << T[i].second.first << " - " << T[i].second.second << " : "
+            std::cout << T[i].second.first << " - " << T[i].second.second << " : "
                 << T[i].first;
-            cout << endl;
+            std::cout << std::endl;
         }
     }
 
-    void insertElement(list<int>& variables, int variable)
+    void insertElement(std::list<int>& variables, int variable)
     {
-        if (find(variables.begin(), variables.end(), variable) == variables.end()) {
+        if (std::find(variables.begin(), variables.end(), variable) == variables.end()) {
             variables.push_front(variable);
         }
     }
 
-    vector<pair<int, int>> reorder(vector<pair<float, pair<int, int>>> T, int root_original)
+    std::vector<std::pair<int, int>> reorder(std::vector<std::pair<float, std::pair<int, int>>> T, int root_original)
     {
         // Create the edges of a DAG from the MST
         // replacing unordered_set with list because unordered_set cannot guarantee the order of the elements inserted
-        auto result = vector<pair<int, int>>();
-        auto visited = vector<int>();
-        auto nextVariables = list<int>();
+        auto result = std::vector<std::pair<int, int>>();
+        auto visited = std::vector<int>();
+        auto nextVariables = std::list<int>();
         nextVariables.push_front(root_original);
         while (nextVariables.size() > 0) {
             int root = nextVariables.front();
@@ -104,8 +103,8 @@ namespace bayesnet {
         return result;
     }
 
-    MST::MST(const vector<string>& features, const Tensor& weights, const int root) : features(features), weights(weights), root(root) {}
-    vector<pair<int, int>> MST::maximumSpanningTree()
+    MST::MST(const std::vector<std::string>& features, const torch::Tensor& weights, const int root) : features(features), weights(weights), root(root) {}
+    std::vector<std::pair<int, int>> MST::maximumSpanningTree()
     {
         auto num_features = features.size();
         Graph g(num_features);

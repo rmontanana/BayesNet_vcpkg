@@ -7,12 +7,10 @@
 #include "CPPFImdlp.h"
 #include "Utils.h"
 namespace platform {
-    using namespace std;
-
     enum fileType_t { CSV, ARFF, RDATA };
     class SourceData {
     public:
-        SourceData(string source)
+        SourceData(std::string source)
         {
             if (source == "Surcov") {
                 path = "datasets/";
@@ -24,10 +22,10 @@ namespace platform {
                 path = "data/";
                 fileType = RDATA;
             } else {
-                throw invalid_argument("Unknown source.");
+                throw std::invalid_argument("Unknown source.");
             }
         }
-        string getPath()
+        std::string getPath()
         {
             return path;
         }
@@ -36,40 +34,40 @@ namespace platform {
             return fileType;
         }
     private:
-        string path;
+        std::string path;
         fileType_t fileType;
     };
     class Dataset {
     private:
-        string path;
-        string name;
+        std::string path;
+        std::string name;
         fileType_t fileType;
-        string className;
+        std::string className;
         int n_samples{ 0 }, n_features{ 0 };
-        vector<string> features;
-        map<string, vector<int>> states;
+        std::vector<std::string> features;
+        std::map<std::string, std::vector<int>> states;
         bool loaded;
         bool discretize;
         torch::Tensor X, y;
-        vector<vector<float>> Xv;
-        vector<vector<int>> Xd;
-        vector<int> yv;
+        std::vector<std::vector<float>> Xv;
+        std::vector<std::vector<int>> Xd;
+        std::vector<int> yv;
         void buildTensors();
         void load_csv();
         void load_arff();
         void load_rdata();
         void computeStates();
-        vector<mdlp::labels_t> discretizeDataset(vector<mdlp::samples_t>& X, mdlp::labels_t& y);
+        std::vector<mdlp::labels_t> discretizeDataset(std::vector<mdlp::samples_t>& X, mdlp::labels_t& y);
     public:
-        Dataset(const string& path, const string& name, const string& className, bool discretize, fileType_t fileType) : path(path), name(name), className(className), discretize(discretize), loaded(false), fileType(fileType) {};
+        Dataset(const std::string& path, const std::string& name, const std::string& className, bool discretize, fileType_t fileType) : path(path), name(name), className(className), discretize(discretize), loaded(false), fileType(fileType) {};
         explicit Dataset(const Dataset&);
-        string getName() const;
-        string getClassName() const;
-        vector<string> getFeatures() const;
-        map<string, vector<int>> getStates() const;
-        pair<vector<vector<float>>&, vector<int>&> getVectors();
-        pair<vector<vector<int>>&, vector<int>&> getVectorsDiscretized();
-        pair<torch::Tensor&, torch::Tensor&> getTensors();
+        std::string getName() const;
+        std::string getClassName() const;
+        std::vector<string> getFeatures() const;
+        std::map<std::string, std::vector<int>> getStates() const;
+        std::pair<vector<std::vector<float>>&, std::vector<int>&> getVectors();
+        std::pair<vector<std::vector<int>>&, std::vector<int>&> getVectorsDiscretized();
+        std::pair<torch::Tensor&, torch::Tensor&> getTensors();
         int getNFeatures() const;
         int getNSamples() const;
         void load();

@@ -4,24 +4,22 @@
 #include <vector>
 #include <string>
 namespace bayesnet {
-    using namespace std;
-    using namespace torch;
     class MST {
     private:
-        Tensor weights;
-        vector<string> features;
+        torch::Tensor weights;
+        std::vector<std::string> features;
         int root = 0;
     public:
         MST() = default;
-        MST(const vector<string>& features, const Tensor& weights, const int root);
-        vector<pair<int, int>> maximumSpanningTree();
+        MST(const std::vector<std::string>& features, const torch::Tensor& weights, const int root);
+        std::vector<std::pair<int, int>> maximumSpanningTree();
     };
     class Graph {
     private:
         int V;      // number of nodes in graph
-        vector <pair<float, pair<int, int>>> G; // vector for graph
-        vector <pair<float, pair<int, int>>> T; // vector for mst
-        vector<int> parent;
+        std::vector <std::pair<float, std::pair<int, int>>> G; // std::vector for graph
+        std::vector <std::pair<float, std::pair<int, int>>> T; // std::vector for mst
+        std::vector<int> parent;
     public:
         explicit Graph(int V);
         void addEdge(int u, int v, float wt);
@@ -29,7 +27,7 @@ namespace bayesnet {
         void union_set(int u, int v);
         void kruskal_algorithm();
         void display_mst();
-        vector <pair<float, pair<int, int>>> get_mst() { return T; }
+        std::vector <std::pair<float, std::pair<int, int>>> get_mst() { return T; }
     };
 }
 #endif

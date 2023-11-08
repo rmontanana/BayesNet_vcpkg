@@ -3,18 +3,18 @@
 #include "Network.h"
 #include "bayesnetUtils.h"
 namespace bayesnet {
-    Network::Network() : features(vector<string>()), className(""), classNumStates(0), fitted(false), laplaceSmoothing(0) {}
-    Network::Network(float maxT) : features(vector<string>()), className(""), classNumStates(0), maxThreads(maxT), fitted(false), laplaceSmoothing(0) {}
+    Network::Network() : features(std::vector<std::string>()), className(""), classNumStates(0), fitted(false), laplaceSmoothing(0) {}
+    Network::Network(float maxT) : features(std::vector<std::string>()), className(""), classNumStates(0), maxThreads(maxT), fitted(false), laplaceSmoothing(0) {}
     Network::Network(Network& other) : laplaceSmoothing(other.laplaceSmoothing), features(other.features), className(other.className), classNumStates(other.getClassNumStates()), maxThreads(other.
         getmaxThreads()), fitted(other.fitted)
     {
-        for (const auto& pair : other.nodes) {
-            nodes[pair.first] = std::make_unique<Node>(*pair.second);
+        for (const auto& node : other.nodes) {
+            nodes[node.first] = std::make_unique<Node>(*node.second);
         }
     }
     void Network::initialize()
     {
-        features = vector<string>();
+        features = std::vector<std::string>();
         className = "";
         classNumStates = 0;
         fitted = false;
@@ -29,10 +29,10 @@ namespace bayesnet {
     {
         return samples;
     }
-    void Network::addNode(const string& name)
+    void Network::addNode(const std::string& name)
     {
         if (name == "") {
-            throw invalid_argument("Node name cannot be empty");
+            throw std::invalid_argument("Node name cannot be empty");
         }
         if (nodes.find(name) != nodes.end()) {
             return;
@@ -42,7 +42,7 @@ namespace bayesnet {
         }
         nodes[name] = std::make_unique<Node>(name);
     }
-    vector<string> Network::getFeatures() const
+    std::vector<std::string> Network::getFeatures() const
     {
         return features;
     }
@@ -58,11 +58,11 @@ namespace bayesnet {
         }
         return result;
     }
-    string Network::getClassName() const
+    std::string Network::getClassName() const
     {
         return className;
     }
-    bool Network::isCyclic(const string& nodeId, unordered_set<string>& visited, unordered_set<string>& recStack)
+    bool Network::isCyclic(const std::string& nodeId, std::unordered_set<std::string>& visited, std::unordered_set<std::string>& recStack)
     {
         if (visited.find(nodeId) == visited.end()) // if node hasn't been visited yet
         {
@@ -78,78 +78,78 @@ namespace bayesnet {
         recStack.erase(nodeId); // remove node from recursion stack before function ends
         return false;
     }
-    void Network::addEdge(const string& parent, const string& child)
+    void Network::addEdge(const std::string& parent, const std::string& child)
     {
         if (nodes.find(parent) == nodes.end()) {
-            throw invalid_argument("Parent node " + parent + " does not exist");
+            throw std::invalid_argument("Parent node " + parent + " does not exist");
         }
         if (nodes.find(child) == nodes.end()) {
-            throw invalid_argument("Child node " + child + " does not exist");
+            throw std::invalid_argument("Child node " + child + " does not exist");
         }
         // Temporarily add edge to check for cycles
         nodes[parent]->addChild(nodes[child].get());
         nodes[child]->addParent(nodes[parent].get());
-        unordered_set<string> visited;
-        unordered_set<string> recStack;
+        std::unordered_set<std::string> visited;
+        std::unordered_set<std::string> recStack;
         if (isCyclic(nodes[child]->getName(), visited, recStack)) // if adding this edge forms a cycle
         {
             // remove problematic edge
             nodes[parent]->removeChild(nodes[child].get());
             nodes[child]->removeParent(nodes[parent].get());
-            throw invalid_argument("Adding this edge forms a cycle in the graph.");
+            throw std::invalid_argument("Adding this edge forms a cycle in the graph.");
         }
     }
-    map<string, std::unique_ptr<Node>>& Network::getNodes()
+    std::map<std::string, std::unique_ptr<Node>>& Network::getNodes()
     {
         return nodes;
     }
-    void Network::checkFitData(int n_samples, int n_features, int n_samples_y, const vector<string>& featureNames, const string& className, const map<string, vector<int>>& states, const torch::Tensor& weights)
+    void Network::checkFitData(int n_samples, int n_features, int n_samples_y, const std::vector<std::string>& featureNames, const std::string& className, const std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights)
     {
         if (weights.size(0) != n_samples) {
-            throw invalid_argument("Weights (" + to_string(weights.size(0)) + ") must have the same number of elements as samples (" + to_string(n_samples) + ") in Network::fit");
+            throw std::invalid_argument("Weights (" + std::to_string(weights.size(0)) + ") must have the same number of elements as samples (" + std::to_string(n_samples) + ") in Network::fit");
         }
         if (n_samples != n_samples_y) {
-            throw invalid_argument("X and y must have the same number of samples in Network::fit (" + to_string(n_samples) + " != " + to_string(n_samples_y) + ")");
+            throw std::invalid_argument("X and y must have the same number of samples in Network::fit (" + std::to_string(n_samples) + " != " + std::to_string(n_samples_y) + ")");
         }
         if (n_features != featureNames.size()) {
-            throw invalid_argument("X and features must have the same number of features in Network::fit (" + to_string(n_features) + " != " + to_string(featureNames.size()) + ")");
+            throw std::invalid_argument("X and features must have the same number of features in Network::fit (" + std::to_string(n_features) + " != " + std::to_string(featureNames.size()) + ")");
         }
         if (n_features != features.size() - 1) {
-            throw invalid_argument("X and local features must have the same number of features in Network::fit (" + to_string(n_features) + " != " + to_string(features.size() - 1) + ")");
+            throw std::invalid_argument("X and local features must have the same number of features in Network::fit (" + std::to_string(n_features) + " != " + std::to_string(features.size() - 1) + ")");
         }
         if (find(features.begin(), features.end(), className) == features.end()) {
-            throw invalid_argument("className not found in Network::features");
+            throw std::invalid_argument("className not found in Network::features");
         }
         for (auto& feature : featureNames) {
             if (find(features.begin(), features.end(), feature) == features.end()) {
-                throw invalid_argument("Feature " + feature + " not found in Network::features");
+                throw std::invalid_argument("Feature " + feature + " not found in Network::features");
             }
             if (states.find(feature) == states.end()) {
-                throw invalid_argument("Feature " + feature + " not found in states");
+                throw std::invalid_argument("Feature " + feature + " not found in states");
             }
         }
     }
-    void Network::setStates(const map<string, vector<int>>& states)
+    void Network::setStates(const std::map<std::string, std::vector<int>>& states)
     {
         // Set states to every Node in the network
-        for_each(features.begin(), features.end(), [this, &states](const string& feature) {
+        for_each(features.begin(), features.end(), [this, &states](const std::string& feature) {
             nodes.at(feature)->setNumStates(states.at(feature).size());
             });
         classNumStates = nodes.at(className)->getNumStates();
     }
     // X comes in nxm, where n is the number of features and m the number of samples
-    void Network::fit(const torch::Tensor& X, const torch::Tensor& y, const torch::Tensor& weights, const vector<string>& featureNames, const string& className, const map<string, vector<int>>& states)
+    void Network::fit(const torch::Tensor& X, const torch::Tensor& y, const torch::Tensor& weights, const std::vector<std::string>& featureNames, const std::string& className, const std::map<std::string, std::vector<int>>& states)
     {
         checkFitData(X.size(1), X.size(0), y.size(0), featureNames, className, states, weights);
         this->className = className;
-        Tensor ytmp = torch::transpose(y.view({ y.size(0), 1 }), 0, 1);
+        torch::Tensor ytmp = torch::transpose(y.view({ y.size(0), 1 }), 0, 1);
         samples = torch::cat({ X , ytmp }, 0);
         for (int i = 0; i < featureNames.size(); ++i) {
             auto row_feature = X.index({ i, "..." });
         }
         completeFit(states, weights);
     }
-    void Network::fit(const torch::Tensor& samples, const torch::Tensor& weights, const vector<string>& featureNames, const string& className, const map<string, vector<int>>& states)
+    void Network::fit(const torch::Tensor& samples, const torch::Tensor& weights, const std::vector<std::string>& featureNames, const std::string& className, const std::map<std::string, std::vector<int>>& states)
     {
         checkFitData(samples.size(1), samples.size(0) - 1, samples.size(1), featureNames, className, states, weights);
         this->className = className;
@@ -157,7 +157,7 @@ namespace bayesnet {
         completeFit(states, weights);
     }
     // input_data comes in nxm, where n is the number of features and m the number of samples
-    void Network::fit(const vector<vector<int>>& input_data, const vector<int>& labels, const vector<double>& weights_, const vector<string>& featureNames, const string& className, const map<string, vector<int>>& states)
+    void Network::fit(const std::vector<std::vector<int>>& input_data, const std::vector<int>& labels, const std::vector<double>& weights_, const std::vector<std::string>& featureNames, const std::string& className, const std::map<std::string, std::vector<int>>& states)
     {
         const torch::Tensor weights = torch::tensor(weights_, torch::kFloat64);
         checkFitData(input_data[0].size(), input_data.size(), labels.size(), featureNames, className, states, weights);
@@ -170,11 +170,11 @@ namespace bayesnet {
         samples.index_put_({ -1, "..." }, torch::tensor(labels, torch::kInt32));
         completeFit(states, weights);
     }
-    void Network::completeFit(const map<string, vector<int>>& states, const torch::Tensor& weights)
+    void Network::completeFit(const std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights)
     {
         setStates(states);
         laplaceSmoothing = 1.0 / samples.size(1); // To use in CPT computation
-        vector<thread> threads;
+        std::vector<std::thread> threads;
         for (auto& node : nodes) {
             threads.emplace_back([this, &node, &weights]() {
                 node.second->computeCPT(samples, features, laplaceSmoothing, weights);
@@ -188,12 +188,12 @@ namespace bayesnet {
     torch::Tensor Network::predict_tensor(const torch::Tensor& samples, const bool proba)
     {
         if (!fitted) {
-            throw logic_error("You must call fit() before calling predict()");
+            throw std::logic_error("You must call fit() before calling predict()");
         }
         torch::Tensor result;
         result = torch::zeros({ samples.size(1), classNumStates }, torch::kFloat64);
         for (int i = 0; i < samples.size(1); ++i) {
-            const Tensor sample = samples.index({ "...", i });
+            const torch::Tensor sample = samples.index({ "...", i });
             auto psample = predict_sample(sample);
             auto temp = torch::tensor(psample, torch::kFloat64);
             //            result.index_put_({ i, "..." }, torch::tensor(predict_sample(sample), torch::kFloat64));
@@ -204,32 +204,32 @@ namespace bayesnet {
         return result.argmax(1);
     }
     // Return mxn tensor of probabilities
-    Tensor Network::predict_proba(const Tensor& samples)
+    torch::Tensor Network::predict_proba(const torch::Tensor& samples)
     {
         return predict_tensor(samples, true);
     }
 
     // Return mxn tensor of probabilities
-    Tensor Network::predict(const Tensor& samples)
+    torch::Tensor Network::predict(const torch::Tensor& samples)
     {
         return predict_tensor(samples, false);
     }
 
-    // Return mx1 vector of predictions
-    // tsamples is nxm vector of samples
-    vector<int> Network::predict(const vector<vector<int>>& tsamples)
+    // Return mx1 std::vector of predictions
+    // tsamples is nxm std::vector of samples
+    std::vector<int> Network::predict(const std::vector<std::vector<int>>& tsamples)
     {
         if (!fitted) {
-            throw logic_error("You must call fit() before calling predict()");
+            throw std::logic_error("You must call fit() before calling predict()");
         }
-        vector<int> predictions;
-        vector<int> sample;
+        std::vector<int> predictions;
+        std::vector<int> sample;
         for (int row = 0; row < tsamples[0].size(); ++row) {
             sample.clear();
             for (int col = 0; col < tsamples.size(); ++col) {
                 sample.push_back(tsamples[col][row]);
             }
-            vector<double> classProbabilities = predict_sample(sample);
+            std::vector<double> classProbabilities = predict_sample(sample);
             // Find the class with the maximum posterior probability
             auto maxElem = max_element(classProbabilities.begin(), classProbabilities.end());
             int predictedClass = distance(classProbabilities.begin(), maxElem);
@@ -237,14 +237,14 @@ namespace bayesnet {
         }
         return predictions;
     }
-    // Return mxn vector of probabilities
-    vector<vector<double>> Network::predict_proba(const vector<vector<int>>& tsamples)
+    // Return mxn std::vector of probabilities
+    std::vector<std::vector<double>> Network::predict_proba(const std::vector<std::vector<int>>& tsamples)
     {
         if (!fitted) {
-            throw logic_error("You must call fit() before calling predict_proba()");
+            throw std::logic_error("You must call fit() before calling predict_proba()");
         }
-        vector<vector<double>> predictions;
-        vector<int> sample;
+        std::vector<std::vector<double>> predictions;
+        std::vector<int> sample;
         for (int row = 0; row < tsamples[0].size(); ++row) {
             sample.clear();
             for (int col = 0; col < tsamples.size(); ++col) {
@@ -254,9 +254,9 @@ namespace bayesnet {
         }
         return predictions;
     }
-    double Network::score(const vector<vector<int>>& tsamples, const vector<int>& labels)
+    double Network::score(const std::vector<std::vector<int>>& tsamples, const std::vector<int>& labels)
     {
-        vector<int> y_pred = predict(tsamples);
+        std::vector<int> y_pred = predict(tsamples);
         int correct = 0;
         for (int i = 0; i < y_pred.size(); ++i) {
             if (y_pred[i] == labels[i]) {
@@ -265,35 +265,35 @@ namespace bayesnet {
         }
         return (double)correct / y_pred.size();
     }
-    // Return 1xn vector of probabilities
-    vector<double> Network::predict_sample(const vector<int>& sample)
+    // Return 1xn std::vector of probabilities
+    std::vector<double> Network::predict_sample(const std::vector<int>& sample)
     {
         // Ensure the sample size is equal to the number of features
         if (sample.size() != features.size() - 1) {
-            throw invalid_argument("Sample size (" + to_string(sample.size()) +
-                ") does not match the number of features (" + to_string(features.size() - 1) + ")");
+            throw std::invalid_argument("Sample size (" + std::to_string(sample.size()) +
+                ") does not match the number of features (" + std::to_string(features.size() - 1) + ")");
         }
-        map<string, int> evidence;
+        std::map<std::string, int> evidence;
         for (int i = 0; i < sample.size(); ++i) {
             evidence[features[i]] = sample[i];
         }
         return exactInference(evidence);
     }
-    // Return 1xn vector of probabilities
-    vector<double> Network::predict_sample(const Tensor& sample)
+    // Return 1xn std::vector of probabilities
+    std::vector<double> Network::predict_sample(const torch::Tensor& sample)
     {
         // Ensure the sample size is equal to the number of features
         if (sample.size(0) != features.size() - 1) {
-            throw invalid_argument("Sample size (" + to_string(sample.size(0)) +
-                ") does not match the number of features (" + to_string(features.size() - 1) + ")");
+            throw std::invalid_argument("Sample size (" + std::to_string(sample.size(0)) +
+                ") does not match the number of features (" + std::to_string(features.size() - 1) + ")");
         }
-        map<string, int> evidence;
+        std::map<std::string, int> evidence;
         for (int i = 0; i < sample.size(0); ++i) {
             evidence[features[i]] = sample[i].item<int>();
         }
         return exactInference(evidence);
     }
-    double Network::computeFactor(map<string, int>& completeEvidence)
+    double Network::computeFactor(std::map<std::string, int>& completeEvidence)
     {
         double result = 1.0;
         for (auto& node : getNodes()) {
@@ -301,17 +301,17 @@ namespace bayesnet {
         }
         return result;
     }
-    vector<double> Network::exactInference(map<string, int>& evidence)
+    std::vector<double> Network::exactInference(std::map<std::string, int>& evidence)
     {
-        vector<double> result(classNumStates, 0.0);
-        vector<thread> threads;
-        mutex mtx;
+        std::vector<double> result(classNumStates, 0.0);
+        std::vector<std::thread> threads;
+        std::mutex mtx;
         for (int i = 0; i < classNumStates; ++i) {
             threads.emplace_back([this, &result, &evidence, i, &mtx]() {
-                auto completeEvidence = map<string, int>(evidence);
+                auto completeEvidence = std::map<std::string, int>(evidence);
                 completeEvidence[getClassName()] = i;
                 double factor = computeFactor(completeEvidence);
-                lock_guard<mutex> lock(mtx);
+                std::lock_guard<std::mutex> lock(mtx);
                 result[i] = factor;
                 });
         }
@@ -323,12 +323,12 @@ namespace bayesnet {
         transform(result.begin(), result.end(), result.begin(), [sum](const double& value) { return value / sum; });
         return result;
     }
-    vector<string> Network::show() const
+    std::vector<std::string> Network::show() const
     {
-        vector<string> result;
+        std::vector<std::string> result;
         // Draw the network
         for (auto& node : nodes) {
-            string line = node.first + " -> ";
+            std::string line = node.first + " -> ";
             for (auto child : node.second->getChildren()) {
                 line += child->getName() + ", ";
             }
@@ -336,12 +336,12 @@ namespace bayesnet {
         }
         return result;
     }
-    vector<string> Network::graph(const string& title) const
+    std::vector<std::string> Network::graph(const std::string& title) const
     {
-        auto output = vector<string>();
+        auto output = std::vector<std::string>();
         auto prefix = "digraph BayesNet {\nlabel=<BayesNet ";
         auto suffix = ">\nfontsize=30\nfontcolor=blue\nlabelloc=t\nlayout=circo\n";
-        string header = prefix + title + suffix;
+        std::string header = prefix + title + suffix;
         output.push_back(header);
         for (auto& node : nodes) {
             auto result = node.second->graph(className);
@@ -350,9 +350,9 @@ namespace bayesnet {
         output.push_back("}\n");
         return output;
     }
-    vector<pair<string, string>> Network::getEdges() const
+    std::vector<std::pair<std::string, std::string>> Network::getEdges() const
     {
-        auto edges = vector<pair<string, string>>();
+        auto edges = std::vector<std::pair<std::string, std::string>>();
         for (const auto& node : nodes) {
             auto head = node.first;
             for (const auto& child : node.second->getChildren()) {
@@ -366,7 +366,7 @@ namespace bayesnet {
     {
         return getEdges().size();
     }
-    vector<string> Network::topological_sort()
+    std::vector<std::string> Network::topological_sort()
     {
         /* Check if al the fathers of every node are before the node */
         auto result = features;
@@ -393,10 +393,10 @@ namespace bayesnet {
                                 ending = false;
                             }
                         } else {
-                            throw logic_error("Error in topological sort because of node " + feature + " is not in result");
+                            throw std::logic_error("Error in topological sort because of node " + feature + " is not in result");
                         }
                     } else {
-                        throw logic_error("Error in topological sort because of node father " + fatherName + " is not in result");
+                        throw std::logic_error("Error in topological sort because of node father " + fatherName + " is not in result");
                     }
                 }
             }
@@ -406,8 +406,8 @@ namespace bayesnet {
     void Network::dump_cpt() const
     {
         for (auto& node : nodes) {
-            cout << "* " << node.first << ": (" << node.second->getNumStates() << ") : " << node.second->getCPT().sizes() << endl;
-            cout << node.second->getCPT() << endl;
+            std::cout << "* " << node.first << ": (" << node.second->getNumStates() << ") : " << node.second->getCPT().sizes() << std::endl;
+            std::cout << node.second->getCPT() << std::endl;
         }
     }
 }

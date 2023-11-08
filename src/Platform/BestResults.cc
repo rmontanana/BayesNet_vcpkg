@@ -13,26 +13,25 @@
 
 
 namespace fs = std::filesystem;
-// function ftime_to_string, Code taken from 
+// function ftime_to_std::string, Code taken from 
 // https://stackoverflow.com/a/58237530/1389271
 template <typename TP>
 std::string ftime_to_string(TP tp)
 {
-    using namespace std::chrono;
-    auto sctp = time_point_cast<system_clock::duration>(tp - TP::clock::now()
-        + system_clock::now());
-    auto tt = system_clock::to_time_t(sctp);
+    auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(tp - TP::clock::now()
+        + std::chrono::system_clock::now());
+    auto tt = std::chrono::system_clock::to_time_t(sctp);
     std::tm* gmt = std::gmtime(&tt);
     std::stringstream buffer;
     buffer << std::put_time(gmt, "%Y-%m-%d %H:%M");
     return buffer.str();
 }
 namespace platform {
-    string BestResults::build()
+    std::string BestResults::build()
     {
         auto files = loadResultFiles();
         if (files.size() == 0) {
-            cerr << Colors::MAGENTA() << "No result files were found!" << Colors::RESET() << endl;
+            std::cerr << Colors::MAGENTA() << "No result files were found!" << Colors::RESET() << std::endl;
             exit(1);
         }
         json bests;
@@ -42,7 +41,7 @@ namespace platform {
             for (auto const& item : data.at("results")) {
                 bool update = false;
                 // Check if results file contains only one dataset
-                auto datasetName = item.at("dataset").get<string>();
+                auto datasetName = item.at("dataset").get<std::string>();
                 if (bests.contains(datasetName)) {
                     if (item.at("score").get<double>() > bests[datasetName].at(0).get<double>()) {
                         update = true;
@@ -55,39 +54,39 @@ namespace platform {
                 }
             }
         }
-        string bestFileName = path + bestResultFile();
+        std::string bestFileName = path + bestResultFile();
         if (FILE* fileTest = fopen(bestFileName.c_str(), "r")) {
             fclose(fileTest);
-            cout << Colors::MAGENTA() << "File " << bestFileName << " already exists and it shall be overwritten." << Colors::RESET() << endl;
+            std::cout << Colors::MAGENTA() << "File " << bestFileName << " already exists and it shall be overwritten." << Colors::RESET() << std::endl;
         }
-        ofstream file(bestFileName);
+        std::ofstream file(bestFileName);
         file << bests;
         file.close();
         return bestFileName;
     }
-    string BestResults::bestResultFile()
+    std::string BestResults::bestResultFile()
     {
         return "best_results_" + score + "_" + model + ".json";
     }
-    pair<string, string> getModelScore(string name)
+    std::pair<std::string, std::string> getModelScore(std::string name)
     {
         // results_accuracy_BoostAODE_MacBookpro16_2023-09-06_12:27:00_1.json
         int i = 0;
         auto pos = name.find("_");
         auto pos2 = name.find("_", pos + 1);
-        string score = name.substr(pos + 1, pos2 - pos - 1);
+        std::string score = name.substr(pos + 1, pos2 - pos - 1);
         pos = name.find("_", pos2 + 1);
-        string model = name.substr(pos2 + 1, pos - pos2 - 1);
+        std::string model = name.substr(pos2 + 1, pos - pos2 - 1);
         return { model, score };
     }
-    vector<string> BestResults::loadResultFiles()
+    std::vector<std::string> BestResults::loadResultFiles()
     {
-        vector<string> files;
+        std::vector<std::string> files;
         using std::filesystem::directory_iterator;
-        string fileModel, fileScore;
+        std::string fileModel, fileScore;
         for (const auto& file : directory_iterator(path)) {
             auto fileName = file.path().filename().string();
-            if (fileName.find(".json") != string::npos && fileName.find("results_") == 0) {
+            if (fileName.find(".json") != std::string::npos && fileName.find("results_") == 0) {
                 tie(fileModel, fileScore) = getModelScore(fileName);
                 if (score == fileScore && (model == fileModel || model == "any")) {
                     files.push_back(fileName);
@@ -96,37 +95,37 @@ namespace platform {
         }
         return files;
     }
-    json BestResults::loadFile(const string& fileName)
+    json BestResults::loadFile(const std::string& fileName)
     {
-        ifstream resultData(fileName);
+        std::ifstream resultData(fileName);
         if (resultData.is_open()) {
             json data = json::parse(resultData);
             return data;
         }
-        throw invalid_argument("Unable to open result file. [" + fileName + "]");
+        throw std::invalid_argument("Unable to open result file. [" + fileName + "]");
     }
-    vector<string> BestResults::getModels()
+    std::vector<std::string> BestResults::getModels()
     {
-        set<string> models;
-        vector<string> result;
+        std::set<std::string> models;
+        std::vector<std::string> result;
         auto files = loadResultFiles();
         if (files.size() == 0) {
-            cerr << Colors::MAGENTA() << "No result files were found!" << Colors::RESET() << endl;
+            std::cerr << Colors::MAGENTA() << "No result files were found!" << Colors::RESET() << std::endl;
             exit(1);
         }
-        string fileModel, fileScore;
+        std::string fileModel, fileScore;
         for (const auto& file : files) {
             // extract the model from the file name
             tie(fileModel, fileScore) = getModelScore(file);
-            // add the model to the vector of models
+            // add the model to the std::vector of models
             models.insert(fileModel);
         }
-        result = vector<string>(models.begin(), models.end());
+        result = std::vector<std::string>(models.begin(), models.end());
         return result;
     }
-    vector<string> BestResults::getDatasets(json table)
+    std::vector<std::string> BestResults::getDatasets(json table)
     {
-        vector<string> datasets;
+        std::vector<std::string> datasets;
         for (const auto& dataset : table.items()) {
             datasets.push_back(dataset.key());
         }
@@ -136,7 +135,7 @@ namespace platform {
     {
         auto models = getModels();
         for (const auto& model : models) {
-            cout << "Building best results for model: " << model << endl;
+            std::cout << "Building best results for model: " << model << std::endl;
             this->model = model;
             build();
         }
@@ -144,62 +143,62 @@ namespace platform {
     }
     void BestResults::listFile()
     {
-        string bestFileName = path + bestResultFile();
+        std::string bestFileName = path + bestResultFile();
         if (FILE* fileTest = fopen(bestFileName.c_str(), "r")) {
             fclose(fileTest);
         } else {
-            cerr << Colors::MAGENTA() << "File " << bestFileName << " doesn't exist." << Colors::RESET() << endl;
+            std::cerr << Colors::MAGENTA() << "File " << bestFileName << " doesn't exist." << Colors::RESET() << std::endl;
             exit(1);
         }
         auto temp = ConfigLocale();
-        auto date = ftime_to_string(filesystem::last_write_time(bestFileName));
+        auto date = ftime_to_string(std::filesystem::last_write_time(bestFileName));
         auto data = loadFile(bestFileName);
         auto datasets = getDatasets(data);
-        int maxDatasetName = (*max_element(datasets.begin(), datasets.end(), [](const string& a, const string& b) { return a.size() < b.size(); })).size();
+        int maxDatasetName = (*max_element(datasets.begin(), datasets.end(), [](const std::string& a, const std::string& b) { return a.size() < b.size(); })).size();
         int maxFileName = 0;
         int maxHyper = 15;
         for (auto const& item : data.items()) {
-            maxHyper = max(maxHyper, (int)item.value().at(1).dump().size());
-            maxFileName = max(maxFileName, (int)item.value().at(2).get<string>().size());
+            maxHyper = std::max(maxHyper, (int)item.value().at(1).dump().size());
+            maxFileName = std::max(maxFileName, (int)item.value().at(2).get<std::string>().size());
         }
-        stringstream oss;
-        oss << Colors::GREEN() << "Best results for " << model << " as of " << date << endl;
-        cout << oss.str();
-        cout << string(oss.str().size() - 8, '-') << endl;
-        cout << Colors::GREEN() << " #  " << setw(maxDatasetName + 1) << left << "Dataset" << "Score       " << setw(maxFileName) << "File" << " Hyperparameters" << endl;
-        cout << "=== " << string(maxDatasetName, '=') << " =========== " << string(maxFileName, '=') << " " << string(maxHyper, '=') << endl;
+        std::stringstream oss;
+        oss << Colors::GREEN() << "Best results for " << model << " as of " << date << std::endl;
+        std::cout << oss.str();
+        std::cout << std::string(oss.str().size() - 8, '-') << std::endl;
+        std::cout << Colors::GREEN() << " #  " << std::setw(maxDatasetName + 1) << std::left << "Dataset" << "Score       " << std::setw(maxFileName) << "File" << " Hyperparameters" << std::endl;
+        std::cout << "=== " << std::string(maxDatasetName, '=') << " =========== " << std::string(maxFileName, '=') << " " << std::string(maxHyper, '=') << std::endl;
         auto i = 0;
         bool odd = true;
         double total = 0;
         for (auto const& item : data.items()) {
             auto color = odd ? Colors::BLUE() : Colors::CYAN();
             double value = item.value().at(0).get<double>();
-            cout << color << setw(3) << fixed << right << i++ << " ";
-            cout << setw(maxDatasetName) << left << item.key() << " ";
-            cout << setw(11) << setprecision(9) << fixed << value << " ";
-            cout << setw(maxFileName) << item.value().at(2).get<string>() << " ";
-            cout << item.value().at(1) << " ";
-            cout << endl;
+            std::cout << color << std::setw(3) << std::fixed << std::right << i++ << " ";
+            std::cout << std::setw(maxDatasetName) << std::left << item.key() << " ";
+            std::cout << std::setw(11) << std::setprecision(9) << std::fixed << value << " ";
+            std::cout << std::setw(maxFileName) << item.value().at(2).get<std::string>() << " ";
+            std::cout << item.value().at(1) << " ";
+            std::cout << std::endl;
             total += value;
             odd = !odd;
         }
-        cout << Colors::GREEN() << "=== " << string(maxDatasetName, '=') << " ===========" << endl;
-        cout << setw(5 + maxDatasetName) << "Total.................. " << setw(11) << setprecision(8) << fixed << total << endl;
+        std::cout << Colors::GREEN() << "=== " << std::string(maxDatasetName, '=') << " ===========" << std::endl;
+        std::cout << std::setw(5 + maxDatasetName) << "Total.................. " << std::setw(11) << std::setprecision(8) << std::fixed << total << std::endl;
     }
-    json BestResults::buildTableResults(vector<string> models)
+    json BestResults::buildTableResults(std::vector<std::string> models)
     {
         json table;
-        auto maxDate = filesystem::file_time_type::max();
+        auto maxDate = std::filesystem::file_time_type::max();
         for (const auto& model : models) {
             this->model = model;
-            string bestFileName = path + bestResultFile();
+            std::string bestFileName = path + bestResultFile();
             if (FILE* fileTest = fopen(bestFileName.c_str(), "r")) {
                 fclose(fileTest);
             } else {
-                cerr << Colors::MAGENTA() << "File " << bestFileName << " doesn't exist." << Colors::RESET() << endl;
+                std::cerr << Colors::MAGENTA() << "File " << bestFileName << " doesn't exist." << Colors::RESET() << std::endl;
                 exit(1);
             }
-            auto dateWrite = filesystem::last_write_time(bestFileName);
+            auto dateWrite = std::filesystem::last_write_time(bestFileName);
             if (dateWrite < maxDate) {
                 maxDate = dateWrite;
             }
@@ -209,25 +208,25 @@ namespace platform {
         table["dateTable"] = ftime_to_string(maxDate);
         return table;
     }
-    void BestResults::printTableResults(vector<string> models, json table)
+    void BestResults::printTableResults(std::vector<std::string> models, json table)
     {
-        stringstream oss;
-        oss << Colors::GREEN() << "Best results for " << score << " as of " << table.at("dateTable").get<string>() << endl;
-        cout << oss.str();
-        cout << string(oss.str().size() - 8, '-') << endl;
-        cout << Colors::GREEN() << " #  " << setw(maxDatasetName + 1) << left << string("Dataset");
+        std::stringstream oss;
+        oss << Colors::GREEN() << "Best results for " << score << " as of " << table.at("dateTable").get<std::string>() << std::endl;
+        std::cout << oss.str();
+        std::cout << std::string(oss.str().size() - 8, '-') << std::endl;
+        std::cout << Colors::GREEN() << " #  " << std::setw(maxDatasetName + 1) << std::left << std::string("Dataset");
         for (const auto& model : models) {
-            cout << setw(maxModelName) << left << model << " ";
+            std::cout << std::setw(maxModelName) << std::left << model << " ";
         }
-        cout << endl;
-        cout << "=== " << string(maxDatasetName, '=') << " ";
+        std::cout << std::endl;
+        std::cout << "=== " << std::string(maxDatasetName, '=') << " ";
         for (const auto& model : models) {
-            cout << string(maxModelName, '=') << " ";
+            std::cout << std::string(maxModelName, '=') << " ";
         }
-        cout << endl;
+        std::cout << std::endl;
         auto i = 0;
         bool odd = true;
-        map<string, double> totals;
+        std::map<std::string, double> totals;
         int nDatasets = table.begin().value().size();
         for (const auto& model : models) {
             totals[model] = 0.0;
@@ -235,8 +234,8 @@ namespace platform {
         auto datasets = getDatasets(table.begin().value());
         for (auto const& dataset : datasets) {
             auto color = odd ? Colors::BLUE() : Colors::CYAN();
-            cout << color << setw(3) << fixed << right << i++ << " ";
-            cout << setw(maxDatasetName) << left << dataset << " ";
+            std::cout << color << std::setw(3) << std::fixed << std::right << i++ << " ";
+            std::cout << std::setw(maxDatasetName) << std::left << dataset << " ";
             double maxValue = 0;
             // Find out the max value for this dataset
             for (const auto& model : models) {
@@ -247,23 +246,23 @@ namespace platform {
             }
             // Print the row with red colors on max values
             for (const auto& model : models) {
-                string efectiveColor = color;
+                std::string efectiveColor = color;
                 double value = table[model].at(dataset).at(0).get<double>();
                 if (value == maxValue) {
                     efectiveColor = Colors::RED();
                 }
                 totals[model] += value;
-                cout << efectiveColor << setw(maxModelName) << setprecision(maxModelName - 2) << fixed << value << " ";
+                std::cout << efectiveColor << std::setw(maxModelName) << std::setprecision(maxModelName - 2) << std::fixed << value << " ";
             }
-            cout << endl;
+            std::cout << std::endl;
             odd = !odd;
         }
-        cout << Colors::GREEN() << "=== " << string(maxDatasetName, '=') << " ";
+        std::cout << Colors::GREEN() << "=== " << std::string(maxDatasetName, '=') << " ";
         for (const auto& model : models) {
-            cout << string(maxModelName, '=') << " ";
+            std::cout << std::string(maxModelName, '=') << " ";
         }
-        cout << endl;
-        cout << Colors::GREEN() << setw(5 + maxDatasetName) << "    Totals...................";
+        std::cout << std::endl;
+        std::cout << Colors::GREEN() << std::setw(5 + maxDatasetName) << "    Totals...................";
         double max = 0.0;
         for (const auto& total : totals) {
             if (total.second > max) {
@@ -271,13 +270,13 @@ namespace platform {
             }
         }
         for (const auto& model : models) {
-            string efectiveColor = Colors::GREEN();
+            std::string efectiveColor = Colors::GREEN();
             if (totals[model] == max) {
                 efectiveColor = Colors::RED();
             }
-            cout << efectiveColor << right << setw(maxModelName) << setprecision(maxModelName - 4) << fixed << totals[model] << " ";
+            std::cout << efectiveColor << std::right << std::setw(maxModelName) << std::setprecision(maxModelName - 4) << std::fixed << totals[model] << " ";
         }
-        cout << endl;
+        std::cout << std::endl;
     }
     void BestResults::reportSingle(bool excel)
     {
@@ -286,7 +285,7 @@ namespace platform {
             auto models = getModels();
             // Build the table of results
             json table = buildTableResults(models);
-            vector<string> datasets = getDatasets(table.begin().value());
+            std::vector<std::string> datasets = getDatasets(table.begin().value());
             BestResultsExcel excel(score, datasets);
             excel.reportSingle(model, path + bestResultFile());
             messageExcelFile(excel.getFileName());
@@ -297,15 +296,15 @@ namespace platform {
         auto models = getModels();
         // Build the table of results
         json table = buildTableResults(models);
-        vector<string> datasets = getDatasets(table.begin().value());
-        maxModelName = (*max_element(models.begin(), models.end(), [](const string& a, const string& b) { return a.size() < b.size(); })).size();
-        maxModelName = max(12, maxModelName);
-        maxDatasetName = (*max_element(datasets.begin(), datasets.end(), [](const string& a, const string& b) { return a.size() < b.size(); })).size();
-        maxDatasetName = max(25, maxDatasetName);
+        std::vector<std::string> datasets = getDatasets(table.begin().value());
+        maxModelName = (*max_element(models.begin(), models.end(), [](const std::string& a, const std::string& b) { return a.size() < b.size(); })).size();
+        maxModelName = std::max(12, maxModelName);
+        maxDatasetName = (*max_element(datasets.begin(), datasets.end(), [](const std::string& a, const std::string& b) { return a.size() < b.size(); })).size();
+        maxDatasetName = std::max(25, maxDatasetName);
         // Print the table of results
         printTableResults(models, table);
         // Compute the Friedman test
-        map<string, map<string, float>> ranksModels;
+        std::map<std::string, std::map<std::string, float>> ranksModels;
         if (friedman) {
             Statistics stats(models, datasets, table, significance);
             auto result = stats.friedmanTest();
@@ -319,7 +318,7 @@ namespace platform {
                 int idx = -1;
                 double min = 2000;
                 // Find out the control model
-                auto totals = vector<double>(models.size(), 0.0);
+                auto totals = std::vector<double>(models.size(), 0.0);
                 for (const auto& dataset : datasets) {
                     for (int i = 0; i < models.size(); ++i) {
                         totals[i] += ranksModels[dataset][models[i]];
@@ -337,8 +336,8 @@ namespace platform {
             messageExcelFile(excel.getFileName());
         }
     }
-    void BestResults::messageExcelFile(const string& fileName)
+    void BestResults::messageExcelFile(const std::string& fileName)
     {
-        cout << Colors::YELLOW() << "** Excel file generated: " << fileName << Colors::RESET() << endl;
+        std::cout << Colors::YELLOW() << "** Excel file generated: " << fileName << Colors::RESET() << std::endl;
     }
 }

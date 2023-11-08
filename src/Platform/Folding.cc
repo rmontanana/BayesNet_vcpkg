@@ -4,23 +4,23 @@
 namespace platform {
     Fold::Fold(int k, int n, int seed) : k(k), n(n), seed(seed)
     {
-        random_device rd;
-        random_seed = default_random_engine(seed == -1 ? rd() : seed);
-        srand(seed == -1 ? time(0) : seed);
+        std::random_device rd;
+        random_seed = std::default_random_engine(seed == -1 ? rd() : seed);
+        std::srand(seed == -1 ? time(0) : seed);
     }
-    KFold::KFold(int k, int n, int seed) : Fold(k, n, seed), indices(vector<int>(n))
+    KFold::KFold(int k, int n, int seed) : Fold(k, n, seed), indices(std::vector<int>(n))
     {
-        iota(begin(indices), end(indices), 0); // fill with 0, 1, ..., n - 1
+        std::iota(begin(indices), end(indices), 0); // fill with 0, 1, ..., n - 1
         shuffle(indices.begin(), indices.end(), random_seed);
     }
-    pair<vector<int>, vector<int>> KFold::getFold(int nFold)
+    std::pair<std::vector<int>, std::vector<int>> KFold::getFold(int nFold)
     {
         if (nFold >= k || nFold < 0) {
-            throw out_of_range("nFold (" + to_string(nFold) + ") must be less than k (" + to_string(k) + ")");
+            throw std::out_of_range("nFold (" + std::to_string(nFold) + ") must be less than k (" + std::to_string(k) + ")");
         }
         int nTest = n / k;
-        auto train = vector<int>();
-        auto test = vector<int>();
+        auto train = std::vector<int>();
+        auto test = std::vector<int>();
         for (int i = 0; i < n; i++) {
             if (i >= nTest * nFold && i < nTest * (nFold + 1)) {
                 test.push_back(indices[i]);
@@ -33,10 +33,10 @@ namespace platform {
     StratifiedKFold::StratifiedKFold(int k, torch::Tensor& y, int seed) : Fold(k, y.numel(), seed)
     {
         n = y.numel();
-        this->y = vector<int>(y.data_ptr<int>(), y.data_ptr<int>() + n);
+        this->y = std::vector<int>(y.data_ptr<int>(), y.data_ptr<int>() + n);
         build();
     }
-    StratifiedKFold::StratifiedKFold(int k, const vector<int>& y, int seed)
+    StratifiedKFold::StratifiedKFold(int k, const std::vector<int>& y, int seed)
         : Fold(k, y.size(), seed)
     {
         this->y = y;
@@ -45,12 +45,12 @@ namespace platform {
     }
     void StratifiedKFold::build()
     {
-        stratified_indices = vector<vector<int>>(k);
+        stratified_indices = std::vector<std::vector<int>>(k);
         int fold_size = n / k;
 
         // Compute class counts and indices
-        auto class_indices = map<int, vector<int>>();
-        vector<int> class_counts(*max_element(y.begin(), y.end()) + 1, 0);
+        auto class_indices = std::map<int, std::vector<int>>();
+        std::vector<int> class_counts(*max_element(y.begin(), y.end()) + 1, 0);
         for (auto i = 0; i < n; ++i) {
             class_counts[y[i]]++;
             class_indices[y[i]].push_back(i);
@@ -63,8 +63,8 @@ namespace platform {
         for (auto label = 0; label < class_counts.size(); ++label) {
             auto num_samples_to_take = class_counts.at(label) / k;
             if (num_samples_to_take == 0) {
-                cerr << "Warning! The number of samples in class " << label << " (" << class_counts.at(label)
-                    << ") is less than the number of folds (" << k << ")." << endl;
+                std::cerr << "Warning! The number of samples in class " << label << " (" << class_counts.at(label)
+                    << ") is less than the number of folds (" << k << ")." << std::endl;
                 faulty = true;
                 continue;
             }
@@ -74,7 +74,7 @@ namespace platform {
                 move(class_indices[label].begin(), it, back_inserter(stratified_indices[fold]));  // ##
                 class_indices[label].erase(class_indices[label].begin(), it);
             }
-            auto chosen = vector<bool>(k, false);
+            auto chosen = std::vector<bool>(k, false);
             while (remainder_samples_to_take > 0) {
                 int fold = (rand() % static_cast<int>(k));
                 if (chosen.at(fold)) {
@@ -88,13 +88,13 @@ namespace platform {
             }
         }
     }
-    pair<vector<int>, vector<int>> StratifiedKFold::getFold(int nFold)
+    std::pair<std::vector<int>, std::vector<int>> StratifiedKFold::getFold(int nFold)
     {
         if (nFold >= k || nFold < 0) {
-            throw out_of_range("nFold (" + to_string(nFold) + ") must be less than k (" + to_string(k) + ")");
+            throw std::out_of_range("nFold (" + std::to_string(nFold) + ") must be less than k (" + std::to_string(k) + ")");
         }
-        vector<int> test_indices = stratified_indices[nFold];
-        vector<int> train_indices;
+        std::vector<int> test_indices = stratified_indices[nFold];
+        std::vector<int> train_indices;
         for (int i = 0; i < k; ++i) {
             if (i == nFold) continue;
             train_indices.insert(train_indices.end(), stratified_indices[i].begin(), stratified_indices[i].end());

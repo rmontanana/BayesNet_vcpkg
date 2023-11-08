@@ -7,8 +7,8 @@
 namespace platform {
     ReportBase::ReportBase(json data_, bool compare) : data(data_), compare(compare), margin(0.1)
     {
-        stringstream oss;
-        oss << "Better than ZeroR + " << setprecision(1) << fixed << margin * 100 << "%";
+        std::stringstream oss;
+        oss << "Better than ZeroR + " << std::setprecision(1) << fixed << margin * 100 << "%";
         meaning = {
             {Symbols::equal_best, "Equal to best"},
             {Symbols::better_best, "Better than best"},
@@ -16,10 +16,10 @@ namespace platform {
             {Symbols::upward_arrow, oss.str()}
         };
     }
-    string ReportBase::fromVector(const string& key)
+    std::string ReportBase::fromVector(const std::string& key)
     {
-        stringstream oss;
-        string sep = "";
+        std::stringstream oss;
+        std::string sep = "";
         oss << "[";
         for (auto& item : data[key]) {
             oss << sep << item.get<double>();
@@ -28,13 +28,13 @@ namespace platform {
         oss << "]";
         return oss.str();
     }
-    string ReportBase::fVector(const string& title, const json& data, const int width, const int precision)
+    std::string ReportBase::fVector(const std::string& title, const json& data, const int width, const int precision)
     {
-        stringstream oss;
-        string sep = "";
+        std::stringstream oss;
+        std::string sep = "";
         oss << title << "[";
         for (const auto& item : data) {
-            oss << sep << fixed << setw(width) << setprecision(precision) << item.get<double>();
+            oss << sep << fixed << setw(width) << std::setprecision(precision) << item.get<double>();
             sep = ", ";
         }
         oss << "]";
@@ -45,25 +45,25 @@ namespace platform {
         header();
         body();
     }
-    string ReportBase::compareResult(const string& dataset, double result)
+    std::string ReportBase::compareResult(const std::string& dataset, double result)
     {
-        string status = " ";
+        std::string status = " ";
         if (compare) {
-            double best = bestResult(dataset, data["model"].get<string>());
+            double best = bestResult(dataset, data["model"].get<std::string>());
             if (result == best) {
                 status = Symbols::equal_best;
             } else if (result > best) {
                 status = Symbols::better_best;
             }
         } else {
-            if (data["score_name"].get<string>() == "accuracy") {
+            if (data["score_name"].get<std::string>() == "accuracy") {
                 auto dt = Datasets(false, Paths::datasets());
                 dt.loadDataset(dataset);
                 auto numClasses = dt.getNClasses(dataset);
                 if (numClasses == 2) {
-                    vector<int> distribution = dt.getClassesCounts(dataset);
+                    std::vector<int> distribution = dt.getClassesCounts(dataset);
                     double nSamples = dt.getNSamples(dataset);
-                    vector<int>::iterator maxValue = max_element(distribution.begin(), distribution.end());
+                    std::vector<int>::iterator maxValue = max_element(distribution.begin(), distribution.end());
                     double mark = *maxValue / nSamples * (1 + margin);
                     if (mark > 1) {
                         mark = 0.9995;
@@ -82,14 +82,14 @@ namespace platform {
         }
         return status;
     }
-    double ReportBase::bestResult(const string& dataset, const string& model)
+    double ReportBase::bestResult(const std::string& dataset, const std::string& model)
     {
         double value = 0.0;
         if (bestResults.size() == 0) {
             // try to load the best results
-            string score = data["score_name"];
+            std::string score = data["score_name"];
             replace(score.begin(), score.end(), '_', '-');
-            string fileName = "best_results_" + score + "_" + model + ".json";
+            std::string fileName = "best_results_" + score + "_" + model + ".json";
             ifstream resultData(Paths::results() + "/" + fileName);
             if (resultData.is_open()) {
                 bestResults = json::parse(resultData);

@@ -2,9 +2,9 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
 #include <catch2/generators/catch_generators.hpp>
-#include <vector>
+#include <std::vector>
 #include <map>
-#include <string>
+#include <std::string>
 #include "KDB.h"
 #include "TAN.h"
 #include "SPODE.h"
@@ -18,7 +18,7 @@
 
 TEST_CASE("Test Bayesian Classifiers score", "[BayesNet]")
 {
-    map <pair<string, string>, float> scores = {
+    map <pair<std::string, std::string>, float> scores = {
         // Diabetes
         {{"diabetes", "AODE"}, 0.811198}, {{"diabetes", "KDB"}, 0.852865}, {{"diabetes", "SPODE"}, 0.802083}, {{"diabetes", "TAN"}, 0.821615},
         {{"diabetes", "AODELd"}, 0.8138f}, {{"diabetes", "KDBLd"}, 0.80208f}, {{"diabetes", "SPODELd"}, 0.78646f}, {{"diabetes", "TANLd"}, 0.8099f},  {{"diabetes", "BoostAODE"}, 0.83984f},
@@ -33,7 +33,7 @@ TEST_CASE("Test Bayesian Classifiers score", "[BayesNet]")
         {{"iris", "AODELd"}, 0.973333}, {{"iris", "KDBLd"}, 0.973333}, {{"iris", "SPODELd"}, 0.96f}, {{"iris", "TANLd"}, 0.97333f}, {{"iris", "BoostAODE"}, 0.98f}
     };
 
-    string file_name = GENERATE("glass", "iris", "ecoli", "diabetes");
+    std::string file_name = GENERATE("glass", "iris", "ecoli", "diabetes");
     auto raw = RawDatasets(file_name, false);
 
     SECTION("Test TAN classifier (" + file_name + ")")
@@ -111,12 +111,12 @@ TEST_CASE("Test Bayesian Classifiers score", "[BayesNet]")
         REQUIRE(score == Catch::Approx(scores[{file_name, "BoostAODE"}]).epsilon(raw.epsilon));
     }
     // for (auto scores : scores) {
-    //     cout << "{{\"" << scores.first.first << "\", \"" << scores.first.second << "\"}, " << scores.second << "}, ";
+    //     std::cout << "{{\"" << scores.first.first << "\", \"" << scores.first.second << "\"}, " << scores.second << "}, ";
     // }
 }
 TEST_CASE("Models features", "[BayesNet]")
 {
-    auto graph = vector<string>({ "digraph BayesNet {\nlabel=<BayesNet Test>\nfontsize=30\nfontcolor=blue\nlabelloc=t\nlayout=circo\n",
+    auto graph = std::vector<std::string>({ "digraph BayesNet {\nlabel=<BayesNet Test>\nfontsize=30\nfontcolor=blue\nlabelloc=t\nlayout=circo\n",
         "class [shape=circle, fontcolor=red, fillcolor=lightblue, style=filled ] \n",
         "class -> sepallength", "class -> sepalwidth", "class -> petallength", "class -> petalwidth", "petallength [shape=circle] \n",
         "petallength -> sepallength", "petalwidth [shape=circle] \n", "sepallength [shape=circle] \n",
@@ -128,7 +128,7 @@ TEST_CASE("Models features", "[BayesNet]")
     clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
     REQUIRE(clf.getNumberOfNodes() == 6);
     REQUIRE(clf.getNumberOfEdges() == 7);
-    REQUIRE(clf.show() == vector<string>{"class -> sepallength, sepalwidth, petallength, petalwidth, ", "petallength -> sepallength, ", "petalwidth -> ", "sepallength -> sepalwidth, ", "sepalwidth -> petalwidth, "});
+    REQUIRE(clf.show() == std::vector<std::string>{"class -> sepallength, sepalwidth, petallength, petalwidth, ", "petallength -> sepallength, ", "petalwidth -> ", "sepallength -> sepalwidth, ", "sepalwidth -> petalwidth, "});
     REQUIRE(clf.graph("Test") == graph);
 }
 TEST_CASE("Get num features & num edges", "[BayesNet]")

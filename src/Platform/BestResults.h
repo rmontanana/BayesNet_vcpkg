@@ -2,32 +2,31 @@
 #define BESTRESULTS_H
 #include <string>
 #include <nlohmann/json.hpp>
-using namespace std;
 using json = nlohmann::json;
 namespace platform {
     class BestResults {
     public:
-        explicit BestResults(const string& path, const string& score, const string& model, bool friedman, double significance = 0.05)
+        explicit BestResults(const std::string& path, const std::string& score, const std::string& model, bool friedman, double significance = 0.05)
             : path(path), score(score), model(model), friedman(friedman), significance(significance)
         {
         }
-        string build();
+        std::string build();
         void reportSingle(bool excel);
         void reportAll(bool excel);
         void buildAll();
     private:
-        vector<string> getModels();
-        vector<string> getDatasets(json table);
-        vector<string> loadResultFiles();
-        void messageExcelFile(const string& fileName);
-        json buildTableResults(vector<string> models);
-        void printTableResults(vector<string> models, json table);
-        string bestResultFile();
-        json loadFile(const string& fileName);
+        std::vector<std::string> getModels();
+        std::vector<std::string> getDatasets(json table);
+        std::vector<std::string> loadResultFiles();
+        void messageExcelFile(const std::string& fileName);
+        json buildTableResults(std::vector<std::string> models);
+        void printTableResults(std::vector<std::string> models, json table);
+        std::string bestResultFile();
+        json loadFile(const std::string& fileName);
         void listFile();
-        string path;
-        string score;
-        string model;
+        std::string path;
+        std::string score;
+        std::string model;
         bool friedman;
         double significance;
         int maxModelName = 0;

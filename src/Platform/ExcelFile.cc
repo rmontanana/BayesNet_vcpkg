@@ -26,7 +26,7 @@ namespace platform {
     {
         return workbook;
     }
-    void ExcelFile::setProperties(string title)
+    void ExcelFile::setProperties(std::string title)
     {
         char line[title.size() + 1];
         strcpy(line, title.c_str());
@@ -40,34 +40,34 @@ namespace platform {
         };
         workbook_set_properties(workbook, &properties);
     }
-    lxw_format* ExcelFile::efectiveStyle(const string& style)
+    lxw_format* ExcelFile::efectiveStyle(const std::string& style)
     {
         lxw_format* efectiveStyle = NULL;
         if (style != "") {
-            string suffix = row % 2 ? "_odd" : "_even";
+            std::string suffix = row % 2 ? "_odd" : "_even";
             try {
                 efectiveStyle = styles.at(style + suffix);
             }
-            catch (const out_of_range& oor) {
+            catch (const std::out_of_range& oor) {
                 try {
                     efectiveStyle = styles.at(style);
                 }
-                catch (const out_of_range& oor) {
-                    throw invalid_argument("Style " + style + " not found");
+                catch (const std::out_of_range& oor) {
+                    throw std::invalid_argument("Style " + style + " not found");
                 }
             }
         }
         return efectiveStyle;
     }
-    void ExcelFile::writeString(int row, int col, const string& text, const string& style)
+    void ExcelFile::writeString(int row, int col, const std::string& text, const std::string& style)
     {
         worksheet_write_string(worksheet, row, col, text.c_str(), efectiveStyle(style));
     }
-    void ExcelFile::writeInt(int row, int col, const int number, const string& style)
+    void ExcelFile::writeInt(int row, int col, const int number, const std::string& style)
     {
         worksheet_write_number(worksheet, row, col, number, efectiveStyle(style));
     }
-    void ExcelFile::writeDouble(int row, int col, const double number, const string& style)
+    void ExcelFile::writeDouble(int row, int col, const double number, const std::string& style)
     {
         worksheet_write_number(worksheet, row, col, number, efectiveStyle(style));
     }
@@ -76,7 +76,7 @@ namespace platform {
         uint32_t efectiveColor = odd ? colorEven : colorOdd;
         format_set_bg_color(style, lxw_color_t(efectiveColor));
     }
-    void ExcelFile::createStyle(const string& name, lxw_format* style, bool odd)
+    void ExcelFile::createStyle(const std::string& name, lxw_format* style, bool odd)
     {
         addColor(style, odd);
         if (name == "textCentered") {
@@ -116,7 +116,7 @@ namespace platform {
     {
         auto styleNames = { "text", "textCentered", "bodyHeader", "result", "time", "ints", "floats" };
         lxw_format* style;
-        for (string name : styleNames) {
+        for (std::string name : styleNames) {
             lxw_format* style = workbook_add_format(workbook);
             style = workbook_add_format(workbook);
             createStyle(name, style, true);

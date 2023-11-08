@@ -5,7 +5,6 @@
 #include <map>
 #include <nlohmann/json.hpp>
 
-using namespace std;
 using json = nlohmann::json;
 
 namespace platform {
@@ -21,30 +20,30 @@ namespace platform {
         bool reject;
     };
     struct HolmLine {
-        string model;
+        std::string model;
         long double pvalue;
         double rank;
         WTL wtl;
         bool reject;
     };
     struct HolmResult {
-        string model;
-        vector<HolmLine> holmLines;
+        std::string model;
+        std::vector<HolmLine> holmLines;
     };
     class Statistics {
     public:
-        Statistics(const vector<string>& models, const vector<string>& datasets, const json& data, double significance = 0.05, bool output = true);
+        Statistics(const std::vector<std::string>& models, const std::vector<std::string>& datasets, const json& data, double significance = 0.05, bool output = true);
         bool friedmanTest();
         void postHocHolmTest(bool friedmanResult);
         FriedmanResult& getFriedmanResult();
         HolmResult& getHolmResult();
-        map<string, map<string, float>>& getRanks();
+        std::map<std::string, std::map<std::string, float>>& getRanks();
     private:
         void fit();
         void computeRanks();
         void computeWTL();
-        const vector<string>& models;
-        const vector<string>& datasets;
+        const std::vector<std::string>& models;
+        const std::vector<std::string>& datasets;
         const json& data;
         double significance;
         bool output;
@@ -52,13 +51,13 @@ namespace platform {
         int nModels = 0;
         int nDatasets = 0;
         int controlIdx = 0;
-        map<int, WTL> wtl;
-        map<string, float> ranks;
+        std::map<int, WTL> wtl;
+        std::map<std::string, float> ranks;
         int maxModelName = 0;
         int maxDatasetName = 0;
         FriedmanResult friedmanResult;
         HolmResult holmResult;
-        map<string, map<string, float>> ranksModels;
+        std::map<std::string, std::map<std::string, float>> ranksModels;
     };
 }
 #endif // !STATISTICS_H

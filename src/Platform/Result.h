@@ -5,31 +5,30 @@
 #include <string>
 #include <nlohmann/json.hpp>
 namespace platform {
-    using namespace std;
     using json = nlohmann::json;
 
     class Result {
     public:
-        Result(const string& path, const string& filename);
+        Result(const std::string& path, const std::string& filename);
         json load() const;
-        string to_string(int maxModel) const;
-        string getFilename() const { return filename; };
-        string getDate() const { return date; };
+        std::string to_string(int maxModel) const;
+        std::string getFilename() const { return filename; };
+        std::string getDate() const { return date; };
         double getScore() const { return score; };
-        string getTitle() const { return title; };
+        std::string getTitle() const { return title; };
         double getDuration() const { return duration; };
-        string getModel() const { return model; };
-        string getScoreName() const { return scoreName; };
+        std::string getModel() const { return model; };
+        std::string getScoreName() const { return scoreName; };
         bool isComplete() const { return complete; };
     private:
-        string path;
-        string filename;
-        string date;
+        std::string path;
+        std::string filename;
+        std::string date;
         double score;
-        string title;
+        std::string title;
         double duration;
-        string model;
-        string scoreName;
+        std::string model;
+        std::string scoreName;
         bool complete;
     };
 };

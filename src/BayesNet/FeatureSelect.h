@@ -3,16 +3,15 @@
 #include <torch/torch.h>
 #include <vector>
 #include "BayesMetrics.h"
-using namespace std;
 namespace bayesnet {
     class FeatureSelect : public Metrics {
     public:
-        // dataset is a n+1xm tensor of integers where dataset[-1] is the y vector
-        FeatureSelect(const torch::Tensor& samples, const vector<string>& features, const string& className, const int maxFeatures, const int classNumStates, const torch::Tensor& weights);
+        // dataset is a n+1xm tensor of integers where dataset[-1] is the y std::vector
+        FeatureSelect(const torch::Tensor& samples, const std::vector<std::string>& features, const std::string& className, const int maxFeatures, const int classNumStates, const torch::Tensor& weights);
         virtual ~FeatureSelect() {};
         virtual void fit() = 0;
-        vector<int> getFeatures() const;
-        vector<double> getScores() const;
+        std::vector<int> getFeatures() const;
+        std::vector<double> getScores() const;
     protected:
         void initialize();
         void computeSuLabels();
@@ -21,10 +20,10 @@ namespace bayesnet {
         double computeMeritCFS();
         const torch::Tensor& weights;
         int maxFeatures;
-        vector<int> selectedFeatures;
-        vector<double> selectedScores;
-        vector<double> suLabels;
-        map<pair<int, int>, double> suFeatures;
+        std::vector<int> selectedFeatures;
+        std::vector<double> selectedScores;
+        std::vector<double> suLabels;
+        std::map<std::pair<int, int>, double> suFeatures;
         bool fitted = false;
     };
 }

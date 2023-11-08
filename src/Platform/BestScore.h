@@ -7,14 +7,14 @@
 namespace platform {
     class BestScore {
     public:
-        static pair<string, double> getScore(const std::string& metric)
+        static std::pair<std::string, double> getScore(const std::string& metric)
         {
-            static map<pair<string, string>, pair<string, double>> data = {
+            static std::map<std::pair<std::string, std::string>, std::pair<std::string, double>> data = {
                {{"discretiz", "accuracy"}, {"STree_default (linear-ovo)",  22.109799}},
                {{"odte", "accuracy"}, {"STree_default (linear-ovo)",  22.109799}},
             };
             auto env = platform::DotEnv();
-            string experiment = env.get("experiment");
+            std::string experiment = env.get("experiment");
             try {
                 return data[{experiment, metric}];
             }
