@@ -1,5 +1,6 @@
 include_directories(${BayesNet_SOURCE_DIR}/src/BayesNet)
 include_directories(${BayesNet_SOURCE_DIR}/src/Platform)
+include_directories(${BayesNet_SOURCE_DIR}/src/PyClassifiers)
 include_directories(${BayesNet_SOURCE_DIR}/lib/Files)
 include_directories(${BayesNet_SOURCE_DIR}/lib/mdlp)
 include_directories(${BayesNet_SOURCE_DIR}/lib/argparse/include)
@@ -11,7 +12,7 @@ add_executable(b_manage b_manage.cc Results.cc ManageResults.cc CommandParser.cc
 add_executable(b_list b_list.cc Datasets.cc Dataset.cc)
 add_executable(b_best b_best.cc BestResults.cc Result.cc Statistics.cc BestResultsExcel.cc ReportExcel.cc ReportBase.cc Datasets.cc Dataset.cc ExcelFile.cc)
 
-target_link_libraries(b_main BayesNet ArffFiles mdlp "${TORCH_LIBRARIES}")
+target_link_libraries(b_main BayesNet ArffFiles mdlp "${TORCH_LIBRARIES}" PyWrap)
 target_link_libraries(b_manage "${TORCH_LIBRARIES}" "${XLSXWRITER_LIB}" ArffFiles mdlp)
 target_link_libraries(b_best Boost::boost "${XLSXWRITER_LIB}" "${TORCH_LIBRARIES}" ArffFiles mdlp)
 target_link_libraries(b_list ArffFiles mdlp "${TORCH_LIBRARIES}")

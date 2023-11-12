@@ -36,11 +36,15 @@ option(CODE_COVERAGE "Collect coverage from test library"         OFF)
 set(Boost_USE_STATIC_LIBS OFF) 
 set(Boost_USE_MULTITHREADED ON)  
 set(Boost_USE_STATIC_RUNTIME OFF) 
-find_package(Boost 1.66.0 REQUIRED) 
+find_package(Boost 1.66.0 REQUIRED COMPONENTS python3 numpy3) 
 if(Boost_FOUND)
     message("Boost_INCLUDE_DIRS=${Boost_INCLUDE_DIRS}")
     include_directories(${Boost_INCLUDE_DIRS}) 
 endif()
+
+# Python
+find_package(Python3 3.11...3.11.9 COMPONENTS Interpreter Development REQUIRED)
+message("Python3_LIBRARIES=${Python3_LIBRARIES}")
 
 # CMakes modules
 # --------------
@@ -77,6 +81,7 @@ add_subdirectory(config)
 add_subdirectory(lib/Files)
 add_subdirectory(src/BayesNet)
 add_subdirectory(src/Platform)
+add_subdirectory(src/PyClassifiers)
 add_subdirectory(sample)
 
 file(GLOB BayesNet_HEADERS CONFIGURE_DEPENDS ${BayesNet_SOURCE_DIR}/src/BayesNet/*.h ${BayesNet_SOURCE_DIR}/BayesNet/*.h)

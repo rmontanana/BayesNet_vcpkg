@@ -1,5 +1,6 @@
-include_directories(${PyWrap_SOURCE_DIR}/lib/Files)
-include_directories(${PyWrap_SOURCE_DIR}/lib/json/include)
+include_directories(${BayesNet_SOURCE_DIR}/lib/Files)
+include_directories(${BayesNet_SOURCE_DIR}/lib/json/include)
+include_directories(${BayesNet_SOURCE_DIR}/src/BayesNet)
 include_directories(${Python3_INCLUDE_DIRS})
 include_directories(${TORCH_INCLUDE_DIRS})
 

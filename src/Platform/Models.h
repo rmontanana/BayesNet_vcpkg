@@ -11,6 +11,7 @@
 #include "SPODELd.h"
 #include "AODELd.h"
 #include "BoostAODE.h"
+#include "STree.h"
 namespace platform {
     class Models {
     private:

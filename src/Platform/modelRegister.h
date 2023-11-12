@@ -18,4 +18,6 @@ static platform::Registrar registrarALD("AODELd",
     [](void) -> bayesnet::BaseClassifier* { return new bayesnet::AODELd();});
 static platform::Registrar registrarBA("BoostAODE",
     [](void) -> bayesnet::BaseClassifier* { return new bayesnet::BoostAODE();});
+static pywrap::Registrar registrarSt("STree",
+    [](void) -> bayesnet::BaseClassifier* { return new pywrap::STree();});
 #endif
