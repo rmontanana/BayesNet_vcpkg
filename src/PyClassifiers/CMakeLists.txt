@@ -1,9 +1,8 @@
-include_directories(${BayesNet_SOURCE_DIR}/lib/mdlp)
-include_directories(${BayesNet_SOURCE_DIR}/lib/Files)
-include_directories(${BayesNet_SOURCE_DIR}/lib/json/include)
-include_directories(${BayesNet_SOURCE_DIR}/src/BayesNet)
-include_directories(${BayesNet_SOURCE_DIR}/src/Platform)
-add_library(BayesNet bayesnetUtils.cc Network.cc Node.cc BayesMetrics.cc Classifier.cc 
-    KDB.cc TAN.cc SPODE.cc Ensemble.cc AODE.cc TANLd.cc KDBLd.cc SPODELd.cc AODELd.cc BoostAODE.cc 
-    Mst.cc Proposal.cc CFS.cc FCBF.cc IWSS.cc FeatureSelect.cc ${BayesNet_SOURCE_DIR}/src/Platform/Models.cc)
-target_link_libraries(BayesNet mdlp "${TORCH_LIBRARIES}")
+include_directories(${PyWrap_SOURCE_DIR}/lib/Files)
+include_directories(${PyWrap_SOURCE_DIR}/lib/json/include)
+include_directories(${Python3_INCLUDE_DIRS})
+include_directories(${TORCH_INCLUDE_DIRS})
+
+add_library(PyWrap SHARED PyWrap.cc STree.cc ODTE.cc SVC.cc RandomForest.cc PyClassifier.cc)
+#target_link_libraries(PyWrap ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::boost Boost::python Boost::numpy xgboost::xgboost ArffFiles)
+target_link_libraries(PyWrap ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::boost Boost::python Boost::numpy ArffFiles)
