@@ -1,5 +1,4 @@
 #include "AODELd.h"
-#include "Models.h"
 
 namespace bayesnet {
     AODELd::AODELd() : Ensemble(), Proposal(dataset, features, className) {}

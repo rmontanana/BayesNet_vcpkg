@@ -2,7 +2,7 @@
 namespace pywrap {
     namespace bp = boost::python;
     namespace np = boost::python::numpy;
-    PyClassifier::PyClassifier(const std::string& module, const std::string& className) : module(module), className(className), fitted(false)
+    PyClassifier::PyClassifier(const std::string& module, const std::string& className, bool sklearn) : module(module), className(className), sklearn(sklearn), fitted(false)
     {
         // This id allows to have more than one instance of the same module/class
         id = reinterpret_cast<clfId_t>(this);
@@ -29,11 +29,10 @@ namespace pywrap {
     }
     std::string PyClassifier::version()
     {
+        if (sklearn) {
+            return pyWrap->sklearnVersion();
+        }
         return pyWrap->version(id);
-    }
-    std::string PyClassifier::sklearnVersion()
-    {
-        return pyWrap->sklearnVersion();
     }
     std::string PyClassifier::callMethodString(const std::string& method)
     {
