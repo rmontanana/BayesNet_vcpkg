@@ -37,6 +37,7 @@ namespace bayesnet {
         int getNumberOfStates() const override;
         torch::Tensor predict(torch::Tensor& X) override;
         status_t getStatus() const override { return status; }
+        std::string getVersion() override { return "0.2.0"; };
         std::vector<int> predict(std::vector<std::vector<int>>& X) override;
         float score(torch::Tensor& X, torch::Tensor& y) override;
         float score(std::vector<std::vector<int>>& X, std::vector<int>& y) override;

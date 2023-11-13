@@ -18,6 +18,12 @@ static platform::Registrar registrarALD("AODELd",
     [](void) -> bayesnet::BaseClassifier* { return new bayesnet::AODELd();});
 static platform::Registrar registrarBA("BoostAODE",
     [](void) -> bayesnet::BaseClassifier* { return new bayesnet::BoostAODE();});
-static pywrap::Registrar registrarSt("STree",
+static platform::Registrar registrarSt("STree",
     [](void) -> bayesnet::BaseClassifier* { return new pywrap::STree();});
+static platform::Registrar registrarOdte("Odte",
+    [](void) -> bayesnet::BaseClassifier* { return new pywrap::ODTE();});
+static platform::Registrar registrarSvc("SVC",
+    [](void) -> bayesnet::BaseClassifier* { return new pywrap::SVC();});
+static platform::Registrar registrarRaF("RandomForest",
+    [](void) -> bayesnet::BaseClassifier* { return new pywrap::RandomForest();});
 #endif

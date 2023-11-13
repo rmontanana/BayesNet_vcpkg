@@ -6,6 +6,7 @@ include_directories(${BayesNet_SOURCE_DIR}/lib/mdlp)
 include_directories(${BayesNet_SOURCE_DIR}/lib/argparse/include)
 include_directories(${BayesNet_SOURCE_DIR}/lib/json/include)
 include_directories(${BayesNet_SOURCE_DIR}/lib/libxlsxwriter/include)
+include_directories(${Python3_INCLUDE_DIRS})
 
 add_executable(b_main b_main.cc Folding.cc Experiment.cc Datasets.cc Dataset.cc Models.cc ReportConsole.cc ReportBase.cc)
 add_executable(b_manage b_manage.cc Results.cc ManageResults.cc CommandParser.cc Result.cc ReportConsole.cc ReportExcel.cc ReportBase.cc Datasets.cc Dataset.cc ExcelFile.cc)

@@ -12,6 +12,9 @@
 #include "AODELd.h"
 #include "BoostAODE.h"
 #include "STree.h"
+#include "ODTE.h"
+#include "SVC.h"
+#include "RandomForest.h"
 namespace platform {
     class Models {
     private:

@@ -74,15 +74,15 @@ namespace pywrap {
         Py_XDECREF(incoming);
         return resultTensor;
     }
-    double PyClassifier::score(torch::Tensor& X, torch::Tensor& y)
+    float PyClassifier::score(torch::Tensor& X, torch::Tensor& y)
     {
         auto [Xn, yn] = tensors2numpy(X, y);
         CPyObject Xp = bp::incref(bp::object(Xn).ptr());
         CPyObject yp = bp::incref(bp::object(yn).ptr());
-        auto result = pyWrap->score(id, Xp, yp);
+        float result = pyWrap->score(id, Xp, yp);
         return result;
     }
-    void PyClassifier::setHyperparameters(const nlohmann::json& hyperparameters)
+    void PyClassifier::setHyperparameters(nlohmann::json& hyperparameters)
     {
         // Check if hyperparameters are valid, default is no hyperparameters
         const std::vector<std::string> validKeys = { };

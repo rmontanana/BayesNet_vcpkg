@@ -9,7 +9,7 @@ namespace pywrap {
         STree() : PyClassifier("stree", "Stree") {};
         ~STree() = default;
         std::string graph();
-        void setHyperparameters(const nlohmann::json& hyperparameters) override;
+        void setHyperparameters(nlohmann::json& hyperparameters) override;
     };
 } /* namespace pywrap */
 #endif /* STREE_H */
