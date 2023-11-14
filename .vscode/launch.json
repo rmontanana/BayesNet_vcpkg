@@ -25,7 +25,7 @@
             "program": "${workspaceFolder}/build/src/Platform/b_main",
             "args": [
                 "-m",
-                "TAN",
+                "STree",
                 "--stratified",
                 "-d",
                 "zoo",
