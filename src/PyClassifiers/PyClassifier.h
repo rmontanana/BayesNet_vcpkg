@@ -22,7 +22,7 @@ namespace pywrap {
         PyClassifier& fit(torch::Tensor& X, torch::Tensor& y, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states) override;
         PyClassifier& fit(torch::Tensor& X, torch::Tensor& y);
         PyClassifier& fit(torch::Tensor& dataset, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states) override { return *this; };
-        PyClassifier& fit(torch::Tensor& dataset, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights) { return *this; };
+        PyClassifier& fit(torch::Tensor& dataset, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights) override { return *this; };
         torch::Tensor predict(torch::Tensor& X) override;
         std::vector<int> predict(std::vector<std::vector<int >>& X) override { return std::vector<int>(); };
         float score(std::vector<std::vector<int>>& X, std::vector<int>& y) override { return 0.0; };
