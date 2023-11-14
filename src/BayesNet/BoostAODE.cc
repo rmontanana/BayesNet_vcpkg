@@ -108,8 +108,10 @@ namespace bayesnet {
     void BoostAODE::trainModel(const torch::Tensor& weights)
     {
         unordered_set<int> featuresUsed;
+        int tolerance = 5; // number of times the accuracy can be lower than the threshold
         if (selectFeatures) {
             featuresUsed = initializeModels();
+            tolerance = 0; // Remove tolerance if features are selected
         }
         if (maxModels == 0)
             maxModels = .1 * n > 10 ? .1 * n : n;
@@ -119,7 +121,7 @@ namespace bayesnet {
         double priorAccuracy = 0.0;
         double delta = 1.0;
         double threshold = 1e-4;
-        int tolerance = 5; // number of times the accuracy can be lower than the threshold
+
         int count = 0; // number of times the accuracy is lower than the threshold
         fitted = true; // to enable predict
         // Step 0: Set the finish condition
