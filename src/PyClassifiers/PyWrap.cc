@@ -5,6 +5,7 @@
 #include <map>
 #include <sstream>
 #include <boost/python/numpy.hpp>
+#include <iostream>
 
 namespace pywrap {
     namespace np = boost::python::numpy;
@@ -19,6 +20,7 @@ namespace pywrap {
         if (wrapper == nullptr) {
             wrapper = new PyWrap();
             pyInstance = new CPyInstance();
+            PyRun_SimpleString("import warnings;warnings.filterwarnings('ignore')");
         }
         return wrapper;
     }
@@ -59,6 +61,7 @@ namespace pywrap {
     void PyWrap::clean(const clfId_t id)
     {
         // Remove Python interpreter if no more modules imported left
+        // std::cout << "*Cleaning module " << id << std::endl;
         std::lock_guard<std::mutex> lock(mutex);
         auto result = moduleClassMap.find(id);
         if (result == moduleClassMap.end()) {
@@ -72,9 +75,11 @@ namespace pywrap {
             PyErr_Print();
             errorAbort("Error cleaning module ");
         }
-        if (moduleClassMap.empty()) {
-            RemoveInstance();
-        }
+        // if (moduleClassMap.empty()) {
+        //     RemoveInstance();
+        //     std::cout << "*Python interpreter cleaned" << std::endl;
+        // }
+        // std::cout << "*Module " << id << " cleaned" << std::endl;
     }
     void PyWrap::errorAbort(const std::string& message)
     {

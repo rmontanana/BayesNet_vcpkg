@@ -168,8 +168,8 @@ namespace platform {
                 fold = new StratifiedKFold(nfolds, y, seed);
             else
                 fold = new KFold(nfolds, y.size(0), seed);
+            auto clf = Models::instance()->create(model);
             for (int nfold = 0; nfold < nfolds; nfold++) {
-                auto clf = Models::instance()->create(model);
                 setModelVersion(clf->getVersion());
                 if (hyperparameters.size() != 0) {
                     clf->setHyperparameters(hyperparameters);
@@ -211,8 +211,8 @@ namespace platform {
                 result.addTimeTrain(train_time[item].item<double>());
                 result.addTimeTest(test_time[item].item<double>());
                 item++;
-                clf.reset();
             }
+            clf.reset();
             if (!quiet)
                 std::cout << "end. " << flush;
             delete fold;
