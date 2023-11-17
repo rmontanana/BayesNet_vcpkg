@@ -10,20 +10,20 @@
 namespace bayesnet {
     class Proposal {
     public:
-        Proposal(torch::Tensor& pDataset, vector<string>& features_, string& className_);
+        Proposal(torch::Tensor& pDataset, std::vector<std::string>& features_, std::string& className_);
         virtual ~Proposal();
     protected:
         void checkInput(const torch::Tensor& X, const torch::Tensor& y);
         torch::Tensor prepareX(torch::Tensor& X);
-        map<string, vector<int>> localDiscretizationProposal(const map<string, vector<int>>& states, Network& model);
-        map<string, vector<int>> fit_local_discretization(const torch::Tensor& y);
+        map<std::string, std::vector<int>> localDiscretizationProposal(const map<std::string, std::vector<int>>& states, Network& model);
+        map<std::string, std::vector<int>> fit_local_discretization(const torch::Tensor& y);
         torch::Tensor Xf; // X continuous nxm tensor
         torch::Tensor y; // y discrete nx1 tensor
-        map<string, mdlp::CPPFImdlp*> discretizers;
+        map<std::string, mdlp::CPPFImdlp*> discretizers;
     private:
         torch::Tensor& pDataset; // (n+1)xm tensor
-        vector<string>& pFeatures;
-        string& pClassName;
+        std::vector<std::string>& pFeatures;
+        std::string& pClassName;
     };
 }
 

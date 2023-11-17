@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 namespace platform {
-    //static vector<string> split(const string& text, char delimiter);
+    //static std::vector<std::string> split(const std::string& text, char delimiter);
     static std::vector<std::string> split(const std::string& text, char delimiter)
     {
         std::vector<std::string> result;

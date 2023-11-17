@@ -17,7 +17,7 @@ namespace bayesnet {
             }
         }
     }
-    vector<string> SPODE::graph(const string& name) const
+    std::vector<std::string> SPODE::graph(const std::string& name) const
     {
         return model.graph(name);
     }

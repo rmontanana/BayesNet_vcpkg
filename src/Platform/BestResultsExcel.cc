@@ -7,20 +7,20 @@
 #include "ReportExcel.h"
 
 namespace platform {
-    json loadResultData(const string& fileName)
+    json loadResultData(const std::string& fileName)
     {
         json data;
-        ifstream resultData(fileName);
+        std::ifstream resultData(fileName);
         if (resultData.is_open()) {
             data = json::parse(resultData);
         } else {
-            throw invalid_argument("Unable to open result file. [" + fileName + "]");
+            throw std::invalid_argument("Unable to open result file. [" + fileName + "]");
         }
         return data;
     }
-    string getColumnName(int colNum)
+    std::string getColumnName(int colNum)
     {
-        string columnName = "";
+        std::string columnName = "";
         if (colNum == 0)
             return "A";
         while (colNum > 0) {
@@ -30,15 +30,15 @@ namespace platform {
         }
         return columnName;
     }
-    BestResultsExcel::BestResultsExcel(const string& score, const vector<string>& datasets) : score(score), datasets(datasets)
+    BestResultsExcel::BestResultsExcel(const std::string& score, const std::vector<std::string>& datasets) : score(score), datasets(datasets)
     {
         workbook = workbook_new((Paths::excel() + fileName).c_str());
         setProperties("Best Results");
-        int maxDatasetName = (*max_element(datasets.begin(), datasets.end(), [](const string& a, const string& b) { return a.size() < b.size(); })).size();
-        datasetNameSize = max(datasetNameSize, maxDatasetName);
+        int maxDatasetName = (*max_element(datasets.begin(), datasets.end(), [](const std::string& a, const std::string& b) { return a.size() < b.size(); })).size();
+        datasetNameSize = std::max(datasetNameSize, maxDatasetName);
         createFormats();
     }
-    void BestResultsExcel::reportAll(const vector<string>& models, const json& table, const map<string, map<string, float>>& ranks, bool friedman, double significance)
+    void BestResultsExcel::reportAll(const std::vector<std::string>& models, const json& table, const std::map<std::string, std::map<std::string, float>>& ranks, bool friedman, double significance)
     {
         this->table = table;
         this->models = models;
@@ -46,23 +46,23 @@ namespace platform {
         this->friedman = friedman;
         this->significance = significance;
         worksheet = workbook_add_worksheet(workbook, "Best Results");
-        int maxModelName = (*max_element(models.begin(), models.end(), [](const string& a, const string& b) { return a.size() < b.size(); })).size();
-        modelNameSize = max(modelNameSize, maxModelName);
+        int maxModelName = (*std::max_element(models.begin(), models.end(), [](const std::string& a, const std::string& b) { return a.size() < b.size(); })).size();
+        modelNameSize = std::max(modelNameSize, maxModelName);
         formatColumns();
         build();
     }
-    void BestResultsExcel::reportSingle(const string& model, const string& fileName)
+    void BestResultsExcel::reportSingle(const std::string& model, const std::string& fileName)
     {
         worksheet = workbook_add_worksheet(workbook, "Report");
         if (FILE* fileTest = fopen(fileName.c_str(), "r")) {
             fclose(fileTest);
         } else {
-            cerr << "File " << fileName << " doesn't exist." << endl;
+            std::cerr << "File " << fileName << " doesn't exist." << std::endl;
             exit(1);
         }
         json data = loadResultData(fileName);
 
-        string title = "Best results for " + model;
+        std::string title = "Best results for " + model;
         worksheet_merge_range(worksheet, 0, 0, 0, 4, title.c_str(), styles["headerFirst"]);
         // Body header
         row = 3;
@@ -73,30 +73,30 @@ namespace platform {
         writeString(row, 3, "File", "bodyHeader");
         writeString(row, 4, "Hyperparameters", "bodyHeader");
         auto i = 0;
-        string hyperparameters;
+        std::string hyperparameters;
         int hypSize = 22;
-        map<string, string> files; // map of files imported and their tabs
+        std::map<std::string, std::string> files; // map of files imported and their tabs
         for (auto const& item : data.items()) {
             row++;
             writeInt(row, 0, i++, "ints");
             writeString(row, 1, item.key().c_str(), "text");
             writeDouble(row, 2, item.value().at(0).get<double>(), "result");
-            auto fileName = item.value().at(2).get<string>();
-            string hyperlink = "";
+            auto fileName = item.value().at(2).get<std::string>();
+            std::string hyperlink = "";
             try {
                 hyperlink = files.at(fileName);
             }
-            catch (const out_of_range& oor) {
-                auto tabName = "table_" + to_string(i);
+            catch (const std::out_of_range& oor) {
+                auto tabName = "table_" + std::to_string(i);
                 auto worksheetNew = workbook_add_worksheet(workbook, tabName.c_str());
                 json data = loadResultData(Paths::results() + fileName);
                 auto report = ReportExcel(data, false, workbook, worksheetNew);
                 report.show();
-                hyperlink = "#table_" + to_string(i);
+                hyperlink = "#table_" + std::to_string(i);
                 files[fileName] = hyperlink;
             }
-            hyperlink += "!H" + to_string(i + 6);
-            string fileNameText = "=HYPERLINK(\"" + hyperlink + "\",\"" + fileName + "\")";
+            hyperlink += "!H" + std::to_string(i + 6);
+            std::string fileNameText = "=HYPERLINK(\"" + hyperlink + "\",\"" + fileName + "\")";
             worksheet_write_formula(worksheet, row, 3, fileNameText.c_str(), efectiveStyle("text"));
             hyperparameters = item.value().at(1).dump();
             if (hyperparameters.size() > hypSize) {
@@ -107,13 +107,13 @@ namespace platform {
         row++;
         // Set Totals
         writeString(row, 1, "Total", "bodyHeader");
-        stringstream oss;
+        std::stringstream oss;
         auto colName = getColumnName(2);
         oss << "=sum(" << colName << "5:" << colName << row << ")";
         worksheet_write_formula(worksheet, row, 2, oss.str().c_str(), styles["bodyHeader_odd"]);
         // Set format
         worksheet_freeze_panes(worksheet, 4, 2);
-        vector<int> columns_sizes = { 5, datasetNameSize, modelNameSize, 66, hypSize + 1 };
+        std::vector<int> columns_sizes = { 5, datasetNameSize, modelNameSize, 66, hypSize + 1 };
         for (int i = 0; i < columns_sizes.size(); ++i) {
             worksheet_set_column(worksheet, i, i, columns_sizes.at(i), NULL);
         }
@@ -125,7 +125,7 @@ namespace platform {
     void BestResultsExcel::formatColumns()
     {
         worksheet_freeze_panes(worksheet, 4, 2);
-        vector<int> columns_sizes = { 5, datasetNameSize };
+        std::vector<int> columns_sizes = { 5, datasetNameSize };
         for (int i = 0; i < models.size(); ++i) {
             columns_sizes.push_back(modelNameSize);
         }
@@ -133,7 +133,7 @@ namespace platform {
             worksheet_set_column(worksheet, i, i, columns_sizes.at(i), NULL);
         }
     }
-    void BestResultsExcel::addConditionalFormat(string formula)
+    void BestResultsExcel::addConditionalFormat(std::string formula)
     {
         // Add conditional format for max/min values in scores/ranks sheets
         lxw_format* custom_format = workbook_add_format(workbook);
@@ -142,8 +142,8 @@ namespace platform {
         // Create a conditional format object. A static object would also work.
         lxw_conditional_format* conditional_format = (lxw_conditional_format*)calloc(1, sizeof(lxw_conditional_format));
         conditional_format->type = LXW_CONDITIONAL_TYPE_FORMULA;
-        string col = getColumnName(models.size() + 1);
-        stringstream oss;
+        std::string col = getColumnName(models.size() + 1);
+        std::stringstream oss;
         oss << "=C5=" << formula << "($C5:$" << col << "5)";
         auto formulaValue = oss.str();
         conditional_format->value_string = formulaValue.c_str();
@@ -170,14 +170,14 @@ namespace platform {
             doFriedman();
         }
     }
-    string BestResultsExcel::getFileName()
+    std::string BestResultsExcel::getFileName()
     {
         return Paths::excel() + fileName;
     }
     void BestResultsExcel::header(bool ranks)
     {
         row = 0;
-        string message = ranks ? "Ranks for score " + score : "Best results for " + score;
+        std::string message = ranks ? "Ranks for score " + score : "Best results for " + score;
         worksheet_merge_range(worksheet, 0, 0, 0, 1 + models.size(), message.c_str(), styles["headerFirst"]);
         // Body header
         row = 3;
@@ -210,7 +210,7 @@ namespace platform {
         writeString(row, 1, "Total", "bodyHeader");
         int col = 1;
         for (const auto& model : models) {
-            stringstream oss;
+            std::stringstream oss;
             auto colName = getColumnName(col + 1);
             oss << "=SUM(" << colName << "5:" << colName << row << ")";
             worksheet_write_formula(worksheet, row, ++col, oss.str().c_str(), styles["bodyHeader_odd"]);
@@ -221,7 +221,7 @@ namespace platform {
             int col = 1;
             for (const auto& model : models) {
                 auto colName = getColumnName(col + 1);
-                stringstream oss;
+                std::stringstream oss;
                 oss << "=SUM(" << colName << "5:" << colName << row - 1 << ")/" << datasets.size();
                 worksheet_write_formula(worksheet, row, ++col, oss.str().c_str(), styles["bodyHeader_odd"]);
             }
@@ -230,7 +230,7 @@ namespace platform {
     void BestResultsExcel::doFriedman()
     {
         worksheet = workbook_add_worksheet(workbook, "Friedman");
-        vector<int> columns_sizes = { 5, datasetNameSize };
+        std::vector<int> columns_sizes = { 5, datasetNameSize };
         for (int i = 0; i < models.size(); ++i) {
             columns_sizes.push_back(modelNameSize);
         }
@@ -262,7 +262,7 @@ namespace platform {
         row += 2;
         worksheet_merge_range(worksheet, row, 0, row, 1 + models.size(), "Null hypothesis: H0 'There is no significant differences between the control model and the other models.'", styles["headerSmall"]);
         row += 2;
-        string controlModel = "Control Model: " + holmResult.model;
+        std::string controlModel = "Control Model: " + holmResult.model;
         worksheet_merge_range(worksheet, row, 1, row, 7, controlModel.c_str(), styles["bodyHeader_odd"]);
         row++;
         writeString(row, 1, "Model", "bodyHeader");

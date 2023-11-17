@@ -2,7 +2,6 @@
 #include <argparse/argparse.hpp>
 #include "ManageResults.h"
 
-using namespace std;
 
 argparse::ArgumentParser manageArguments(int argc, char** argv)
 {
@@ -17,17 +16,17 @@ argparse::ArgumentParser manageArguments(int argc, char** argv)
         program.parse_args(argc, argv);
         auto number = program.get<int>("number");
         if (number < 0) {
-            throw runtime_error("Number of results must be greater than or equal to 0");
+            throw std::runtime_error("Number of results must be greater than or equal to 0");
         }
-        auto model = program.get<string>("model");
-        auto score = program.get<string>("score");
+        auto model = program.get<std::string>("model");
+        auto score = program.get<std::string>("score");
         auto complete = program.get<bool>("complete");
         auto partial = program.get<bool>("partial");
         auto compare = program.get<bool>("compare");
     }
-    catch (const exception& err) {
-        cerr << err.what() << endl;
-        cerr << program;
+    catch (const std::exception& err) {
+        std::cerr << err.what() << std::endl;
+        std::cerr << program;
         exit(1);
     }
     return program;
@@ -37,8 +36,8 @@ int main(int argc, char** argv)
 {
     auto program = manageArguments(argc, argv);
     int number = program.get<int>("number");
-    string model = program.get<string>("model");
-    string score = program.get<string>("score");
+    std::string model = program.get<std::string>("model");
+    std::string score = program.get<std::string>("score");
     auto complete = program.get<bool>("complete");
     auto partial = program.get<bool>("partial");
     auto compare = program.get<bool>("compare");

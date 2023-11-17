@@ -6,7 +6,6 @@
 #include "ExcelFile.h"
 #include "Colors.h"
 namespace platform {
-    using namespace std;
     class ReportExcel : public ReportBase, public ExcelFile {
     public:
         explicit ReportExcel(json data_, bool compare, lxw_workbook* workbook, lxw_worksheet* worksheet = NULL);

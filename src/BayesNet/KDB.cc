@@ -1,13 +1,11 @@
 #include "KDB.h"
 
 namespace bayesnet {
-    using namespace torch;
-
     KDB::KDB(int k, float theta) : Classifier(Network()), k(k), theta(theta) {}
     void KDB::setHyperparameters(nlohmann::json& hyperparameters)
     {
         // Check if hyperparameters are valid
-        const vector<string> validKeys = { "k", "theta" };
+        const std::vector<std::string> validKeys = { "k", "theta" };
         checkHyperparameters(validKeys, hyperparameters);
         if (hyperparameters.contains("k")) {
             k = hyperparameters["k"];
@@ -40,16 +38,16 @@ namespace bayesnet {
         // 1. For each feature Xi, compute mutual information, I(X;C),
         // where C is the class.
         addNodes();
-        const Tensor& y = dataset.index({ -1, "..." });
-        vector<double> mi;
+        const torch::Tensor& y = dataset.index({ -1, "..." });
+        std::vector<double> mi;
         for (auto i = 0; i < features.size(); i++) {
-            Tensor firstFeature = dataset.index({ i, "..." });
+            torch::Tensor firstFeature = dataset.index({ i, "..." });
             mi.push_back(metrics.mutualInformation(firstFeature, y, weights));
         }
         // 2. Compute class conditional mutual information I(Xi;XjIC), f or each
         auto conditionalEdgeWeights = metrics.conditionalEdge(weights);
         // 3. Let the used variable list, S, be empty.
-        vector<int> S;
+        std::vector<int> S;
         // 4. Let the DAG network being constructed, BN, begin with a single
         // class node, C.
         // 5. Repeat until S includes all domain features
@@ -67,9 +65,9 @@ namespace bayesnet {
             S.push_back(idx);
         }
     }
-    void KDB::add_m_edges(int idx, vector<int>& S, Tensor& weights)
+    void KDB::add_m_edges(int idx, std::vector<int>& S, torch::Tensor& weights)
     {
-        auto n_edges = min(k, static_cast<int>(S.size()));
+        auto n_edges = std::min(k, static_cast<int>(S.size()));
         auto cond_w = clone(weights);
         bool exit_cond = k == 0;
         int num = 0;
@@ -81,7 +79,7 @@ namespace bayesnet {
                     model.addEdge(features[max_minfo], features[idx]);
                     num++;
                 }
-                catch (const invalid_argument& e) {
+                catch (const std::invalid_argument& e) {
                     // Loops are not allowed
                 }
             }
@@ -91,11 +89,11 @@ namespace bayesnet {
             exit_cond = num == n_edges || candidates.size(0) == 0;
         }
     }
-    vector<string> KDB::graph(const string& title) const
+    std::vector<std::string> KDB::graph(const std::string& title) const
     {
-        string header{ title };
+        std::string header{ title };
         if (title == "KDB") {
-            header += " (k=" + to_string(k) + ", theta=" + to_string(theta) + ")";
+            header += " (k=" + std::to_string(k) + ", theta=" + std::to_string(theta) + ")";
         }
         return model.graph(header);
     }

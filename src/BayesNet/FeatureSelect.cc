@@ -2,7 +2,7 @@
 #include <limits>
 #include "bayesnetUtils.h"
 namespace bayesnet {
-    FeatureSelect::FeatureSelect(const torch::Tensor& samples, const vector<string>& features, const string& className, const int maxFeatures, const int classNumStates, const torch::Tensor& weights) :
+    FeatureSelect::FeatureSelect(const torch::Tensor& samples, const std::vector<std::string>& features, const std::string& className, const int maxFeatures, const int classNumStates, const torch::Tensor& weights) :
         Metrics(samples, features, className, classNumStates), maxFeatures(maxFeatures == 0 ? samples.size(0) - 1 : maxFeatures), weights(weights)
 
     {
@@ -42,7 +42,7 @@ namespace bayesnet {
         try {
             return suFeatures.at({ firstFeature, secondFeature });
         }
-        catch (const out_of_range& e) {
+        catch (const std::out_of_range& e) {
             double result = symmetricalUncertainty(firstFeature, secondFeature);
             suFeatures[{firstFeature, secondFeature}] = result;
             return result;
@@ -62,17 +62,17 @@ namespace bayesnet {
         }
         return rcf / sqrt(n + (n * n - n) * rff);
     }
-    vector<int> FeatureSelect::getFeatures() const
+    std::vector<int> FeatureSelect::getFeatures() const
     {
         if (!fitted) {
-            throw runtime_error("FeatureSelect not fitted");
+            throw std::runtime_error("FeatureSelect not fitted");
         }
         return selectedFeatures;
     }
-    vector<double> FeatureSelect::getScores() const
+    std::vector<double> FeatureSelect::getScores() const
     {
         if (!fitted) {
-            throw runtime_error("FeatureSelect not fitted");
+            throw std::runtime_error("FeatureSelect not fitted");
         }
         return selectedScores;
     }

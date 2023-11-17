@@ -2,7 +2,7 @@
 #include "FCBF.h"
 namespace bayesnet {
 
-    FCBF::FCBF(const torch::Tensor& samples, const vector<string>& features, const string& className, const int maxFeatures, const int classNumStates, const torch::Tensor& weights, const double threshold) :
+    FCBF::FCBF(const torch::Tensor& samples, const std::vector<std::string>& features, const std::string& className, const int maxFeatures, const int classNumStates, const torch::Tensor& weights, const double threshold) :
         FeatureSelect(samples, features, className, maxFeatures, classNumStates, weights), threshold(threshold)
     {
         if (threshold < 1e-7) {

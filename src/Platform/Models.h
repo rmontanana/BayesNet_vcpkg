@@ -11,10 +11,14 @@
 #include "SPODELd.h"
 #include "AODELd.h"
 #include "BoostAODE.h"
+#include "STree.h"
+#include "ODTE.h"
+#include "SVC.h"
+#include "RandomForest.h"
 namespace platform {
     class Models {
     private:
-        map<string, function<bayesnet::BaseClassifier* (void)>> functionRegistry;
+        map<std::string, function<bayesnet::BaseClassifier* (void)>> functionRegistry;
         static Models* factory; //singleton
         Models() {};
     public:
@@ -22,16 +26,16 @@ namespace platform {
         void operator=(const Models&) = delete;
         // Idea from: https://www.codeproject.com/Articles/567242/AplusC-2b-2bplusObjectplusFactory
         static Models* instance();
-        shared_ptr<bayesnet::BaseClassifier> create(const string& name);
-        void registerFactoryFunction(const string& name,
+        shared_ptr<bayesnet::BaseClassifier> create(const std::string& name);
+        void registerFactoryFunction(const std::string& name,
             function<bayesnet::BaseClassifier* (void)> classFactoryFunction);
-        vector<string> getNames();
-        string toString();
+        std::vector<string> getNames();
+        std::string tostring();
 
     };
     class Registrar {
     public:
-        Registrar(const string& className, function<bayesnet::BaseClassifier* (void)> classFactoryFunction);
+        Registrar(const std::string& className, function<bayesnet::BaseClassifier* (void)> classFactoryFunction);
     };
 }
 #endif

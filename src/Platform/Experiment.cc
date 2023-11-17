@@ -6,7 +6,7 @@
 #include "Paths.h"
 namespace platform {
     using json = nlohmann::json;
-    string get_date()
+    std::string get_date()
     {
         time_t rawtime;
         tm* timeinfo;
@@ -16,7 +16,7 @@ namespace platform {
         oss << std::put_time(timeinfo, "%Y-%m-%d");
         return oss.str();
     }
-    string get_time()
+    std::string get_time()
     {
         time_t rawtime;
         tm* timeinfo;
@@ -27,9 +27,9 @@ namespace platform {
         return oss.str();
     }
     Experiment::Experiment() : hyperparameters(json::parse("{}")) {}
-    string Experiment::get_file_name()
+    std::string Experiment::get_file_name()
     {
-        string result = "results_" + score_name + "_" + model + "_" + platform + "_" + get_date() + "_" + get_time() + "_" + (stratified ? "1" : "0") + ".json";
+        std::string result = "results_" + score_name + "_" + model + "_" + platform + "_" + get_date() + "_" + get_time() + "_" + (stratified ? "1" : "0") + ".json";
         return result;
     }
 
@@ -81,7 +81,7 @@ namespace platform {
         }
         return result;
     }
-    void Experiment::save(const string& path)
+    void Experiment::save(const std::string& path)
     {
         json data = build_json();
         ofstream file(path + "/" + get_file_name());
@@ -99,20 +99,20 @@ namespace platform {
     void Experiment::show()
     {
         json data = build_json();
-        cout << data.dump(4) << endl;
+        std::cout << data.dump(4) << std::endl;
     }
 
-    void Experiment::go(vector<string> filesToProcess, bool quiet)
+    void Experiment::go(std::vector<std::string> filesToProcess, bool quiet)
     {
-        cout << "*** Starting experiment: " << title << " ***" << endl;
+        std::cout << "*** Starting experiment: " << title << " ***" << std::endl;
         for (auto fileName : filesToProcess) {
-            cout << "- " << setw(20) << left << fileName << " " << right << flush;
+            std::cout << "- " << setw(20) << left << fileName << " " << right << flush;
             cross_validation(fileName, quiet);
-            cout << endl;
+            std::cout << std::endl;
         }
     }
 
-    string getColor(bayesnet::status_t status)
+    std::string getColor(bayesnet::status_t status)
     {
         switch (status) {
             case bayesnet::NORMAL:
@@ -126,13 +126,13 @@ namespace platform {
         }
     }
 
-    void showProgress(int fold, const string& color, const string& phase)
+    void showProgress(int fold, const std::string& color, const std::string& phase)
     {
-        string prefix = phase == "a" ? "" : "\b\b\b\b";
-        cout << prefix << color << fold << Colors::RESET() << "(" << color << phase << Colors::RESET() << ")" << flush;
+        std::string prefix = phase == "a" ? "" : "\b\b\b\b";
+        std::cout << prefix << color << fold << Colors::RESET() << "(" << color << phase << Colors::RESET() << ")" << flush;
 
     }
-    void Experiment::cross_validation(const string& fileName, bool quiet)
+    void Experiment::cross_validation(const std::string& fileName, bool quiet)
     {
         auto datasets = platform::Datasets(discretized, Paths::datasets());
         // Get dataset
@@ -142,14 +142,14 @@ namespace platform {
         auto samples = datasets.getNSamples(fileName);
         auto className = datasets.getClassName(fileName);
         if (!quiet) {
-            cout << " (" << setw(5) << samples << "," << setw(3) << features.size() << ") " << flush;
+            std::cout << " (" << setw(5) << samples << "," << setw(3) << features.size() << ") " << flush;
         }
         // Prepare Result
         auto result = Result();
         auto [values, counts] = at::_unique(y);
         result.setSamples(X.size(1)).setFeatures(X.size(0)).setClasses(values.size(0));
         result.setHyperparameters(hyperparameters);
-        // Initialize results vectors
+        // Initialize results std::vectors
         int nResults = nfolds * static_cast<int>(randomSeeds.size());
         auto accuracy_test = torch::zeros({ nResults }, torch::kFloat64);
         auto accuracy_train = torch::zeros({ nResults }, torch::kFloat64);
@@ -162,7 +162,7 @@ namespace platform {
         int item = 0;
         for (auto seed : randomSeeds) {
             if (!quiet)
-                cout << "(" << seed << ") doing Fold: " << flush;
+                std::cout << "(" << seed << ") doing Fold: " << flush;
             Fold* fold;
             if (stratified)
                 fold = new StratifiedKFold(nfolds, y, seed);
@@ -204,17 +204,16 @@ namespace platform {
                 accuracy_train[item] = accuracy_train_value;
                 accuracy_test[item] = accuracy_test_value;
                 if (!quiet)
-                    cout << "\b\b\b, " << flush;
-                // Store results and times in vector
+                    std::cout << "\b\b\b, " << flush;
+                // Store results and times in std::vector
                 result.addScoreTrain(accuracy_train_value);
                 result.addScoreTest(accuracy_test_value);
                 result.addTimeTrain(train_time[item].item<double>());
                 result.addTimeTest(test_time[item].item<double>());
                 item++;
-                clf.reset();
             }
             if (!quiet)
-                cout << "end. " << flush;
+                std::cout << "end. " << flush;
             delete fold;
         }
         result.setScoreTest(torch::mean(accuracy_test).item<double>()).setScoreTrain(torch::mean(accuracy_train).item<double>());

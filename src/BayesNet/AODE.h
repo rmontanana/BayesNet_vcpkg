@@ -9,7 +9,7 @@ namespace bayesnet {
     public:
         AODE();
         virtual ~AODE() {};
-        vector<string> graph(const string& title = "AODE") const override;
+        std::vector<std::string> graph(const std::string& title = "AODE") const override;
     };
 }
 #endif

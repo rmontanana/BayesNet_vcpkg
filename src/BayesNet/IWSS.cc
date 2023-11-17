@@ -2,7 +2,7 @@
 #include <limits>
 #include "bayesnetUtils.h"
 namespace bayesnet {
-    IWSS::IWSS(const torch::Tensor& samples, const vector<string>& features, const string& className, const int maxFeatures, const int classNumStates, const torch::Tensor& weights, const double threshold) :
+    IWSS::IWSS(const torch::Tensor& samples, const std::vector<std::string>& features, const std::string& className, const int maxFeatures, const int classNumStates, const torch::Tensor& weights, const double threshold) :
         FeatureSelect(samples, features, className, maxFeatures, classNumStates, weights), threshold(threshold)
     {
         if (threshold < 0 || threshold > .5) {

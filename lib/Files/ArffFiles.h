@@ -4,31 +4,29 @@
 #include <string>
 #include <vector>
 
-using namespace std;
-
 class ArffFiles {
 private:
-    vector<string> lines;
-    vector<pair<string, string>> attributes;
-    string className;
-    string classType;
-    vector<vector<float>> X;
-    vector<int> y;
+    std::vector<std::string> lines;
+    std::vector<std::pair<std::string, std::string>> attributes;
+    std::string className;
+    std::string classType;
+    std::vector<std::vector<float>> X;
+    std::vector<int> y;
     void generateDataset(int);
-    void loadCommon(string);
+    void loadCommon(std::string);
 public:
     ArffFiles();
-    void load(const string&, bool = true);
-    void load(const string&, const string&);
-    vector<string> getLines() const;
+    void load(const std::string&, bool = true);
+    void load(const std::string&, const std::string&);
+    std::vector<std::string> getLines() const;
     unsigned long int getSize() const;
-    string getClassName() const;
-    string getClassType() const;
-    static string trim(const string&);
-    vector<vector<float>>& getX();
-    vector<int>& getY();
-    vector<pair<string, string>> getAttributes() const;
-    static vector<int> factorize(const vector<string>& labels_t);
+    std::string getClassName() const;
+    std::string getClassType() const;
+    static std::string trim(const std::string&);
+    std::vector<std::vector<float>>& getX();
+    std::vector<int>& getY();
+    std::vector<std::pair<std::string, std::string>> getAttributes() const;
+    static std::vector<int> factorize(const std::vector<std::string>& labels_t);
 };
 
 #endif

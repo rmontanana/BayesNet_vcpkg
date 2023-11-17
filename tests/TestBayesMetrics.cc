@@ -4,24 +4,23 @@
 #include "BayesMetrics.h"
 #include "TestUtils.h"
 
-using namespace std;
 
 TEST_CASE("Metrics Test", "[BayesNet]")
 {
-    string file_name = GENERATE("glass", "iris", "ecoli", "diabetes");
-    map<string, pair<int, vector<int>>> resultsKBest = {
+    std::string file_name = GENERATE("glass", "iris", "ecoli", "diabetes");
+    map<std::string, pair<int, std::vector<int>>> resultsKBest = {
         {"glass", {7, { 0, 1, 7, 6, 3, 5, 2 }}},
         {"iris", {3, { 0, 3, 2 }} },
         {"ecoli", {6, { 2, 4, 1, 0, 6, 5 }}},
         {"diabetes", {2, { 7, 1 }}}
     };
-    map<string, double> resultsMI = {
+    map<std::string, double> resultsMI = {
         {"glass", 0.12805398},
         {"iris", 0.3158139948},
         {"ecoli", 0.0089431099},
         {"diabetes", 0.0345470614}
     };
-    map<pair<string, int>, vector<pair<int, int>>> resultsMST = {
+    map<pair<std::string, int>, std::vector<pair<int, int>>> resultsMST = {
         { {"glass", 0}, { {0, 6}, {0, 5}, {0, 3}, {5, 1}, {5, 8}, {5, 4}, {6, 2}, {6, 7} } },
         { {"glass", 1}, { {1, 5}, {5, 0}, {5, 8}, {5, 4}, {0, 6}, {0, 3}, {6, 2}, {6, 7} } },
         { {"iris", 0}, { {0, 1}, {0, 2}, {1, 3} } },
@@ -41,7 +40,7 @@ TEST_CASE("Metrics Test", "[BayesNet]")
 
     SECTION("Test SelectKBestWeighted")
     {
-        vector<int> kBest = metrics.SelectKBestWeighted(raw.weights, true, resultsKBest.at(file_name).first);
+        std::vector<int> kBest = metrics.SelectKBestWeighted(raw.weights, true, resultsKBest.at(file_name).first);
         REQUIRE(kBest.size() == resultsKBest.at(file_name).first);
         REQUIRE(kBest == resultsKBest.at(file_name).second);
     }

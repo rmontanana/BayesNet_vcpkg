@@ -7,7 +7,7 @@
 TEST_CASE("KFold Test", "[Platform][KFold]")
 {
     // Initialize a KFold object with k=5 and a seed of 19.
-    string file_name = GENERATE("glass", "iris", "ecoli", "diabetes");
+    std::string file_name = GENERATE("glass", "iris", "ecoli", "diabetes");
     auto raw = RawDatasets(file_name, true);
     int nFolds = 5;
     platform::KFold kfold(nFolds, raw.nSamples, 19);
@@ -29,7 +29,7 @@ TEST_CASE("KFold Test", "[Platform][KFold]")
     }
 }
 
-map<int, int> counts(vector<int> y, vector<int> indices)
+map<int, int> counts(std::vector<int> y, std::vector<int> indices)
 {
     map<int, int> result;
     for (auto i = 0; i < indices.size(); ++i) {
@@ -40,8 +40,8 @@ map<int, int> counts(vector<int> y, vector<int> indices)
 
 TEST_CASE("StratifiedKFold Test", "[Platform][StratifiedKFold]")
 {
-    // Initialize a StratifiedKFold object with k=3, using the y vector, and a seed of 17.
-    string file_name = GENERATE("glass", "iris", "ecoli", "diabetes");
+    // Initialize a StratifiedKFold object with k=3, using the y std::vector, and a seed of 17.
+    std::string file_name = GENERATE("glass", "iris", "ecoli", "diabetes");
     int nFolds = GENERATE(3, 5, 10);
     auto raw = RawDatasets(file_name, true);
     platform::StratifiedKFold stratified_kfoldt(nFolds, raw.yt, 17);
@@ -55,10 +55,10 @@ TEST_CASE("StratifiedKFold Test", "[Platform][StratifiedKFold]")
     SECTION("Stratified Fold Test")
     {
         // Test each fold's size and contents.
-        auto counts = map<int, vector<int>>();
+        auto counts = map<int, std::vector<int>>();
         // Initialize the counts per Fold
         for (int i = 0; i < nFolds; ++i) {
-            counts[i] = vector<int>(raw.classNumStates, 0);
+            counts[i] = std::vector<int>(raw.classNumStates, 0);
         }
         // Check fold and compute counts of each fold
         for (int fold = 0; fold < nFolds; ++fold) {

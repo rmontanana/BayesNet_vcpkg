@@ -4,7 +4,6 @@
 #include "BestResults.h"
 #include "Colors.h"
 
-using namespace std;
 
 argparse::ArgumentParser manageArguments(int argc, char** argv)
 {
@@ -15,19 +14,19 @@ argparse::ArgumentParser manageArguments(int argc, char** argv)
     program.add_argument("--report").help("report of best score results file").default_value(false).implicit_value(true);
     program.add_argument("--friedman").help("Friedman test").default_value(false).implicit_value(true);
     program.add_argument("--excel").help("Output to excel").default_value(false).implicit_value(true);
-    program.add_argument("--level").help("significance level").default_value(0.05).scan<'g', double>().action([](const string& value) {
+    program.add_argument("--level").help("significance level").default_value(0.05).scan<'g', double>().action([](const std::string& value) {
         try {
-            auto k = stod(value);
+            auto k = std::stod(value);
             if (k < 0.01 || k > 0.15) {
-                throw runtime_error("Significance level hast to be a number in [0.01, 0.15]");
+                throw std::runtime_error("Significance level hast to be a number in [0.01, 0.15]");
             }
             return k;
         }
-        catch (const runtime_error& err) {
-            throw runtime_error(err.what());
+        catch (const std::runtime_error& err) {
+            throw std::runtime_error(err.what());
         }
         catch (...) {
-            throw runtime_error("Number of folds must be an decimal number");
+            throw std::runtime_error("Number of folds must be an decimal number");
         }});
     return program;
 }
@@ -35,35 +34,35 @@ argparse::ArgumentParser manageArguments(int argc, char** argv)
 int main(int argc, char** argv)
 {
     auto program = manageArguments(argc, argv);
-    string model, score;
+    std::string model, score;
     bool build, report, friedman, excel;
     double level;
     try {
         program.parse_args(argc, argv);
-        model = program.get<string>("model");
-        score = program.get<string>("score");
+        model = program.get<std::string>("model");
+        score = program.get<std::string>("score");
         build = program.get<bool>("build");
         report = program.get<bool>("report");
         friedman = program.get<bool>("friedman");
         excel = program.get<bool>("excel");
         level = program.get<double>("level");
         if (model == "" || score == "") {
-            throw runtime_error("Model and score name must be supplied");
+            throw std::runtime_error("Model and score name must be supplied");
         }
         if (friedman && model != "any") {
-            cerr << "Friedman test can only be used with all models" << endl;
-            cerr << program;
+            std::cerr << "Friedman test can only be used with all models" << std::endl;
+            std::cerr << program;
             exit(1);
         }
         if (!report && !build) {
-            cerr << "Either build, report or both, have to be selected to do anything!" << endl;
-            cerr << program;
+            std::cerr << "Either build, report or both, have to be selected to do anything!" << std::endl;
+            std::cerr << program;
             exit(1);
         }
     }
-    catch (const exception& err) {
-        cerr << err.what() << endl;
-        cerr << program;
+    catch (const std::exception& err) {
+        std::cerr << err.what() << std::endl;
+        std::cerr << program;
         exit(1);
     }
     // Generate report
@@ -72,8 +71,8 @@ int main(int argc, char** argv)
         if (model == "any") {
             results.buildAll();
         } else {
-            string fileName = results.build();
-            cout << Colors::GREEN() << fileName << " created!" << Colors::RESET() << endl;
+            std::string fileName = results.build();
+            std::cout << Colors::GREEN() << fileName << " created!" << Colors::RESET() << std::endl;
         }
     }
     if (report) {

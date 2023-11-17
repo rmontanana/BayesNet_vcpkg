@@ -8,7 +8,6 @@
 
 using json = nlohmann::json;
 namespace platform {
-    using namespace std;
 
     class ReportBase {
     public:
@@ -17,19 +16,19 @@ namespace platform {
         void show();
     protected:
         json data;
-        string fromVector(const string& key);
-        string fVector(const string& title, const json& data, const int width, const int precision);
+        std::string fromVector(const std::string& key);
+        std::string fVector(const std::string& title, const json& data, const int width, const int precision);
         bool getExistBestFile();
         virtual void header() = 0;
         virtual void body() = 0;
         virtual void showSummary() = 0;
-        string compareResult(const string& dataset, double result);
-        map<string, int> summary;
+        std::string compareResult(const std::string& dataset, double result);
+        std::map<std::string, int> summary;
         double margin;
-        map<string, string> meaning;
+        std::map<std::string, std::string> meaning;
         bool compare;
     private:
-        double bestResult(const string& dataset, const string& model);
+        double bestResult(const std::string& dataset, const std::string& model);
         json bestResults;
         bool existBestFile = true;
     };

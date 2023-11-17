@@ -6,16 +6,16 @@
 #include "Utils.h"
 
 namespace platform {
-    void CommandParser::messageError(const string& message)
+    void CommandParser::messageError(const std::string& message)
     {
-        cout << Colors::RED() << message << Colors::RESET() << endl;
+        std::cout << Colors::RED() << message << Colors::RESET() << std::endl;
     }
-    pair<char, int> CommandParser::parse(const string& color, const vector<tuple<string, char, bool>>& options, const char defaultCommand, const int maxIndex)
+    std::pair<char, int> CommandParser::parse(const std::string& color, const std::vector<std::tuple<std::string, char, bool>>& options, const char defaultCommand, const int maxIndex)
     {
         bool finished = false;
         while (!finished) {
-            stringstream oss;
-            string line;
+            std::stringstream oss;
+            std::string line;
             oss << color << "Choose option (";
             bool first = true;
             for (auto& option : options) {
@@ -24,12 +24,12 @@ namespace platform {
                 } else {
                     oss << ", ";
                 }
-                oss << get<char>(option) << "=" << get<string>(option);
+                oss << std::get<char>(option) << "=" << std::get<std::string>(option);
             }
             oss << "): ";
-            cout << oss.str();
-            getline(cin, line);
-            cout << Colors::RESET();
+            std::cout << oss.str();
+            getline(std::cin, line);
+            std::cout << Colors::RESET();
             line = trim(line);
             if (line.size() == 0)
                 continue;
@@ -45,15 +45,15 @@ namespace platform {
             }
             bool found = false;
             for (auto& option : options) {
-                if (line[0] == get<char>(option)) {
+                if (line[0] == std::get<char>(option)) {
                     found = true;
                     // it's a match
                     line.erase(line.begin());
                     line = trim(line);
-                    if (get<bool>(option)) {
+                    if (std::get<bool>(option)) {
                         // The option requires a value
                         if (line.size() == 0) {
-                            messageError("Option " + get<string>(option) + " requires a value");
+                            messageError("Option " + std::get<std::string>(option) + " requires a value");
                             break;
                         }
                         try {
@@ -69,11 +69,11 @@ namespace platform {
                         }
                     } else {
                         if (line.size() > 0) {
-                            messageError("option " + get<string>(option) + " doesn't accept values");
+                            messageError("option " + std::get<std::string>(option) + " doesn't accept values");
                             break;
                         }
                     }
-                    command = get<char>(option);
+                    command = std::get<char>(option);
                     finished = true;
                     break;
                 }

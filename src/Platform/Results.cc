@@ -2,7 +2,7 @@
 #include <algorithm>
 
 namespace platform {
-    Results::Results(const string& path, const string& model, const string& score, bool complete, bool partial) :
+    Results::Results(const std::string& path, const std::string& model, const std::string& score, bool complete, bool partial) :
         path(path), model(model), scoreName(score), complete(complete), partial(partial)
     {
         load();
@@ -17,7 +17,7 @@ namespace platform {
         using std::filesystem::directory_iterator;
         for (const auto& file : directory_iterator(path)) {
             auto filename = file.path().filename().string();
-            if (filename.find(".json") != string::npos && filename.find("results_") == 0) {
+            if (filename.find(".json") != std::string::npos && filename.find("results_") == 0) {
                 auto result = Result(path, filename);
                 bool addResult = true;
                 if (model != "any" && result.getModel() != model || scoreName != "any" && scoreName != result.getScoreName() || complete && !result.isComplete() || partial && result.isComplete())
@@ -27,7 +27,7 @@ namespace platform {
             }
         }
     }
-    void Results::hideResult(int index, const string& pathHidden)
+    void Results::hideResult(int index, const std::string& pathHidden)
     {
         auto filename = files.at(index).getFilename();
         rename((path + "/" + filename).c_str(), (pathHidden + "/" + filename).c_str());
