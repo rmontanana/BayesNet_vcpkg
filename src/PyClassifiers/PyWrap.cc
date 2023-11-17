@@ -61,7 +61,6 @@ namespace pywrap {
     void PyWrap::clean(const clfId_t id)
     {
         // Remove Python interpreter if no more modules imported left
-        // std::cout << "*Cleaning module " << id << std::endl;
         std::lock_guard<std::mutex> lock(mutex);
         auto result = moduleClassMap.find(id);
         if (result == moduleClassMap.end()) {
@@ -75,11 +74,11 @@ namespace pywrap {
             PyErr_Print();
             errorAbort("Error cleaning module ");
         }
+        // With boost you can't remove the interpreter
+        // https://www.boost.org/doc/libs/1_83_0/libs/python/doc/html/tutorial/tutorial/embedding.html#tutorial.embedding.getting_started
         // if (moduleClassMap.empty()) {
         //     RemoveInstance();
-        //     std::cout << "*Python interpreter cleaned" << std::endl;
         // }
-        // std::cout << "*Module " << id << " cleaned" << std::endl;
     }
     void PyWrap::errorAbort(const std::string& message)
     {
