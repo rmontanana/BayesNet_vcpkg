@@ -2,7 +2,7 @@
 
 namespace bayesnet {
     KDB::KDB(int k, float theta) : Classifier(Network()), k(k), theta(theta) {}
-    void KDB::setHyperparameters(nlohmann::json& hyperparameters)
+    void KDB::setHyperparameters(const nlohmann::json& hyperparameters)
     {
         // Check if hyperparameters are valid
         const std::vector<std::string> validKeys = { "k", "theta" };

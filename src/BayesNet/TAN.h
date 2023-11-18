@@ -8,7 +8,7 @@ namespace bayesnet {
         void buildModel(const torch::Tensor& weights) override;
     public:
         TAN();
-        virtual ~TAN() {};
+        virtual ~TAN() = default;
         std::vector<std::string> graph(const std::string& name = "TAN") const override;
     };
 }

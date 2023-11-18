@@ -7,7 +7,7 @@ namespace pywrap {
     public:
         RandomForest() : PyClassifier("sklearn.ensemble", "RandomForestClassifier", true) {};
         ~RandomForest() = default;
-        void setHyperparameters(nlohmann::json& hyperparameters) override;
+        void setHyperparameters(const nlohmann::json& hyperparameters) override;
     };
 } /* namespace pywrap */
 #endif /* RANDOMFOREST_H */

@@ -7,7 +7,7 @@ namespace pywrap {
     public:
         SVC() : PyClassifier("sklearn.svm", "SVC", true) {};
         ~SVC() = default;
-        void setHyperparameters(nlohmann::json& hyperparameters) override;
+        void setHyperparameters(const nlohmann::json& hyperparameters) override;
     };
 
 } /* namespace pywrap */

@@ -10,7 +10,7 @@ namespace bayesnet {
         void buildModel(const torch::Tensor& weights) override;
     public:
         explicit SPODE(int root);
-        virtual ~SPODE() {};
+        virtual ~SPODE() = default;
         std::vector<std::string> graph(const std::string& name = "SPODE") const override;
     };
 }

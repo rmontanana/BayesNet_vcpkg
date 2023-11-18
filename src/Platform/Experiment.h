@@ -6,6 +6,7 @@
 #include <chrono>
 #include "Folding.h"
 #include "BaseClassifier.h"
+#include "HyperParameters.h"
 #include "TAN.h"
 #include "KDB.h"
 #include "AODE.h"
@@ -80,17 +81,8 @@ namespace platform {
         const std::vector<double>& getTimesTest() const { return times_test; }
     };
     class Experiment {
-    private:
-        std::string title, model, platform, score_name, model_version, language_version, language;
-        bool discretized{ false }, stratified{ false };
-        std::vector<Result> results;
-        std::vector<int> randomSeeds;
-        json hyperparameters = "{}";
-        int nfolds{ 0 };
-        float duration{ 0 };
-        json build_json();
     public:
-        Experiment();
+        Experiment() = default;
         Experiment& setTitle(const std::string& title) { this->title = title; return *this; }
         Experiment& setModel(const std::string& model) { this->model = model; return *this; }
         Experiment& setPlatform(const std::string& platform) { this->platform = platform; return *this; }
@@ -104,13 +96,22 @@ namespace platform {
         Experiment& addResult(Result result) { results.push_back(result); return *this; }
         Experiment& addRandomSeed(int randomSeed) { randomSeeds.push_back(randomSeed); return *this; }
         Experiment& setDuration(float duration) { this->duration = duration; return *this; }
-        Experiment& setHyperparameters(const json& hyperparameters) { this->hyperparameters = hyperparameters; return *this; }
+        Experiment& setHyperparameters(const HyperParameters& hyperparameters_) { this->hyperparameters = hyperparameters_; return *this; }
         std::string get_file_name();
         void save(const std::string& path);
         void cross_validation(const std::string& fileName, bool quiet);
         void go(std::vector<std::string> filesToProcess, bool quiet);
         void show();
         void report();
+    private:
+        std::string title, model, platform, score_name, model_version, language_version, language;
+        bool discretized{ false }, stratified{ false };
+        std::vector<Result> results;
+        std::vector<int> randomSeeds;
+        HyperParameters hyperparameters;
+        int nfolds{ 0 };
+        float duration{ 0 };
+        json build_json();
     };
 }
 #endif

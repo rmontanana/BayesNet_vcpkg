@@ -13,8 +13,8 @@ namespace bayesnet {
         void buildModel(const torch::Tensor& weights) override;
     public:
         explicit KDB(int k, float theta = 0.03);
-        virtual ~KDB() {};
-        void setHyperparameters(nlohmann::json& hyperparameters) override;
+        virtual ~KDB() = default;
+        void setHyperparameters(const nlohmann::json& hyperparameters) override;
         std::vector<std::string> graph(const std::string& name = "KDB") const override;
     };
 }

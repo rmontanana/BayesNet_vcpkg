@@ -5,7 +5,7 @@ namespace pywrap {
     {
         return callMethodString("graph");
     }
-    void STree::setHyperparameters(nlohmann::json& hyperparameters)
+    void STree::setHyperparameters(const nlohmann::json& hyperparameters)
     {
         // Check if hyperparameters are valid
         const std::vector<std::string> validKeys = { "C", "kernel", "max_iter", "max_depth", "random_state", "multiclass_strategy" };

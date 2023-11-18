@@ -81,7 +81,7 @@ namespace pywrap {
         float result = pyWrap->score(id, Xp, yp);
         return result;
     }
-    void PyClassifier::setHyperparameters(nlohmann::json& hyperparameters)
+    void PyClassifier::setHyperparameters(const nlohmann::json& hyperparameters)
     {
         // Check if hyperparameters are valid, default is no hyperparameters
         const std::vector<std::string> validKeys = { };

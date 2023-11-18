@@ -16,7 +16,9 @@ argparse::ArgumentParser manageArguments()
     auto env = platform::DotEnv();
     argparse::ArgumentParser program("main");
     program.add_argument("-d", "--dataset").default_value("").help("Dataset file name");
-    program.add_argument("--hyperparameters").default_value("{}").help("Hyperparamters passed to the model in Experiment");
+    program.add_argument("--hyperparameters").default_value("{}").help("Hyperparameters passed to the model in Experiment");
+    program.add_argument("--hyper-file").default_value("").help("Hyperparameters file name." \
+        "Mutually exclusive with hyperparameters. This file should contain hyperparameters for each dataset in json format.");
     program.add_argument("-m", "--model")
         .help("Model to use " + platform::Models::instance()->tostring())
         .action([](const std::string& value) {
@@ -53,7 +55,7 @@ argparse::ArgumentParser manageArguments()
 
 int main(int argc, char** argv)
 {
-    std::string file_name, model_name, title;
+    std::string file_name, model_name, title, hyperparameters_file;
     json hyperparameters_json;
     bool discretize_dataset, stratified, saveResults, quiet;
     std::vector<int> seeds;
@@ -71,6 +73,10 @@ int main(int argc, char** argv)
         seeds = program.get<std::vector<int>>("seeds");
         auto hyperparameters = program.get<std::string>("hyperparameters");
         hyperparameters_json = json::parse(hyperparameters);
+        hyperparameters_file = program.get<std::string>("hyper-file");
+        if (hyperparameters_file != "" && hyperparameters != "{}") {
+            throw runtime_error("hyperparameters and hyper_file are mutually exclusive");
+        }
         title = program.get<std::string>("title");
         if (title == "" && file_name == "") {
             throw runtime_error("title is mandatory if dataset is not provided");
@@ -96,15 +102,22 @@ int main(int argc, char** argv)
         filesToTest = datasets.getNames();
         saveResults = true;
     }
+    platform::HyperParameters test_hyperparams;
+    if (hyperparameters_file != "") {
+        test_hyperparams = platform::HyperParameters(datasets.getNames(), hyperparameters_file);
+    } else {
+        test_hyperparams = platform::HyperParameters(datasets.getNames(), hyperparameters_json);
+    }
+
     /*
-    * Begin Processing
-    */
+     * Begin Processing
+     */
     auto env = platform::DotEnv();
     auto experiment = platform::Experiment();
     experiment.setTitle(title).setLanguage("cpp").setLanguageVersion("14.0.3");
     experiment.setDiscretized(discretize_dataset).setModel(model_name).setPlatform(env.get("platform"));
     experiment.setStratified(stratified).setNFolds(n_folds).setScoreName("accuracy");
-    experiment.setHyperparameters(hyperparameters_json);
+    experiment.setHyperparameters(test_hyperparams);
     for (auto seed : seeds) {
         experiment.addRandomSeed(seed);
     }

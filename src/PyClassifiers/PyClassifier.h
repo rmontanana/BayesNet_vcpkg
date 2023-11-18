@@ -27,7 +27,6 @@ namespace pywrap {
         std::vector<int> predict(std::vector<std::vector<int >>& X) override { return std::vector<int>(); };
         float score(std::vector<std::vector<int>>& X, std::vector<int>& y) override { return 0.0; };
         float score(torch::Tensor& X, torch::Tensor& y) override;
-        void setHyperparameters(nlohmann::json& hyperparameters) override;
         std::string version();
         std::string callMethodString(const std::string& method);
         std::string getVersion() override { return this->version(); };
@@ -39,6 +38,7 @@ namespace pywrap {
         bayesnet::status_t getStatus() const override { return bayesnet::NORMAL; };
         std::vector<std::string> topological_order() override { return std::vector<std::string>(); }
         void dump_cpt() const override {};
+        void setHyperparameters(const nlohmann::json& hyperparameters) override;
     protected:
         void checkHyperparameters(const std::vector<std::string>& validKeys, const nlohmann::json& hyperparameters);
         nlohmann::json hyperparameters;

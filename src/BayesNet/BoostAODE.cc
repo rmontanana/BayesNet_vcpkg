@@ -43,7 +43,7 @@ namespace bayesnet {
             y_train = y_;
         }
     }
-    void BoostAODE::setHyperparameters(nlohmann::json& hyperparameters)
+    void BoostAODE::setHyperparameters(const nlohmann::json& hyperparameters)
     {
         // Check if hyperparameters are valid
         const std::vector<std::string> validKeys = { "repeatSparent", "maxModels", "ascending", "convergence", "threshold", "select_features" };

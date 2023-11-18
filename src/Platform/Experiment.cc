@@ -26,7 +26,6 @@ namespace platform {
         oss << std::put_time(timeinfo, "%H:%M:%S");
         return oss.str();
     }
-    Experiment::Experiment() : hyperparameters(json::parse("{}")) {}
     std::string Experiment::get_file_name()
     {
         std::string result = "results_" + score_name + "_" + model + "_" + platform + "_" + get_date() + "_" + get_time() + "_" + (stratified ? "1" : "0") + ".json";
@@ -148,7 +147,7 @@ namespace platform {
         auto result = Result();
         auto [values, counts] = at::_unique(y);
         result.setSamples(X.size(1)).setFeatures(X.size(0)).setClasses(values.size(0));
-        result.setHyperparameters(hyperparameters);
+        result.setHyperparameters(hyperparameters.get(fileName));
         // Initialize results std::vectors
         int nResults = nfolds * static_cast<int>(randomSeeds.size());
         auto accuracy_test = torch::zeros({ nResults }, torch::kFloat64);
@@ -171,8 +170,8 @@ namespace platform {
             for (int nfold = 0; nfold < nfolds; nfold++) {
                 auto clf = Models::instance()->create(model);
                 setModelVersion(clf->getVersion());
-                if (hyperparameters.size() != 0) {
-                    clf->setHyperparameters(hyperparameters);
+                if (hyperparameters.notEmpty(fileName)) {
+                    clf->setHyperparameters(hyperparameters.get(fileName));
                 }
                 // Split train - test dataset
                 train_timer.start();

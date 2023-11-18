@@ -153,7 +153,7 @@ namespace bayesnet {
     {
         model.dump_cpt();
     }
-    void Classifier::checkHyperparameters(const std::vector<std::string>& validKeys, nlohmann::json& hyperparameters)
+    void Classifier::checkHyperparameters(const std::vector<std::string>& validKeys, const nlohmann::json& hyperparameters)
     {
         for (const auto& item : hyperparameters.items()) {
             if (find(validKeys.begin(), validKeys.end(), item.key()) == validKeys.end()) {
@@ -161,7 +161,7 @@ namespace bayesnet {
             }
         }
     }
-    void Classifier::setHyperparameters(nlohmann::json& hyperparameters)
+    void Classifier::setHyperparameters(const nlohmann::json& hyperparameters)
     {
         // Check if hyperparameters are valid, default is no hyperparameters
         const std::vector<std::string> validKeys = { };
