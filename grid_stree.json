@@ -1,0 +1,162 @@
+{
+    "balance-scale": {
+        "C": 10000.0,
+        "gamma": 0.1,
+        "kernel": "rbf",
+        "max_iter": 10000
+    },
+    "balloons": {
+        "C": 7,
+        "gamma": 0.1,
+        "kernel": "rbf",
+        "max_iter": 10000
+    },
+    "breast-cancer-wisc-diag": {
+        "C": 0.2,
+        "max_iter": 10000
+    },
+    "breast-cancer-wisc-prog": {
+        "C": 0.2,
+        "max_iter": 10000
+    },
+    "breast-cancer-wisc": {},
+    "breast-cancer": {},
+    "cardiotocography-10clases": {},
+    "cardiotocography-3clases": {},
+    "conn-bench-sonar-mines-rocks": {},
+    "cylinder-bands": {},
+    "dermatology": {
+        "C": 55,
+        "max_iter": 10000
+    },
+    "echocardiogram": {
+        "C": 7,
+        "gamma": 0.1,
+        "kernel": "poly",
+        "max_features": "auto",
+        "max_iter": 10000
+    },
+    "fertility": {
+        "C": 0.05,
+        "max_features": "auto",
+        "max_iter": 10000
+    },
+    "haberman-survival": {},
+    "heart-hungarian": {
+        "C": 0.05,
+        "max_iter": 10000
+    },
+    "hepatitis": {
+        "C": 7,
+        "gamma": 0.1,
+        "kernel": "rbf",
+        "max_iter": 10000
+    },
+    "ilpd-indian-liver": {},
+    "ionosphere": {
+        "C": 7,
+        "gamma": 0.1,
+        "kernel": "rbf",
+        "max_iter": 10000
+    },
+    "iris": {},
+    "led-display": {},
+    "libras": {
+        "C": 0.08,
+        "max_iter": 10000
+    },
+    "low-res-spect": {
+        "C": 0.05,
+        "max_iter": 10000
+    },
+    "lymphography": {
+        "C": 0.05,
+        "max_iter": 10000
+    },
+    "mammographic": {},
+    "molec-biol-promoter": {
+        "C": 0.05,
+        "gamma": 0.1,
+        "kernel": "poly",
+        "max_iter": 10000
+    },
+    "musk-1": {
+        "C": 0.05,
+        "gamma": 0.1,
+        "kernel": "poly",
+        "max_iter": 10000
+    },
+    "oocytes_merluccius_nucleus_4d": {
+        "C": 8.25,
+        "gamma": 0.1,
+        "kernel": "poly"
+    },
+    "oocytes_merluccius_states_2f": {},
+    "oocytes_trisopterus_nucleus_2f": {},
+    "oocytes_trisopterus_states_5b": {
+        "C": 0.11,
+        "max_iter": 10000
+    },
+    "parkinsons": {},
+    "pima": {},
+    "pittsburg-bridges-MATERIAL": {
+        "C": 7,
+        "gamma": 0.1,
+        "kernel": "rbf",
+        "max_iter": 10000
+    },
+    "pittsburg-bridges-REL-L": {},
+    "pittsburg-bridges-SPAN": {
+        "C": 0.05,
+        "max_iter": 10000
+    },
+    "pittsburg-bridges-T-OR-D": {},
+    "planning": {
+        "C": 7,
+        "gamma": 10.0,
+        "kernel": "rbf",
+        "max_iter": 10000
+    },
+    "post-operative": {
+        "C": 55,
+        "degree": 5,
+        "gamma": 0.1,
+        "kernel": "poly",
+        "max_iter": 10000
+    },
+    "seeds": {
+        "C": 10000.0,
+        "max_iter": 10000
+    },
+    "statlog-australian-credit": {
+        "C": 0.05,
+        "max_features": "auto",
+        "max_iter": 10000
+    },
+    "statlog-german-credit": {},
+    "statlog-heart": {},
+    "statlog-image": {
+        "C": 7,
+        "max_iter": 10000
+    },
+    "statlog-vehicle": {},
+    "synthetic-control": {
+        "C": 0.55,
+        "max_iter": 10000
+    },
+    "tic-tac-toe": {
+        "C": 0.2,
+        "gamma": 0.1,
+        "kernel": "poly",
+        "max_iter": 10000
+    },
+    "vertebral-column-2clases": {},
+    "wine": {
+        "C": 0.55,
+        "max_iter": 10000
+    },
+    "zoo": {
+        "C": 0.1,
+        "max_iter": 10000
+    }
+}

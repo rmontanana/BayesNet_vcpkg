@@ -170,9 +170,9 @@ namespace platform {
             for (int nfold = 0; nfold < nfolds; nfold++) {
                 auto clf = Models::instance()->create(model);
                 setModelVersion(clf->getVersion());
-                if (hyperparameters.notEmpty(fileName)) {
-                    clf->setHyperparameters(hyperparameters.get(fileName));
-                }
+                auto valid = clf->getValidHyperparameters();
+                hyperparameters.check(valid, fileName);
+                clf->setHyperparameters(hyperparameters.get(fileName));
                 // Split train - test dataset
                 train_timer.start();
                 auto [train, test] = fold->getFold(nfold);

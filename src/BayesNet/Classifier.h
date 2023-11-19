@@ -22,7 +22,6 @@ namespace bayesnet {
         void checkFitParameters();
         virtual void buildModel(const torch::Tensor& weights) = 0;
         void trainModel(const torch::Tensor& weights) override;
-        void checkHyperparameters(const std::vector<std::string>& validKeys, const nlohmann::json& hyperparameters);
         void buildDataset(torch::Tensor& y);
     public:
         Classifier(Network model);
@@ -44,7 +43,7 @@ namespace bayesnet {
         std::vector<std::string> show() const override;
         std::vector<std::string> topological_order()  override;
         void dump_cpt() const override;
-        void setHyperparameters(const nlohmann::json& hyperparameters) override;
+        void setHyperparameters(const nlohmann::json& hyperparameters) override; //For classifiers that don't have hyperparameters
     };
 }
 #endif

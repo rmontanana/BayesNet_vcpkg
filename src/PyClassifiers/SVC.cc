@@ -1,11 +1,8 @@
 #include "SVC.h"
 
 namespace pywrap {
-    void SVC::setHyperparameters(const nlohmann::json& hyperparameters)
+    SVC::SVC() : PyClassifier("sklearn.svm", "SVC", true)
     {
-        // Check if hyperparameters are valid
-        const std::vector<std::string> validKeys = { "C", "gamma", "kernel", "random_state" };
-        checkHyperparameters(validKeys, hyperparameters);
-        this->hyperparameters = hyperparameters;
+        validHyperparameters = { "C", "gamma", "kernel", "random_state" };
     }
 } /* namespace pywrap */

@@ -1,5 +1,6 @@
 #include "HyperParameters.h"
 #include <fstream>
+#include <iostream>
 
 namespace platform {
     HyperParameters::HyperParameters(const std::vector<std::string>& datasets, const json& hyperparameters_)
@@ -21,13 +22,24 @@ namespace platform {
         // Check if hyperparameters are valid
         for (const auto& dataset : datasets) {
             if (!input_hyperparameters.contains(dataset)) {
-                throw std::runtime_error("Dataset " + dataset + " not found in hyperparameters file");
+                std::cerr << "*Warning: Dataset " << dataset << " not found in hyperparameters file" << " assuming default hyperparameters" << std::endl;
+                hyperparameters[dataset] = json({});
+                continue;
             }
-            hyperparameters[dataset] = input_hyperparameters[dataset];
+            hyperparameters[dataset] = input_hyperparameters[dataset].get<json>();
         }
     }
-    json HyperParameters::get(const std::string& key)
+    void HyperParameters::check(const std::vector<std::string>& valid, const std::string& fileName)
     {
-        return hyperparameters.at(key);
+        json result = hyperparameters.at(fileName);
+        for (const auto& item : result.items()) {
+            if (find(valid.begin(), valid.end(), item.key()) == valid.end()) {
+                throw std::invalid_argument("Hyperparameter " + item.key() + " is not valid. Passed Hyperparameters are: " + result.dump(4));
+            }
+        }
+    }
+    json HyperParameters::get(const std::string& fileName)
+    {
+        return hyperparameters.at(fileName);
     }
 } /* namespace platform */

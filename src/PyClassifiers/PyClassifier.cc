@@ -83,17 +83,6 @@ namespace pywrap {
     }
     void PyClassifier::setHyperparameters(const nlohmann::json& hyperparameters)
     {
-        // Check if hyperparameters are valid, default is no hyperparameters
-        const std::vector<std::string> validKeys = { };
-        checkHyperparameters(validKeys, hyperparameters);
         this->hyperparameters = hyperparameters;
-    }
-    void PyClassifier::checkHyperparameters(const std::vector<std::string>& validKeys, const nlohmann::json& hyperparameters)
-    {
-        for (const auto& item : hyperparameters.items()) {
-            if (find(validKeys.begin(), validKeys.end(), item.key()) == validKeys.end()) {
-                throw std::invalid_argument("Hyperparameter " + item.key() + " is not valid");
-            }
-        }
     }
 } /* namespace pywrap */

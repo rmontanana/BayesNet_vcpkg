@@ -21,7 +21,7 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "experiment",
+            "name": "experimentPy",
             "program": "${workspaceFolder}/build_debug/src/Platform/b_main",
             "args": [
                 "-m",
@@ -32,6 +32,23 @@
                 //"--discretize"
                 // "--hyperparameters",
                 // "{\"repeatSparent\": true, \"maxModels\": 12}"
+            ],
+            "cwd": "/home/rmontanana/Code/discretizbench",
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "experimentBayes",
+            "program": "${workspaceFolder}/build_debug/src/Platform/b_main",
+            "args": [
+                "-m",
+                "TAN",
+                "--stratified",
+                "--discretize",
+                "-d",
+                "iris",
+                "--hyperparameters",
+                "{\"repeatSparent\": true, \"maxModels\": 12}"
             ],
             "cwd": "/home/rmontanana/Code/discretizbench",
         },

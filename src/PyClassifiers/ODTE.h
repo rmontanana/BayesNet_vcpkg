@@ -6,10 +6,9 @@
 namespace pywrap {
     class ODTE : public PyClassifier {
     public:
-        ODTE() : PyClassifier("odte", "Odte") {};
+        ODTE();
         ~ODTE() = default;
         std::string graph();
-        void setHyperparameters(const nlohmann::json& hyperparameters) override;
     };
 } /* namespace pywrap */
 #endif /* ODTE_H */

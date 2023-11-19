@@ -40,7 +40,6 @@ namespace pywrap {
         void dump_cpt() const override {};
         void setHyperparameters(const nlohmann::json& hyperparameters) override;
     protected:
-        void checkHyperparameters(const std::vector<std::string>& validKeys, const nlohmann::json& hyperparameters);
         nlohmann::json hyperparameters;
         void trainModel(const torch::Tensor& weights) override {};
     private:

@@ -6,8 +6,6 @@
 namespace bayesnet {
     enum status_t { NORMAL, WARNING, ERROR };
     class BaseClassifier {
-    protected:
-        virtual void trainModel(const torch::Tensor& weights) = 0;
     public:
         // X is nxm std::vector, y is nx1 std::vector
         virtual BaseClassifier& fit(std::vector<std::vector<int>>& X, std::vector<int>& y, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states) = 0;
@@ -30,6 +28,10 @@ namespace bayesnet {
         std::vector<std::string> virtual topological_order() = 0;
         void virtual dump_cpt()const = 0;
         virtual void setHyperparameters(const nlohmann::json& hyperparameters) = 0;
+        std::vector<std::string>& getValidHyperparameters() { return validHyperparameters; }
+    protected:
+        virtual void trainModel(const torch::Tensor& weights) = 0;
+        std::vector<std::string> validHyperparameters;
     };
 }
 #endif

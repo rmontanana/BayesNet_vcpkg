@@ -10,7 +10,11 @@
 #include "IWSS.h"
 
 namespace bayesnet {
-    BoostAODE::BoostAODE() : Ensemble() {}
+    BoostAODE::BoostAODE() : Ensemble()
+    {
+        validHyperparameters = { "repeatSparent", "maxModels", "ascending", "convergence", "threshold", "select_features" };
+
+    }
     void BoostAODE::buildModel(const torch::Tensor& weights)
     {
         // Models shall be built in trainModel
@@ -45,9 +49,6 @@ namespace bayesnet {
     }
     void BoostAODE::setHyperparameters(const nlohmann::json& hyperparameters)
     {
-        // Check if hyperparameters are valid
-        const std::vector<std::string> validKeys = { "repeatSparent", "maxModels", "ascending", "convergence", "threshold", "select_features" };
-        checkHyperparameters(validKeys, hyperparameters);
         if (hyperparameters.contains("repeatSparent")) {
             repeatSparent = hyperparameters["repeatSparent"];
         }

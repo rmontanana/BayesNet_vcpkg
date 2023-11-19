@@ -1,11 +1,8 @@
 #include "RandomForest.h"
 
 namespace pywrap {
-    void RandomForest::setHyperparameters(const nlohmann::json& hyperparameters)
+    RandomForest::RandomForest() : PyClassifier("sklearn.ensemble", "RandomForestClassifier", true)
     {
-        // Check if hyperparameters are valid
-        const std::vector<std::string> validKeys = { "n_estimators", "n_jobs", "random_state" };
-        checkHyperparameters(validKeys, hyperparameters);
-        this->hyperparameters = hyperparameters;
+        validHyperparameters = { "n_estimators", "n_jobs", "random_state" };
     }
 } /* namespace pywrap */
