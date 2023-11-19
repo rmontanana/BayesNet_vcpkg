@@ -1,5 +1,6 @@
 #include "HyperParameters.h"
 #include <fstream>
+#include <sstream>
 #include <iostream>
 
 namespace platform {
@@ -9,6 +10,14 @@ namespace platform {
         for (const auto& item : datasets) {
             hyperparameters[item] = hyperparameters_;
         }
+    }
+    // https://www.techiedelight.com/implode-a-vector-of-strings-into-a-comma-separated-string-in-cpp/
+    std::string join(std::vector<std::string> const& strings, std::string delim)
+    {
+        std::stringstream ss;
+        std::copy(strings.begin(), strings.end(),
+            std::ostream_iterator<std::string>(ss, delim.c_str()));
+        return ss.str();
     }
     HyperParameters::HyperParameters(const std::vector<std::string>& datasets, const std::string& hyperparameters_file)
     {
@@ -34,7 +43,8 @@ namespace platform {
         json result = hyperparameters.at(fileName);
         for (const auto& item : result.items()) {
             if (find(valid.begin(), valid.end(), item.key()) == valid.end()) {
-                throw std::invalid_argument("Hyperparameter " + item.key() + " is not valid. Passed Hyperparameters are: " + result.dump(4));
+                throw std::invalid_argument("Hyperparameter " + item.key() + " is not valid. Passed Hyperparameters are: "
+                    + result.dump(4) + "\n Valid hyperparameters are: {" + join(valid, ",") + "}");
             }
         }
     }
