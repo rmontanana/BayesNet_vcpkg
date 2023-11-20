@@ -18,11 +18,23 @@ The best option is install the packages that the Linux distribution have in its 
 sudo dnf install boost-devel
 ```
 
-If this is not possible and the compressed packaged is installed, the following environment variable has to be set:
+If this is not possible and the compressed packaged is installed, the following environment variable has to be set pointing to the folder where it was unzipped to:
 
 ```bash
 export BOOST_ROOT=/path/to/library/
 ```
+
+In some cases, it is needed to build the library, to do so:
+
+```bash
+cd /path/to/library
+mkdir own
+./bootstrap.sh --prefix=/path/to/library/own
+./b2 install
+export BOOST_ROOT=/path/to/library/own/
+```
+
+Don't forget to add the export BOOST_ROOT statement to .bashrc or wherever it is meant to be.
 
 ### libxlswriter
 
