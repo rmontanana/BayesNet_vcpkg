@@ -30,6 +30,7 @@ namespace pywrap {
         std::string version();
         std::string callMethodString(const std::string& method);
         std::string getVersion() override { return this->version(); };
+        // TODO: Implement these 3 methods
         int getNumberOfNodes()const override { return 0; };
         int getNumberOfEdges()const override { return 0; };
         int getNumberOfStates() const override { return 0; };
