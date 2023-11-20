@@ -9,6 +9,7 @@ namespace platform {
         static std::string hiddenResults() { return "hidden_results/"; }
         static std::string excel() { return "excel/"; }
         static std::string cfs() { return "cfs/"; }
+        static std::string grid() { return "grid/"; }
         static std::string datasets()
         {
             auto env = platform::DotEnv();

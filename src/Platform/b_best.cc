@@ -7,7 +7,7 @@
 
 argparse::ArgumentParser manageArguments(int argc, char** argv)
 {
-    argparse::ArgumentParser program("best");
+    argparse::ArgumentParser program("b_sbest");
     program.add_argument("-m", "--model").default_value("").help("Filter results of the selected model) (any for all models)");
     program.add_argument("-s", "--score").default_value("").help("Filter results of the score name supplied");
     program.add_argument("--build").help("build best score results file").default_value(false).implicit_value(true);

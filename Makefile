@@ -4,7 +4,7 @@ SHELL := /bin/bash
 
 f_release = build_release
 f_debug = build_debug
-app_targets = b_best b_list b_main b_manage
+app_targets = b_best b_list b_main b_manage b_grid
 test_targets = unit_tests_bayesnet unit_tests_platform
 n_procs = -j 16
 
@@ -36,10 +36,10 @@ install: ## Copy binary files to bin folder
 	@echo "Destination folder: $(dest)"
 	make buildr
 	@echo ">>> Copying files to $(dest)"
-	@cp $(f_release)/src/Platform/b_main $(dest)
-	@cp $(f_release)/src/Platform/b_list $(dest)
-	@cp $(f_release)/src/Platform/b_manage $(dest)
-	@cp $(f_release)/src/Platform/b_best $(dest)
+	for item in $(app_targets); do \
+		echo ">>> Copying $$item" ; \
+		cp $(f_release)/src/Platform/$$item $(dest) ; \
+	done
 
 dependency: ## Create a dependency graph diagram of the project (build/dependency.png)
 	@echo ">>> Creating dependency graph diagram of the project...";

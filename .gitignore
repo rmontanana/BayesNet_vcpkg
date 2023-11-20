@@ -32,8 +32,7 @@
 *.out
 *.app
 build/**
-build_debug/**
-build_release/**
+build_*/**
 *.dSYM/**
 cmake-build*/**
 .idea
