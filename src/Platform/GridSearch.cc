@@ -1,19 +1,25 @@
+#include <iostream>
 #include "GridSearch.h"
+#include "Paths.h"
+#include "Datasets.h"
+#include "HyperParameters.h"
 
 namespace platform {
-
     GridSearch::GridSearch(struct ConfigGrid& config) : config(config)
     {
-        this->config.input_file = config.path + "grid_" + config.model + "_input.json";
         this->config.output_file = config.path + "grid_" + config.model + "_output.json";
     }
     void GridSearch::go()
     {
-        // // Load datasets
-        // auto datasets = platform::Datasets(config.input_file);
-        // // Load hyperparameters
+        // Load datasets
+        auto datasets = platform::Datasets(config.discretize, Paths::datasets());
+        int i = 0;
+        for (const auto& item : grid.getGrid("BoostAODE")) {
+            std::cout << i++ << " hyperparams: " << item.dump() << std::endl;
+        }
+        // Load hyperparameters
         // auto hyperparameters = platform::HyperParameters(datasets.getNames(), config.input_file);
-        // // Check if hyperparameters are valid
+        // Check if hyperparameters are valid
         // auto valid_hyperparameters = platform::Models::instance()->getHyperparameters(config.model);
         // hyperparameters.check(valid_hyperparameters, config.model);
         // // Load model

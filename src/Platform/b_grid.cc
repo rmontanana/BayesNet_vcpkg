@@ -8,7 +8,6 @@
 #include "Timer.h"
 
 
-
 argparse::ArgumentParser manageArguments(std::string program_name)
 {
     auto env = platform::DotEnv();
@@ -63,7 +62,6 @@ int main(int argc, char** argv)
         cerr << program;
         exit(1);
     }
-
     /*
      * Begin Processing
      */

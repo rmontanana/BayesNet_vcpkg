@@ -2,6 +2,7 @@
 #define GRIDSEARCH_H
 #include <string>
 #include <vector>
+#include "GridData.h"
 
 namespace platform {
     struct ConfigGrid {
@@ -23,8 +24,7 @@ namespace platform {
         ~GridSearch() = default;
     private:
         struct ConfigGrid config;
-
+        GridData grid;
     };
-
 } /* namespace platform */
 #endif /* GRIDSEARCH_H */

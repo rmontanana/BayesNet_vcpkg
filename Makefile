@@ -35,8 +35,10 @@ dest ?= ${HOME}/bin
 install: ## Copy binary files to bin folder
 	@echo "Destination folder: $(dest)"
 	make buildr
+	@echo "*******************************************"
 	@echo ">>> Copying files to $(dest)"
-	for item in $(app_targets); do \
+	@echo "*******************************************"
+	@for item in $(app_targets); do \
 		echo ">>> Copying $$item" ; \
 		cp $(f_release)/src/Platform/$$item $(dest) ; \
 	done
