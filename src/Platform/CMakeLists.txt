@@ -9,7 +9,7 @@ include_directories(${BayesNet_SOURCE_DIR}/lib/libxlsxwriter/include)
 include_directories(${Python3_INCLUDE_DIRS})
 
 add_executable(b_best b_best.cc BestResults.cc Result.cc Statistics.cc BestResultsExcel.cc ReportExcel.cc ReportBase.cc Datasets.cc Dataset.cc ExcelFile.cc)
-add_executable(b_grid b_grid.cc GridSearch.cc GridData.cc Folding.cc Datasets.cc Dataset.cc)
+add_executable(b_grid b_grid.cc GridSearch.cc GridData.cc HyperParameters.cc Folding.cc Datasets.cc Dataset.cc)
 add_executable(b_list b_list.cc Datasets.cc Dataset.cc)
 add_executable(b_main b_main.cc Folding.cc Experiment.cc Datasets.cc Dataset.cc Models.cc HyperParameters.cc ReportConsole.cc ReportBase.cc)
 add_executable(b_manage b_manage.cc Results.cc ManageResults.cc CommandParser.cc Result.cc ReportConsole.cc ReportExcel.cc ReportBase.cc Datasets.cc Dataset.cc ExcelFile.cc)

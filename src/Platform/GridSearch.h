@@ -2,6 +2,8 @@
 #define GRIDSEARCH_H
 #include <string>
 #include <vector>
+#include "Datasets.h"
+#include "HyperParameters.h"
 #include "GridData.h"
 
 namespace platform {
@@ -23,6 +25,7 @@ namespace platform {
         void save();
         ~GridSearch() = default;
     private:
+        void processFile(std::string fileName, Datasets& datasets, HyperParameters& hyperparameters);
         struct ConfigGrid config;
         GridData grid;
     };

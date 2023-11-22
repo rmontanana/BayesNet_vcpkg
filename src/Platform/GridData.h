@@ -11,10 +11,11 @@ namespace platform {
     public:
         GridData();
         ~GridData() = default;
-        std::vector<json> getGrid(const std::string& model) { return doCombination(model); }
+        std::vector<json> getGrid(const std::string& model);
+        int getNumCombinations(const std::string& model);
     private:
+        json generateCombinations(json::iterator index, const json::iterator last, std::vector<json>& output, json currentCombination);
         int computeNumCombinations(const json& line);
-        std::vector<json> doCombination(const std::string& model);
         std::map<std::string, json> grid;
     };
 } /* namespace platform */
