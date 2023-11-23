@@ -66,6 +66,7 @@ int main(int argc, char** argv)
      * Begin Processing
      */
     auto env = platform::DotEnv();
+    platform::Paths::createPath(platform::Paths::grid());
     config.path = platform::Paths::grid();
     auto grid_search = platform::GridSearch(config);
     platform::Timer timer;

@@ -2,11 +2,13 @@
 #define GRIDSEARCH_H
 #include <string>
 #include <vector>
+#include <nlohmann/json.hpp>
 #include "Datasets.h"
 #include "HyperParameters.h"
 #include "GridData.h"
 
 namespace platform {
+    using json = nlohmann::json;
     struct ConfigGrid {
         std::string model;
         std::string score;
@@ -25,7 +27,8 @@ namespace platform {
         void save();
         ~GridSearch() = default;
     private:
-        void processFile(std::string fileName, Datasets& datasets, HyperParameters& hyperparameters);
+        double processFile(std::string fileName, Datasets& datasets, HyperParameters& hyperparameters);
+        json results;
         struct ConfigGrid config;
         GridData grid;
     };

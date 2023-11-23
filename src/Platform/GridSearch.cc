@@ -36,7 +36,7 @@ namespace platform {
                 return Colors::RESET();
         }
     }
-    void GridSearch::processFile(std::string fileName, Datasets& datasets, HyperParameters& hyperparameters)
+    double GridSearch::processFile(std::string fileName, Datasets& datasets, HyperParameters& hyperparameters)
     {
         // Get dataset
         auto [X, y] = datasets.getTensors(fileName);
@@ -44,6 +44,8 @@ namespace platform {
         auto features = datasets.getFeatures(fileName);
         auto samples = datasets.getNSamples(fileName);
         auto className = datasets.getClassName(fileName);
+        double totalScore = 0.0;
+        int numItems = 0;
         for (const auto& seed : config.seeds) {
             std::cout << "(" << seed << ") doing Fold: " << flush;
             Fold* fold;
@@ -51,8 +53,10 @@ namespace platform {
                 fold = new StratifiedKFold(config.n_folds, y, seed);
             else
                 fold = new KFold(config.n_folds, y.size(0), seed);
+            double bestScore = 0.0;
             for (int nfold = 0; nfold < config.n_folds; nfold++) {
                 auto clf = Models::instance()->create(config.model);
+                clf->setHyperparameters(hyperparameters.get(fileName));
                 auto [train, test] = fold->getFold(nfold);
                 auto train_t = torch::tensor(train);
                 auto test_t = torch::tensor(test);
@@ -60,15 +64,18 @@ namespace platform {
                 auto y_train = y.index({ train_t });
                 auto X_test = X.index({ "...", test_t });
                 auto y_test = y.index({ test_t });
-                showProgressFold(nfold + 1, getColor(clf->getStatus()), "a");
                 // Train model
-                // clf->fit(X_train, y_train, features, className, states);
+                clf->fit(X_train, y_train, features, className, states);
+                showProgressFold(nfold + 1, getColor(clf->getStatus()), "a");
                 showProgressFold(nfold + 1, getColor(clf->getStatus()), "b");
+                totalScore += clf->score(X_test, y_test);
+                numItems++;
                 showProgressFold(nfold + 1, getColor(clf->getStatus()), "c");
                 std::cout << "\b\b\b,  \b" << flush;
             }
             delete fold;
         }
+        return numItems == 0 ? 0.0 : totalScore / numItems;
     }
     void GridSearch::go()
     {
@@ -83,12 +90,21 @@ namespace platform {
         for (const auto& dataset : datasets.getNames()) {
             std::cout << "- " << setw(20) << left << dataset << " " << right << flush;
             int num = 0;
+            double bestScore = 0.0;
+            json bestHyperparameters;
             for (const auto& hyperparam_line : grid.getGrid(config.model)) {
                 showProgressComb(++num, totalComb, Colors::CYAN());
                 auto hyperparameters = platform::HyperParameters(datasets.getNames(), hyperparam_line);
-                processFile(dataset, datasets, hyperparameters);
+                double score = processFile(dataset, datasets, hyperparameters);
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestHyperparameters = hyperparam_line;
+                }
             }
-            std::cout << "end." << std::endl;
+            std::cout << "end." << " Score: " << setw(9) << setprecision(7) << fixed
+                << bestScore << " [" << bestHyperparameters.dump() << "]" << std::endl;
+            results[dataset]["score"] = bestScore;
+            results[dataset]["hyperparameters"] = bestHyperparameters;
         }
         // Save results
         save();
@@ -96,7 +112,7 @@ namespace platform {
     void GridSearch::save()
     {
         std::ofstream file(config.output_file);
-        // file << results.dump(4);
+        file << results.dump(4);
         file.close();
     }
 } /* namespace platform */
