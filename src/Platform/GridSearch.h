@@ -15,6 +15,7 @@ namespace platform {
         std::string path;
         std::string input_file;
         std::string output_file;
+        bool quiet;
         bool discretize;
         bool stratified;
         int n_folds;
@@ -24,7 +25,7 @@ namespace platform {
     public:
         explicit GridSearch(struct ConfigGrid& config);
         void go();
-        void save();
+        void save() const;
         ~GridSearch() = default;
     private:
         double processFile(std::string fileName, Datasets& datasets, HyperParameters& hyperparameters);

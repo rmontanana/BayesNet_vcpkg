@@ -23,6 +23,7 @@ argparse::ArgumentParser manageArguments(std::string program_name)
             }
     );
     program.add_argument("--discretize").help("Discretize input datasets").default_value((bool)stoi(env.get("discretize"))).implicit_value(true);
+    program.add_argument("--quiet").help("Don't display detailed progress").default_value(false).implicit_value(true);
     program.add_argument("--stratified").help("If Stratified KFold is to be done").default_value((bool)stoi(env.get("stratified"))).implicit_value(true);
     program.add_argument("--score").help("Score used in gridsearch").default_value("accuracy");
     program.add_argument("-f", "--folds").help("Number of folds").default_value(stoi(env.get("n_folds"))).scan<'i', int>().action([](const std::string& value) {
@@ -55,6 +56,7 @@ int main(int argc, char** argv)
         config.discretize = program.get<bool>("discretize");
         config.stratified = program.get<bool>("stratified");
         config.n_folds = program.get<int>("folds");
+        config.quiet = program.get<bool>("quiet");
         config.seeds = program.get<std::vector<int>>("seeds");
     }
     catch (const exception& err) {
