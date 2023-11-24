@@ -30,7 +30,6 @@ namespace platform {
         double processFile(std::string fileName, Datasets& datasets, HyperParameters& hyperparameters);
         json results;
         struct ConfigGrid config;
-        GridData grid;
     };
 } /* namespace platform */
 #endif /* GRIDSEARCH_H */

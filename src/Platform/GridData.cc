@@ -1,31 +1,15 @@
 #include "GridData.h"
-#include <iostream>
+#include <fstream>
 
 namespace platform {
-    GridData::GridData()
+    GridData::GridData(const std::string& fileName)
     {
-        auto boostaode = R"(
-            [
-                {
-                    "convergence": [true, false],
-                    "ascending": [true, false],
-                    "repeatSparent": [true, false],
-                    "select_features": ["CFS", "FCBF"],
-                    "tolerance": [0, 3, 5],
-                    "threshold": [1e-7]
-                },
-                {
-                    "convergence": [true, false],
-                    "ascending": [true, false],
-                    "repeatSparent": [true, false],
-                    "select_features": ["IWSS"],
-                    "tolerance": [0, 3, 5],
-                    "threshold": [0.5]
-                
-                }
-            ]
-        )"_json;
-        grid["BoostAODE"] = boostaode;
+        std::ifstream resultData(fileName);
+        if (resultData.is_open()) {
+            grid = json::parse(resultData);
+        } else {
+            throw std::invalid_argument("Unable to open input file. [" + fileName + "]");
+        }
     }
     int GridData::computeNumCombinations(const json& line)
     {
@@ -35,10 +19,10 @@ namespace platform {
         }
         return numCombinations;
     }
-    int GridData::getNumCombinations(const std::string& model)
+    int GridData::getNumCombinations()
     {
         int numCombinations = 0;
-        for (const auto& line : grid.at(model)) {
+        for (const auto& line : grid) {
             numCombinations += computeNumCombinations(line);
         }
         return numCombinations;
@@ -60,10 +44,10 @@ namespace platform {
         }
         return currentCombination;
     }
-    std::vector<json> GridData::getGrid(const std::string& model)
+    std::vector<json> GridData::getGrid()
     {
         auto result = std::vector<json>();
-        for (json line : grid.at(model)) {
+        for (json line : grid) {
             generateCombinations(line.begin(), line.end(), result, json({}));
         }
         return result;

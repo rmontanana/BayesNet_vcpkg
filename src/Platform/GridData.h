@@ -9,14 +9,14 @@ namespace platform {
     using json = nlohmann::json;
     class GridData {
     public:
-        GridData();
+        explicit GridData(const std::string& fileName);
         ~GridData() = default;
-        std::vector<json> getGrid(const std::string& model);
-        int getNumCombinations(const std::string& model);
+        std::vector<json> getGrid();
+        int getNumCombinations();
     private:
         json generateCombinations(json::iterator index, const json::iterator last, std::vector<json>& output, json currentCombination);
         int computeNumCombinations(const json& line);
-        std::map<std::string, json> grid;
+        json grid;
     };
 } /* namespace platform */
 #endif /* GRIDDATA_H */
