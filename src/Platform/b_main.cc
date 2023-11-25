@@ -11,10 +11,10 @@
 
 using json = nlohmann::json;
 
-argparse::ArgumentParser manageArguments()
+argparse::ArgumentParser manageArguments(std::string program_name)
 {
     auto env = platform::DotEnv();
-    argparse::ArgumentParser program("main");
+    argparse::ArgumentParser program(program_name);
     program.add_argument("-d", "--dataset").default_value("").help("Dataset file name");
     program.add_argument("--hyperparameters").default_value("{}").help("Hyperparameters passed to the model in Experiment");
     program.add_argument("--hyper-file").default_value("").help("Hyperparameters file name." \
@@ -61,7 +61,7 @@ int main(int argc, char** argv)
     std::vector<int> seeds;
     std::vector<std::string> filesToTest;
     int n_folds;
-    auto program = manageArguments();
+    auto program = manageArguments("b_main");
     try {
         program.parse_args(argc, argv);
         file_name = program.get<std::string>("dataset");

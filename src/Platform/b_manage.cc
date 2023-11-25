@@ -5,7 +5,7 @@
 
 argparse::ArgumentParser manageArguments(int argc, char** argv)
 {
-    argparse::ArgumentParser program("manage");
+    argparse::ArgumentParser program("b_manage");
     program.add_argument("-n", "--number").default_value(0).help("Number of results to show (0 = all)").scan<'i', int>();
     program.add_argument("-m", "--model").default_value("any").help("Filter results of the selected model)");
     program.add_argument("-s", "--score").default_value("any").help("Filter results of the score name supplied");

@@ -3,30 +3,16 @@
 #include <torch/torch.h>
 #include <nlohmann/json.hpp>
 #include <string>
-#include <chrono>
 #include "Folding.h"
 #include "BaseClassifier.h"
 #include "HyperParameters.h"
 #include "TAN.h"
 #include "KDB.h"
 #include "AODE.h"
+#include "Timer.h"
 
 namespace platform {
     using json = nlohmann::json;
-    class Timer {
-    private:
-        std::chrono::high_resolution_clock::time_point begin;
-    public:
-        Timer() = default;
-        ~Timer() = default;
-        void start() { begin = std::chrono::high_resolution_clock::now(); }
-        double getDuration()
-        {
-            std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
-            std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double >> (end - begin);
-            return time_span.count();
-        }
-    };
     class Result {
     private:
         std::string dataset, model_version;

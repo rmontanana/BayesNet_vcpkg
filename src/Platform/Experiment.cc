@@ -133,7 +133,7 @@ namespace platform {
     }
     void Experiment::cross_validation(const std::string& fileName, bool quiet)
     {
-        auto datasets = platform::Datasets(discretized, Paths::datasets());
+        auto datasets = Datasets(discretized, Paths::datasets());
         // Get dataset
         auto [X, y] = datasets.getTensors(fileName);
         auto states = datasets.getStates(fileName);
