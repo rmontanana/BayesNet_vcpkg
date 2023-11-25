@@ -35,7 +35,7 @@ namespace platform {
                 hyperparameters[dataset] = json({});
                 continue;
             }
-            hyperparameters[dataset] = input_hyperparameters[dataset].get<json>();
+            hyperparameters[dataset] = input_hyperparameters[dataset]["hyperparameters"].get<json>();
         }
     }
     void HyperParameters::check(const std::vector<std::string>& valid, const std::string& fileName)
