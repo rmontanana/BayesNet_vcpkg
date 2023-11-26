@@ -108,7 +108,7 @@ namespace platform {
         // Load previous results
         json results;
         auto datasets_names = datasets.getNames();
-        if (config.continue_from != "no") {
+        if (config.continue_from != "No") {
             if (std::find(datasets_names.begin(), datasets_names.end(), config.continue_from) == datasets_names.end()) {
                 throw std::invalid_argument("Dataset " + config.continue_from + " not found");
             }
