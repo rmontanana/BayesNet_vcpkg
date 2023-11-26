@@ -15,6 +15,7 @@ namespace platform {
         std::string path;
         std::string input_file;
         std::string output_file;
+        std::string continue_from;
         bool quiet;
         bool discretize;
         bool stratified;
@@ -25,11 +26,10 @@ namespace platform {
     public:
         explicit GridSearch(struct ConfigGrid& config);
         void go();
-        void save() const;
         ~GridSearch() = default;
     private:
+        void save(json& results) const;
         double processFile(std::string fileName, Datasets& datasets, HyperParameters& hyperparameters);
-        json results;
         struct ConfigGrid config;
     };
 } /* namespace platform */

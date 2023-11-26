@@ -7,7 +7,6 @@
 #include "Result.h"
 namespace platform {
     using json = nlohmann::json;
-
     class Results {
     public:
         Results(const std::string& path, const std::string& model, const std::string& score, bool complete, bool partial);
@@ -34,5 +33,4 @@ namespace platform {
         void load(); // Loads the list of results
     };
 };
-
 #endif

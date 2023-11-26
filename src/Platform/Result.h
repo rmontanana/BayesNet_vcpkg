@@ -32,5 +32,4 @@ namespace platform {
         bool complete;
     };
 };
-
 #endif

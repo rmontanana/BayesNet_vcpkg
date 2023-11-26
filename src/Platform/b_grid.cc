@@ -24,6 +24,7 @@ argparse::ArgumentParser manageArguments(std::string program_name)
     );
     program.add_argument("--discretize").help("Discretize input datasets").default_value((bool)stoi(env.get("discretize"))).implicit_value(true);
     program.add_argument("--quiet").help("Don't display detailed progress").default_value(false).implicit_value(true);
+    program.add_argument("--continue").help("Continue computing from that dataset").default_value("No");
     program.add_argument("--stratified").help("If Stratified KFold is to be done").default_value((bool)stoi(env.get("stratified"))).implicit_value(true);
     program.add_argument("--score").help("Score used in gridsearch").default_value("accuracy");
     program.add_argument("-f", "--folds").help("Number of folds").default_value(stoi(env.get("n_folds"))).scan<'i', int>().action([](const std::string& value) {
@@ -58,6 +59,7 @@ int main(int argc, char** argv)
         config.n_folds = program.get<int>("folds");
         config.quiet = program.get<bool>("quiet");
         config.seeds = program.get<std::vector<int>>("seeds");
+        config.continue_from = program.get<std::string>("continue");
     }
     catch (const exception& err) {
         cerr << err.what() << std::endl;
@@ -75,7 +77,6 @@ int main(int argc, char** argv)
     timer.start();
     grid_search.go();
     std::cout << "Process took " << timer.getDurationString() << std::endl;
-    grid_search.save();
     std::cout << "Done!" << std::endl;
     return 0;
 }

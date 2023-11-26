@@ -7,6 +7,26 @@
 #include "Colors.h"
 
 namespace platform {
+    std::string get_date()
+    {
+        time_t rawtime;
+        tm* timeinfo;
+        time(&rawtime);
+        timeinfo = std::localtime(&rawtime);
+        std::ostringstream oss;
+        oss << std::put_time(timeinfo, "%Y-%m-%d");
+        return oss.str();
+    }
+    std::string get_time()
+    {
+        time_t rawtime;
+        tm* timeinfo;
+        time(&rawtime);
+        timeinfo = std::localtime(&rawtime);
+        std::ostringstream oss;
+        oss << std::put_time(timeinfo, "%H:%M:%S");
+        return oss.str();
+    }
     GridSearch::GridSearch(struct ConfigGrid& config) : config(config)
     {
         this->config.output_file = config.path + "grid_" + config.model + "_output.json";
@@ -43,7 +63,6 @@ namespace platform {
         auto [X, y] = datasets.getTensors(fileName);
         auto states = datasets.getStates(fileName);
         auto features = datasets.getFeatures(fileName);
-        auto samples = datasets.getNSamples(fileName);
         auto className = datasets.getClassName(fileName);
         double totalScore = 0.0;
         int numItems = 0;
@@ -86,6 +105,33 @@ namespace platform {
     {
         // Load datasets
         auto datasets = Datasets(config.discretize, Paths::datasets());
+        // Load previous results
+        json results;
+        auto datasets_names = datasets.getNames();
+        if (config.continue_from != "no") {
+            if (std::find(datasets_names.begin(), datasets_names.end(), config.continue_from) == datasets_names.end()) {
+                throw std::invalid_argument("Dataset " + config.continue_from + " not found");
+            }
+            if (!config.quiet)
+                std::cout << "* Loading previous results" << std::endl;
+            try {
+                std::ifstream file(config.output_file);
+                if (file.is_open()) {
+                    results = json::parse(file);
+                }
+            }
+            catch (const std::exception& e) {
+                std::cerr << "Error loading previous results: " << e.what() << std::endl;
+            }
+            // Remove datasets already processed
+            vector< string >::iterator it = datasets_names.begin();
+            while (it != datasets_names.end()) {
+                if (*it != config.continue_from) {
+                    it = datasets_names.erase(it);
+                } else
+                    break;
+            }
+        }
         // Create model
         std::cout << "***************** Starting Gridsearch *****************" << std::endl;
         std::cout << "input file=" << config.input_file << std::endl;
@@ -94,7 +140,7 @@ namespace platform {
         std::cout << "* Doing " << totalComb << " combinations for each dataset/seed/fold" << std::endl;
         // Generate hyperparameters grid & run gridsearch
         // Check each combination of hyperparameters for each dataset and each seed
-        for (const auto& dataset : datasets.getNames()) {
+        for (const auto& dataset : datasets_names) {
             if (!config.quiet)
                 std::cout << "- " << setw(20) << left << dataset << " " << right << flush;
             int num = 0;
@@ -116,15 +162,17 @@ namespace platform {
             }
             results[dataset]["score"] = bestScore;
             results[dataset]["hyperparameters"] = bestHyperparameters;
+            results[dataset]["date"] = get_date() + " " + get_time();
+            // Save partial results
+            save(results);
         }
-        // Save results
-        save();
+        // Save final results
+        save(results);
         std::cout << "***************** Ending Gridsearch *******************" << std::endl;
     }
-    void GridSearch::save() const
+    void GridSearch::save(json& results) const
     {
         std::ofstream file(config.output_file);
         file << results.dump(4);
-        file.close();
     }
 } /* namespace platform */
