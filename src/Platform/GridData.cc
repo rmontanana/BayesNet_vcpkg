@@ -52,4 +52,8 @@ namespace platform {
         }
         return result;
     }
+    json& GridData::getInputGrid()
+    {
+        return grid;
+    }
 } /* namespace platform */

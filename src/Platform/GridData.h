@@ -13,6 +13,7 @@ namespace platform {
         ~GridData() = default;
         std::vector<json> getGrid();
         int getNumCombinations();
+        json& getInputGrid();
     private:
         json generateCombinations(json::iterator index, const json::iterator last, std::vector<json>& output, json currentCombination);
         int computeNumCombinations(const json& line);

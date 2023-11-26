@@ -109,6 +109,8 @@ namespace platform {
         json results;
         auto datasets_names = datasets.getNames();
         if (config.continue_from != "No") {
+            // Continue previous execution:
+            // Load previous results & remove datasets already processed
             if (std::find(datasets_names.begin(), datasets_names.end(), config.continue_from) == datasets_names.end()) {
                 throw std::invalid_argument("Dataset " + config.continue_from + " not found");
             }
@@ -146,7 +148,8 @@ namespace platform {
             int num = 0;
             double bestScore = 0.0;
             json bestHyperparameters;
-            for (const auto& hyperparam_line : grid.getGrid()) {
+            auto combinations = grid.getGrid();
+            for (const auto& hyperparam_line : combinations) {
                 if (!config.quiet)
                     showProgressComb(++num, totalComb, Colors::CYAN());
                 auto hyperparameters = platform::HyperParameters(datasets.getNames(), hyperparam_line);
@@ -163,6 +166,7 @@ namespace platform {
             results[dataset]["score"] = bestScore;
             results[dataset]["hyperparameters"] = bestHyperparameters;
             results[dataset]["date"] = get_date() + " " + get_time();
+            results[dataset]["grid"] = grid.getInputGrid();
             // Save partial results
             save(results);
         }
