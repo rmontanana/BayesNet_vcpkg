@@ -145,6 +145,45 @@ namespace pywrap {
     {
         return callMethodString(id, "version");
     }
+    int PyWrap::callMethodSumOfItems(const clfId_t id, const std::string& method)
+    {
+        // Call method on each estimator and sum the results (made for RandomForest)
+        PyObject* instance = getClass(id);
+        PyObject* estimators = PyObject_GetAttrString(instance, "estimators_");
+        if (estimators == nullptr) {
+            errorAbort("Failed to get attribute: " + method);
+        }
+        int sumOfItems = 0;
+        Py_ssize_t len = PyList_Size(estimators);
+        for (Py_ssize_t i = 0; i < len; i++) {
+            PyObject* estimator = PyList_GetItem(estimators, i);
+            PyObject* result;
+            if (method == "node_count") {
+                PyObject* owner = PyObject_GetAttrString(estimator, "tree_");
+                if (owner == nullptr) {
+                    Py_XDECREF(estimators);
+                    errorAbort("Failed to get attribute tree_ for: " + method);
+                }
+                result = PyObject_GetAttrString(owner, method.c_str());
+                if (result == nullptr) {
+                    Py_XDECREF(estimators);
+                    Py_XDECREF(owner);
+                    errorAbort("Failed to get attribute node_count: " + method);
+                }
+                Py_DECREF(owner);
+            } else {
+                result = PyObject_CallMethod(estimator, method.c_str(), nullptr);
+                if (result == nullptr) {
+                    Py_XDECREF(estimators);
+                    errorAbort("Failed to call method: " + method);
+                }
+            }
+            sumOfItems += PyLong_AsLong(result);
+            Py_DECREF(result);
+        }
+        Py_DECREF(estimators);
+        return sumOfItems;
+    }
     void PyWrap::setHyperparameters(const clfId_t id, const json& hyperparameters)
     {
         // Set hyperparameters as attributes of the class

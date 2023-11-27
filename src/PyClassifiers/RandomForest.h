@@ -7,6 +7,9 @@ namespace pywrap {
     public:
         RandomForest();
         ~RandomForest() = default;
+        int getNumberOfEdges() const override;
+        int getNumberOfStates() const override;
+        int getNumberOfNodes() const override;
     };
 } /* namespace pywrap */
 #endif /* RANDOMFOREST_H */

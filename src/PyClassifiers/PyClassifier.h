@@ -29,9 +29,9 @@ namespace pywrap {
         float score(torch::Tensor& X, torch::Tensor& y) override;
         std::string version();
         std::string callMethodString(const std::string& method);
+        int callMethodSumOfItems(const std::string& method) const;
         int callMethodInt(const std::string& method) const;
         std::string getVersion() override { return this->version(); };
-        // TODO: Implement these 3 methods
         int getNumberOfNodes() const override { return 0; };
         int getNumberOfEdges() const override { return 0; };
         int getNumberOfStates() const override { return 0; };

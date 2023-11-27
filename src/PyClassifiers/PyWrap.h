@@ -27,6 +27,7 @@ namespace pywrap {
         int callMethodInt(const clfId_t id, const std::string& method);
         std::string sklearnVersion();
         std::string version(const clfId_t id);
+        int callMethodSumOfItems(const clfId_t id, const std::string& method);
         void setHyperparameters(const clfId_t id, const json& hyperparameters);
         void fit(const clfId_t id, CPyObject& X, CPyObject& y);
         PyObject* predict(const clfId_t id, CPyObject& X);

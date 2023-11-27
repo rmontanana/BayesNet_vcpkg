@@ -38,6 +38,10 @@ namespace pywrap {
     {
         return pyWrap->callMethodString(id, method);
     }
+    int PyClassifier::callMethodSumOfItems(const std::string& method) const
+    {
+        return pyWrap->callMethodSumOfItems(id, method);
+    }
     int PyClassifier::callMethodInt(const std::string& method) const
     {
         return pyWrap->callMethodInt(id, method);
