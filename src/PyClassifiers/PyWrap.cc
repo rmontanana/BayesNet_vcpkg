@@ -127,10 +127,19 @@ namespace pywrap {
     }
     std::string PyWrap::sklearnVersion()
     {
-        return "1.0";
-        // CPyObject data = PyRun_SimpleString("import sklearn;return sklearn.__version__");
-        // std::string result = PyUnicode_AsUTF8(data);
-        // return result;
+        PyObject* sklearnModule = PyImport_ImportModule("sklearn");
+        if (sklearnModule == nullptr) {
+            errorAbort("Couldn't import sklearn");
+        }
+        PyObject* versionAttr = PyObject_GetAttrString(sklearnModule, "__version__");
+        if (versionAttr == nullptr || !PyUnicode_Check(versionAttr)) {
+            Py_XDECREF(sklearnModule);
+            errorAbort("Couldn't get sklearn version");
+        }
+        std::string result = PyUnicode_AsUTF8(versionAttr);
+        Py_XDECREF(versionAttr);
+        Py_XDECREF(sklearnModule);
+        return result;
     }
     std::string PyWrap::version(const clfId_t id)
     {
