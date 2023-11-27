@@ -8,6 +8,9 @@ namespace pywrap {
     public:
         STree();
         ~STree() = default;
+        int getNumberOfNodes() const override;
+        int getNumberOfEdges() const override;
+        int getNumberOfStates() const override;
         std::string graph();
     };
 } /* namespace pywrap */

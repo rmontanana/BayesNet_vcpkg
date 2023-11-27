@@ -110,6 +110,21 @@ namespace pywrap {
         Py_XDECREF(result);
         return value;
     }
+    int PyWrap::callMethodInt(const clfId_t id, const std::string& method)
+    {
+        PyObject* instance = getClass(id);
+        PyObject* result;
+        try {
+            if (!(result = PyObject_CallMethod(instance, method.c_str(), NULL)))
+                errorAbort("Couldn't call method " + method);
+        }
+        catch (const std::exception& e) {
+            errorAbort(e.what());
+        }
+        int value = PyLong_AsLong(result);
+        Py_XDECREF(result);
+        return value;
+    }
     std::string PyWrap::sklearnVersion()
     {
         return "1.0";

@@ -38,6 +38,10 @@ namespace pywrap {
     {
         return pyWrap->callMethodString(id, method);
     }
+    int PyClassifier::callMethodInt(const std::string& method) const
+    {
+        return pyWrap->callMethodInt(id, method);
+    }
     PyClassifier& PyClassifier::fit(torch::Tensor& X, torch::Tensor& y)
     {
         if (!fitted && hyperparameters.size() > 0) {

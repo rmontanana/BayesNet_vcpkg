@@ -24,6 +24,7 @@ namespace pywrap {
         void operator=(const PyWrap&) = delete;
         ~PyWrap() = default;
         std::string callMethodString(const clfId_t id, const std::string& method);
+        int callMethodInt(const clfId_t id, const std::string& method);
         std::string sklearnVersion();
         std::string version(const clfId_t id);
         void setHyperparameters(const clfId_t id, const json& hyperparameters);
