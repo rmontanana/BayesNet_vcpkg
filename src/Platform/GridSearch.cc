@@ -123,15 +123,21 @@ namespace platform {
                 }
             }
             catch (const std::exception& e) {
-                std::cerr << "Error loading previous results: " << e.what() << std::endl;
+                std::cerr << "* There were no previous results" << std::endl;
+                std::cerr << "* Initizalizing new results" << std::endl;
+                results = json();
             }
             // Remove datasets already processed
             vector< string >::iterator it = datasets_names.begin();
             while (it != datasets_names.end()) {
                 if (*it != config.continue_from) {
                     it = datasets_names.erase(it);
-                } else
-                    break;
+                } else {
+                    if (config.only)
+                        ++it;
+                    else
+                        break;
+                }
             }
         }
         // Create model

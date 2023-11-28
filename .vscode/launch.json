@@ -14,7 +14,7 @@
                 "-s",
                 "271",
                 "-p",
-                "/home/rmontanana/Code/discretizbench/datasets/",
+                "/Users/rmontanana/Code/discretizbench/datasets/",
             ],
             //"cwd": "${workspaceFolder}/build/sample/",
         },
@@ -33,7 +33,22 @@
                 // "--hyperparameters",
                 // "{\"repeatSparent\": true, \"maxModels\": 12}"
             ],
-            "cwd": "/home/rmontanana/Code/discretizbench",
+            "cwd": "${workspaceFolder}/../discretizbench",
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "gridsearch",
+            "program": "${workspaceFolder}/build_debug/src/Platform/b_grid",
+            "args": [
+                "-m",
+                "KDB",
+                "--discretize",
+                "--continue",
+                "glass",
+                "--only"
+            ],
+            "cwd": "${workspaceFolder}/../discretizbench",
         },
         {
             "type": "lldb",
@@ -64,7 +79,7 @@
                 "accuracy",
                 "--build",
             ],
-            "cwd": "/home/rmontanana/Code/discretizbench",
+            "cwd": "${workspaceFolder}/../discretizbench",
         },
         {
             "type": "lldb",
@@ -75,7 +90,7 @@
                 "-n",
                 "20"
             ],
-            "cwd": "/home/rmontanana/Code/discretizbench",
+            "cwd": "${workspaceFolder}/../discretizbench",
         },
         {
             "type": "lldb",
@@ -84,7 +99,7 @@
             "program": "${workspaceFolder}/build_debug/src/Platform/b_list",
             "args": [],
             //"cwd": "/Users/rmontanana/Code/discretizbench",
-            "cwd": "/home/rmontanana/Code/covbench",
+            "cwd": "${workspaceFolder}/../discretizbench",
         },
         {
             "type": "lldb",

@@ -17,6 +17,7 @@ namespace platform {
         std::string output_file;
         std::string continue_from;
         bool quiet;
+        bool only; // used with continue_from to only compute that dataset
         bool discretize;
         bool stratified;
         int n_folds;
