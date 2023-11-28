@@ -28,6 +28,8 @@ namespace platform {
         explicit GridSearch(struct ConfigGrid& config);
         void go();
         ~GridSearch() = default;
+        std::vector<json> dump();
+        json getResults();
     private:
         void save(json& results) const;
         double processFile(std::string fileName, Datasets& datasets, HyperParameters& hyperparameters);

@@ -32,6 +32,18 @@ namespace platform {
         this->config.output_file = config.path + "grid_" + config.model + "_output.json";
         this->config.input_file = config.path + "grid_" + config.model + "_input.json";
     }
+    std::vector<json> GridSearch::dump()
+    {
+        return GridData(config.input_file).getGrid();
+    }
+    json GridSearch::getResults()
+    {
+        std::ifstream file(config.output_file);
+        if (file.is_open()) {
+            return json::parse(file);
+        }
+        return json();
+    }
     void showProgressComb(const int num, const int total, const std::string& color)
     {
         int spaces = int(log(total) / log(10)) + 1;

@@ -11,10 +11,9 @@
 
 using json = nlohmann::json;
 
-argparse::ArgumentParser manageArguments(std::string program_name)
+void manageArguments(argparse::ArgumentParser& program)
 {
     auto env = platform::DotEnv();
-    argparse::ArgumentParser program(program_name);
     program.add_argument("-d", "--dataset").default_value("").help("Dataset file name");
     program.add_argument("--hyperparameters").default_value("{}").help("Hyperparameters passed to the model in Experiment");
     program.add_argument("--hyper-file").default_value("").help("Hyperparameters file name." \
@@ -50,18 +49,18 @@ argparse::ArgumentParser manageArguments(std::string program_name)
         }});
     auto seed_values = env.getSeeds();
     program.add_argument("-s", "--seeds").nargs(1, 10).help("Random seeds. Set to -1 to have pseudo random").scan<'i', int>().default_value(seed_values);
-    return program;
 }
 
 int main(int argc, char** argv)
 {
+    argparse::ArgumentParser program("b_main");
+    manageArguments(program);
     std::string file_name, model_name, title, hyperparameters_file;
     json hyperparameters_json;
     bool discretize_dataset, stratified, saveResults, quiet;
     std::vector<int> seeds;
     std::vector<std::string> filesToTest;
     int n_folds;
-    auto program = manageArguments("b_main");
     try {
         program.parse_args(argc, argv);
         file_name = program.get<std::string>("dataset");
