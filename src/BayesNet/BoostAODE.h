@@ -21,6 +21,7 @@ namespace bayesnet {
         // Hyperparameters
         bool repeatSparent = false; // if true, a feature can be selected more than once
         int maxModels = 0;
+        int tolerance = 0;
         bool ascending = false; //Process KBest features ascending or descending order
         bool convergence = false; //if true, stop when the model does not improve
         bool selectFeatures = false; // if true, use feature selection

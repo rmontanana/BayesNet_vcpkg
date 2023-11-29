@@ -12,7 +12,7 @@
 namespace bayesnet {
     BoostAODE::BoostAODE() : Ensemble()
     {
-        validHyperparameters = { "repeatSparent", "maxModels", "ascending", "convergence", "threshold", "select_features" };
+        validHyperparameters = { "repeatSparent", "maxModels", "ascending", "convergence", "threshold", "select_features", "tolerance" };
 
     }
     void BoostAODE::buildModel(const torch::Tensor& weights)
@@ -47,22 +47,32 @@ namespace bayesnet {
             y_train = y_;
         }
     }
-    void BoostAODE::setHyperparameters(const nlohmann::json& hyperparameters)
+    void BoostAODE::setHyperparameters(const nlohmann::json& hyperparameters_)
     {
+        auto hyperparameters = hyperparameters_;
         if (hyperparameters.contains("repeatSparent")) {
             repeatSparent = hyperparameters["repeatSparent"];
+            hyperparameters.erase("repeatSparent");
         }
         if (hyperparameters.contains("maxModels")) {
             maxModels = hyperparameters["maxModels"];
+            hyperparameters.erase("maxModels");
         }
         if (hyperparameters.contains("ascending")) {
             ascending = hyperparameters["ascending"];
+            hyperparameters.erase("ascending");
         }
         if (hyperparameters.contains("convergence")) {
             convergence = hyperparameters["convergence"];
+            hyperparameters.erase("convergence");
         }
         if (hyperparameters.contains("threshold")) {
             threshold = hyperparameters["threshold"];
+            hyperparameters.erase("threshold");
+        }
+        if (hyperparameters.contains("tolerance")) {
+            tolerance = hyperparameters["tolerance"];
+            hyperparameters.erase("tolerance");
         }
         if (hyperparameters.contains("select_features")) {
             auto selectedAlgorithm = hyperparameters["select_features"];
@@ -72,6 +82,10 @@ namespace bayesnet {
             if (std::find(algos.begin(), algos.end(), selectedAlgorithm) == algos.end()) {
                 throw std::invalid_argument("Invalid selectFeatures value [IWSS, FCBF, CFS]");
             }
+            hyperparameters.erase("select_features");
+        }
+        if (!hyperparameters.empty()) {
+            throw std::invalid_argument("Invalid hyperparameters" + hyperparameters.dump());
         }
     }
     std::unordered_set<int> BoostAODE::initializeModels()
@@ -109,10 +123,8 @@ namespace bayesnet {
     void BoostAODE::trainModel(const torch::Tensor& weights)
     {
         std::unordered_set<int> featuresUsed;
-        int tolerance = 5; // number of times the accuracy can be lower than the threshold
         if (selectFeatures) {
             featuresUsed = initializeModels();
-            tolerance = 0; // Remove tolerance if features are selected
         }
         if (maxModels == 0)
             maxModels = .1 * n > 10 ? .1 * n : n;

@@ -89,6 +89,8 @@ namespace platform {
             double bestScore = 0.0;
             for (int nfold = 0; nfold < config.n_folds; nfold++) {
                 auto clf = Models::instance()->create(config.model);
+                auto valid = clf->getValidHyperparameters();
+                hyperparameters.check(valid, fileName);
                 clf->setHyperparameters(hyperparameters.get(fileName));
                 auto [train, test] = fold->getFold(nfold);
                 auto train_t = torch::tensor(train);
