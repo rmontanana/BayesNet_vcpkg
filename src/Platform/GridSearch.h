@@ -1,7 +1,7 @@
 #ifndef GRIDSEARCH_H
 #define GRIDSEARCH_H
 #include <string>
-#include <vector>
+#include <map>
 #include <nlohmann/json.hpp>
 #include "Datasets.h"
 #include "HyperParameters.h"
@@ -12,9 +12,6 @@ namespace platform {
     struct ConfigGrid {
         std::string model;
         std::string score;
-        std::string path;
-        std::string input_file;
-        std::string output_file;
         std::string continue_from;
         bool quiet;
         bool only; // used with continue_from to only compute that dataset
@@ -28,7 +25,6 @@ namespace platform {
         explicit GridSearch(struct ConfigGrid& config);
         void go();
         ~GridSearch() = default;
-        std::vector<json> dump();
         json getResults();
     private:
         void save(json& results) const;

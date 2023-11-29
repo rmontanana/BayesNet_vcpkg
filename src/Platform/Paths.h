@@ -26,6 +26,14 @@ namespace platform {
             }
         }
         static std::string excelResults() { return "some_results.xlsx"; }
+        static std::string grid_input(const std::string& model)
+        {
+            return grid() + "grid_" + model + "_input.json";
+        }
+        static std::string grid_output(const std::string& model)
+        {
+            return grid() + "grid_" + model + "_output.json";
+        }
     };
 }
 #endif

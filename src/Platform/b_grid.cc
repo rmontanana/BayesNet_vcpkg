@@ -1,5 +1,7 @@
 #include <iostream>
 #include <argparse/argparse.hpp>
+#include <map>
+#include <nlohmann/json.hpp>
 #include "DotEnv.h"
 #include "Models.h"
 #include "modelRegister.h"
@@ -8,6 +10,7 @@
 #include "Timer.h"
 #include "Colors.h"
 
+using json = nlohmann::json;
 
 void manageArguments(argparse::ArgumentParser& program)
 {
@@ -50,6 +53,72 @@ void manageArguments(argparse::ArgumentParser& program)
     program.add_argument("-s", "--seeds").nargs(1, 10).help("Random seeds. Set to -1 to have pseudo random").scan<'i', int>().default_value(seed_values);
 }
 
+void list_dump(std::string& model)
+{
+    auto data = platform::GridData(platform::Paths::grid_input(model));
+    std::cout << Colors::MAGENTA() << "Listing configuration input file (Grid)" << std::endl << std::endl;
+    int index = 0;
+    int max_hyper = 15;
+    int max_dataset = 7;
+    auto combinations = data.getGridFile();
+    for (auto const& item : combinations) {
+        if (item.first.size() > max_dataset) {
+            max_dataset = item.first.size();
+        }
+        if (item.second.dump().size() > max_hyper) {
+            max_hyper = item.second.dump().size();
+        }
+    }
+    std::cout << Colors::GREEN() << left << " #  " << left << setw(max_dataset) << "Dataset" << " #Com. "
+        << setw(max_hyper) << "Hyperparameters" << std::endl;
+    std::cout << "=== " << string(max_dataset, '=') << " ===== " << string(max_hyper, '=') << std::endl;
+    bool odd = true;
+    for (auto const& item : combinations) {
+        auto color = odd ? Colors::CYAN() : Colors::BLUE();
+        std::cout << color;
+        auto num_combinations = data.getNumCombinations(item.first);
+        std::cout << setw(3) << fixed << right << ++index << left << " " << setw(max_dataset) << item.first
+            << " " << setw(5) << right << num_combinations << " " << setw(max_hyper) << item.second.dump() << std::endl;
+        odd = !odd;
+    }
+    std::cout << Colors::RESET() << std::endl;
+}
+void list_results(json& results, std::string& model)
+{
+    std::cout << Colors::MAGENTA() << "Listing computed hyperparameters for model "
+        << model << std::endl << std::endl;
+    int spaces = 0;
+    int hyperparameters_spaces = 0;
+    for (const auto& item : results.items()) {
+        auto key = item.key();
+        auto value = item.value();
+        if (key.size() > spaces) {
+            spaces = key.size();
+        }
+        if (value["hyperparameters"].dump().size() > hyperparameters_spaces) {
+            hyperparameters_spaces = value["hyperparameters"].dump().size();
+        }
+    }
+    std::cout << Colors::GREEN() << " #  " << left << setw(spaces) << "Dataset" << " " << setw(19) << "Date" << " "
+        << setw(8) << "Score" << " " << "Hyperparameters" << std::endl;
+    std::cout << "=== " << string(spaces, '=') << " " << string(19, '=') << " " << string(8, '=') << " "
+        << string(hyperparameters_spaces, '=') << std::endl;
+    bool odd = true;
+    int index = 0;
+    for (const auto& item : results.items()) {
+        auto color = odd ? Colors::CYAN() : Colors::BLUE();
+        auto key = item.key();
+        auto value = item.value();
+        std::cout << color;
+        std::cout << std::setw(3) << std::right << index++ << " ";
+        std::cout << left << setw(spaces) << key << " " << value["date"].get<string>()
+            << " " << setw(8) << setprecision(6) << fixed << right
+            << value["score"].get<double>() << " " << value["hyperparameters"].dump() << std::endl;
+        odd = !odd;
+    }
+    std::cout << Colors::RESET() << std::endl;
+}
+
 int main(int argc, char** argv)
 {
     argparse::ArgumentParser program("b_grid");
@@ -87,74 +156,22 @@ int main(int argc, char** argv)
      */
     auto env = platform::DotEnv();
     platform::Paths::createPath(platform::Paths::grid());
-    config.path = platform::Paths::grid();
     auto grid_search = platform::GridSearch(config);
     platform::Timer timer;
     timer.start();
     if (dump) {
-        auto combinations = grid_search.dump();
-        auto total = combinations.size();
-        int spaces = int(log(total) / log(10)) + 1;
-        std::cout << Colors::MAGENTA() << "There are " << total << " combinations" << std::endl << std::endl;
-        int index = 0;
-        int max = 0;
-        for (auto const& item : combinations) {
-            if (item.dump().size() > spaces) {
-                max = item.dump().size();
-            }
-        }
-        std::cout << Colors::GREEN() << left << setw(spaces) << "#" << left << " " << setw(spaces)
-            << "Hyperparameters" << std::endl;
-        std::cout << string(spaces, '=') << " " << string(max, '=') << std::endl;
-        bool odd = true;
-        for (auto const& item : combinations) {
-            auto color = odd ? Colors::CYAN() : Colors::BLUE();
-            std::cout << color;
-            std::cout << setw(spaces) << fixed << right << ++index << left << " " << item.dump() << std::endl;
-            odd = !odd;
-        }
-        std::cout << Colors::RESET() << std::endl;
+        list_dump(config.model);
     } else {
         if (compute) {
             grid_search.go();
             std::cout << "Process took " << timer.getDurationString() << std::endl;
         } else {
-            std::cout << Colors::MAGENTA() << "Listing computed hyperparameters for model "
-                << config.model << std::endl << std::endl;
+            // List results
             auto results = grid_search.getResults();
             if (results.empty()) {
-                std::cout << "No results found" << std::endl;
+                std::cout << "** No results found" << std::endl;
             } else {
-                int spaces = 0;
-                int hyperparameters_spaces = 0;
-                for (const auto& item : results.items()) {
-                    auto key = item.key();
-                    auto value = item.value();
-                    if (key.size() > spaces) {
-                        spaces = key.size();
-                    }
-                    if (value["hyperparameters"].dump().size() > hyperparameters_spaces) {
-                        hyperparameters_spaces = value["hyperparameters"].dump().size();
-                    }
-                }
-                std::cout << Colors::GREEN() << " #  " << left << setw(spaces) << "Dataset" << " " << setw(19) << "Date" << " "
-                    << setw(8) << "Score" << " " << "Hyperparameters" << std::endl;
-                std::cout << "=== " << string(spaces, '=') << " " << string(19, '=') << " " << string(8, '=') << " "
-                    << string(hyperparameters_spaces, '=') << std::endl;
-                bool odd = true;
-                int index = 0;
-                for (const auto& item : results.items()) {
-                    auto color = odd ? Colors::CYAN() : Colors::BLUE();
-                    auto key = item.key();
-                    auto value = item.value();
-                    std::cout << color;
-                    std::cout << std::setw(3) << std::right << index++ << " ";
-                    std::cout << left << setw(spaces) << key << " " << value["date"].get<string>()
-                        << " " << setw(8) << setprecision(6) << fixed << right
-                        << value["score"].get<double>() << " " << value["hyperparameters"].dump() << std::endl;
-                    odd = !odd;
-                }
-                std::cout << Colors::RESET() << std::endl;
+                list_results(results, config.model);
             }
         }
     }
