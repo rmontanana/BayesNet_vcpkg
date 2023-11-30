@@ -28,6 +28,7 @@ namespace platform {
         json getResults();
     private:
         void save(json& results) const;
+        vector<std::string> processDatasets(Datasets& datasets);
         double processFile(std::string fileName, Datasets& datasets, HyperParameters& hyperparameters);
         struct ConfigGrid config;
     };
