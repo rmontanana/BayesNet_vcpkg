@@ -17,19 +17,22 @@ namespace platform {
         bool only; // used with continue_from to only compute that dataset
         bool discretize;
         bool stratified;
+        int nested;
         int n_folds;
         std::vector<int> seeds;
     };
     class GridSearch {
     public:
         explicit GridSearch(struct ConfigGrid& config);
-        void go();
+        void goSingle();
+        void goNested();
         ~GridSearch() = default;
         json getResults();
     private:
         void save(json& results) const;
+        json initializeResults();
         vector<std::string> processDatasets(Datasets& datasets);
-        double processFile(std::string fileName, Datasets& datasets, HyperParameters& hyperparameters);
+        double processFileSingle(std::string fileName, Datasets& datasets, HyperParameters& hyperparameters);
         struct ConfigGrid config;
     };
 } /* namespace platform */

@@ -63,7 +63,7 @@ namespace platform {
                 return Colors::RESET();
         }
     }
-    double GridSearch::processFile(std::string fileName, Datasets& datasets, HyperParameters& hyperparameters)
+    double GridSearch::processFileSingle(std::string fileName, Datasets& datasets, HyperParameters& hyperparameters)
     {
         // Get dataset
         auto [X, y] = datasets.getTensors(fileName);
@@ -135,11 +135,8 @@ namespace platform {
         }
         return datasets_names;
     }
-
-    void GridSearch::go()
+    json GridSearch::initializeResults()
     {
-        auto datasets = Datasets(config.discretize, Paths::datasets());
-        auto datasets_names = processDatasets(datasets);
         // Load previous results
         json results;
         if (config.continue_from != "No") {
@@ -149,6 +146,7 @@ namespace platform {
                 std::ifstream file(Paths::grid_output(config.model));
                 if (file.is_open()) {
                     results = json::parse(file);
+                    results = results["results"];
                 }
             }
             catch (const std::exception& e) {
@@ -157,7 +155,15 @@ namespace platform {
                 results = json();
             }
         }
-        std::cout << "***************** Starting Gridsearch *****************" << std::endl;
+        return results;
+    }
+
+    void GridSearch::goSingle()
+    {
+        auto datasets = Datasets(config.discretize, Paths::datasets());
+        auto datasets_names = processDatasets(datasets);
+        json results = initializeResults();
+        std::cout << "***************** Starting Single Gridsearch *****************" << std::endl;
         std::cout << "input file=" << Paths::grid_input(config.model) << std::endl;
         auto grid = GridData(Paths::grid_input(config.model));
         // Generate hyperparameters grid & run gridsearch
@@ -174,7 +180,7 @@ namespace platform {
                 if (!config.quiet)
                     showProgressComb(++num, totalComb, Colors::CYAN());
                 auto hyperparameters = platform::HyperParameters(datasets.getNames(), hyperparam_line);
-                double score = processFile(dataset, datasets, hyperparameters);
+                double score = processFileSingle(dataset, datasets, hyperparameters);
                 if (score > bestScore) {
                     bestScore = score;
                     bestHyperparameters = hyperparam_line;
@@ -184,20 +190,80 @@ namespace platform {
                 std::cout << "end." << " Score: " << setw(9) << setprecision(7) << fixed
                     << bestScore << " [" << bestHyperparameters.dump() << "]" << std::endl;
             }
-            results[dataset]["score"] = bestScore;
-            results[dataset]["hyperparameters"] = bestHyperparameters;
-            results[dataset]["date"] = get_date() + " " + get_time();
-            results[dataset]["grid"] = grid.getInputGrid(dataset);
+            json result = {
+                { "score", bestScore },
+                { "hyperparameters", bestHyperparameters },
+                { "date", get_date() + " " + get_time() },
+                { "grid", grid.getInputGrid(dataset) }
+            };
+            results[dataset] = result;
             // Save partial results
             save(results);
         }
         // Save final results
         save(results);
-        std::cout << "***************** Ending Gridsearch *******************" << std::endl;
+        std::cout << "***************** Ending Single Gridsearch *******************" << std::endl;
+    }
+    void GridSearch::goNested()
+    {
+        auto datasets = Datasets(config.discretize, Paths::datasets());
+        auto datasets_names = processDatasets(datasets);
+        json results = initializeResults();
+        std::cout << "***************** Starting Nested Gridsearch *****************" << std::endl;
+        std::cout << "input file=" << Paths::grid_input(config.model) << std::endl;
+        auto grid = GridData(Paths::grid_input(config.model));
+        // Generate hyperparameters grid & run gridsearch
+        // Check each combination of hyperparameters for each dataset and each seed
+        for (const auto& dataset : datasets_names) {
+            auto totalComb = grid.getNumCombinations(dataset);
+            if (!config.quiet)
+                std::cout << "- " << setw(20) << left << dataset << " " << right << flush;
+            int num = 0;
+            double bestScore = 0.0;
+            json bestHyperparameters;
+            auto combinations = grid.getGrid(dataset);
+            for (const auto& hyperparam_line : combinations) {
+                if (!config.quiet)
+                    showProgressComb(++num, totalComb, Colors::CYAN());
+                auto hyperparameters = platform::HyperParameters(datasets.getNames(), hyperparam_line);
+                double score = processFileSingle(dataset, datasets, hyperparameters);
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestHyperparameters = hyperparam_line;
+                }
+            }
+            if (!config.quiet) {
+                std::cout << "end." << " Score: " << setw(9) << setprecision(7) << fixed
+                    << bestScore << " [" << bestHyperparameters.dump() << "]" << std::endl;
+            }
+            json result = {
+                { "score", bestScore },
+                { "hyperparameters", bestHyperparameters },
+                { "date", get_date() + " " + get_time() },
+                { "grid", grid.getInputGrid(dataset) }
+            };
+            results[dataset] = result;
+            // Save partial results
+            save(results);
+        }
+        // Save final results
+        save(results);
+        std::cout << "***************** Ending Nested Gridsearch *******************" << std::endl;
     }
     void GridSearch::save(json& results) const
     {
         std::ofstream file(Paths::grid_output(config.model));
-        file << results.dump(4);
+        json output = {
+            { "model", config.model },
+            { "score", config.score },
+            { "discretize", config.discretize },
+            { "stratified", config.stratified },
+            { "n_folds", config.n_folds },
+            { "seeds", config.seeds },
+            { "date", get_date() + " " + get_time()},
+            { "nested", config.nested},
+            { "results", results }
+        };
+        file << output.dump(4);
     }
 } /* namespace platform */
