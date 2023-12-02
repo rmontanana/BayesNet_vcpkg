@@ -20,9 +20,14 @@ namespace platform {
             std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double >> (end - begin);
             return time_span.count();
         }
-        std::string getDurationString()
+        double getLapse()
         {
-            double duration = getDuration();
+            std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double >> (std::chrono::high_resolution_clock::now() - begin);
+            return time_span.count();
+        }
+        std::string getDurationString(bool lapse = false)
+        {
+            double duration = lapse ? getLapse() : getDuration();
             double durationShow = duration > 3600 ? duration / 3600 : duration > 60 ? duration / 60 : duration;
             std::string durationUnit = duration > 3600 ? "h" : duration > 60 ? "m" : "s";
             std::stringstream ss;

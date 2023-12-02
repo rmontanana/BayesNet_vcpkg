@@ -46,7 +46,8 @@
                 "--discretize",
                 "--continue",
                 "glass",
-                "--only"
+                "--only",
+                "--compute"
             ],
             "cwd": "${workspaceFolder}/../discretizbench",
         },
