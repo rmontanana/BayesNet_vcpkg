@@ -235,7 +235,8 @@ namespace platform {
                         if (!config.quiet)
                             std::cout << "\b\b\b,  \b" << flush;
                     }
-                    std::cout << string(3 * config.nested + 2 * spcs_combinations + 4, '\b') << flush;
+                    int magic = 3 * config.nested + 2 * spcs_combinations + 4;
+                    std::cout << string(magic, '\b') << string(magic, ' ') << string(magic, '\b') << flush;
                     delete nested_fold;
                     hypScore /= config.nested;
                     if (hypScore > bestHypScore) {
@@ -255,7 +256,7 @@ namespace platform {
                     showProgressFold(nfold + 1, getColor(clf->getStatus()), "b");
                 double score = clf->score(X_test, y_test);
                 if (!config.quiet)
-                    std::cout << "\b\b\b\b\b,  \b" << flush;
+                    std::cout << string(2 * config.nested - 1, '\b') << "," << string(2 * config.nested, ' ') << string(2 * config.nested - 1, '\b') << flush;
                 if (score > bestScore) {
                     bestScore = score;
                     bestHyperparameters = bestHypHyperparameters;
