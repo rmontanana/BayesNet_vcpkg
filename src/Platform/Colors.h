@@ -9,6 +9,7 @@ public:
     static std::string YELLOW() { return "\033[1;33m"; }
     static std::string RED() { return "\033[1;31m"; }
     static std::string WHITE() { return "\033[1;37m"; }
+    static std::string IBLUE() { return "\033[0;94m"; }
     static std::string RESET() { return "\033[0m"; }
 };
 #endif // COLORS_H

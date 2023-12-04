@@ -88,8 +88,9 @@ namespace platform {
                 // for dataset // for seed // for fold // for hyperparameters // for nested fold
                 tie(bestScore, bestHyperparameters) = processFileNested(dataset, datasets, combinations);
             if (!config.quiet) {
-                std::cout << "end." << " Score: " << setw(9) << setprecision(7) << fixed
-                    << bestScore << " [" << bestHyperparameters.dump() << "]" << std::endl;
+                std::cout << "end." << " Score: " << Colors::IBLUE() << setw(9) << setprecision(7) << fixed
+                    << bestScore << Colors::BLUE() << " [" << bestHyperparameters.dump() << "]"
+                    << Colors::RESET() << ::endl;
             }
             json result = {
                 { "score", bestScore },
