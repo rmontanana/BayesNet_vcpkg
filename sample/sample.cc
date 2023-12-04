@@ -29,7 +29,7 @@ pair<std::vector<mdlp::labels_t>, map<std::string, int>> discretize(std::vector<
     return { Xd, maxes };
 }
 
-bool file_exists(const std::std::std::string& name)
+bool file_exists(const std::string& name)
 {
     if (FILE* file = fopen(name.c_str(), "r")) {
         fclose(file);
@@ -72,7 +72,7 @@ int main(int argc, char** argv)
     argparse::ArgumentParser program("BayesNetSample");
     program.add_argument("-d", "--dataset")
         .help("Dataset file name")
-        .action([valid_datasets](const std::std::std::string& value) {
+        .action([valid_datasets](const std::string& value) {
         if (find(valid_datasets.begin(), valid_datasets.end(), value) != valid_datasets.end()) {
             return value;
         }
@@ -84,20 +84,20 @@ int main(int argc, char** argv)
         .default_value(std::string{ PATH }
     );
     program.add_argument("-m", "--model")
-        .help("Model to use " + platform::Models::instance()->tostd::string())
-        .action([](const std::std::std::string& value) {
+        .help("Model to use " + platform::Models::instance()->tostring())
+        .action([](const std::string& value) {
         static const std::vector<std::string> choices = platform::Models::instance()->getNames();
         if (find(choices.begin(), choices.end(), value) != choices.end()) {
             return value;
         }
-        throw runtime_error("Model must be one of " + platform::Models::instance()->tostd::string());
+        throw runtime_error("Model must be one of " + platform::Models::instance()->tostring());
             }
     );
     program.add_argument("--discretize").help("Discretize input dataset").default_value(false).implicit_value(true);
     program.add_argument("--dumpcpt").help("Dump CPT Tables").default_value(false).implicit_value(true);
     program.add_argument("--stratified").help("If Stratified KFold is to be done").default_value(false).implicit_value(true);
     program.add_argument("--tensors").help("Use tensors to store samples").default_value(false).implicit_value(true);
-    program.add_argument("-f", "--folds").help("Number of folds").default_value(5).scan<'i', int>().action([](const std::std::string& value) {
+    program.add_argument("-f", "--folds").help("Number of folds").default_value(5).scan<'i', int>().action([](const std::string& value) {
         try {
             auto k = stoi(value);
             if (k < 2) {
@@ -184,8 +184,8 @@ int main(int argc, char** argv)
     file.close();
     std::cout << "Graph saved in " << model_name << "_" << file_name << ".dot" << std::endl;
     std::cout << "dot -Tpng -o " + dot_file + ".png " + dot_file + ".dot " << std::endl;
-    std::string stratified_std::string = stratified ? " Stratified" : "";
-    std::cout << nFolds << " Folds" << stratified_std::string << " Cross validation" << std::endl;
+    std::string stratified_string = stratified ? " Stratified" : "";
+    std::cout << nFolds << " Folds" << stratified_string << " Cross validation" << std::endl;
     std::cout << "==========================================" << std::endl;
     torch::Tensor Xt = torch::zeros({ static_cast<int>(Xd.size()), static_cast<int>(Xd[0].size()) }, torch::kInt32);
     torch::Tensor yt = torch::tensor(y, torch::kInt32);
