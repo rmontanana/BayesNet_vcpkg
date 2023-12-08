@@ -274,11 +274,9 @@ namespace platform {
     vector<std::string> GridSearch::processDatasets(Datasets& datasets)
     {
         // Load datasets
-
         auto datasets_names = datasets.getNames();
         if (config.continue_from != NO_CONTINUE()) {
             // Continue previous execution:
-            // remove datasets already processed
             if (std::find(datasets_names.begin(), datasets_names.end(), config.continue_from) == datasets_names.end()) {
                 throw std::invalid_argument("Dataset " + config.continue_from + " not found");
             }
@@ -294,6 +292,15 @@ namespace platform {
                         break;
                 }
             }
+        }
+        // Exclude datasets
+        for (const auto& name : config.excluded) {
+            auto dataset = name.get<std::string>();
+            auto it = std::find(datasets_names.begin(), datasets_names.end(), dataset);
+            if (it == datasets_names.end()) {
+                throw std::invalid_argument("Dataset " + dataset + " already excluded or doesn't exist!");
+            }
+            datasets_names.erase(it);
         }
         return datasets_names;
     }

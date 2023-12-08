@@ -21,6 +21,7 @@ namespace platform {
         bool stratified;
         int nested;
         int n_folds;
+        json excluded;
         std::vector<int> seeds;
     };
     class GridSearch {
