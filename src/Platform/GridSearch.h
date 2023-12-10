@@ -24,6 +24,10 @@ namespace platform {
         json excluded;
         std::vector<int> seeds;
     };
+    struct ConfigMPI {
+        int rank;
+        int nprocs;
+    }
     class GridSearch {
     public:
         explicit GridSearch(struct ConfigGrid& config);
