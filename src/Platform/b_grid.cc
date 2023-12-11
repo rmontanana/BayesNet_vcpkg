@@ -141,18 +141,18 @@ void list_results(json& results, std::string& model)
 
 void initialize_mpi(struct platform::ConfigMPI& config)
 {
-    int provided;
+    // int provided;
     // MPI_Init_thread(nullptr, nullptr, MPI_THREAD_MULTIPLE, &provided);
     // if (provided != MPI_THREAD_MULTIPLE) {
     //     std::cerr << "MPI_Init_thread returned " << provided << " instead of " << MPI_THREAD_MULTIPLE << std::endl;
     //     exit(1);
     // }
-    MPI_Init(nullptr, nullptr);
-    int rank, size;
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &size);
-    config.mpi_rank = rank;
-    config.mpi_size = size;
+    // MPI_Init(nullptr, nullptr);
+    // int rank, size;
+    // MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    // MPI_Comm_size(MPI_COMM_WORLD, &size);
+    // config.mpi_rank = rank;
+    // config.mpi_size = size;
 }
 
 
@@ -213,8 +213,11 @@ int main(int argc, char** argv)
     } else {
         if (compute) {
             if (program.get<bool>("mpi")) {
-                initialize_mpi(mpi_config);
-                grid_search.setMPIConfig(mpi_config);
+                MPI_Init(nullptr, nullptr);
+                MPI_Comm_rank(MPI_COMM_WORLD, &config.rank);
+                MPI_Comm_size(MPI_COMM_WORLD, &config.size);
+                grid_search.go_mpi();
+                MPI_Finzalize();
             } else {
                 grid_search.go();
                 std::cout << "Process took " << timer.getDurationString() << std::endl;

@@ -8,6 +8,16 @@ Bayesian Network Classifier with libtorch from scratch
 
 Before compiling BayesNet.
 
+### MPI
+
+In Linux just install openmpi & openmpi-devel packages.
+
+In Mac OS X, install mpich with brew and if cmake doesn't find it, edit mpicxx wrapper to remove the ",-commons,use_dylibs" from final_ldflags
+
+```bash
+vi /opt/homebrew/bin/mpicx
+```
+
 ### boost library
 
 [Getting Started](<https://www.boost.org/doc/libs/1_83_0/more/getting_started/index.html>)

@@ -25,12 +25,18 @@ set(CMAKE_CXX_EXTENSIONS                  OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS          ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
-
 # Options
 # -------
 option(ENABLE_CLANG_TIDY "Enable to add clang tidy."              OFF)
 option(ENABLE_TESTING "Unit testing build"                        OFF)
 option(CODE_COVERAGE "Collect coverage from test library"         OFF)
+option(MPI_ENABLED "Enable MPI options"                           ON)
+
+if (MPI_ENABLED)
+  find_package(MPI REQUIRED)
+  message("MPI_CXX_LIBRARIES=${MPI_CXX_LIBRARIES}")
+  message("MPI_CXX_INCLUDE_DIRS=${MPI_CXX_INCLUDE_DIRS}")
+endif (MPI_ENABLED)
 
 # Boost Library
 set(Boost_USE_STATIC_LIBS OFF) 
