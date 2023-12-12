@@ -2,6 +2,7 @@
 #include <argparse/argparse.hpp>
 #include <map>
 #include <nlohmann/json.hpp>
+#include <mpi.h>
 #include "DotEnv.h"
 #include "Models.h"
 #include "modelRegister.h"
@@ -164,7 +165,6 @@ int main(int argc, char** argv)
     argparse::ArgumentParser program("b_grid");
     manageArguments(program);
     struct platform::ConfigGrid config;
-    struct platform::ConfigMPI mpi_config;
     bool dump, compute;
     try {
         program.parse_args(argc, argv);
@@ -213,11 +213,13 @@ int main(int argc, char** argv)
     } else {
         if (compute) {
             if (program.get<bool>("mpi")) {
-                MPI_Init(nullptr, nullptr);
-                MPI_Comm_rank(MPI_COMM_WORLD, &config.rank);
-                MPI_Comm_size(MPI_COMM_WORLD, &config.size);
-                grid_search.go_mpi();
-                MPI_Finzalize();
+                struct platform::ConfigMPI mpi_config;
+                mpi_config.manager = 0; // which process is the manager
+                MPI_Init(&argc, &argv);
+                MPI_Comm_rank(MPI_COMM_WORLD, &mpi_config.rank);
+                MPI_Comm_size(MPI_COMM_WORLD, &mpi_config.n_procs);
+                grid_search.go_MPI(mpi_config);
+                MPI_Finalize();
             } else {
                 grid_search.go();
                 std::cout << "Process took " << timer.getDurationString() << std::endl;

@@ -63,6 +63,126 @@ namespace platform {
                 return Colors::RESET();
         }
     }
+    json GridSearch::buildTasks()
+    {
+        auto result = json::array();
+        auto datasets = Datasets(false, Paths::datasets());
+        auto datasets_names = datasets.getNames();
+        auto grid = GridData(Paths::grid_input(config.model));
+        for (const auto& dataset : datasets_names) {
+            for (const auto& seed : config.seeds) {
+                auto combinations = grid.getGrid(dataset);
+                for (const auto& hyperparam_line : combinations) {
+                    auto hyperparameters = platform::HyperParameters(datasets.getNames(), hyperparam_line);
+                    json task = {
+                        { "dataset", dataset },
+                        { "seed", seed },
+                        { "hyperparameters", hyperparameters.get(dataset) }
+                    };
+                    result.push_back(task);
+                }
+            }
+        }
+        return result;
+    }
+    std::pair<int, int> GridSearch::partRange(int n_tasks, int nprocs, int rank)
+    {
+        int assigned = 0;
+        int remainder = n_tasks % nprocs;
+        int start = 0;
+        if (rank < remainder) {
+            assigned = n_tasks / nprocs + 1;
+        } else {
+            assigned = n_tasks / nprocs;
+            start = remainder;
+        }
+        start += rank * assigned;
+        int end = start + assigned;
+        if (rank == nprocs - 1) {
+            end = n_tasks;
+        }
+        return { start, end };
+    }
+    void GridSearch::go_MPI(struct ConfigMPI& config_mpi)
+    {
+        /*
+         * Manager will do the loops dataset, seed, fold (primary) and hyperparameter
+         * Workers will do the loop fold (nested)
+         *
+         * The overall process consists in these steps:
+            * 1. Manager will broadcast the tasks to all the processes
+            * 1.1 Broadcast the number of tasks
+            * 1.2 Broadcast the length of the following string
+            * 1.2 Broadcast the tasks as a char* string
+            * 2. Workers will receive the tasks and start the process
+            * 2.1 A method will tell each worker the range of combinations to process
+            * 2.2 Each worker will process the combinations and return the best score obtained
+            * 3. Manager gather the scores from all the workers and get the best hyperparameters
+            * 3.1 Manager find out which worker has the best score
+            * 3.2 Manager broadcast the winner worker
+            * 3.3 The winner worker send the best hyperparameters to manager
+            *
+         */
+        char* msg;
+        int tasks_size;
+        if (config_mpi.rank == config_mpi.manager) {
+            auto tasks = buildTasks();
+            auto tasks_str = tasks.dump();
+            tasks_size = tasks_str.size();
+            msg = new char[tasks_size + 1];
+            strcpy(msg, tasks_str.c_str());
+        }
+        //
+        // 1. Manager will broadcast the tasks to all the processes
+        //
+        MPI_Bcast(&tasks_size, 1, MPI_INT, config_mpi.manager, MPI_COMM_WORLD);
+        if (config_mpi.rank != config_mpi.manager) {
+            msg = new char[tasks_size + 1];
+        }
+        MPI_Bcast(msg, tasks_size + 1, MPI_CHAR, config_mpi.manager, MPI_COMM_WORLD);
+        json tasks = json::parse(msg);
+        delete[] msg;
+        //
+        // 2. All Workers will receive the tasks and start the process
+        //
+        int num_tasks = tasks.size();
+        auto [start, end] = partRange(num_tasks, config_mpi.n_procs, config_mpi.rank);
+        // 2.2 Each worker will process the combinations and return the best score obtained
+        for (int i = start; i < end; ++i) {
+            auto task = tasks[i];
+            auto dataset = task["dataset"].get<std::string>();
+            auto seed = task["seed"].get<int>();
+            auto hyperparam_line = task["hyperparameters"];
+            auto datasets = Datasets(config.discretize, Paths::datasets());
+            auto [X, y] = datasets.getTensors(dataset);
+            auto states = datasets.getStates(dataset);
+            auto features = datasets.getFeatures(dataset);
+            auto className = datasets.getClassName(dataset);
+            double bestScore = 0.0;
+            json bestHyperparameters;
+            // First level fold
+            Fold* fold;
+            if (config.stratified)
+                fold = new StratifiedKFold(config.n_folds, y, seed);
+            else
+                fold = new KFold(config.n_folds, y.size(0), seed);
+            for (int nfold = 0; nfold < config.n_folds; nfold++) {
+
+                auto clf = Models::instance()->create(config.model);
+                auto valid = clf->getValidHyperparameters();
+                hyperparameters.check(valid, dataset);
+                clf->setHyperparameters(hyperparameters.get(dataset));
+                auto [train, test] = fold->getFold(nfold);
+                auto train_t = torch::tensor(train);
+                auto test_t = torch::tensor(test);
+                auto X_train = X.index({ "...", train_t });
+                auto y_train = y.index({ train_t });
+                auto X_test = X.index({ "...", test
+                    }
+
+            }
+        }
+    }
     void GridSearch::go()
     {
         timer.start();

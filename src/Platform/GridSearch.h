@@ -26,12 +26,14 @@ namespace platform {
     };
     struct ConfigMPI {
         int rank;
-        int nprocs;
-    }
+        int n_procs;
+        int manager;
+    };
     class GridSearch {
     public:
         explicit GridSearch(struct ConfigGrid& config);
         void go();
+        void go_MPI(struct ConfigMPI& config_mpi);
         ~GridSearch() = default;
         json getResults();
         static inline std::string NO_CONTINUE() { return "NO_CONTINUE"; }
@@ -42,6 +44,8 @@ namespace platform {
         pair<double, json> processFileSingle(std::string fileName, Datasets& datasets, std::vector<json>& combinations);
         pair<double, json> processFileNested(std::string fileName, Datasets& datasets, std::vector<json>& combinations);
         struct ConfigGrid config;
+        pair<int, int> partRange(int n_tasks, int nprocs, int rank);
+        json buildTasks();
         Timer timer; // used to measure the time of the whole process
     };
 } /* namespace platform */
