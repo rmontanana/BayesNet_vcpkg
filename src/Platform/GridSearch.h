@@ -2,6 +2,7 @@
 #define GRIDSEARCH_H
 #include <string>
 #include <map>
+#include <mpi.h>
 #include <nlohmann/json.hpp>
 #include "Datasets.h"
 #include "HyperParameters.h"

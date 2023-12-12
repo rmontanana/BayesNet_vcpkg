@@ -189,8 +189,8 @@ int main(int argc, char** argv)
         auto excluded = program.get<std::string>("exclude");
         config.excluded = json::parse(excluded);
         if (program.get<bool>("mpi")) {
-            if (!compute) {
-                throw std::runtime_error("Cannot use --mpi without --compute");
+            if (!compute || config.nested == 0) {
+                throw std::runtime_error("Cannot use --mpi without --compute or without --nested");
             }
         }
     }
