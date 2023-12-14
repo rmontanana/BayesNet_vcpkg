@@ -297,9 +297,11 @@ namespace platform {
             total = new char[max_size * config_mpi.n_procs] {};
         }
         // 3.2 Gather all the results from the workers into the manager
+        std::cout << "(" << config_mpi.rank << ")" << msg << std::endl;
         MPI_Gather(msg, max_size, MPI_CHAR, total, max_size * config_mpi.n_procs, MPI_CHAR, config_mpi.manager, MPI_COMM_WORLD);
         delete[] msg;
         if (config_mpi.rank == config_mpi.manager) {
+            std::cout << "Manager taking final control!" << std::endl;
             json total_results;
             json best_results;
             // 3.3 Compile the results from all the workers
@@ -312,6 +314,7 @@ namespace platform {
                 }
             }
             delete[] total;
+            std::cout << "Total results: " << total_results.dump() << std::endl;
             // 3.4 Filter the best hyperparameters for each dataset
             auto grid = GridData(Paths::grid_input(config.model));
             for (auto& [dataset, folds] : total_results.items()) {
@@ -332,8 +335,10 @@ namespace platform {
                 };
                 best_results[dataset] = result;
             }
+            std::cout << "Best results: " << best_results.dump() << std::endl;
             save(total_results);
         }
+        std::cout << "Process " << config_mpi.rank << " finished!" << std::endl;
     }
     void GridSearch::go()
     {
