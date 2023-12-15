@@ -222,7 +222,7 @@ namespace platform {
         // Save results
         results[dataset][std::to_string(n_fold)]["score"] = best_fold_score;
         results[dataset][std::to_string(n_fold)]["hyperparameters"] = best_fold_hyper;
-        results[dataset][std::to_string(n_fold)]["hyperparameters"] = seed;
+        results[dataset][std::to_string(n_fold)]["seed"] = seed;
         status(config_mpi, "Finished dataset " + dataset + " with seed " + std::to_string(seed) + " and fold " + std::to_string(n_fold) + " score " + std::to_string(best_fold_score));
     }
     void GridSearch::go_mpi(struct ConfigMPI& config_mpi)
@@ -288,18 +288,19 @@ namespace platform {
         // 3. Manager gather the scores from all the workers and find out the best hyperparameters for each dataset
         //
         //3.1 Obtain the maximum size of the results message of all the workers
-        MPI_Reduce(&size, &max_size, 1, MPI_INT, MPI_MAX, config_mpi.manager, MPI_COMM_WORLD);
+        MPI_Allreduce(&size, &max_size, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
         // Assign the memory to the message and initialize it to 0s
-        char* total;
-        msg = new char[max_size] {};
+        status(config_mpi, "Max size of the results message: " + std::to_string(max_size));
+        status(config_mpi, "size of my message " + std::to_string(size));
+        char* total = NULL;
+        msg = new char[max_size];
         strncpy(msg, results.dump().c_str(), size);
         if (config_mpi.rank == config_mpi.manager) {
-            total = new char[max_size * config_mpi.n_procs] {};
+            total = new char[max_size * config_mpi.n_procs];
         }
         // 3.2 Gather all the results from the workers into the manager
         std::cout << "(" << config_mpi.rank << ")" << msg << std::endl;
-        MPI_Gather(msg, max_size, MPI_CHAR, total, max_size * config_mpi.n_procs, MPI_CHAR, config_mpi.manager, MPI_COMM_WORLD);
-        delete[] msg;
+        MPI_Gather(msg, max_size, MPI_CHAR, total, max_size, MPI_CHAR, config_mpi.manager, MPI_COMM_WORLD);
         if (config_mpi.rank == config_mpi.manager) {
             std::cout << "Manager taking final control!" << std::endl;
             json total_results;
@@ -338,6 +339,7 @@ namespace platform {
             std::cout << "Best results: " << best_results.dump() << std::endl;
             save(total_results);
         }
+        delete[] msg;
         std::cout << "Process " << config_mpi.rank << " finished!" << std::endl;
     }
     void GridSearch::go()
