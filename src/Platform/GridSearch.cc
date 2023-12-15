@@ -119,6 +119,12 @@ namespace platform {
         std::random_device rd;
         std::mt19937 g(rd());
         std::shuffle(tasks.begin(), tasks.end(), g);
+        std::cout << "Tasks size: " << tasks.size() << std::endl;
+        std::cout << "|";
+        for (int i = 0; i < tasks.size(); ++i) {
+            std::cout << (i + 1) % 10;
+        }
+        std::cout << "|" << std::endl << "|" << std::flush;
         return tasks;
     }
     std::pair<int, int> GridSearch::part_range_mpi(int n_tasks, int nprocs, int rank)
@@ -139,9 +145,10 @@ namespace platform {
         }
         return { start, end };
     }
-    void status(struct ConfigMPI& config_mpi, std::string status)
+    std::string get_color_rank(int rank)
     {
-        std::cout << "* (" << config_mpi.rank << "): " << status << std::endl;
+        auto colors = { Colors::RED(), Colors::GREEN(),  Colors::BLUE(), Colors::MAGENTA(), Colors::CYAN() };
+        return *(colors.begin() + rank % colors.size());
     }
     void GridSearch::process_task_mpi(struct ConfigMPI& config_mpi, json& task, Datasets& datasets, json& results)
     {
@@ -152,7 +159,6 @@ namespace platform {
         auto n_fold = task["fold"].get<int>();
         // Generate the hyperparamters combinations
         auto combinations = grid.getGrid(dataset);
-        status(config_mpi, "Processing dataset " + dataset + " with seed " + std::to_string(seed) + " and fold " + std::to_string(n_fold));
         auto [X, y] = datasets.getTensors(dataset);
         auto states = datasets.getStates(dataset);
         auto features = datasets.getFeatures(dataset);
@@ -176,7 +182,6 @@ namespace platform {
         double best_fold_score = 0.0;
         json best_fold_hyper;
         for (const auto& hyperparam_line : combinations) {
-            //status(config_mpi, "* Dataset: " + dataset + " Fold: " + std::to_string(n_fold) + " Processing hyperparameters: " + std::to_string(++num) + "/" + std::to_string(combinations.size()));
             auto hyperparameters = platform::HyperParameters(datasets.getNames(), hyperparam_line);
             Fold* nested_fold;
             if (config.stratified)
@@ -223,7 +228,7 @@ namespace platform {
         results[dataset][std::to_string(n_fold)]["score"] = best_fold_score;
         results[dataset][std::to_string(n_fold)]["hyperparameters"] = best_fold_hyper;
         results[dataset][std::to_string(n_fold)]["seed"] = seed;
-        status(config_mpi, "Finished dataset " + dataset + " with seed " + std::to_string(seed) + " and fold " + std::to_string(n_fold) + " score " + std::to_string(best_fold_score));
+        std::cout << get_color_rank(config_mpi.rank) << "*" << std::flush;
     }
     void GridSearch::go_mpi(struct ConfigMPI& config_mpi)
     {
@@ -290,8 +295,6 @@ namespace platform {
         //3.1 Obtain the maximum size of the results message of all the workers
         MPI_Allreduce(&size, &max_size, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
         // Assign the memory to the message and initialize it to 0s
-        status(config_mpi, "Max size of the results message: " + std::to_string(max_size));
-        status(config_mpi, "size of my message " + std::to_string(size));
         char* total = NULL;
         msg = new char[max_size];
         strncpy(msg, results.dump().c_str(), size);
@@ -299,10 +302,10 @@ namespace platform {
             total = new char[max_size * config_mpi.n_procs];
         }
         // 3.2 Gather all the results from the workers into the manager
-        std::cout << "(" << config_mpi.rank << ")" << msg << std::endl;
         MPI_Gather(msg, max_size, MPI_CHAR, total, max_size, MPI_CHAR, config_mpi.manager, MPI_COMM_WORLD);
+        delete[] msg;
         if (config_mpi.rank == config_mpi.manager) {
-            std::cout << "Manager taking final control!" << std::endl;
+            std::cout << "|" << std::endl;
             json total_results;
             json best_results;
             // 3.3 Compile the results from all the workers
@@ -315,7 +318,6 @@ namespace platform {
                 }
             }
             delete[] total;
-            std::cout << "Total results: " << total_results.dump() << std::endl;
             // 3.4 Filter the best hyperparameters for each dataset
             auto grid = GridData(Paths::grid_input(config.model));
             for (auto& [dataset, folds] : total_results.items()) {
@@ -336,11 +338,8 @@ namespace platform {
                 };
                 best_results[dataset] = result;
             }
-            std::cout << "Best results: " << best_results.dump() << std::endl;
-            save(total_results);
+            save(best_results);
         }
-        delete[] msg;
-        std::cout << "Process " << config_mpi.rank << " finished!" << std::endl;
     }
     void GridSearch::go()
     {
