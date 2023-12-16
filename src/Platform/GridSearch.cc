@@ -116,8 +116,7 @@ namespace platform {
             }
         }
         // It's important to shuffle the array so heavy datasets are spread across the Workers
-        std::random_device rd;
-        std::mt19937 g(rd());
+        std::mt19937 g{ 271 }; // Use fixed seed to obtain the same shuffle
         std::shuffle(tasks.begin(), tasks.end(), g);
         std::cout << "Tasks size: " << tasks.size() << std::endl;
         std::cout << "|";
@@ -258,6 +257,7 @@ namespace platform {
         char* msg;
         int tasks_size;
         if (config_mpi.rank == config_mpi.manager) {
+            timer.start();
             auto tasks = build_tasks_mpi();
             auto tasks_str = tasks.dump();
             tasks_size = tasks_str.size();
@@ -305,7 +305,7 @@ namespace platform {
         MPI_Gather(msg, max_size, MPI_CHAR, total, max_size, MPI_CHAR, config_mpi.manager, MPI_COMM_WORLD);
         delete[] msg;
         if (config_mpi.rank == config_mpi.manager) {
-            std::cout << "|" << std::endl;
+            std::cout << Colors::RESET() << "|" << std::endl;
             json total_results;
             json best_results;
             // 3.3 Compile the results from all the workers
