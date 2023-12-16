@@ -152,6 +152,8 @@ namespace platform {
     void GridSearch::process_task_mpi(struct ConfigMPI& config_mpi, json& task, Datasets& datasets, json& results)
     {
         // Process the task and store the result in the results json
+        Timer timer;
+        timer.start();
         auto grid = GridData(Paths::grid_input(config.model));
         auto dataset = task["dataset"].get<std::string>();
         auto seed = task["seed"].get<int>();
@@ -227,6 +229,7 @@ namespace platform {
         results[dataset][std::to_string(n_fold)]["score"] = best_fold_score;
         results[dataset][std::to_string(n_fold)]["hyperparameters"] = best_fold_hyper;
         results[dataset][std::to_string(n_fold)]["seed"] = seed;
+        results[dataset][std::to_string(n_fold)]["duration"] = timer.getDuration();
         std::cout << get_color_rank(config_mpi.rank) << "*" << std::flush;
     }
     void GridSearch::go_mpi(struct ConfigMPI& config_mpi)
@@ -322,19 +325,22 @@ namespace platform {
             auto grid = GridData(Paths::grid_input(config.model));
             for (auto& [dataset, folds] : total_results.items()) {
                 double best_score = 0.0;
+                double duration = 0.0;
                 json best_hyper;
                 for (auto& [fold, result] : folds.items()) {
+                    duration += result["duration"].get<double>();
                     if (result["score"] > best_score) {
                         best_score = result["score"];
                         best_hyper = result["hyperparameters"];
                     }
                 }
+                auto timer = Timer();
                 json result = {
                     { "score", best_score },
                     { "hyperparameters", best_hyper },
                     { "date", get_date() + " " + get_time() },
                     { "grid", grid.getInputGrid(dataset) },
-                    { "duration", 0 }
+                    { "duration", timer.translate2String(duration) }
                 };
                 best_results[dataset] = result;
             }

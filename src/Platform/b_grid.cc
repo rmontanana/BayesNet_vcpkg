@@ -133,29 +133,12 @@ void list_results(json& results, std::string& model)
         std::cout << color;
         std::cout << std::setw(3) << std::right << index++ << " ";
         std::cout << left << setw(spaces) << key << " " << value["date"].get<string>()
-            << " " << setw(8) << value["duration"] << " " << setw(8) << setprecision(6)
+            << " " << setw(8) << value["duration"].get<string>() << " " << setw(8) << setprecision(6)
             << fixed << right << value["score"].get<double>() << " " << value["hyperparameters"].dump() << std::endl;
         odd = !odd;
     }
     std::cout << Colors::RESET() << std::endl;
 }
-
-void initialize_mpi(struct platform::ConfigMPI& config)
-{
-    // int provided;
-    // MPI_Init_thread(nullptr, nullptr, MPI_THREAD_MULTIPLE, &provided);
-    // if (provided != MPI_THREAD_MULTIPLE) {
-    //     std::cerr << "MPI_Init_thread returned " << provided << " instead of " << MPI_THREAD_MULTIPLE << std::endl;
-    //     exit(1);
-    // }
-    // MPI_Init(nullptr, nullptr);
-    // int rank, size;
-    // MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    // MPI_Comm_size(MPI_COMM_WORLD, &size);
-    // config.mpi_rank = rank;
-    // config.mpi_size = size;
-}
-
 
 /*
  * Main
