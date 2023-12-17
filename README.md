@@ -10,7 +10,11 @@ Before compiling BayesNet.
 
 ### MPI
 
-In Linux just install openmpi & openmpi-devel packages.
+In Linux just install openmpi & openmpi-devel packages. Only cmake can't find openmpi install (like in Oracle Linux) set the following variable:
+
+```bash
+export MPI_HOME="/usr/lib64/openmpi"
+```
 
 In Mac OS X, install mpich with brew and if cmake doesn't find it, edit mpicxx wrapper to remove the ",-commons,use_dylibs" from final_ldflags
 
