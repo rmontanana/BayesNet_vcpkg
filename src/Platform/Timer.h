@@ -35,7 +35,7 @@ namespace platform {
             double durationShow = duration > 3600 ? duration / 3600 : duration > 60 ? duration / 60 : duration;
             std::string durationUnit = duration > 3600 ? "h" : duration > 60 ? "m" : "s";
             std::stringstream ss;
-            ss << std::setw(7) << std::setprecision(2) << std::fixed << durationShow << " " << durationUnit << " ";
+            ss << std::setprecision(2) << std::fixed << durationShow << " " << durationUnit;
             return ss.str();
         }
     };

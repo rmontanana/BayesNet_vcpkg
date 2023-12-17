@@ -133,7 +133,7 @@ void list_results(json& results, std::string& model)
         std::cout << color;
         std::cout << std::setw(3) << std::right << index++ << " ";
         std::cout << left << setw(spaces) << key << " " << value["date"].get<string>()
-            << " " << setw(8) << value["duration"].get<string>() << " " << setw(8) << setprecision(6)
+            << " " << setw(8) << right << value["duration"].get<string>() << " " << setw(8) << setprecision(6)
             << fixed << right << value["score"].get<double>() << " " << value["hyperparameters"].dump() << std::endl;
         odd = !odd;
     }
