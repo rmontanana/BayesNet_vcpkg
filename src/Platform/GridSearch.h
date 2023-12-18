@@ -2,6 +2,7 @@
 #define GRIDSEARCH_H
 #include <string>
 #include <map>
+#include <mpi.h>
 #include <nlohmann/json.hpp>
 #include "Datasets.h"
 #include "HyperParameters.h"
@@ -24,10 +25,16 @@ namespace platform {
         json excluded;
         std::vector<int> seeds;
     };
+    struct ConfigMPI {
+        int rank;
+        int n_procs;
+        int manager;
+    };
     class GridSearch {
     public:
         explicit GridSearch(struct ConfigGrid& config);
         void go();
+        void go_mpi(struct ConfigMPI& config_mpi);
         ~GridSearch() = default;
         json getResults();
         static inline std::string NO_CONTINUE() { return "NO_CONTINUE"; }
@@ -38,6 +45,9 @@ namespace platform {
         pair<double, json> processFileSingle(std::string fileName, Datasets& datasets, std::vector<json>& combinations);
         pair<double, json> processFileNested(std::string fileName, Datasets& datasets, std::vector<json>& combinations);
         struct ConfigGrid config;
+        pair<int, int> part_range_mpi(int n_tasks, int nprocs, int rank);
+        json build_tasks_mpi();
+        void process_task_mpi(struct ConfigMPI& config_mpi, json& task, Datasets& datasets, json& results);
         Timer timer; // used to measure the time of the whole process
     };
 } /* namespace platform */
