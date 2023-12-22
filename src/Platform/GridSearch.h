@@ -30,6 +30,15 @@ namespace platform {
         int n_procs;
         int manager;
     };
+    typedef struct {
+        uint idx_dataset;
+        uint idx_combination;
+        double score;
+    } Task_Result;
+    const TAG_QUERY = 1;
+    const TAG_RESULT = 2;
+    const TAG_TASK = 3;
+    const TAG_END = 4;
     class GridSearch {
     public:
         explicit GridSearch(struct ConfigGrid& config);
