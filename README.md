@@ -8,6 +8,18 @@ Bayesian Network Classifier with libtorch from scratch
 
 Before compiling BayesNet.
 
+### Miniconda
+
+To be able to run Python Classifiers such as STree, ODTE, SVC, etc. it is needed to install Miniconda. To do so, download the installer from [Miniconda](https://docs.conda.io/en/latest/miniconda.html) and run it. It is recommended to install it in the home folder.
+
+In Linux sometimes the library libstdc++ is mistaken from the miniconda installation and produces the next message when running the b_xxxx executables:
+
+```bash
+libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by b_xxxx)
+```
+
+The solution is to erase the libstdc++ library from the miniconda installation:
+
 ### MPI
 
 In Linux just install openmpi & openmpi-devel packages. Only if cmake can't find openmpi installation (like in Oracle Linux) set the following variable:
