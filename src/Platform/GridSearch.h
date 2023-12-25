@@ -35,15 +35,16 @@ namespace platform {
         uint idx_combination;
         double score;
     } Task_Result;
-    const TAG_QUERY = 1;
-    const TAG_RESULT = 2;
-    const TAG_TASK = 3;
-    const TAG_END = 4;
+    const int TAG_QUERY = 1;
+    const int TAG_RESULT = 2;
+    const int TAG_TASK = 3;
+    const int TAG_END = 4;
     class GridSearch {
     public:
         explicit GridSearch(struct ConfigGrid& config);
         void go();
         void go_mpi(struct ConfigMPI& config_mpi);
+        void go_producer_consumer(struct ConfigMPI& config_mpi);
         ~GridSearch() = default;
         json getResults();
         static inline std::string NO_CONTINUE() { return "NO_CONTINUE"; }
