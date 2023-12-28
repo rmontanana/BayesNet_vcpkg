@@ -254,7 +254,7 @@ namespace platform {
             MPI_Recv(&result, 1, MPI_Result, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
             if (status.MPI_TAG == TAG_RESULT) {
                 //Store result
-
+                // TODO
             }
             MPI_Send(&i, 1, MPI_INT, status.MPI_SOURCE, TAG_TASK, MPI_COMM_WORLD);
         }
@@ -264,7 +264,7 @@ namespace platform {
             MPI_Recv(&result, 1, MPI_Result, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
             if (status.MPI_TAG == TAG_RESULT) {
                 //Store result
-
+                // TODO
             }
             MPI_Send(&i, 1, MPI_INT, status.MPI_SOURCE, TAG_END, MPI_COMM_WORLD);
         }
@@ -276,6 +276,7 @@ namespace platform {
         //
         // Select the best result of the computed outer folds
         //
+        // TODO
         return results;
     }
     void consumer(Datasets& datasets, json& tasks, struct ConfigGrid& config, struct ConfigMPI& config_mpi, MPI_Datatype& MPI_Result)
