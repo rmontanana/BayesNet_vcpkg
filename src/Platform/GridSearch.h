@@ -34,6 +34,7 @@ namespace platform {
         uint idx_dataset;
         uint idx_combination;
         double score;
+        double time;
     } Task_Result;
     const int TAG_QUERY = 1;
     const int TAG_RESULT = 2;
