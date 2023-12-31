@@ -201,7 +201,7 @@ int main(int argc, char** argv)
                 MPI_Init(&argc, &argv);
                 MPI_Comm_rank(MPI_COMM_WORLD, &mpi_config.rank);
                 MPI_Comm_size(MPI_COMM_WORLD, &mpi_config.n_procs);
-                grid_search.go_mpi(mpi_config);
+                grid_search.go_producer_consumer(mpi_config);
                 if (mpi_config.rank == mpi_config.manager) {
                     auto results = grid_search.getResults();
                     list_results(results, config.model);

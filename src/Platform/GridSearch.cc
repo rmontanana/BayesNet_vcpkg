@@ -44,7 +44,7 @@ namespace platform {
         }
         return json();
     }
-    vector<std::string> GridSearch::processDatasets(Datasets& datasets)
+    vector<std::string> GridSearch::processDatasets(Datasets& datasets) const
     {
         // Load datasets
         auto datasets_names = datasets.getNames();
@@ -109,7 +109,7 @@ namespace platform {
         auto datasets = Datasets(false, Paths::datasets());
         auto all_datasets = datasets.getNames();
         auto datasets_names = processDatasets(datasets);
-        for (int idx_dataset = 0; idx_dataset < all_datasets.size(); ++idx_dataset) {
+        for (int idx_dataset = 0; idx_dataset < datasets_names.size(); ++idx_dataset) {
             auto dataset = all_datasets[idx_dataset];
             for (const auto& seed : config.seeds) {
                 auto combinations = grid.getGrid(dataset);
@@ -169,7 +169,6 @@ namespace platform {
         auto y_train = y.index({ train_t });
         auto X_test = X.index({ "...", test_t });
         auto y_test = y.index({ test_t });
-        auto num = 0;
         double best_fold_score = 0.0;
         int best_idx_combination = -1;
         json best_fold_hyper;
@@ -222,6 +221,7 @@ namespace platform {
         result->idx_dataset = task["idx_dataset"].get<int>();
         result->idx_combination = best_idx_combination;
         result->score = best_fold_score;
+        result->n_fold = n_fold;
         result->time = timer.getDuration();
         // Update progress bar
         std::cout << get_color_rank(config_mpi.rank) << "*" << std::flush;
@@ -244,17 +244,34 @@ namespace platform {
         }
         return { start, end };
     }
+    void store_result(std::vector<std::string>& names, Task_Result& result, json& results)
+    {
+        json json_result = {
+            { "score", result.score },
+            { "combination", result.idx_combination },
+            { "fold", result.n_fold },
+            { "time", result.time },
+            { "dataset", result.idx_dataset }
+        };
+        auto name = names[result.idx_dataset];
+        if (!results.contains(name)) {
+            results[name] = json::array();
+        }
+        results[name].push_back(json_result);
+    }
     json producer(json& tasks, struct ConfigMPI& config_mpi, MPI_Datatype& MPI_Result)
     {
         Task_Result result;
         json results;
         int num_tasks = tasks.size();
+        auto datasets = Datasets(false, Paths::datasets());
+        auto names = datasets.getNames();
         for (int i = 0; i < num_tasks; ++i) {
             MPI_Status status;
             MPI_Recv(&result, 1, MPI_Result, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
             if (status.MPI_TAG == TAG_RESULT) {
                 //Store result
-                // TODO
+                store_result(names, result, results);
             }
             MPI_Send(&i, 1, MPI_INT, status.MPI_SOURCE, TAG_TASK, MPI_COMM_WORLD);
         }
@@ -264,19 +281,42 @@ namespace platform {
             MPI_Recv(&result, 1, MPI_Result, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
             if (status.MPI_TAG == TAG_RESULT) {
                 //Store result
-                // TODO
+                store_result(names, result, results);
             }
             MPI_Send(&i, 1, MPI_INT, status.MPI_SOURCE, TAG_END, MPI_COMM_WORLD);
         }
         return results;
     }
-    json select_best_results_folds(json& all_results)
+    json select_best_results_folds(json& all_results, std::string& model)
     {
         json results;
+        Timer timer;
+        auto grid = GridData(Paths::grid_input(model));
         //
         // Select the best result of the computed outer folds
         //
-        // TODO
+        for (const auto& result : results.items()) {
+            // each result has the results of all the outer folds as each one were a different task
+            double best_score = 0.0;
+            json best;
+            for (const auto& result_fold : result.value()) {
+                double score = result_fold["score"].get<double>();
+                if (score > best_score) {
+                    best_score = score;
+                    best = result_fold;
+                }
+            }
+            auto dataset = result.key();
+            auto combinations = grid.getGrid(dataset);
+            json json_best = {
+                    { "score", best_score },
+                    { "hyperparameters", combinations[best["combination"].get<int>()] },
+                    { "date", get_date() + " " + get_time() },
+                    { "grid", grid.getInputGrid(dataset) },
+                    { "duration", timer.translate2String(best["time"].get<double>()) }
+            };
+            results[dataset] = json_best;
+        }
         return results;
     }
     void consumer(Datasets& datasets, json& tasks, struct ConfigGrid& config, struct ConfigMPI& config_mpi, MPI_Datatype& MPI_Result)
@@ -303,8 +343,8 @@ namespace platform {
         * Each task is a json object with the following structure:
         * {
         *   "dataset": "dataset_name",
+        *   "idx_dataset": idx_dataset,
         *   "seed": # of seed to use,
-        *   "model": "model_name",
         *   "Fold": # of fold to process
         * }
         *
@@ -331,14 +371,15 @@ namespace platform {
         Task_Result result;
         int tasks_size;
         MPI_Datatype MPI_Result;
-        MPI_Datatype type[4] = { MPI_UNSIGNED, MPI_UNSIGNED, MPI_DOUBLE, MPI_DOUBLE };
-        int blocklen[4] = { 1, 1, 1, 1 };
-        MPI_Aint disp[4];
+        MPI_Datatype type[5] = { MPI_UNSIGNED, MPI_UNSIGNED, MPI_INT, MPI_DOUBLE, MPI_DOUBLE };
+        int blocklen[5] = { 1, 1, 1, 1, 1 };
+        MPI_Aint disp[5];
         disp[0] = offsetof(Task_Result, idx_dataset);
         disp[1] = offsetof(Task_Result, idx_combination);
-        disp[2] = offsetof(Task_Result, score);
-        disp[3] = offsetof(Task_Result, time);
-        MPI_Type_create_struct(4, blocklen, disp, type, &MPI_Result);
+        disp[2] = offsetof(Task_Result, n_fold);
+        disp[3] = offsetof(Task_Result, score);
+        disp[4] = offsetof(Task_Result, time);
+        MPI_Type_create_struct(5, blocklen, disp, type, &MPI_Result);
         MPI_Type_commit(&MPI_Result);
         //
         // 0.2 Manager creates the tasks
@@ -369,7 +410,7 @@ namespace platform {
         auto datasets = Datasets(config.discretize, Paths::datasets());
         if (config_mpi.rank == config_mpi.manager) {
             auto all_results = producer(tasks, config_mpi, MPI_Result);
-            auto results = select_best_results_folds(all_results);
+            auto results = select_best_results_folds(all_results, config.model);
             save(results);
         } else {
             consumer(datasets, tasks, config, config_mpi, MPI_Result);
@@ -381,8 +422,8 @@ namespace platform {
          * Each task is a json object with the following structure:
          * {
          *   "dataset": "dataset_name",
+         *   "idx_dataset": idx_dataset,
          *   "seed": # of seed to use,
-         *   "model": "model_name",
          *   "Fold": # of fold to process
          * }
          *

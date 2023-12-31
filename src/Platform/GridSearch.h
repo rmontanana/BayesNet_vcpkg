@@ -33,6 +33,7 @@ namespace platform {
     typedef struct {
         uint idx_dataset;
         uint idx_combination;
+        int n_fold;
         double score;
         double time;
     } Task_Result;
@@ -52,7 +53,7 @@ namespace platform {
     private:
         void save(json& results);
         json initializeResults();
-        vector<std::string> processDatasets(Datasets& datasets);
+        vector<std::string> processDatasets(Datasets& datasets) const;
         pair<double, json> processFileSingle(std::string fileName, Datasets& datasets, std::vector<json>& combinations);
         pair<double, json> processFileNested(std::string fileName, Datasets& datasets, std::vector<json>& combinations);
         struct ConfigGrid config;
