@@ -53,7 +53,7 @@ namespace platform {
     private:
         void save(json& results);
         json initializeResults();
-        vector<std::string> filterDatasets(Datasets& datasets) const;
+        std::vector<std::string> filterDatasets(Datasets& datasets) const;
         // pair<double, json> processFileSingle(std::string fileName, Datasets& datasets, std::vector<json>& combinations);
         // pair<double, json> processFileNested(std::string fileName, Datasets& datasets, std::vector<json>& combinations);
         struct ConfigGrid config;

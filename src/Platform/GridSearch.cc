@@ -44,7 +44,7 @@ namespace platform {
         }
         return json();
     }
-    vector<std::string> GridSearch::filterDatasets(Datasets& datasets) const
+    std::vector<std::string> GridSearch::filterDatasets(Datasets& datasets) const
     {
         // Load datasets
         auto datasets_names = datasets.getNames();
@@ -54,7 +54,7 @@ namespace platform {
                 throw std::invalid_argument("Dataset " + config.continue_from + " not found");
             }
             // Remove datasets already processed
-            vector< string >::iterator it = datasets_names.begin();
+            std::vector<string>::iterator it = datasets_names.begin();
             while (it != datasets_names.end()) {
                 if (*it != config.continue_from) {
                     it = datasets_names.erase(it);
@@ -253,47 +253,36 @@ namespace platform {
             { "time", result.time },
             { "dataset", result.idx_dataset }
         };
-        std::cout << "x Storing result for dataset " << result.idx_dataset << " from " << result.idx_combination << ::endl;
-        std::cout << json_result.dump() << std::endl;
-        std::cout << string(80, '-') << std::endl;
         auto name = names[result.idx_dataset];
         if (!results.contains(name)) {
             results[name] = json::array();
         }
         results[name].push_back(json_result);
-        std::cout << results.dump() << std::endl;
         return results;
     }
-    json producer(json& tasks, struct ConfigMPI& config_mpi, MPI_Datatype& MPI_Result)
+    json producer(std::vector<std::string>& names, json& tasks, struct ConfigMPI& config_mpi, MPI_Datatype& MPI_Result)
     {
         Task_Result result;
         json results;
         int num_tasks = tasks.size();
-        auto datasets = Datasets(false, Paths::datasets());
-        auto names = datasets.getNames();
+
         for (int i = 0; i < num_tasks; ++i) {
             MPI_Status status;
-            std::cout << "+ Producer waiting for result." << std::endl;
             MPI_Recv(&result, 1, MPI_Result, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
             if (status.MPI_TAG == TAG_RESULT) {
                 //Store result
-                std::cout << "+ Producer received result from " << status.MPI_SOURCE << std::endl;
                 store_result(names, result, results);
             }
-            std::cout << "+ Producer sending task " << i << " to " << status.MPI_SOURCE << std::endl;
             MPI_Send(&i, 1, MPI_INT, status.MPI_SOURCE, TAG_TASK, MPI_COMM_WORLD);
         }
         // Send end message to all workers but the manager
         for (int i = 0; i < config_mpi.n_procs - 1; ++i) {
             MPI_Status status;
-            std::cout << "+ Producer waiting for result (closing)." << std::endl;
             MPI_Recv(&result, 1, MPI_Result, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
             if (status.MPI_TAG == TAG_RESULT) {
                 //Store result
-                std::cout << "+ Producer received result from " << status.MPI_SOURCE << " (closing)" << std::endl;
                 store_result(names, result, results);
             }
-            std::cout << "+ Producer sending end signal to " << status.MPI_SOURCE << std::endl;
             MPI_Send(&i, 1, MPI_INT, status.MPI_SOURCE, TAG_END, MPI_COMM_WORLD);
         }
         return results;
@@ -306,13 +295,10 @@ namespace platform {
         //
         // Select the best result of the computed outer folds
         //
-        std::cout << "--- Selecting best results of the outer folds ---" << std::endl;
-        std::cout << all_results.dump() << std::endl;
         for (const auto& result : all_results.items()) {
             // each result has the results of all the outer folds as each one were a different task
             double best_score = 0.0;
             json best;
-            std::cout << "     Processing " << result.key() << std::endl;
             for (const auto& result_fold : result.value()) {
                 double score = result_fold["score"].get<double>();
                 if (score > best_score) {
@@ -341,17 +327,14 @@ namespace platform {
         int task;
         while (true) {
             MPI_Status status;
-            std::cout << "- Consumer nº " << config_mpi.rank << " waiting for task." << std::endl;
             MPI_Recv(&task, 1, MPI_INT, config_mpi.manager, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
             if (status.MPI_TAG == TAG_END) {
                 break;
             }
             // Process task
-            std::cout << " - Consumer nº " << config_mpi.rank << " processing task " << task << std::endl;
             process_task_mpi_consumer(config, config_mpi, tasks, task, datasets, &result);
             // Send result to producer
             MPI_Send(&result, 1, MPI_Result, config_mpi.manager, TAG_RESULT, MPI_COMM_WORLD);
-            std::cout << " - Consumer nº " << config_mpi.rank << " sent task " << task << std::endl;
         }
     }
     void GridSearch::go_producer_consumer(struct ConfigMPI& config_mpi)
@@ -426,9 +409,11 @@ namespace platform {
         //
         auto datasets = Datasets(config.discretize, Paths::datasets());
         if (config_mpi.rank == config_mpi.manager) {
-            json all_results = producer(tasks, config_mpi, MPI_Result);
+            auto datasets_names = filterDatasets(datasets);
+            json all_results = producer(datasets_names, tasks, config_mpi, MPI_Result);
             json results = select_best_results_folds(all_results, config.model);
             save(results);
+            std::cout << "|" << std::endl;
         } else {
             consumer(datasets, tasks, config, config_mpi, MPI_Result);
         }
