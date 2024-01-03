@@ -44,22 +44,22 @@ namespace platform {
     class GridSearch {
     public:
         explicit GridSearch(struct ConfigGrid& config);
-        void go();
-        void go_mpi(struct ConfigMPI& config_mpi);
+        // void go();
+        // void go_mpi(struct ConfigMPI& config_mpi);
         void go_producer_consumer(struct ConfigMPI& config_mpi);
         ~GridSearch() = default;
-        json getResults();
+        json loadResults();
         static inline std::string NO_CONTINUE() { return "NO_CONTINUE"; }
     private:
         void save(json& results);
         json initializeResults();
-        vector<std::string> processDatasets(Datasets& datasets) const;
-        pair<double, json> processFileSingle(std::string fileName, Datasets& datasets, std::vector<json>& combinations);
-        pair<double, json> processFileNested(std::string fileName, Datasets& datasets, std::vector<json>& combinations);
+        vector<std::string> filterDatasets(Datasets& datasets) const;
+        // pair<double, json> processFileSingle(std::string fileName, Datasets& datasets, std::vector<json>& combinations);
+        // pair<double, json> processFileNested(std::string fileName, Datasets& datasets, std::vector<json>& combinations);
         struct ConfigGrid config;
-        pair<int, int> part_range_mpi(int n_tasks, int nprocs, int rank);
+        // pair<int, int> part_range_mpi(int n_tasks, int nprocs, int rank);
         json build_tasks_mpi();
-        void process_task_mpi(struct ConfigMPI& config_mpi, json& task, Datasets& datasets, json& results);
+        // void process_task_mpi(struct ConfigMPI& config_mpi, json& task, Datasets& datasets, json& results);
         Timer timer; // used to measure the time of the whole process
     };
 } /* namespace platform */

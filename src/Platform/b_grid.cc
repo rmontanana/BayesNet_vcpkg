@@ -203,18 +203,18 @@ int main(int argc, char** argv)
                 MPI_Comm_size(MPI_COMM_WORLD, &mpi_config.n_procs);
                 grid_search.go_producer_consumer(mpi_config);
                 if (mpi_config.rank == mpi_config.manager) {
-                    auto results = grid_search.getResults();
+                    auto results = grid_search.loadResults();
                     list_results(results, config.model);
                     std::cout << "Process took " << timer.getDurationString() << std::endl;
                 }
                 MPI_Finalize();
-            } else {
-                grid_search.go();
-                std::cout << "Process took " << timer.getDurationString() << std::endl;
+                // } else {
+                //     grid_search.go();
+                //     std::cout << "Process took " << timer.getDurationString() << std::endl;
             }
         } else {
             // List results
-            auto results = grid_search.getResults();
+            auto results = grid_search.loadResults();
             if (results.empty()) {
                 std::cout << "** No results found" << std::endl;
             } else {
