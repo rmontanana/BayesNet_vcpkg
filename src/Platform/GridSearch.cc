@@ -413,7 +413,7 @@ namespace platform {
             json all_results = producer(datasets_names, tasks, config_mpi, MPI_Result);
             json results = select_best_results_folds(all_results, config.model);
             save(results);
-            std::cout << "|" << std::endl;
+            std::cout << Colors::RESET() << "|" << std::endl;
         } else {
             consumer(datasets, tasks, config, config_mpi, MPI_Result);
         }
