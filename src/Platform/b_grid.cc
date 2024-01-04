@@ -32,7 +32,6 @@ void manageArguments(argparse::ArgumentParser& program)
     group.add_argument("--report").help("Report the computed hyperparameters").default_value(false).implicit_value(true);
     group.add_argument("--compute").help("Perform computation of the grid output hyperparameters").default_value(false).implicit_value(true);
     program.add_argument("--discretize").help("Discretize input datasets").default_value((bool)stoi(env.get("discretize"))).implicit_value(true);
-    program.add_argument("--mpi").help("Use MPI computing grid").default_value(false).implicit_value(true);
     program.add_argument("--stratified").help("If Stratified KFold is to be done").default_value((bool)stoi(env.get("stratified"))).implicit_value(true);
     program.add_argument("--quiet").help("Don't display detailed progress").default_value(false).implicit_value(true);
     program.add_argument("--continue").help("Continue computing from that dataset").default_value(platform::GridSearch::NO_CONTINUE());
@@ -108,8 +107,8 @@ void list_results(json& results, std::string& model)
         + " Nested: " + (results["nested"].get<int>() == 0 ? "False" : to_string(results["nested"].get<int>()))
     );
     std::cout << std::string(MAXL, '*') << std::endl;
-    int spaces = 0;
-    int hyperparameters_spaces = 0;
+    int spaces = 7;
+    int hyperparameters_spaces = 15;
     for (const auto& item : results["results"].items()) {
         auto key = item.key();
         auto value = item.value();
@@ -128,11 +127,10 @@ void list_results(json& results, std::string& model)
     int index = 0;
     for (const auto& item : results["results"].items()) {
         auto color = odd ? Colors::CYAN() : Colors::BLUE();
-        auto key = item.key();
         auto value = item.value();
         std::cout << color;
         std::cout << std::setw(3) << std::right << index++ << " ";
-        std::cout << left << setw(spaces) << key << " " << value["date"].get<string>()
+        std::cout << left << setw(spaces) << item.key() << " " << value["date"].get<string>()
             << " " << setw(8) << right << value["duration"].get<string>() << " " << setw(8) << setprecision(6)
             << fixed << right << value["score"].get<double>() << " " << value["hyperparameters"].dump() << std::endl;
         odd = !odd;
@@ -171,11 +169,6 @@ int main(int argc, char** argv)
         }
         auto excluded = program.get<std::string>("exclude");
         config.excluded = json::parse(excluded);
-        if (program.get<bool>("mpi")) {
-            if (!compute || config.nested == 0) {
-                throw std::runtime_error("Cannot use --mpi without --compute or without --nested");
-            }
-        }
     }
     catch (const exception& err) {
         cerr << err.what() << std::endl;
@@ -195,23 +188,21 @@ int main(int argc, char** argv)
         list_dump(config.model);
     } else {
         if (compute) {
-            if (program.get<bool>("mpi")) {
-                struct platform::ConfigMPI mpi_config;
-                mpi_config.manager = 0; // which process is the manager
-                MPI_Init(&argc, &argv);
-                MPI_Comm_rank(MPI_COMM_WORLD, &mpi_config.rank);
-                MPI_Comm_size(MPI_COMM_WORLD, &mpi_config.n_procs);
-                grid_search.go_producer_consumer(mpi_config);
-                if (mpi_config.rank == mpi_config.manager) {
-                    auto results = grid_search.loadResults();
-                    list_results(results, config.model);
-                    std::cout << "Process took " << timer.getDurationString() << std::endl;
-                }
-                MPI_Finalize();
-                // } else {
-                //     grid_search.go();
-                //     std::cout << "Process took " << timer.getDurationString() << std::endl;
+            struct platform::ConfigMPI mpi_config;
+            mpi_config.manager = 0; // which process is the manager
+            MPI_Init(&argc, &argv);
+            MPI_Comm_rank(MPI_COMM_WORLD, &mpi_config.rank);
+            MPI_Comm_size(MPI_COMM_WORLD, &mpi_config.n_procs);
+            if (mpi_config.n_procs < 2) {
+                throw std::runtime_error("Cannot use --compute with less than 2 mpi processes, try mpirun -np 2 ...");
             }
+            grid_search.go(mpi_config);
+            if (mpi_config.rank == mpi_config.manager) {
+                auto results = grid_search.loadResults();
+                list_results(results, config.model);
+                std::cout << "Process took " << timer.getDurationString() << std::endl;
+            }
+            MPI_Finalize();
         } else {
             // List results
             auto results = grid_search.loadResults();
