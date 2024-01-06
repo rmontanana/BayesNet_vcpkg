@@ -1,6 +1,7 @@
 #include <iostream>
 #include <argparse/argparse.hpp>
 #include "ManageResults.h"
+#include "config.h"
 
 
 void manageArguments(argparse::ArgumentParser& program, int argc, char** argv)
@@ -32,7 +33,7 @@ void manageArguments(argparse::ArgumentParser& program, int argc, char** argv)
 
 int main(int argc, char** argv)
 {
-    auto program = argparse::ArgumentParser("b_manage");
+    auto program = argparse::ArgumentParser("b_manage", { project_version.begin(), project_version.end() });
     manageArguments(program, argc, argv);
     int number = program.get<int>("number");
     std::string model = program.get<std::string>("model");

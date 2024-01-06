@@ -3,7 +3,7 @@
 #include "Paths.h"
 #include "BestResults.h"
 #include "Colors.h"
-
+#include "config.h"
 
 void manageArguments(argparse::ArgumentParser& program, int argc, char** argv)
 {
@@ -31,7 +31,7 @@ void manageArguments(argparse::ArgumentParser& program, int argc, char** argv)
 
 int main(int argc, char** argv)
 {
-    argparse::ArgumentParser program("b_sbest");
+    argparse::ArgumentParser program("b_best", { project_version.begin(), project_version.end() });
     manageArguments(program, argc, argv);
     std::string model, score;
     bool build, report, friedman, excel;

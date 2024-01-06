@@ -1,10 +1,12 @@
-include_directories(${BayesNet_SOURCE_DIR}/lib/mdlp)
-include_directories(${BayesNet_SOURCE_DIR}/lib/Files)
-include_directories(${BayesNet_SOURCE_DIR}/lib/json/include)
-include_directories(${BayesNet_SOURCE_DIR}/src/BayesNet)
-include_directories(${BayesNet_SOURCE_DIR}/src/Platform)
-include_directories(${BayesNet_SOURCE_DIR}/src/PyClassifiers)
-include_directories(${Python3_INCLUDE_DIRS})
+include_directories(
+    ${BayesNet_SOURCE_DIR}/lib/mdlp
+    ${BayesNet_SOURCE_DIR}/lib/Files
+    ${BayesNet_SOURCE_DIR}/lib/json/include
+    ${BayesNet_SOURCE_DIR}/src/BayesNet
+    ${BayesNet_SOURCE_DIR}/src/Platform
+    ${BayesNet_SOURCE_DIR}/src/PyClassifiers
+    ${Python3_INCLUDE_DIRS}
+)
 
 add_library(BayesNet bayesnetUtils.cc Network.cc Node.cc BayesMetrics.cc Classifier.cc 
     KDB.cc TAN.cc SPODE.cc Ensemble.cc AODE.cc TANLd.cc KDBLd.cc SPODELd.cc AODELd.cc BoostAODE.cc 

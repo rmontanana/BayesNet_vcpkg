@@ -7,6 +7,7 @@
 #include "Models.h"
 #include "modelRegister.h"
 #include "Paths.h"
+#include "config.h"
 
 
 using json = nlohmann::json;
@@ -53,7 +54,7 @@ void manageArguments(argparse::ArgumentParser& program)
 
 int main(int argc, char** argv)
 {
-    argparse::ArgumentParser program("b_main");
+    argparse::ArgumentParser program("b_main", { project_version.begin(), project_version.end() });
     manageArguments(program);
     std::string file_name, model_name, title, hyperparameters_file;
     json hyperparameters_json;

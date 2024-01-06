@@ -10,6 +10,7 @@
 #include "Paths.h"
 #include "Timer.h"
 #include "Colors.h"
+#include "config.h"
 
 using json = nlohmann::json;
 const int MAXL = 133;
@@ -156,7 +157,7 @@ void list_results(json& results, std::string& model)
  */
 int main(int argc, char** argv)
 {
-    argparse::ArgumentParser program("b_grid");
+    argparse::ArgumentParser program("b_grid", { project_version.begin(), project_version.end() });
     manageArguments(program);
     struct platform::ConfigGrid config;
     bool dump, compute;
