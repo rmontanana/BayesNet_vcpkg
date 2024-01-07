@@ -1,18 +1,17 @@
 if(ENABLE_TESTING)
     set(TEST_BAYESNET "unit_tests_bayesnet")
-    set(TEST_PLATFORM "unit_tests_platform")
-    include_directories(${BayesNet_SOURCE_DIR}/src/BayesNet)
-    include_directories(${BayesNet_SOURCE_DIR}/src/Platform)
-    include_directories(${BayesNet_SOURCE_DIR}/lib/Files)
-    include_directories(${BayesNet_SOURCE_DIR}/lib/mdlp)
-    include_directories(${BayesNet_SOURCE_DIR}/lib/json/include)
-    include_directories(${BayesNet_SOURCE_DIR}/lib/argparse/include)
-    set(TEST_SOURCES_BAYESNET TestBayesModels.cc TestBayesNetwork.cc TestBayesMetrics.cc TestUtils.cc ${BayesNet_SOURCE_DIR}/src/Platform/Folding.cc ${BayesNet_SOURCES})
-    set(TEST_SOURCES_PLATFORM TestFolding.cc TestUtils.cc ${BayesNet_SOURCE_DIR}/src/Platform/Folding.cc)
+    include_directories(
+        ${BayesNet_SOURCE_DIR}/src/BayesNet
+        ${BayesNet_SOURCE_DIR}/src/Platform
+        ${BayesNet_SOURCE_DIR}/lib/Files
+        ${BayesNet_SOURCE_DIR}/lib/mdlp
+        ${BayesNet_SOURCE_DIR}/lib/folding
+        ${BayesNet_SOURCE_DIR}/lib/json/include
+        ${BayesNet_SOURCE_DIR}/lib/argparse/include
+        ${CMAKE_BINARY_DIR}/configured_files/include
+    )
+    set(TEST_SOURCES_BAYESNET TestBayesModels.cc TestBayesNetwork.cc TestBayesMetrics.cc TestUtils.cc ${BayesNet_SOURCES})
     add_executable(${TEST_BAYESNET} ${TEST_SOURCES_BAYESNET})
-    add_executable(${TEST_PLATFORM} ${TEST_SOURCES_PLATFORM})
     target_link_libraries(${TEST_BAYESNET} PUBLIC "${TORCH_LIBRARIES}" ArffFiles mdlp Catch2::Catch2WithMain)
-    target_link_libraries(${TEST_PLATFORM} PUBLIC "${TORCH_LIBRARIES}" ArffFiles mdlp Catch2::Catch2WithMain)
     add_test(NAME ${TEST_BAYESNET} COMMAND ${TEST_BAYESNET})
-    add_test(NAME ${TEST_PLATFORM} COMMAND ${TEST_PLATFORM})
 endif(ENABLE_TESTING)

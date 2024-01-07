@@ -1,11 +1,11 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
-.PHONY: coverage setup help build test clean debug release
+.PHONY: coverage setup help buildr buildd test clean debug release
 
 f_release = build_release
 f_debug = build_debug
-app_targets = b_best b_list b_main b_manage b_grid
-test_targets = unit_tests_bayesnet unit_tests_platform
+app_targets = BayesNet
+test_targets = unit_tests_bayesnet 
 n_procs = -j 16
 
 define ClearTests
@@ -31,36 +31,21 @@ setup: ## Install dependencies for tests and coverage
 		pip install gcovr; \
 	fi
 
-dest ?= ${HOME}/bin
-install: ## Copy binary files to bin folder
-	@echo "Destination folder: $(dest)"
-	make buildr
-	@echo "*******************************************"
-	@echo ">>> Copying files to $(dest)"
-	@echo "*******************************************"
-	@for item in $(app_targets); do \
-		echo ">>> Copying $$item" ; \
-		cp $(f_release)/src/Platform/$$item $(dest) ; \
-	done
-
 dependency: ## Create a dependency graph diagram of the project (build/dependency.png)
 	@echo ">>> Creating dependency graph diagram of the project...";
 	$(MAKE) debug
 	cd $(f_debug) && cmake .. --graphviz=dependency.dot && dot -Tpng dependency.dot -o dependency.png
 
 buildd: ## Build the debug targets
-	cmake --build $(f_debug) -t $(app_targets) BayesNetSample $(n_procs)
+	cmake --build $(f_debug) -t $(app_targets) $(n_procs)
 
 buildr: ## Build the release targets
-	cmake --build $(f_release) -t $(app_targets) BayesNetSample $(n_procs)
+	cmake --build $(f_release) -t $(app_targets) $(n_procs)
 
 clean: ## Clean the tests info
 	@echo ">>> Cleaning Debug BayesNet tests...";
 	$(call ClearTests)
 	@echo ">>> Done";
-
-clang-uml: ## Create uml class and sequence diagrams
-	clang-uml -p --add-compile-flag -I /usr/lib/gcc/x86_64-redhat-linux/8/include/
 
 debug: ## Build a debug version of the project
 	@echo ">>> Building Debug BayesNet...";
@@ -89,27 +74,10 @@ test: ## Run tests (opt="-s") to verbose output the tests, (opt="-c='Test Maximu
 	done
 	@echo ">>> Done";
 
-opt = ""
-testp: ## Run platform tests (opt="-s") to verbose output the tests, (opt="-c='Stratified Fold Test'") to run only that section
-	@echo ">>> Running Platform tests...";
-	@$(MAKE) clean
-	@cmake --build $(f_debug) --target unit_tests_platform $(n_procs)
-	@if [ -f $(f_debug)/tests/unit_tests_platform ]; then cd $(f_debug)/tests ; ./unit_tests_platform $(opt) ; fi ; 
-	@echo ">>> Done";
-
-opt = ""
-testb: ## Run BayesNet tests (opt="-s") to verbose output the tests, (opt="-c='Test Maximum Spanning Tree'") to run only that section
-	@echo ">>> Running BayesNet tests...";
-	@$(MAKE) clean
-	@cmake --build $(f_debug) --target unit_tests_bayesnet $(n_procs)
-	@if [ -f $(f_debug)/tests/unit_tests_bayesnet ]; then cd $(f_debug)/tests ; ./unit_tests_bayesnet $(opt) ; fi ; 
-	@echo ">>> Done";
-
 coverage: ## Run tests and generate coverage report (build/index.html)
-	@echo ">>> Building tests with coverage...";
+	@echo ">>> Building tests with coverage..."
 	@$(MAKE) test
-	@cd $(f_debug) ; \
-	gcovr --config ../gcovr.cfg tests ;
+	@gcovr $(f_debug)/tests
 	@echo ">>> Done";	
 
 

@@ -3,6 +3,7 @@
 #include "Node.h"
 #include <map>
 #include <vector>
+#include "config.h"
 
 namespace bayesnet {
     class Network {
@@ -56,7 +57,7 @@ namespace bayesnet {
         std::vector<std::string> graph(const std::string& title) const; // Returns a std::vector of std::strings representing the graph in graphviz format
         void initialize();
         void dump_cpt() const;
-        inline std::string version() { return "0.2.0"; }
+        inline std::string version() { return  { project_version.begin(), project_version.end() }; }
     };
 }
 #endif

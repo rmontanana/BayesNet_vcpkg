@@ -1,11 +1,11 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
 #include <catch2/generators/catch_generators.hpp>
-#include <std::string>
+#include <string>
 #include "TestUtils.h"
 #include "Network.h"
 
-void buildModel(bayesnet::Network& net, const std::vector<std::string>& features, const std::std::string& className)
+void buildModel(bayesnet::Network& net, const std::vector<std::string>& features, const std::string& className)
 {
     std::vector<pair<int, int>> network = { {0, 1}, {0, 2}, {1, 3} };
     for (const auto& feature : features) {

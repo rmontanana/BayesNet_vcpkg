@@ -2,12 +2,10 @@
 #include <functional>
 #include <limits.h>
 #include "BoostAODE.h"
-#include "Colors.h"
-#include "Folding.h"
-#include "Paths.h"
 #include "CFS.h"
 #include "FCBF.h"
 #include "IWSS.h"
+#include "folding.hpp"
 
 namespace bayesnet {
     BoostAODE::BoostAODE() : Ensemble()
@@ -24,7 +22,7 @@ namespace bayesnet {
         auto y_ = dataset.index({ -1, "..." });
         if (convergence) {
             // Prepare train & validation sets from train data
-            auto fold = platform::StratifiedKFold(5, y_, 271);
+            auto fold = folding::StratifiedKFold(5, y_, 271);
             dataset_ = torch::clone(dataset);
             // save input dataset
             auto [train, test] = fold.getFold(0);

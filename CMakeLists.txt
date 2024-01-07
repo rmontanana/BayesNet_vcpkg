@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 project(BayesNet
-  VERSION 0.2.0
+  VERSION 1.0.0
   DESCRIPTION "Bayesian Network and basic classifiers Library."
   HOMEPAGE_URL "https://github.com/rmontanana/bayesnet"
   LANGUAGES CXX
@@ -30,27 +30,6 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 option(ENABLE_CLANG_TIDY "Enable to add clang tidy."              OFF)
 option(ENABLE_TESTING "Unit testing build"                        OFF)
 option(CODE_COVERAGE "Collect coverage from test library"         OFF)
-option(MPI_ENABLED "Enable MPI options"                           ON)
-
-if (MPI_ENABLED)
-  find_package(MPI REQUIRED)
-  message("MPI_CXX_LIBRARIES=${MPI_CXX_LIBRARIES}")
-  message("MPI_CXX_INCLUDE_DIRS=${MPI_CXX_INCLUDE_DIRS}")
-endif (MPI_ENABLED)
-
-# Boost Library
-set(Boost_USE_STATIC_LIBS OFF) 
-set(Boost_USE_MULTITHREADED ON)  
-set(Boost_USE_STATIC_RUNTIME OFF) 
-find_package(Boost 1.66.0 REQUIRED COMPONENTS python3 numpy3) 
-if(Boost_FOUND)
-    message("Boost_INCLUDE_DIRS=${Boost_INCLUDE_DIRS}")
-    include_directories(${Boost_INCLUDE_DIRS}) 
-endif()
-
-# Python
-find_package(Python3 3.11...3.11.9 COMPONENTS Interpreter Development REQUIRED)
-message("Python3_LIBRARIES=${Python3_LIBRARIES}")
 
 # CMakes modules
 # --------------
@@ -76,23 +55,14 @@ add_git_submodule("lib/mdlp")
 add_git_submodule("lib/argparse")
 add_git_submodule("lib/json")
 
-
-find_library(XLSXWRITER_LIB NAMES libxlsxwriter.dylib libxlsxwriter.so PATHS ${BayesNet_SOURCE_DIR}/lib/libxlsxwriter/lib)
-message("XLSXWRITER_LIB=${XLSXWRITER_LIB}")
-
-
 # Subdirectories
 # --------------
 add_subdirectory(config)
 add_subdirectory(lib/Files)
 add_subdirectory(src/BayesNet)
-add_subdirectory(src/Platform)
-add_subdirectory(src/PyClassifiers)
-add_subdirectory(sample)
 
 file(GLOB BayesNet_HEADERS CONFIGURE_DEPENDS ${BayesNet_SOURCE_DIR}/src/BayesNet/*.h ${BayesNet_SOURCE_DIR}/BayesNet/*.h)
 file(GLOB BayesNet_SOURCES CONFIGURE_DEPENDS ${BayesNet_SOURCE_DIR}/src/BayesNet/*.cc ${BayesNet_SOURCE_DIR}/src/BayesNet/*.cpp)
-file(GLOB Platform_SOURCES CONFIGURE_DEPENDS ${BayesNet_SOURCE_DIR}/src/Platform/*.cc ${BayesNet_SOURCE_DIR}/src/Platform/*.cpp)
 
 # Testing
 # -------

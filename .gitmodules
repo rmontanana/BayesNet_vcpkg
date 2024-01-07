@@ -18,8 +18,6 @@
 	url = https://github.com/nlohmann/json.git
         master = master
 	update = merge
-[submodule "lib/libxlsxwriter"]
-	path = lib/libxlsxwriter
-	url = https://github.com/jmcnamara/libxlsxwriter.git
-        main = main
-	update = merge
+[submodule "lib/folding"]
+	path = lib/folding
+	url = https://github.com/rmontanana/folding

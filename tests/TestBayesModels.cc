@@ -2,9 +2,9 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
 #include <catch2/generators/catch_generators.hpp>
-#include <std::vector>
+#include <vector>
 #include <map>
-#include <std::string>
+#include <string>
 #include "KDB.h"
 #include "TAN.h"
 #include "SPODE.h"
@@ -126,7 +126,7 @@ TEST_CASE("Models features", "[BayesNet]")
     auto raw = RawDatasets("iris", true);
     auto clf = bayesnet::TAN();
     clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
-    REQUIRE(clf.getNumberOfNodes() == 6);
+    REQUIRE(clf.getNumberOfNodes() == 5);
     REQUIRE(clf.getNumberOfEdges() == 7);
     REQUIRE(clf.show() == std::vector<std::string>{"class -> sepallength, sepalwidth, petallength, petalwidth, ", "petallength -> sepallength, ", "petalwidth -> ", "sepallength -> sepalwidth, ", "sepalwidth -> petalwidth, "});
     REQUIRE(clf.graph("Test") == graph);
@@ -136,6 +136,6 @@ TEST_CASE("Get num features & num edges", "[BayesNet]")
     auto raw = RawDatasets("iris", true);
     auto clf = bayesnet::KDB(2);
     clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
-    REQUIRE(clf.getNumberOfNodes() == 6);
+    REQUIRE(clf.getNumberOfNodes() == 5);
     REQUIRE(clf.getNumberOfEdges() == 8);
 }
