@@ -7,7 +7,6 @@ if(ENABLE_TESTING)
         ${BayesNet_SOURCE_DIR}/lib/mdlp
         ${BayesNet_SOURCE_DIR}/lib/folding
         ${BayesNet_SOURCE_DIR}/lib/json/include
-        ${BayesNet_SOURCE_DIR}/lib/argparse/include
         ${CMAKE_BINARY_DIR}/configured_files/include
     )
     set(TEST_SOURCES_BAYESNET TestBayesModels.cc TestBayesNetwork.cc TestBayesMetrics.cc TestUtils.cc ${BayesNet_SOURCES})

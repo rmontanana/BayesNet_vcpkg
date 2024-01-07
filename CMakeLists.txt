@@ -52,7 +52,6 @@ endif (ENABLE_CLANG_TIDY)
 # ---------------------------------------------
 # include(FetchContent)
 add_git_submodule("lib/mdlp")
-add_git_submodule("lib/argparse")
 add_git_submodule("lib/json")
 
 # Subdirectories

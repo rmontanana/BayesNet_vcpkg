@@ -8,11 +8,6 @@
         main  = v2.x
 	update = merge
 	url = https://github.com/catchorg/Catch2.git
-[submodule "lib/argparse"]
-	path = lib/argparse
-	url = https://github.com/p-ranav/argparse
-	master = master
-	update = merge
 [submodule "lib/json"]
 	path = lib/json
 	url = https://github.com/nlohmann/json.git
