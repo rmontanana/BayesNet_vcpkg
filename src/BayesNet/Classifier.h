@@ -19,6 +19,7 @@ namespace bayesnet {
         std::map<std::string, std::vector<int>> states;
         torch::Tensor dataset; // (n+1)xm tensor
         status_t status = NORMAL;
+        std::vector<std::string> notes; // Used to store messages occurred during the fit process
         void checkFitParameters();
         virtual void buildModel(const torch::Tensor& weights) = 0;
         void trainModel(const torch::Tensor& weights) override;

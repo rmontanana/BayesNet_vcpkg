@@ -115,6 +115,7 @@ namespace bayesnet {
             significanceModels.push_back(1.0);
             n_models++;
         }
+        notes.push_back("Used features in initialization: " + std::to_string(featuresUsed.size()) + " of " + std::to_string(features.size()) + " with " + algorithm);
         delete featureSelector;
         return featuresUsed;
     }
@@ -197,6 +198,7 @@ namespace bayesnet {
             exitCondition = n_models >= maxModels && repeatSparent || epsilon_t > 0.5 || count > tolerance;
         }
         if (featuresUsed.size() != features.size()) {
+            notes.push_back("Used features in train: " + std::to_string(featuresUsed.size()) + " of " + std::to_string(features.size()));
             status = WARNING;
         }
     }
