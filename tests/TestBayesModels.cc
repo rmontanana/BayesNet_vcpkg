@@ -139,3 +139,14 @@ TEST_CASE("Get num features & num edges", "[BayesNet]")
     REQUIRE(clf.getNumberOfNodes() == 5);
     REQUIRE(clf.getNumberOfEdges() == 8);
 }
+TEST_CASE("BoostAODE feature_select CFS")
+{
+    auto raw = RawDatasets("glass", true);
+    auto clf = bayesnet::BoostAODE();
+    clf.setHyperparameters({ {"select_features", "CFS"} });
+    clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
+    REQUIRE(clf.getNumberOfNodes() == 90);
+    REQUIRE(clf.getNumberOfEdges() == 153);
+    REQUIRE(clf.getNotes().size() == 1);
+    REQUIRE(clf.getNotes()[0] == "Used features in initialization: 6 of 9 with CFS");
+}
