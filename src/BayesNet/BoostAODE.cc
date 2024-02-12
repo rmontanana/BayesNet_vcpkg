@@ -201,6 +201,7 @@ namespace bayesnet {
             notes.push_back("Used features in train: " + std::to_string(featuresUsed.size()) + " of " + std::to_string(features.size()));
             status = WARNING;
         }
+        notes.push_back("Number of models: " + std::to_string(n_models));
     }
     std::vector<std::string> BoostAODE::graph(const std::string& title) const
     {

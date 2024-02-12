@@ -16,6 +16,11 @@
 #include "AODELd.h"
 #include "TestUtils.h"
 
+TEST_CASE("Library check version", "[BayesNet]")
+{
+    auto clf = bayesnet::KDB(2);
+    REQUIRE(clf.getVersion() == "1.0.1");
+}
 TEST_CASE("Test Bayesian Classifiers score", "[BayesNet]")
 {
     map <pair<std::string, std::string>, float> scores = {
@@ -139,7 +144,7 @@ TEST_CASE("Get num features & num edges", "[BayesNet]")
     REQUIRE(clf.getNumberOfNodes() == 5);
     REQUIRE(clf.getNumberOfEdges() == 8);
 }
-TEST_CASE("BoostAODE feature_select CFS")
+TEST_CASE("BoostAODE feature_select CFS", "[BayesNet]")
 {
     auto raw = RawDatasets("glass", true);
     auto clf = bayesnet::BoostAODE();
@@ -147,6 +152,25 @@ TEST_CASE("BoostAODE feature_select CFS")
     clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
     REQUIRE(clf.getNumberOfNodes() == 90);
     REQUIRE(clf.getNumberOfEdges() == 153);
-    REQUIRE(clf.getNotes().size() == 1);
+    REQUIRE(clf.getNotes().size() == 2);
     REQUIRE(clf.getNotes()[0] == "Used features in initialization: 6 of 9 with CFS");
+    REQUIRE(clf.getNotes()[1] == "Number of models: 9");
+}
+TEST_CASE("BoostAODE test used features in train note", "[BayesNet]")
+{
+    auto raw = RawDatasets("diabetes", true);
+    auto clf = bayesnet::BoostAODE();
+    clf.setHyperparameters({
+        {"ascending",true},
+        {"convergence", true},
+        {"repeatSparent",true},
+        {"select_features","CFS"}
+        });
+    clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
+    REQUIRE(clf.getNumberOfNodes() == 72);
+    REQUIRE(clf.getNumberOfEdges() == 120);
+    REQUIRE(clf.getNotes().size() == 3);
+    REQUIRE(clf.getNotes()[0] == "Used features in initialization: 6 of 8 with CFS");
+    REQUIRE(clf.getNotes()[1] == "Used features in train: 7 of 8");
+    REQUIRE(clf.getNotes()[2] == "Number of models: 8");
 }
