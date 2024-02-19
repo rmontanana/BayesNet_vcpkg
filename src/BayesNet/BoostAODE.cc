@@ -121,6 +121,8 @@ namespace bayesnet {
     }
     void BoostAODE::trainModel(const torch::Tensor& weights)
     {
+        // Algorithm based on the adaboost algorithm for classification
+        // as explained in Ensemble methods (Zhi-Hua Zhou, 2012)
         std::unordered_set<int> featuresUsed;
         if (selectFeatures) {
             featuresUsed = initializeModels();
@@ -132,9 +134,8 @@ namespace bayesnet {
         // Variables to control the accuracy finish condition
         double priorAccuracy = 0.0;
         double delta = 1.0;
-        double threshold = 1e-4;
-        int count = 0; // number of times the accuracy is lower than the threshold
-        fitted = true; // to enable predict
+        double convergence_threshold = 1e-4;
+        int count = 0; // number of times the accuracy is lower than the convergence_threshold
         // Step 0: Set the finish condition
         // if not repeatSparent a finish condition is run out of features
         // n_models == maxModels
@@ -191,10 +192,12 @@ namespace bayesnet {
                 } else {
                     delta = accuracy - priorAccuracy;
                 }
-                if (delta < threshold) {
+                if (delta < convergence_threshold) {
                     count++;
                 }
+                priorAccuracy = accuracy;
             }
+            // epsilon_t > 0.5 => inverse the weights policy (plot ln(wt))
             exitCondition = n_models >= maxModels && repeatSparent || epsilon_t > 0.5 || count > tolerance;
         }
         if (featuresUsed.size() != features.size()) {
@@ -202,6 +205,7 @@ namespace bayesnet {
             status = WARNING;
         }
         notes.push_back("Number of models: " + std::to_string(n_models));
+        fitted = true;
     }
     std::vector<std::string> BoostAODE::graph(const std::string& title) const
     {
