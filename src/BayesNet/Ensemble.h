@@ -7,19 +7,15 @@
 
 namespace bayesnet {
     class Ensemble : public Classifier {
-    private:
-        Ensemble& build(std::vector<std::string>& features, std::string className, std::map<std::string, std::vector<int>>& states);
-    protected:
-        unsigned n_models;
-        std::vector<std::unique_ptr<Classifier>> models;
-        std::vector<double> significanceModels;
-        void trainModel(const torch::Tensor& weights) override;
-        std::vector<int> voting(torch::Tensor& y_pred);
     public:
-        Ensemble();
+        Ensemble(bool predict_voting = true);
         virtual ~Ensemble() = default;
         torch::Tensor predict(torch::Tensor& X) override;
         std::vector<int> predict(std::vector<std::vector<int>>& X) override;
+        torch::Tensor do_predict_voting(torch::Tensor& X);
+        std::vector<int> do_predict_voting(std::vector<std::vector<int>>& X);
+        torch::Tensor do_predict_prob(torch::Tensor& X);
+        std::vector<int> do_predict_prob(std::vector<std::vector<int>>& X);
         float score(torch::Tensor& X, torch::Tensor& y) override;
         float score(std::vector<std::vector<int>>& X, std::vector<int>& y) override;
         int getNumberOfNodes() const override;
@@ -34,6 +30,14 @@ namespace bayesnet {
         void dump_cpt() const override
         {
         }
+    protected:
+        unsigned n_models;
+        std::vector<std::unique_ptr<Classifier>> models;
+        std::vector<double> significanceModels;
+        void trainModel(const torch::Tensor& weights) override;
+        std::vector<int> voting(torch::Tensor& y_pred);
+    private:
+        bool predict_voting;
     };
 }
 #endif
