@@ -19,7 +19,7 @@
 TEST_CASE("Library check version", "[BayesNet]")
 {
     auto clf = bayesnet::KDB(2);
-    REQUIRE(clf.getVersion() == "1.0.1");
+    REQUIRE(clf.getVersion() == "1.0.2");
 }
 TEST_CASE("Test Bayesian Classifiers score", "[BayesNet]")
 {
@@ -164,7 +164,8 @@ TEST_CASE("BoostAODE test used features in train note", "[BayesNet]")
         {"ascending",true},
         {"convergence", true},
         {"repeatSparent",true},
-        {"select_features","CFS"}
+        {"select_features","CFS"},
+        {"tolerance", 3}
         });
     clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
     REQUIRE(clf.getNumberOfNodes() == 72);
