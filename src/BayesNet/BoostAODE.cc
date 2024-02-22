@@ -8,7 +8,7 @@
 #include "folding.hpp"
 
 namespace bayesnet {
-    BoostAODE::BoostAODE() : Ensemble(false)
+    BoostAODE::BoostAODE(bool predict_voting) : Ensemble(predict_voting)
     {
         validHyperparameters = { "repeatSparent", "maxModels", "ascending", "convergence", "threshold", "select_features", "tolerance" };
 

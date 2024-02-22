@@ -156,7 +156,7 @@ TEST_CASE("BoostAODE feature_select CFS", "[BayesNet]")
     REQUIRE(clf.getNotes()[0] == "Used features in initialization: 6 of 9 with CFS");
     REQUIRE(clf.getNotes()[1] == "Number of models: 9");
 }
-TEST_CASE("BoostAODE test used features in train note", "[BayesNet]")
+TEST_CASE("BoostAODE test used features in train note and score", "[BayesNet]")
 {
     auto raw = RawDatasets("diabetes", true);
     auto clf = bayesnet::BoostAODE();
@@ -173,9 +173,25 @@ TEST_CASE("BoostAODE test used features in train note", "[BayesNet]")
     REQUIRE(clf.getNotes()[0] == "Used features in initialization: 6 of 8 with CFS");
     REQUIRE(clf.getNotes()[1] == "Used features in train: 7 of 8");
     REQUIRE(clf.getNotes()[2] == "Number of models: 8");
+    auto score = clf.score(raw.Xv, raw.yv);
+    auto scoret = clf.score(raw.Xt, raw.yt);
+    REQUIRE(score == Catch::Approx(0.8138).epsilon(raw.epsilon));
+    REQUIRE(scoret == Catch::Approx(0.8138).epsilon(raw.epsilon));
 }
 TEST_CASE("TAN predict_proba", "[BayesNet]")
 {
+    auto res_prob = std::vector<std::vector<double>>({
+        { 0.00375671, 0.994457, 0.00178621 },
+        { 0.00137462, 0.992734, 0.00589123 },
+        { 0.00137462, 0.992734, 0.00589123 },
+        { 0.00137462, 0.992734, 0.00589123 },
+        { 0.00218225, 0.992877, 0.00494094 },
+        { 0.00494209, 0.0978534, 0.897205 },
+        { 0.0054192, 0.974275, 0.0203054 },
+        { 0.00433012, 0.985054, 0.0106159 },
+        { 0.000860806, 0.996922, 0.00221698 }
+        });
+    int init_index = 78;
     auto raw = RawDatasets("iris", true);
     auto clf = bayesnet::TAN();
     clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
@@ -191,25 +207,54 @@ TEST_CASE("TAN predict_proba", "[BayesNet]")
         auto maxElem = max_element(y_pred_proba[i].begin(), y_pred_proba[i].end());
         int predictedClass = distance(y_pred_proba[i].begin(), maxElem);
         REQUIRE(predictedClass == y_pred[i]);
+        // Check predict is coherent with predict_proba
         REQUIRE(yt_pred_proba[i].argmax().item<int>() == y_pred[i]);
     }
+    // Check predict_proba values for vectors and tensors
+    for (int i = 0; i < res_prob.size(); i++) {
+        for (int j = 0; j < 3; j++) {
+            REQUIRE(res_prob[i][j] == Catch::Approx(y_pred_proba[i + init_index][j]).epsilon(raw.epsilon));
+            REQUIRE(res_prob[i][j] == Catch::Approx(yt_pred_proba[i + init_index][j].item<double>()).epsilon(raw.epsilon));
+        }
+    }
 }
-
-// TEST_CASE("BoostAODE predict_proba", "[BayesNet]")
-// {
-//     auto raw = RawDatasets("iris", true);
-//     auto clf = bayesnet::BoostAODE();
-//     clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
-//     auto y_pred = clf.predict_proba(raw.Xv);
-//     REQUIRE(y_pred.size(0) == raw.yv.size(0));
-//     REQUIRE(y_pred.size(1) == 3);
-//     auto y_pred2 = clf.predict_proba(raw.Xv);
-//     REQUIRE(y_pred2.size(0) == raw.yv.size(0));
-//     REQUIRE(y_pred2.size(1) == 3);
-//     REQUIRE(y_pred.equal(y_pred2));
-//     for (int i = 0; i < y_pred.size(0); ++i) {
-//         for (int j = 0; j < y_pred.size(1); ++j) {
-//             REQUIRE(y_pred[i][j].item<float>() == y_pred2[i][j].item<float>());
-//         }
-//     }
-// }
+TEST_CASE("BoostAODE predict_proba voting", "[BayesNet]")
+{
+    // auto res_prob = std::vector<std::vector<double>>({
+    //     { 0.00375671, 0.994457, 0.00178621 },
+    //     { 0.00137462, 0.992734, 0.00589123 },
+    //     { 0.00137462, 0.992734, 0.00589123 },
+    //     { 0.00137462, 0.992734, 0.00589123 },
+    //     { 0.00218225, 0.992877, 0.00494094 },
+    //     { 0.00494209, 0.0978534, 0.897205 },
+    //     { 0.0054192, 0.974275, 0.0203054 },
+    //     { 0.00433012, 0.985054, 0.0106159 },
+    //     { 0.000860806, 0.996922, 0.00221698 }
+    //     });
+    // int init_index = 78;
+    auto raw = RawDatasets("iris", true);
+    auto clf = bayesnet::BoostAODE(true);
+    clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
+    auto y_pred_proba = clf.predict_proba(raw.Xv);
+    auto y_pred = clf.predict(raw.Xv);
+    auto yt_pred_proba = clf.predict_proba(raw.Xt);
+    // REQUIRE(y_pred.size() == y_pred_proba.size());
+    // REQUIRE(y_pred.size() == yt_pred_proba.size(0));
+    // REQUIRE(y_pred.size() == raw.yv.size());
+    // REQUIRE(y_pred_proba[0].size() == 3);
+    // REQUIRE(yt_pred_proba.size(1) == y_pred_proba[0].size());
+    // for (int i = 0; i < y_pred_proba.size(); ++i) {
+    //     auto maxElem = max_element(y_pred_proba[i].begin(), y_pred_proba[i].end());
+    //     int predictedClass = distance(y_pred_proba[i].begin(), maxElem);
+    //     REQUIRE(predictedClass == y_pred[i]);
+    //     // Check predict is coherent with predict_proba
+    //     REQUIRE(yt_pred_proba[i].argmax().item<int>() == y_pred[i]);
+    // }
+    // // Check predict_proba values for vectors and tensors
+    // for (int i = 0; i < res_prob.size(); i++) {
+    //     for (int j = 0; j < 3; j++) {
+    //         REQUIRE(res_prob[i][j] == Catch::Approx(y_pred_proba[i + init_index][j]).epsilon(raw.epsilon));
+    //         REQUIRE(res_prob[i][j] == Catch::Approx(yt_pred_proba[i + init_index][j].item<double>()).epsilon(raw.epsilon));
+    //     }
+    // }
+}

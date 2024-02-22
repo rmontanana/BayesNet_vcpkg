@@ -36,7 +36,6 @@ namespace bayesnet {
         std::vector<double> significanceModels;
         void trainModel(const torch::Tensor& weights) override;
         std::vector<int> voting(torch::Tensor& y_pred);
-    private:
         bool predict_voting;
     };
 }
