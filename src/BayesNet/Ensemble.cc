@@ -2,7 +2,10 @@
 
 namespace bayesnet {
 
-    Ensemble::Ensemble(bool predict_voting) : Classifier(Network()), n_models(0), predict_voting(predict_voting) {};
+    Ensemble::Ensemble(bool predict_voting) : Classifier(Network()), n_models(0), predict_voting(predict_voting)
+    {
+
+    };
     const std::string ENSEMBLE_NOT_FITTED = "Ensemble has not been fitted";
     void Ensemble::trainModel(const torch::Tensor& weights)
     {
@@ -37,7 +40,7 @@ namespace bayesnet {
         if (!fitted) {
             throw std::logic_error(ENSEMBLE_NOT_FITTED);
         }
-        return predict_voting ? do_predict_voting(X) : do_predict_prob(X);
+        return do_predict_voting(X);
 
     }
     torch::Tensor Ensemble::predict(torch::Tensor& X)
@@ -45,27 +48,32 @@ namespace bayesnet {
         if (!fitted) {
             throw std::logic_error(ENSEMBLE_NOT_FITTED);
         }
-        return predict_voting ? do_predict_voting(X) : do_predict_prob(X);
+        return do_predict_voting(X);
     }
-    torch::Tensor Ensemble::do_predict_prob(torch::Tensor& X)
+    torch::Tensor Ensemble::predict_proba(torch::Tensor& X)
     {
-        torch::Tensor y_pred = torch::zeros({ X.size(1), n_models }, torch::kFloat32);
-        // auto threads{ std::vector<std::thread>() };
-        // std::mutex mtx;
-        // for (auto i = 0; i < n_models; ++i) {
-        //     threads.push_back(std::thread([&, i]() {
-        //         auto ypredict = models[i]->predict(X);
-        //         std::lock_guard<std::mutex> lock(mtx);
-        //         y_pred.index_put_({ "...", i }, ypredict);
-        //         }));
-        // }
-        // for (auto& thread : threads) {
-        //     thread.join();
-        // }
+        auto n_states = getClassNumStates();
+        torch::Tensor y_pred = torch::zeros({ X.size(1), n_states }, torch::kFloat32);
+        auto threads{ std::vector<std::thread>() };
+        std::mutex mtx;
+        for (auto i = 0; i < n_models; ++i) {
+            threads.push_back(std::thread([&, i]() {
+                auto ypredict = models[i]->predict_proba(X);
+                ypredict *= significanceModels[i];
+                std::lock_guard<std::mutex> lock(mtx);
+                y_pred.index_put_({ "...", i }, ypredict);
+                }));
+        }
+        for (auto& thread : threads) {
+            thread.join();
+        }
+        auto sum = std::reduce(significanceModels.begin(), significanceModels.end());
+        y_pred /= sum;
         return y_pred;
     }
-    std::vector<int> Ensemble::do_predict_prob(std::vector<std::vector<int>>& X)
+    std::vector<std::vector<double>> Ensemble::predict_proba(std::vector<std::vector<int>>& X)
     {
+
         // long m_ = X[0].size();
         // long n_ = X.size();
         // vector<vector<int>> Xd(n_, vector<int>(m_, 0));
@@ -77,7 +85,7 @@ namespace bayesnet {
         //     y_pred.index_put_({ "...", i }, torch::tensor(models[i]->predict(Xd), torch::kInt32));
         // }
         // return voting(y_pred);
-        return std::vector<int>();
+        return std::vector<std::vector<double>>();
     }
     torch::Tensor Ensemble::do_predict_voting(torch::Tensor& X)
     {
@@ -105,14 +113,23 @@ namespace bayesnet {
             Xd[i] = std::vector<int>(X[i].begin(), X[i].end());
         }
         torch::Tensor y_pred = torch::zeros({ m_, n_models }, torch::kInt32);
+        auto threads{ std::vector<std::thread>() };
+        std::mutex mtx;
         for (auto i = 0; i < n_models; ++i) {
-            y_pred.index_put_({ "...", i }, torch::tensor(models[i]->predict(Xd), torch::kInt32));
+            threads.push_back(std::thread([&, i]() {
+                auto ypredict = models[i]->predict(Xd);
+                std::lock_guard<std::mutex> lock(mtx);
+                y_pred.index_put_({ "...", i }, torch::tensor(ypredict, torch::kInt32));
+                }));
+        }
+        for (auto& thread : threads) {
+            thread.join();
         }
         return voting(y_pred);
     }
     float Ensemble::score(torch::Tensor& X, torch::Tensor& y)
     {
-        auto y_pred = predict_voting ? do_predict_voting(X) : do_predict_prob(X);
+        auto y_pred = do_predict_voting(X);
         int correct = 0;
         for (int i = 0; i < y_pred.size(0); ++i) {
             if (y_pred[i].item<int>() == y[i].item<int>()) {
@@ -123,7 +140,7 @@ namespace bayesnet {
     }
     float Ensemble::score(std::vector<std::vector<int>>& X, std::vector<int>& y)
     {
-        auto y_pred = predict_voting ? do_predict_voting(X) : do_predict_prob(X);
+        auto y_pred = do_predict_voting(X);
         int correct = 0;
         for (int i = 0; i < y_pred.size(); ++i) {
             if (y_pred[i] == y[i]) {

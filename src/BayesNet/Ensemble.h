@@ -12,10 +12,10 @@ namespace bayesnet {
         virtual ~Ensemble() = default;
         torch::Tensor predict(torch::Tensor& X) override;
         std::vector<int> predict(std::vector<std::vector<int>>& X) override;
+        torch::Tensor predict_proba(torch::Tensor& X) override;
+        std::vector<std::vector<double>> predict_proba(std::vector<std::vector<int>>& X) override;
         torch::Tensor do_predict_voting(torch::Tensor& X);
         std::vector<int> do_predict_voting(std::vector<std::vector<int>>& X);
-        torch::Tensor do_predict_prob(torch::Tensor& X);
-        std::vector<int> do_predict_prob(std::vector<std::vector<int>>& X);
         float score(torch::Tensor& X, torch::Tensor& y) override;
         float score(std::vector<std::vector<int>>& X, std::vector<int>& y) override;
         int getNumberOfNodes() const override;

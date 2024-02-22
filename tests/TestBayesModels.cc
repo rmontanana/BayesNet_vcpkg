@@ -165,7 +165,6 @@ TEST_CASE("BoostAODE test used features in train note", "[BayesNet]")
         {"convergence", true},
         {"repeatSparent",true},
         {"select_features","CFS"},
-        {"tolerance", 3}
         });
     clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
     REQUIRE(clf.getNumberOfNodes() == 72);
@@ -175,3 +174,42 @@ TEST_CASE("BoostAODE test used features in train note", "[BayesNet]")
     REQUIRE(clf.getNotes()[1] == "Used features in train: 7 of 8");
     REQUIRE(clf.getNotes()[2] == "Number of models: 8");
 }
+TEST_CASE("TAN predict_proba", "[BayesNet]")
+{
+    auto raw = RawDatasets("iris", true);
+    auto clf = bayesnet::TAN();
+    clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
+    auto y_pred_proba = clf.predict_proba(raw.Xv);
+    auto y_pred = clf.predict(raw.Xv);
+    auto yt_pred_proba = clf.predict_proba(raw.Xt);
+    REQUIRE(y_pred.size() == y_pred_proba.size());
+    REQUIRE(y_pred.size() == yt_pred_proba.size(0));
+    REQUIRE(y_pred.size() == raw.yv.size());
+    REQUIRE(y_pred_proba[0].size() == 3);
+    REQUIRE(yt_pred_proba.size(1) == y_pred_proba[0].size());
+    for (int i = 0; i < y_pred_proba.size(); ++i) {
+        auto maxElem = max_element(y_pred_proba[i].begin(), y_pred_proba[i].end());
+        int predictedClass = distance(y_pred_proba[i].begin(), maxElem);
+        REQUIRE(predictedClass == y_pred[i]);
+        REQUIRE(yt_pred_proba[i].argmax().item<int>() == y_pred[i]);
+    }
+}
+
+// TEST_CASE("BoostAODE predict_proba", "[BayesNet]")
+// {
+//     auto raw = RawDatasets("iris", true);
+//     auto clf = bayesnet::BoostAODE();
+//     clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
+//     auto y_pred = clf.predict_proba(raw.Xv);
+//     REQUIRE(y_pred.size(0) == raw.yv.size(0));
+//     REQUIRE(y_pred.size(1) == 3);
+//     auto y_pred2 = clf.predict_proba(raw.Xv);
+//     REQUIRE(y_pred2.size(0) == raw.yv.size(0));
+//     REQUIRE(y_pred2.size(1) == 3);
+//     REQUIRE(y_pred.equal(y_pred2));
+//     for (int i = 0; i < y_pred.size(0); ++i) {
+//         for (int j = 0; j < y_pred.size(1); ++j) {
+//             REQUIRE(y_pred[i][j].item<float>() == y_pred2[i][j].item<float>());
+//         }
+//     }
+// }
