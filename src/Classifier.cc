@@ -121,6 +121,7 @@ namespace bayesnet {
         auto m_ = X[0].size();
         auto n_ = X.size();
         std::vector<std::vector<int>> Xd(n_, std::vector<int>(m_, 0));
+        // Convert to nxm vector
         for (auto i = 0; i < n_; i++) {
             Xd[i] = std::vector<int>(X[i].begin(), X[i].end());
         }
@@ -129,9 +130,6 @@ namespace bayesnet {
     }
     float Classifier::score(torch::Tensor& X, torch::Tensor& y)
     {
-        if (!fitted) {
-            throw std::logic_error(CLASSIFIER_NOT_FITTED);
-        }
         torch::Tensor y_pred = predict(X);
         return (y_pred == y).sum().item<float>() / y.size(0);
     }

@@ -14,8 +14,6 @@ namespace bayesnet {
         std::vector<int> predict(std::vector<std::vector<int>>& X) override;
         torch::Tensor predict_proba(torch::Tensor& X) override;
         std::vector<std::vector<double>> predict_proba(std::vector<std::vector<int>>& X) override;
-        torch::Tensor do_predict_voting(torch::Tensor& X);
-        std::vector<int> do_predict_voting(std::vector<std::vector<int>>& X);
         float score(torch::Tensor& X, torch::Tensor& y) override;
         float score(std::vector<std::vector<int>>& X, std::vector<int>& y) override;
         int getNumberOfNodes() const override;
@@ -31,11 +29,18 @@ namespace bayesnet {
         {
         }
     protected:
+        torch::Tensor predict_average_voting(torch::Tensor& X);
+        std::vector<std::vector<double>> predict_average_voting(std::vector<std::vector<int>>& X);
+        torch::Tensor predict_average_proba(torch::Tensor& X);
+        std::vector<std::vector<double>> predict_average_proba(std::vector<std::vector<int>>& X);
+        torch::Tensor compute_arg_max(torch::Tensor& X);
+        std::vector<int> compute_arg_max(std::vector<std::vector<double>>& X);
+        torch::Tensor voting(torch::Tensor& votes);
+        std::vector<std::vector<double>> voting(std::vector<std::vector<int>>& votes);
         unsigned n_models;
         std::vector<std::unique_ptr<Classifier>> models;
         std::vector<double> significanceModels;
         void trainModel(const torch::Tensor& weights) override;
-        std::vector<int> voting(torch::Tensor& y_pred);
         bool predict_voting;
     };
 }

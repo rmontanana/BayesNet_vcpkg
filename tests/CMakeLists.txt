@@ -1,7 +1,7 @@
 if(ENABLE_TESTING)
     set(TEST_BAYESNET "unit_tests_bayesnet")
     include_directories(
-        ${BayesNet_SOURCE_DIR}/src/BayesNet
+        ${BayesNet_SOURCE_DIR}/src
         ${BayesNet_SOURCE_DIR}/src/Platform
         ${BayesNet_SOURCE_DIR}/lib/Files
         ${BayesNet_SOURCE_DIR}/lib/mdlp
@@ -11,6 +11,6 @@ if(ENABLE_TESTING)
     )
     set(TEST_SOURCES_BAYESNET TestBayesModels.cc TestBayesNetwork.cc TestBayesMetrics.cc TestUtils.cc ${BayesNet_SOURCES})
     add_executable(${TEST_BAYESNET} ${TEST_SOURCES_BAYESNET})
-    target_link_libraries(${TEST_BAYESNET} PUBLIC "${TORCH_LIBRARIES}" ArffFiles mdlp Catch2::Catch2WithMain)
+    target_link_libraries(${TEST_BAYESNET} PUBLIC "${TORCH_LIBRARIES}" ArffFiles mdlp Catch2::Catch2WithMain )
     add_test(NAME ${TEST_BAYESNET} COMMAND ${TEST_BAYESNET})
 endif(ENABLE_TESTING)

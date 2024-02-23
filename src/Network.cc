@@ -238,6 +238,7 @@ namespace bayesnet {
         return predictions;
     }
     // Return mxn std::vector of probabilities
+    // tsamples is nxm std::vector of samples
     std::vector<std::vector<double>> Network::predict_proba(const std::vector<std::vector<int>>& tsamples)
     {
         if (!fitted) {

@@ -34,7 +34,7 @@ namespace bayesnet {
         void setHyperparameters(const nlohmann::json& hyperparameters) override; //For classifiers that don't have hyperparameters
     protected:
         bool fitted;
-        int m, n; // m: number of samples, n: number of features
+        unsigned int m, n; // m: number of samples, n: number of features
         Network model;
         Metrics metrics;
         std::vector<std::string> features;
