@@ -4,8 +4,8 @@
 #include <vector>
 namespace bayesnet {
     std::vector<int> argsort(std::vector<double>& nums);
-    template<typename T>
-    std::vector<std::vector<T>> tensorToVector(torch::Tensor& dtensor);
-    torch::Tensor vectorToTensor(std::vector<std::vector<int>>& vector);
+    std::vector<std::vector<int>> tensorToVector(torch::Tensor& dtensor);
+    std::vector<std::vector<double>> tensorToVectorDouble(torch::Tensor& dtensor);
+    torch::Tensor vectorToTensor(std::vector<std::vector<int>>& vector, bool transpose = true);
 }
 #endif //BAYESNET_UTILS_H

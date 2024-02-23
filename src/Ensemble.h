@@ -36,7 +36,6 @@ namespace bayesnet {
         torch::Tensor compute_arg_max(torch::Tensor& X);
         std::vector<int> compute_arg_max(std::vector<std::vector<double>>& X);
         torch::Tensor voting(torch::Tensor& votes);
-        std::vector<std::vector<double>> voting(std::vector<std::vector<int>>& votes);
         unsigned n_models;
         std::vector<std::unique_ptr<Classifier>> models;
         std::vector<double> significanceModels;
