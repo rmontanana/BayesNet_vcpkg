@@ -10,13 +10,14 @@
 namespace bayesnet {
     BoostAODE::BoostAODE(bool predict_voting) : Ensemble(predict_voting)
     {
-        validHyperparameters = { "repeatSparent", "maxModels", "ascending", "convergence", "threshold", "select_features", "tolerance" };
+        validHyperparameters = { "repeatSparent", "maxModels", "ascending", "convergence", "threshold", "select_features", "tolerance", "predict_voting" };
 
     }
     void BoostAODE::buildModel(const torch::Tensor& weights)
     {
         // Models shall be built in trainModel
         models.clear();
+        significanceModels.clear();
         n_models = 0;
         // Prepare the validation dataset
         auto y_ = dataset.index({ -1, "..." });
@@ -71,6 +72,10 @@ namespace bayesnet {
         if (hyperparameters.contains("tolerance")) {
             tolerance = hyperparameters["tolerance"];
             hyperparameters.erase("tolerance");
+        }
+        if (hyperparameters.contains("predict_voting")) {
+            predict_voting = hyperparameters["predict_voting"];
+            hyperparameters.erase("predict_voting");
         }
         if (hyperparameters.contains("select_features")) {
             auto selectedAlgorithm = hyperparameters["select_features"];
@@ -128,8 +133,11 @@ namespace bayesnet {
         if (selectFeatures) {
             featuresUsed = initializeModels();
         }
-        if (maxModels == 0)
+        bool resetMaxModels = false;
+        if (maxModels == 0) {
             maxModels = .1 * n > 10 ? .1 * n : n;
+            resetMaxModels = true; // Flag to unset maxModels
+        }
         torch::Tensor weights_ = torch::full({ m }, 1.0 / m, torch::kFloat64);
         bool exitCondition = false;
         // Variables to control the accuracy finish condition
@@ -211,6 +219,9 @@ namespace bayesnet {
             status = WARNING;
         }
         notes.push_back("Number of models: " + std::to_string(n_models));
+        if (resetMaxModels) {
+            maxModels = 0;
+        }
     }
     std::vector<std::string> BoostAODE::graph(const std::string& title) const
     {

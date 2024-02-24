@@ -2,9 +2,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
 #include <catch2/generators/catch_generators.hpp>
-#include <vector>
-#include <map>
-#include <string>
 #include "KDB.h"
 #include "TAN.h"
 #include "SPODE.h"
@@ -16,12 +13,9 @@
 #include "AODELd.h"
 #include "TestUtils.h"
 
-TEST_CASE("Library check version", "[BayesNet]")
-{
-    auto clf = bayesnet::KDB(2);
-    REQUIRE(clf.getVersion() == "1.0.2");
-}
-TEST_CASE("Test Bayesian Classifiers score", "[BayesNet]")
+const std::string ACTUAL_VERSION = "1.0.3";
+
+TEST_CASE("Test Bayesian Classifiers score & version", "[BayesNet]")
 {
     map <pair<std::string, std::string>, float> scores = {
         // Diabetes
@@ -37,87 +31,34 @@ TEST_CASE("Test Bayesian Classifiers score", "[BayesNet]")
         {{"iris", "AODE"}, 0.973333}, {{"iris", "KDB"}, 0.973333}, {{"iris", "SPODE"}, 0.973333}, {{"iris", "TAN"}, 0.973333},
         {{"iris", "AODELd"}, 0.973333}, {{"iris", "KDBLd"}, 0.973333}, {{"iris", "SPODELd"}, 0.96f}, {{"iris", "TANLd"}, 0.97333f}, {{"iris", "BoostAODE"}, 0.98f}
     };
+    std::map<std::string, bayesnet::BaseClassifier*> models = {
+        {"AODE", new bayesnet::AODE()}, {"AODELd", new bayesnet::AODELd()},
+        {"BoostAODE", new bayesnet::BoostAODE()},
+        {"KDB", new bayesnet::KDB(2)}, {"KDBLd", new bayesnet::KDBLd(2)},
+        {"SPODE", new bayesnet::SPODE(1)}, {"SPODELd", new bayesnet::SPODELd(1)},
+        {"TAN", new bayesnet::TAN()}, {"TANLd", new bayesnet::TANLd()}
+    };
+    std::string name = GENERATE("AODE", "AODELd", "KDB", "KDBLd", "SPODE", "SPODELd", "TAN", "TANLd");
+    auto clf = models[name];
 
-    std::string file_name = GENERATE("glass", "iris", "ecoli", "diabetes");
-    auto raw = RawDatasets(file_name, false);
-
-    SECTION("Test TAN classifier (" + file_name + ")")
+    SECTION("Test " + name + " classifier")
     {
-        auto clf = bayesnet::TAN();
-        clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
-        auto score = clf.score(raw.Xv, raw.yv);
-        //scores[{file_name, "TAN"}] = score;
-        REQUIRE(score == Catch::Approx(scores[{file_name, "TAN"}]).epsilon(raw.epsilon));
+        for (const std::string& file_name : { "glass", "iris", "ecoli", "diabetes" }) {
+            auto clf = models[name];
+            auto discretize = name.substr(name.length() - 2) != "Ld";
+            auto raw = RawDatasets(file_name, discretize);
+            clf->fit(raw.Xt, raw.yt, raw.featurest, raw.classNamet, raw.statest);
+            auto score = clf->score(raw.Xt, raw.yt);
+            INFO("File: " + file_name);
+            REQUIRE(score == Catch::Approx(scores[{file_name, name}]).epsilon(raw.epsilon));
+        }
     }
-    SECTION("Test TANLd classifier (" + file_name + ")")
+    SECTION("Library check version")
     {
-        auto clf = bayesnet::TANLd();
-        clf.fit(raw.Xt, raw.yt, raw.featurest, raw.classNamet, raw.statest);
-        auto score = clf.score(raw.Xt, raw.yt);
-        //scores[{file_name, "TANLd"}] = score;
-        REQUIRE(score == Catch::Approx(scores[{file_name, "TANLd"}]).epsilon(raw.epsilon));
+        INFO("Checking version of " + name + " classifier");
+        REQUIRE(clf->getVersion() == ACTUAL_VERSION);
     }
-    SECTION("Test KDB classifier (" + file_name + ")")
-    {
-        auto clf = bayesnet::KDB(2);
-        clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
-        auto score = clf.score(raw.Xv, raw.yv);
-        //scores[{file_name, "KDB"}] = score;
-        REQUIRE(score == Catch::Approx(scores[{file_name, "KDB"
-        }]).epsilon(raw.epsilon));
-    }
-    SECTION("Test KDBLd classifier (" + file_name + ")")
-    {
-        auto clf = bayesnet::KDBLd(2);
-        clf.fit(raw.Xt, raw.yt, raw.featurest, raw.classNamet, raw.statest);
-        auto score = clf.score(raw.Xt, raw.yt);
-        //scores[{file_name, "KDBLd"}] = score;
-        REQUIRE(score == Catch::Approx(scores[{file_name, "KDBLd"
-        }]).epsilon(raw.epsilon));
-    }
-    SECTION("Test SPODE classifier (" + file_name + ")")
-    {
-        auto clf = bayesnet::SPODE(1);
-        clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
-        auto score = clf.score(raw.Xv, raw.yv);
-        // scores[{file_name, "SPODE"}] = score;
-        REQUIRE(score == Catch::Approx(scores[{file_name, "SPODE"}]).epsilon(raw.epsilon));
-    }
-    SECTION("Test SPODELd classifier (" + file_name + ")")
-    {
-        auto clf = bayesnet::SPODELd(1);
-        clf.fit(raw.Xt, raw.yt, raw.featurest, raw.classNamet, raw.statest);
-        auto score = clf.score(raw.Xt, raw.yt);
-        // scores[{file_name, "SPODELd"}] = score;
-        REQUIRE(score == Catch::Approx(scores[{file_name, "SPODELd"}]).epsilon(raw.epsilon));
-    }
-    SECTION("Test AODE classifier (" + file_name + ")")
-    {
-        auto clf = bayesnet::AODE();
-        clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
-        auto score = clf.score(raw.Xv, raw.yv);
-        // scores[{file_name, "AODE"}] = score;
-        REQUIRE(score == Catch::Approx(scores[{file_name, "AODE"}]).epsilon(raw.epsilon));
-    }
-    SECTION("Test AODELd classifier (" + file_name + ")")
-    {
-        auto clf = bayesnet::AODELd();
-        clf.fit(raw.Xt, raw.yt, raw.featurest, raw.classNamet, raw.statest);
-        auto score = clf.score(raw.Xt, raw.yt);
-        // scores[{file_name, "AODELd"}] = score;
-        REQUIRE(score == Catch::Approx(scores[{file_name, "AODELd"}]).epsilon(raw.epsilon));
-    }
-    SECTION("Test BoostAODE classifier (" + file_name + ")")
-    {
-        auto clf = bayesnet::BoostAODE(true);
-        clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
-        auto score = clf.score(raw.Xv, raw.yv);
-        // scores[{file_name, "BoostAODE"}] = score;
-        REQUIRE(score == Catch::Approx(scores[{file_name, "BoostAODE"}]).epsilon(raw.epsilon));
-    }
-    // for (auto scores : scores) {
-    //     std::cout << "{{\"" << scores.first.first << "\", \"" << scores.first.second << "\"}, " << scores.second << "}, ";
-    // }
+    delete clf;
 }
 TEST_CASE("Models features", "[BayesNet]")
 {
@@ -263,4 +204,21 @@ TEST_CASE("Model predict_proba", "[BayesNet]")
         }
         delete clf;
     }
+}
+TEST_CASE("BoostAODE voting-proba", "[BayesNet]")
+{
+    auto raw = RawDatasets("iris", false);
+    auto clf = bayesnet::BoostAODE(false);
+    clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
+    auto score_proba = clf.score(raw.Xv, raw.yv);
+    auto pred_proba = clf.predict_proba(raw.Xv);
+    clf.setHyperparameters({
+        {"predict_voting",true},
+        });
+    auto score_voting = clf.score(raw.Xv, raw.yv);
+    auto pred_voting = clf.predict_proba(raw.Xv);
+    REQUIRE(score_proba == Catch::Approx(0.97333).epsilon(raw.epsilon));
+    REQUIRE(score_voting == Catch::Approx(0.98).epsilon(raw.epsilon));
+    REQUIRE(pred_voting[83][2] == Catch::Approx(0.552091).epsilon(raw.epsilon));
+    REQUIRE(pred_proba[83][2] == Catch::Approx(0.546017).epsilon(raw.epsilon));
 }
