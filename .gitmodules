@@ -5,14 +5,16 @@
 	update = merge
 [submodule "lib/catch2"]
 	path = lib/catch2
-        main  = v2.x
+    main  = v2.x
 	update = merge
 	url = https://github.com/catchorg/Catch2.git
 [submodule "lib/json"]
 	path = lib/json
 	url = https://github.com/nlohmann/json.git
-        master = master
+    master = master
 	update = merge
 [submodule "lib/folding"]
 	path = lib/folding
 	url = https://github.com/rmontanana/folding
+	main = main
+	update = merge
