@@ -7,23 +7,6 @@
 
 namespace bayesnet {
     class Network {
-    private:
-        std::map<std::string, std::unique_ptr<Node>> nodes;
-        bool fitted;
-        float maxThreads = 0.95;
-        int classNumStates;
-        std::vector<std::string> features; // Including classname
-        std::string className;
-        double laplaceSmoothing;
-        torch::Tensor samples; // nxm tensor used to fit the model
-        bool isCyclic(const std::string&, std::unordered_set<std::string>&, std::unordered_set<std::string>&);
-        std::vector<double> predict_sample(const std::vector<int>&);
-        std::vector<double> predict_sample(const torch::Tensor&);
-        std::vector<double> exactInference(std::map<std::string, int>&);
-        double computeFactor(std::map<std::string, int>&);
-        void completeFit(const std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights);
-        void checkFitData(int n_features, int n_samples, int n_samples_y, const std::vector<std::string>& featureNames, const std::string& className, const std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights);
-        void setStates(const std::map<std::string, std::vector<int>>&);
     public:
         Network();
         explicit Network(float);
@@ -58,6 +41,23 @@ namespace bayesnet {
         void initialize();
         void dump_cpt() const;
         inline std::string version() { return  { project_version.begin(), project_version.end() }; }
+    private:
+        std::map<std::string, std::unique_ptr<Node>> nodes;
+        bool fitted;
+        float maxThreads = 0.95;
+        int classNumStates;
+        std::vector<std::string> features; // Including classname
+        std::string className;
+        double laplaceSmoothing;
+        torch::Tensor samples; // nxm tensor used to fit the model
+        bool isCyclic(const std::string&, std::unordered_set<std::string>&, std::unordered_set<std::string>&);
+        std::vector<double> predict_sample(const std::vector<int>&);
+        std::vector<double> predict_sample(const torch::Tensor&);
+        std::vector<double> exactInference(std::map<std::string, int>&);
+        double computeFactor(std::map<std::string, int>&);
+        void completeFit(const std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights);
+        void checkFitData(int n_features, int n_samples, int n_samples_y, const std::vector<std::string>& featureNames, const std::string& className, const std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights);
+        void setStates(const std::map<std::string, std::vector<int>>&);
     };
 }
 #endif

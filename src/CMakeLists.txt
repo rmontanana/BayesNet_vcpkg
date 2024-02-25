@@ -3,7 +3,7 @@ include_directories(
     ${BayesNet_SOURCE_DIR}/lib/Files
     ${BayesNet_SOURCE_DIR}/lib/folding
     ${BayesNet_SOURCE_DIR}/lib/json/include
-    ${BayesNet_SOURCE_DIR}/src/BayesNet
+    ${BayesNet_SOURCE_DIR}/src
     ${CMAKE_BINARY_DIR}/configured_files/include
 )
 

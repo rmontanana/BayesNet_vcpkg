@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Voting / probability aggregation in Ensemble classes
+- predict_proba method in Classifier
+- predict_proba method in BoostAODE
+- predict_voting parameter in BoostAODE constructor to use voting or probability to predict (default is voting)
+- hyperparameter predict_voting to AODE, AODELd and BoostAODE (Ensemble child classes)
+- tests to check predict & predict_proba coherence
+
 ## [1.0.2] - 2024-02-20
 
 ### Fixed

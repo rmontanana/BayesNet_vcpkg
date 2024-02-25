@@ -3,6 +3,7 @@
 
 namespace bayesnet {
     Classifier::Classifier(Network model) : model(model), m(0), n(0), metrics(Metrics()), fitted(false) {}
+    const std::string CLASSIFIER_NOT_FITTED = "Classifier has not been fitted";
     Classifier& Classifier::build(const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights)
     {
         this->features = features;
@@ -87,14 +88,14 @@ namespace bayesnet {
     torch::Tensor Classifier::predict(torch::Tensor& X)
     {
         if (!fitted) {
-            throw std::logic_error("Classifier has not been fitted");
+            throw std::logic_error(CLASSIFIER_NOT_FITTED);
         }
         return model.predict(X);
     }
     std::vector<int> Classifier::predict(std::vector<std::vector<int>>& X)
     {
         if (!fitted) {
-            throw std::logic_error("Classifier has not been fitted");
+            throw std::logic_error(CLASSIFIER_NOT_FITTED);
         }
         auto m_ = X[0].size();
         auto n_ = X.size();
@@ -105,18 +106,37 @@ namespace bayesnet {
         auto yp = model.predict(Xd);
         return yp;
     }
-    float Classifier::score(torch::Tensor& X, torch::Tensor& y)
+    torch::Tensor Classifier::predict_proba(torch::Tensor& X)
     {
         if (!fitted) {
-            throw std::logic_error("Classifier has not been fitted");
+            throw std::logic_error(CLASSIFIER_NOT_FITTED);
         }
+        return model.predict_proba(X);
+    }
+    std::vector<std::vector<double>> Classifier::predict_proba(std::vector<std::vector<int>>& X)
+    {
+        if (!fitted) {
+            throw std::logic_error(CLASSIFIER_NOT_FITTED);
+        }
+        auto m_ = X[0].size();
+        auto n_ = X.size();
+        std::vector<std::vector<int>> Xd(n_, std::vector<int>(m_, 0));
+        // Convert to nxm vector
+        for (auto i = 0; i < n_; i++) {
+            Xd[i] = std::vector<int>(X[i].begin(), X[i].end());
+        }
+        auto yp = model.predict_proba(Xd);
+        return yp;
+    }
+    float Classifier::score(torch::Tensor& X, torch::Tensor& y)
+    {
         torch::Tensor y_pred = predict(X);
         return (y_pred == y).sum().item<float>() / y.size(0);
     }
     float Classifier::score(std::vector<std::vector<int>>& X, std::vector<int>& y)
     {
         if (!fitted) {
-            throw std::logic_error("Classifier has not been fitted");
+            throw std::logic_error(CLASSIFIER_NOT_FITTED);
         }
         return model.score(X, y);
     }
@@ -144,6 +164,10 @@ namespace bayesnet {
     int Classifier::getNumberOfStates() const
     {
         return fitted ? model.getStates() : 0;
+    }
+    int Classifier::getClassNumStates() const
+    {
+        return fitted ? model.getClassNumStates() : 0;
     }
     std::vector<std::string> Classifier::topological_order()
     {

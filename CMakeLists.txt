@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 project(BayesNet
-  VERSION 1.0.2
+  VERSION 1.0.3
   DESCRIPTION "Bayesian Network and basic classifiers Library."
   HOMEPAGE_URL "https://github.com/rmontanana/bayesnet"
   LANGUAGES CXX
@@ -58,14 +58,12 @@ add_git_submodule("lib/json")
 # --------------
 add_subdirectory(config)
 add_subdirectory(lib/Files)
-add_subdirectory(src/BayesNet)
+add_subdirectory(src)
 
-file(GLOB BayesNet_HEADERS CONFIGURE_DEPENDS ${BayesNet_SOURCE_DIR}/src/BayesNet/*.h ${BayesNet_SOURCE_DIR}/BayesNet/*.h)
-file(GLOB BayesNet_SOURCES CONFIGURE_DEPENDS ${BayesNet_SOURCE_DIR}/src/BayesNet/*.cc ${BayesNet_SOURCE_DIR}/src/BayesNet/*.cpp)
+file(GLOB BayesNet_SOURCES CONFIGURE_DEPENDS ${BayesNet_SOURCE_DIR}/src/*.cc)
 
 # Testing
 # -------
-
 if (ENABLE_TESTING)
   MESSAGE("Testing enabled")
   add_git_submodule("lib/catch2")  
