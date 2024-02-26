@@ -10,7 +10,7 @@
 namespace bayesnet {
     BoostAODE::BoostAODE(bool predict_voting) : Ensemble(predict_voting)
     {
-        validHyperparameters = { "repeatSparent", "maxModels", "ascending", "convergence", "threshold", "select_features", "tolerance", "predict_voting" };
+        validHyperparameters = { "repeatSparent", "maxModels", "order", "convergence", "threshold", "select_features", "tolerance", "predict_voting" };
 
     }
     void BoostAODE::buildModel(const torch::Tensor& weights)
@@ -57,9 +57,13 @@ namespace bayesnet {
             maxModels = hyperparameters["maxModels"];
             hyperparameters.erase("maxModels");
         }
-        if (hyperparameters.contains("ascending")) {
-            ascending = hyperparameters["ascending"];
-            hyperparameters.erase("ascending");
+        if (hyperparameters.contains("order")) {
+            std::vector<std::string> algos = { "asc", "desc", "rand" };
+            order_algorithm = hyperparameters["order"];
+            if (std::find(algos.begin(), algos.end(), order_algorithm) == algos.end()) {
+                throw std::invalid_argument("Invalid order algorithm, valid values [asc, desc, rand]");
+            }
+            hyperparameters.erase("order");
         }
         if (hyperparameters.contains("convergence")) {
             convergence = hyperparameters["convergence"];
@@ -81,9 +85,9 @@ namespace bayesnet {
             auto selectedAlgorithm = hyperparameters["select_features"];
             std::vector<std::string> algos = { "IWSS", "FCBF", "CFS" };
             selectFeatures = true;
-            algorithm = selectedAlgorithm;
+            select_features_algorithm = selectedAlgorithm;
             if (std::find(algos.begin(), algos.end(), selectedAlgorithm) == algos.end()) {
-                throw std::invalid_argument("Invalid selectFeatures value [IWSS, FCBF, CFS]");
+                throw std::invalid_argument("Invalid selectFeatures value, valid values [IWSS, FCBF, CFS]");
             }
             hyperparameters.erase("select_features");
         }
@@ -96,14 +100,14 @@ namespace bayesnet {
         std::unordered_set<int> featuresUsed;
         torch::Tensor weights_ = torch::full({ m }, 1.0 / m, torch::kFloat64);
         int maxFeatures = 0;
-        if (algorithm == "CFS") {
+        if (select_features_algorithm == "CFS") {
             featureSelector = new CFS(dataset, features, className, maxFeatures, states.at(className).size(), weights_);
-        } else if (algorithm == "IWSS") {
+        } else if (select_features_algorithm == "IWSS") {
             if (threshold < 0 || threshold >0.5) {
                 throw std::invalid_argument("Invalid threshold value for IWSS [0, 0.5]");
             }
             featureSelector = new IWSS(dataset, features, className, maxFeatures, states.at(className).size(), weights_, threshold);
-        } else if (algorithm == "FCBF") {
+        } else if (select_features_algorithm == "FCBF") {
             if (threshold < 1e-7 || threshold > 1) {
                 throw std::invalid_argument("Invalid threshold value [1e-7, 1]");
             }
@@ -120,7 +124,7 @@ namespace bayesnet {
             significanceModels.push_back(1.0);
             n_models++;
         }
-        notes.push_back("Used features in initialization: " + std::to_string(featuresUsed.size()) + " of " + std::to_string(features.size()) + " with " + algorithm);
+        notes.push_back("Used features in initialization: " + std::to_string(featuresUsed.size()) + " of " + std::to_string(features.size()) + " with " + select_features_algorithm);
         delete featureSelector;
         return featuresUsed;
     }
@@ -150,10 +154,14 @@ namespace bayesnet {
         // n_models == maxModels
         // epsilon sub t > 0.5 => inverse the weights policy
         // validation error is not decreasing
+        bool ascending = order_algorithm == "asc";
+        std::mt19937 g{ 173 };
         while (!exitCondition) {
             // Step 1: Build ranking with mutual information
             auto featureSelection = metrics.SelectKBestWeighted(weights_, ascending, n); // Get all the features sorted
-            std::unique_ptr<Classifier> model;
+            if (order_algorithm == "rand") {
+                std::shuffle(featureSelection.begin(), featureSelection.end(), g);
+            }
             auto feature = featureSelection[0];
             if (!repeatSparent || featuresUsed.size() < featureSelection.size()) {
                 bool used = true;
@@ -170,6 +178,7 @@ namespace bayesnet {
                     continue;
                 }
             }
+            std::unique_ptr<Classifier> model;
             model = std::make_unique<SPODE>(feature);
             model->fit(dataset, features, className, states, weights_);
             auto ypred = model->predict(X_train);
