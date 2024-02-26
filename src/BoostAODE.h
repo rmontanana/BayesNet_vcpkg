@@ -22,10 +22,10 @@ namespace bayesnet {
         bool repeatSparent = false; // if true, a feature can be selected more than once
         int maxModels = 0;
         int tolerance = 0;
-        bool ascending = false; //Process KBest features ascending or descending order
+        std::string order_algorithm; // order to process the KBest features asc, desc, rand
         bool convergence = false; //if true, stop when the model does not improve
         bool selectFeatures = false; // if true, use feature selection
-        std::string algorithm = ""; // Selected feature selection algorithm
+        std::string select_features_algorithm = ""; // Selected feature selection algorithm
         FeatureSelect* featureSelector = nullptr;
         double threshold = -1;
     };

@@ -17,7 +17,7 @@ const std::string ACTUAL_VERSION = "1.0.3";
 
 TEST_CASE("Test Bayesian Classifiers score & version", "[BayesNet]")
 {
-    map <pair<std::string, std::string>, float> scores = {
+    map <pair<std::string, std::string>, float> scores{
         // Diabetes
         {{"diabetes", "AODE"}, 0.811198}, {{"diabetes", "KDB"}, 0.852865}, {{"diabetes", "SPODE"}, 0.802083}, {{"diabetes", "TAN"}, 0.821615},
         {{"diabetes", "AODELd"}, 0.8138f}, {{"diabetes", "KDBLd"}, 0.80208f}, {{"diabetes", "SPODELd"}, 0.78646f}, {{"diabetes", "TANLd"}, 0.8099f},  {{"diabetes", "BoostAODE"}, 0.83984f},
@@ -31,7 +31,7 @@ TEST_CASE("Test Bayesian Classifiers score & version", "[BayesNet]")
         {{"iris", "AODE"}, 0.973333}, {{"iris", "KDB"}, 0.973333}, {{"iris", "SPODE"}, 0.973333}, {{"iris", "TAN"}, 0.973333},
         {{"iris", "AODELd"}, 0.973333}, {{"iris", "KDBLd"}, 0.973333}, {{"iris", "SPODELd"}, 0.96f}, {{"iris", "TANLd"}, 0.97333f}, {{"iris", "BoostAODE"}, 0.98f}
     };
-    std::map<std::string, bayesnet::BaseClassifier*> models = {
+    std::map<std::string, bayesnet::BaseClassifier*> models{
         {"AODE", new bayesnet::AODE()}, {"AODELd", new bayesnet::AODELd()},
         {"BoostAODE", new bayesnet::BoostAODE()},
         {"KDB", new bayesnet::KDB(2)}, {"KDBLd", new bayesnet::KDBLd(2)},
@@ -104,7 +104,7 @@ TEST_CASE("BoostAODE test used features in train note and score", "[BayesNet]")
     auto raw = RawDatasets("diabetes", true);
     auto clf = bayesnet::BoostAODE(true);
     clf.setHyperparameters({
-        {"ascending",true},
+        {"order", "asc"},
         {"convergence", true},
         {"repeatSparent",true},
         {"select_features","CFS"},
@@ -168,8 +168,8 @@ TEST_CASE("Model predict_proba", "[BayesNet]")
         {0, 1, 0},
         {0, 1, 0}
         });
-    std::map<std::string, std::vector<std::vector<double>>> res_prob = { {"TAN", res_prob_tan}, {"SPODE", res_prob_spode} , {"BoostAODEproba", res_prob_baode }, {"BoostAODEvoting", res_prob_voting } };
-    std::map<std::string, bayesnet::BaseClassifier*> models = { {"TAN", new bayesnet::TAN()}, {"SPODE", new bayesnet::SPODE(0)}, {"BoostAODEproba", new bayesnet::BoostAODE(false)}, {"BoostAODEvoting", new bayesnet::BoostAODE(true)} };
+    std::map<std::string, std::vector<std::vector<double>>> res_prob{ {"TAN", res_prob_tan}, {"SPODE", res_prob_spode} , {"BoostAODEproba", res_prob_baode }, {"BoostAODEvoting", res_prob_voting } };
+    std::map<std::string, bayesnet::BaseClassifier*> models{ {"TAN", new bayesnet::TAN()}, {"SPODE", new bayesnet::SPODE(0)}, {"BoostAODEproba", new bayesnet::BoostAODE(false)}, {"BoostAODEvoting", new bayesnet::BoostAODE(true)} };
     int init_index = 78;
     auto raw = RawDatasets("iris", true);
 
@@ -178,9 +178,9 @@ TEST_CASE("Model predict_proba", "[BayesNet]")
         auto clf = models[model];
         clf->fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
         auto y_pred_proba = clf->predict_proba(raw.Xv);
+        auto yt_pred_proba = clf->predict_proba(raw.Xt);
         auto y_pred = clf->predict(raw.Xv);
         auto yt_pred = clf->predict(raw.Xt);
-        auto yt_pred_proba = clf->predict_proba(raw.Xt);
         REQUIRE(y_pred.size() == yt_pred.size(0));
         REQUIRE(y_pred.size() == y_pred_proba.size());
         REQUIRE(y_pred.size() == yt_pred_proba.size(0));
@@ -193,6 +193,9 @@ TEST_CASE("Model predict_proba", "[BayesNet]")
             REQUIRE(predictedClass == y_pred[i]);
             // Check predict is coherent with predict_proba
             REQUIRE(yt_pred_proba[i].argmax().item<int>() == y_pred[i]);
+            for (int j = 0; j < yt_pred_proba.size(1); j++) {
+                REQUIRE(yt_pred_proba[i][j].item<double>() == Catch::Approx(y_pred_proba[i][j]).epsilon(raw.epsilon));
+            }
         }
         // Check predict_proba values for vectors and tensors
         for (int i = 0; i < res_prob.size(); i++) {
@@ -221,4 +224,26 @@ TEST_CASE("BoostAODE voting-proba", "[BayesNet]")
     REQUIRE(score_voting == Catch::Approx(0.98).epsilon(raw.epsilon));
     REQUIRE(pred_voting[83][2] == Catch::Approx(0.552091).epsilon(raw.epsilon));
     REQUIRE(pred_proba[83][2] == Catch::Approx(0.546017).epsilon(raw.epsilon));
+}
+TEST_CASE("BoostAODE order asc, desc & random", "[BayesNet]")
+{
+
+    auto raw = RawDatasets("glass", true);
+    std::map<std::string, double> scores{
+        {"asc", 0.83178f }, { "desc", 0.84579f }, { "rand", 0.83645f }
+    };
+    for (const std::string& order : { "asc", "desc", "rand" }) {
+        auto clf = bayesnet::BoostAODE();
+        clf.setHyperparameters({
+            {"order", order},
+            });
+        clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
+        auto score = clf.score(raw.Xv, raw.yv);
+        auto scoret = clf.score(raw.Xt, raw.yt);
+        auto score2 = clf.score(raw.Xv, raw.yv);
+        auto scoret2 = clf.score(raw.Xt, raw.yt);
+        INFO("order: " + order);
+        REQUIRE(score == Catch::Approx(scores[order]).epsilon(raw.epsilon));
+        REQUIRE(scoret == Catch::Approx(scores[order]).epsilon(raw.epsilon));
+    }
 }
