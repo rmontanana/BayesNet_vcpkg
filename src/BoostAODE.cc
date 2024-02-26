@@ -10,7 +10,10 @@
 namespace bayesnet {
     BoostAODE::BoostAODE(bool predict_voting) : Ensemble(predict_voting)
     {
-        validHyperparameters = { "repeatSparent", "maxModels", "order", "convergence", "threshold", "select_features", "tolerance", "predict_voting" };
+        validHyperparameters = {
+            "repeatSparent", "maxModels", "order", "convergence", "threshold",
+            "select_features", "tolerance", "predict_voting", "predict_single"
+        };
 
     }
     void BoostAODE::buildModel(const torch::Tensor& weights)
@@ -69,6 +72,10 @@ namespace bayesnet {
             convergence = hyperparameters["convergence"];
             hyperparameters.erase("convergence");
         }
+        if (hyperparameters.contains("predict_single")) {
+            predict_single = hyperparameters["predict_single"];
+            hyperparameters.erase("predict_single");
+        }
         if (hyperparameters.contains("threshold")) {
             threshold = hyperparameters["threshold"];
             hyperparameters.erase("threshold");
@@ -116,7 +123,6 @@ namespace bayesnet {
         featureSelector->fit();
         auto cfsFeatures = featureSelector->getFeatures();
         for (const int& feature : cfsFeatures) {
-            // std::cout << "Feature: [" << feature << "] " << feature << " " << features.at(feature) << std::endl;
             featuresUsed.insert(feature);
             std::unique_ptr<Classifier> model = std::make_unique<SPODE>(feature);
             model->fit(dataset, features, className, states, weights_);
@@ -128,8 +134,22 @@ namespace bayesnet {
         delete featureSelector;
         return featuresUsed;
     }
+    torch::Tensor BoostAODE::ensemble_predict(torch::Tensor& X, SPODE* model)
+    {
+        if (initialize_prob_table) {
+            initialize_prob_table = false;
+            prob_table = model->predict_proba(X) * 1.0;
+        } else {
+            prob_table += model->predict_proba(X) * 1.0;
+        }
+        // prob_table doesn't store probabilities but the sum of them
+        // to have them we need to divide by the sum of the significances but we
+        // don't need them to predict label values
+        return prob_table.argmax(1);
+    }
     void BoostAODE::trainModel(const torch::Tensor& weights)
     {
+        initialize_prob_table = true;
         fitted = true;
         // Algorithm based on the adaboost algorithm for classification
         // as explained in Ensemble methods (Zhi-Hua Zhou, 2012)
@@ -181,7 +201,12 @@ namespace bayesnet {
             std::unique_ptr<Classifier> model;
             model = std::make_unique<SPODE>(feature);
             model->fit(dataset, features, className, states, weights_);
-            auto ypred = model->predict(X_train);
+            torch::Tensor ypred;
+            if (predict_single) {
+                ypred = model->predict(X_train);
+            } else {
+                ypred = ensemble_predict(X_train, dynamic_cast<SPODE*>(model.get()));
+            }
             // Step 3.1: Compute the classifier amout of say
             auto mask_wrong = ypred != y_train;
             auto mask_right = ypred == y_train;

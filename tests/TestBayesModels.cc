@@ -240,10 +240,28 @@ TEST_CASE("BoostAODE order asc, desc & random", "[BayesNet]")
         clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
         auto score = clf.score(raw.Xv, raw.yv);
         auto scoret = clf.score(raw.Xt, raw.yt);
-        auto score2 = clf.score(raw.Xv, raw.yv);
-        auto scoret2 = clf.score(raw.Xt, raw.yt);
         INFO("order: " + order);
         REQUIRE(score == Catch::Approx(scores[order]).epsilon(raw.epsilon));
         REQUIRE(scoret == Catch::Approx(scores[order]).epsilon(raw.epsilon));
+    }
+}
+TEST_CASE("BoostAODE predict_single", "[BayesNet]")
+{
+
+    auto raw = RawDatasets("glass", true);
+    std::map<bool, double> scores{
+        {true, 0.84579f }, { false, 0.81308f }
+    };
+    for (const bool kind : { true, false}) {
+        auto clf = bayesnet::BoostAODE();
+        clf.setHyperparameters({
+            {"predict_single", kind}, {"order", "desc" },
+            });
+        clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
+        auto score = clf.score(raw.Xv, raw.yv);
+        auto scoret = clf.score(raw.Xt, raw.yt);
+        INFO("kind: " + std::string(kind ? "true" : "false"));
+        REQUIRE(score == Catch::Approx(scores[kind]).epsilon(raw.epsilon));
+        REQUIRE(scoret == Catch::Approx(scores[kind]).epsilon(raw.epsilon));
     }
 }
