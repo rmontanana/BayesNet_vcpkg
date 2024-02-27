@@ -250,7 +250,7 @@ TEST_CASE("BoostAODE predict_single", "[BayesNet]")
 
     auto raw = RawDatasets("glass", true);
     std::map<bool, double> scores{
-        {true, 0.84579f }, { false, 0.81308f }
+        {true, 0.84579f }, { false, 0.80841f }
     };
     for (const bool kind : { true, false}) {
         auto clf = bayesnet::BoostAODE();

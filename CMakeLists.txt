@@ -36,6 +36,13 @@ option(CODE_COVERAGE "Collect coverage from test library"         OFF)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
 include(AddGitSubmodule)
 
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  MESSAGE("Debug mode")
+  set(ENABLE_TESTING ON)
+  set(CODE_COVERAGE ON)
+endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
+
+
 if (CODE_COVERAGE)
     enable_testing()
     include(CodeCoverage)
