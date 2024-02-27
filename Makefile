@@ -61,10 +61,11 @@ release: ## Build a Release version of the project
 	@cmake -S . -B $(f_release) -D CMAKE_BUILD_TYPE=Release
 	@echo ">>> Done";
 
+fname = "tests/data/iris.arff"
 sample: ## Build sample
 	@echo ">>> Building Sample...";
 	cmake --build $(f_release) -t bayesnet_sample $(n_procs)
-	$(f_release)/sample/bayesnet_sample tests/data/iris.arff
+	$(f_release)/sample/bayesnet_sample $(fname)
 	@echo ">>> Done";	
 
 opt = ""
