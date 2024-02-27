@@ -1,44 +1,69 @@
-# Descripción de funcionamiento del algoritmo BoostAODE
+# BoostAODE Algorithm Operation
 
-El algoritmo se basa en el funcionamiento del algoritmo AdaBoost, y utilizando una serie de hiperparámetros se activan cada una de las posibles alternativas.
+The algorithm is based on the AdaBoost algorithm with some new proposals that can be activated using the following hyperparameters.
 
-## Hiperparámetros
+## Hyperparameters
 
-Los hiperparámetros que están definidos en el algoritmo son:
+The hyperparameters defined in the algorithm are:
 
-- **_repeatSparent_ (boolean)**: Permite que se repitan variables del dataset como padre de un _SPODE_. Valor por defecto _false_.
-- **_maxModels_ (int)**: número máximo de modelos (SPODEs) a construir. Este hiperparámetro únicamente es tenido en cuenta si _**repeatSparent**_ se establece como verdadero. Valor por defecto 0.
-- **_order_ ({"asc", "desc", "rand"})**: Establece el orden (ascendente/descendente/aleatorio) en el que se procesarán las variables del dataset para elegir los padres de los SPODEs. Valor por defecto _"desc"_.
-- **_convergence_ (boolean)**: Establece si se utilizará la convergencia del resultado como condición de finalización. En caso de establecer este hiperparámetro como verdadero, el conjunto de datos de entrenamiento que se pasa al modelo se divide en dos conjuntos uno que servirá como datos de entrenamiento y otro de test (por lo que la partición de test original pasará a ser en este caso una partición de validación). La partición se realiza tomando como la primera partición generada por un proceso de generación de 5 particiones estratificadas y con una semilla prefijada. La condición de salida es que la diferencia entre la precisión obtenida por el modelo actual, y la obtenida por el modelo anterior sea mayor que 1e-4, en caso contrario se sumará uno al número de modelos que empeora el resultado (ver siguiente hiperparámetro). Valor por defecto false.
-- **_tolerance_ (int)**: Establece el número máximo de modelos que pueden empeorar el resultado sin suponer una condición de finalización. Valor por defecto 0.
-- **_select_features_ ({“IWSS”, “FCBF”, “CFS”, “”})**: Selecciona en caso de establecerlo, el método de selección de variables que se utilizará para construir unos modelos iniciales para el ensemble que se incluirán sin tener en cuenta ninguna de las otras condiciones de salida. Estos modelos tampoco actualizan o utilizan los pesos que utiliza el algoritmo de Boosting y su significancia se establece en 1.
-- **_threshold_ (double)**: Establece el valor necesario para los algoritmos IWSS y FCBF para poder funcionar. Los valores aceptados son:
-  - IWSS: \[0, 0.5\]
-  - FCBF: \[1e-7, 1\]
-- **_predict_voting_ (boolean)**: Establece si el algoritmo de BoostAODE utilizará la votación de los modelos para predecir el resultado. En caso de establecerlo como falso, se utilizará la media ponderada de las probabilidades de cada predicción de los modelos. Valor por defecto _true_.
-- **_predict_single_ (boolean)**: Establece si el algoritmo de BoostAODE utilizará la predicción de un solo modelo en el proceso de aprendizaje. En caso de establecerlo como falso, se utilizarán todos los modelos entrenados hasta ese momento para calcular la predicción necesaria para actualizar los pesos en el proceso de aprendizaje. Valor por defecto _true_.
+- ***repeatSparent*** (*boolean*): Allows dataset variables to be repeated as parents of an *SPODE*. Default value: *false*.
 
-## Funcionamiento
+- ***maxModels*** (*int*): Maximum number of models (*SPODEs*) to build. This hyperparameter is only taken into account if ***repeatSparent*** is set to *true*. Default value: *0*.
 
-El algoritmo realiza los siguientes pasos:
+- ***order*** (*{"asc", "desc", "rand"}*): Sets the order (ascending/descending/random) in which dataset variables will be processed to choose the parents of the *SPODEs*. Default value: *"desc"*.
 
-- Si se ha establecido select_features se crean tantos SPODEs como variables selecciona el algoritmo correspondiente y se marcan como utilizadas estas variables
-- Se establecen los pesos iniciales de los ejemplos como 1/m
-- Bucle principal de entrenamiento
-  - Ordena las variables por orden de información mutua con la variable clase y se procesan en orden ascente o descendente según valor del hiperparámetro. En caso de ser aleatorio se barajan las variables
-  - Si no se ha establecido la repetición de padres, se marca la variable como utilizada
-  - Crea un Spode utilizando como padre la variable seleccionada
-  - Entrena el modelo y calcula la variable clase correspondiente al dataset de entenamiento. El cálculo lo podrá hacer utilizando el último modelo entrenado o el conjunto de modelos entrenados hasta ese momento.
-  - Actualiza los pesos asociados a los ejemplos de acuerdo a la expresión:
+- ***convergence*** (*boolean*): Sets whether the convergence of the result will be used as a termination condition. If this hyperparameter is set to true, the training dataset passed to the model is divided into two sets, one serving as training data and the other as a test set (so the original test partition will become a validation partition in this case). The partition is made by taking the first partition generated by a process of generating a 5 fold partition with stratification using a predetermined seed. The exit condition used in this *convergence* is that the difference between the accuracy obtained by the current model and that obtained by the previous model is greater than *1e-4*; otherwise, one will be added to the number of models that worsen the result (see next hyperparameter). Default value: *false*.
 
-    - **w<sub>i</sub> · e<sup>&alpha;<sub>t</sub></sup>**  (si el ejemplo ha sido mal clasificado)
+- ***tolerance*** (*int*): Sets the maximum number of models that can worsen the result without constituting a termination condition. Default value: *0*.
 
-    - **w<sub>i</sub> · e<sup>-&alpha;<sub>t</sub></sup>**  (si el ejemplo ha sido bien clasificado)
+- ***select_features*** (*{"IWSS", "FCBF", "CFS", ""}*): Selects the variable selection method to be used to build initial models for the ensemble that will be included without considering any of the other exit conditions. These models also do not update or use the weights used by the Boosting algorithm, and their significance is set to 1.
 
-  - Establece la significancia del modelo como &alpha;<sub>t</sub>
-  - Si se ha establecido el hiperparámetro de convergencia, se calcula el valor de la precisión sobre el dataset de test que hemos separado en un paso inicial
-  - Condiciones de salida:
-    - ε<sub>t</sub> > 0,5 => se penaliza a los ejemplos mal clasificados
-    - Número de modelos con precisión peor mayor que tolerancia y convergencia establecida
-    - No hay más variables para crear modelos y no repeatSparent
-    - Número de modelos > maxModels si repeatSparent está establecido
+- ***threshold*** (*double*): Sets the necessary value for the IWSS and FCBF algorithms to function. Accepted values are:
+  - IWSS: $threshold \in [0, 0.5]$
+  - FCBF: $threshold \in [10^{-7}, 1]$
+
+  Default value is *-1* so every time any of those algorithms are called, the threshold has to be set to the desired value.
+
+- ***predict_voting*** (*boolean*): Sets whether the algorithm will use *model voting* to predict the result. If set to false, the weighted average of the probabilities of each model's prediction will be used. Default value: *true*.
+
+- ***predict_single*** (*boolean*): Sets whether the algorithm will use single-model prediction in the learning process. If set to *false*, all models trained up to that point will be used to calculate the prediction necessary to update the weights in the learning process. Default value: *true*.
+
+## Operation
+
+The algorithm performs the following steps:
+
+1. **Initialization**
+
+    - If ***select_features*** is set, as many *SPODEs* are created as variables selected by the corresponding feature selection algorithm, and these variables are marked as used.
+
+    - Initial weights of the examples are set to *1/m*.
+
+1. **Main Training Loop:**
+
+   - Variables are sorted by mutual information order with the class variable and processed in ascending, descending or random order, according to the value of the *order* hyperparameter. If it is random, the variables are shuffled.
+
+   - If the parent repetition is not established, the variable is marked as used.
+
+   - A *SPODE* is created using the selected variable as the parent.
+
+   - The model is trained, and the class variable corresponding to the training dataset is calculated. The calculation can be done using the last trained model or the set of models trained up to that point, according to the value of the *predict_single* hyperparameter.
+
+   - The weights associated with the examples are updated using this expression:
+
+     - w<sub>i</sub> · e<sup>&alpha;<sub>t</sub></sup> (if the example has been misclassified)
+
+     - w<sub>i</sub> · e<sup>-&alpha;<sub>t</sub></sup> (if the example has been correctly classified)
+
+   - The model significance is set as &alpha;<sub>t</sub>.
+
+   - If the ***convergence*** hyperparameter is set, the accuracy value on the test dataset that we separated in an initial step is calculated.
+
+1. **Exit Conditions:**
+
+   - &epsilon;<sub>t</sub> > 0.5 => misclassified examples are penalized.
+
+   - Number of models with worse accuracy greater than ***tolerance*** and ***convergence*** established.
+
+   - There are no more variables to create models, and ***repeatSparent*** is not set.
+
+   - Number of models > ***maxModels*** if ***repeatSparent*** is set.
