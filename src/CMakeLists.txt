@@ -4,10 +4,15 @@ include_directories(
     ${BayesNet_SOURCE_DIR}/lib/folding
     ${BayesNet_SOURCE_DIR}/lib/json/include
     ${BayesNet_SOURCE_DIR}/src
+    ${BayesNet_SOURCE_DIR}/src/feature_selection
+    ${BayesNet_SOURCE_DIR}/src/bayesian_network
+    ${BayesNet_SOURCE_DIR}/src/classifiers
+    ${BayesNet_SOURCE_DIR}/src/ensembles
+    ${BayesNet_SOURCE_DIR}/src/utils
     ${CMAKE_BINARY_DIR}/configured_files/include
 )
 
-add_library(BayesNet bayesnetUtils.cc Network.cc Node.cc BayesMetrics.cc Classifier.cc 
-    KDB.cc TAN.cc SPODE.cc Ensemble.cc AODE.cc TANLd.cc KDBLd.cc SPODELd.cc AODELd.cc BoostAODE.cc 
-    Mst.cc Proposal.cc CFS.cc FCBF.cc IWSS.cc FeatureSelect.cc )
+file(GLOB_RECURSE Sources "*.cc")
+
+add_library(BayesNet ${Sources})
 target_link_libraries(BayesNet mdlp "${TORCH_LIBRARIES}")

@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Change _ascending_ hyperparameter to _order_ with these possible values _{"asc", "desc", "rand"}_, Default is _"desc"_.
 - Add the _predict_single_ hyperparameter to control if only the last model created is used to predict in boost training or the whole ensemble (all the models built so far). Default is true.
+- sample app to show how to use the library (make sample)
+
+### Changed
+
+- Change the library structure adding folders for each group of classes (classifiers, ensembles, etc).
 
 ## [1.0.3]
 

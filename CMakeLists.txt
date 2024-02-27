@@ -65,9 +65,8 @@ add_git_submodule("lib/json")
 # --------------
 add_subdirectory(config)
 add_subdirectory(lib/Files)
+add_subdirectory(sample)
 add_subdirectory(src)
-
-file(GLOB BayesNet_SOURCES CONFIGURE_DEPENDS ${BayesNet_SOURCE_DIR}/src/*.cc)
 
 # Testing
 # -------
