@@ -28,7 +28,7 @@ namespace bayesnet {
             selectedFeatures.push_back(feature);
             // Compute merit with selectedFeatures
             auto meritNew = computeMeritCFS();
-            double delta = merit != 0.0 ? abs(merit - meritNew) / merit : 0.0;
+            double delta = merit != 0.0 ? std::abs(merit - meritNew) / merit : 0.0;
             if (meritNew > merit || delta < threshold) {
                 if (meritNew > merit) {
                     merit = meritNew;

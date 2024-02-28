@@ -44,11 +44,11 @@ endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
 
 
 if (CODE_COVERAGE)
-    enable_testing()
-    include(CodeCoverage)
-    MESSAGE("Code coverage enabled")
-    set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage -O0 -g")
-    SET(GCC_COVERAGE_LINK_FLAGS " ${GCC_COVERAGE_LINK_FLAGS} -lgcov --coverage")
+  enable_testing()
+  include(CodeCoverage)
+  MESSAGE("Code coverage enabled")
+  set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage -O0 -g")
+  SET(GCC_COVERAGE_LINK_FLAGS " ${GCC_COVERAGE_LINK_FLAGS} -lgcov --coverage")
 endif (CODE_COVERAGE)
 
 if (ENABLE_CLANG_TIDY)

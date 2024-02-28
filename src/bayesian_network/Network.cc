@@ -71,7 +71,7 @@ namespace bayesnet {
             for (Node* child : nodes[nodeId]->getChildren()) {
                 if (visited.find(child->getName()) == visited.end() && isCyclic(child->getName(), visited, recStack))
                     return true;
-                else if (recStack.find(child->getName()) != recStack.end())
+                if (recStack.find(child->getName()) != recStack.end())
                     return true;
             }
         }

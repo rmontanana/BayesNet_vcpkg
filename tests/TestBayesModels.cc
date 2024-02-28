@@ -224,6 +224,8 @@ TEST_CASE("BoostAODE voting-proba", "[BayesNet]")
     REQUIRE(score_voting == Catch::Approx(0.98).epsilon(raw.epsilon));
     REQUIRE(pred_voting[83][2] == Catch::Approx(0.552091).epsilon(raw.epsilon));
     REQUIRE(pred_proba[83][2] == Catch::Approx(0.546017).epsilon(raw.epsilon));
+    clf.dump_cpt();
+    REQUIRE(clf.topological_order() == std::vector<std::string>());
 }
 TEST_CASE("BoostAODE order asc, desc & random", "[BayesNet]")
 {
