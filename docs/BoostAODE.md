@@ -54,7 +54,7 @@ The algorithm performs the following steps:
 
      - w<sub>i</sub> · e<sup>-&alpha;<sub>t</sub></sup> (if the example has been correctly classified)
 
-   - The model significance is set as &alpha;<sub>t</sub>.
+   - The model significance is set to &alpha;<sub>t</sub>.
 
    - If the ***convergence*** hyperparameter is set, the accuracy value on the test dataset that we separated in an initial step is calculated.
 
@@ -67,3 +67,5 @@ The algorithm performs the following steps:
    - There are no more variables to create models, and ***repeatSparent*** is not set.
 
    - Number of models > ***maxModels*** if ***repeatSparent*** is set.
+
+### [Proposal for *predict_single = false*](./BoostAODE_train_predict.pdf)
