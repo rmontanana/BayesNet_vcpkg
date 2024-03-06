@@ -13,7 +13,7 @@
 #include "AODELd.h"
 #include "TestUtils.h"
 
-const std::string ACTUAL_VERSION = "1.0.3";
+const std::string ACTUAL_VERSION = "1.0.4";
 
 TEST_CASE("Test Bayesian Classifiers score & version", "[BayesNet]")
 {
