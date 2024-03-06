@@ -1,6 +1,7 @@
 #include <set>
 #include <functional>
 #include <limits.h>
+#include <tuple>
 #include "BoostAODE.h"
 #include "CFS.h"
 #include "FCBF.h"
@@ -8,9 +9,22 @@
 #include "folding.hpp"
 
 namespace bayesnet {
+    struct {
+        std::string CFS = "CFS";
+        std::string FCBF = "FCBF";
+        std::string IWSS = "IWSS";
+    }SelectFeatures;
+    struct {
+        std::string ASC = "asc";
+        std::string DESC = "desc";
+        std::string RAND = "rand";
+    }Orders;
     BoostAODE::BoostAODE(bool predict_voting) : Ensemble(predict_voting)
     {
-        validHyperparameters = { "repeatSparent", "maxModels", "order", "convergence", "threshold", "select_features", "tolerance", "predict_voting" };
+        validHyperparameters = {
+            "repeatSparent", "maxModels", "order", "convergence", "threshold",
+            "select_features", "tolerance", "predict_voting", "predict_single"
+        };
 
     }
     void BoostAODE::buildModel(const torch::Tensor& weights)
@@ -58,16 +72,20 @@ namespace bayesnet {
             hyperparameters.erase("maxModels");
         }
         if (hyperparameters.contains("order")) {
-            std::vector<std::string> algos = { "asc", "desc", "rand" };
+            std::vector<std::string> algos = { Orders.ASC, Orders.DESC, Orders.RAND };
             order_algorithm = hyperparameters["order"];
             if (std::find(algos.begin(), algos.end(), order_algorithm) == algos.end()) {
-                throw std::invalid_argument("Invalid order algorithm, valid values [asc, desc, rand]");
+                throw std::invalid_argument("Invalid order algorithm, valid values [" + Orders.ASC + ", " + Orders.DESC + ", " + Orders.RAND + "]");
             }
             hyperparameters.erase("order");
         }
         if (hyperparameters.contains("convergence")) {
             convergence = hyperparameters["convergence"];
             hyperparameters.erase("convergence");
+        }
+        if (hyperparameters.contains("predict_single")) {
+            predict_single = hyperparameters["predict_single"];
+            hyperparameters.erase("predict_single");
         }
         if (hyperparameters.contains("threshold")) {
             threshold = hyperparameters["threshold"];
@@ -83,11 +101,11 @@ namespace bayesnet {
         }
         if (hyperparameters.contains("select_features")) {
             auto selectedAlgorithm = hyperparameters["select_features"];
-            std::vector<std::string> algos = { "IWSS", "FCBF", "CFS" };
+            std::vector<std::string> algos = { SelectFeatures.IWSS, SelectFeatures.CFS, SelectFeatures.CFS };
             selectFeatures = true;
             select_features_algorithm = selectedAlgorithm;
             if (std::find(algos.begin(), algos.end(), selectedAlgorithm) == algos.end()) {
-                throw std::invalid_argument("Invalid selectFeatures value, valid values [IWSS, FCBF, CFS]");
+                throw std::invalid_argument("Invalid selectFeatures value, valid values [" + SelectFeatures.IWSS + ", " + SelectFeatures.CFS + ", " + SelectFeatures.FCBF + "]");
             }
             hyperparameters.erase("select_features");
         }
@@ -95,28 +113,54 @@ namespace bayesnet {
             throw std::invalid_argument("Invalid hyperparameters" + hyperparameters.dump());
         }
     }
+    std::tuple<torch::Tensor&, double, bool> update_weights(torch::Tensor& ytrain, torch::Tensor& ypred, torch::Tensor& weights)
+    {
+        bool terminate = false;
+        double alpha_t = 0;
+        auto mask_wrong = ypred != ytrain;
+        auto mask_right = ypred == ytrain;
+        auto masked_weights = weights * mask_wrong.to(weights.dtype());
+        double epsilon_t = masked_weights.sum().item<double>();
+        if (epsilon_t > 0.5) {
+            // Inverse the weights policy (plot ln(wt))
+            // "In each round of AdaBoost, there is a sanity check to ensure that the current base 
+            // learner is better than random guess" (Zhi-Hua Zhou, 2012)
+            terminate = true;
+        } else {
+            double wt = (1 - epsilon_t) / epsilon_t;
+            alpha_t = epsilon_t == 0 ? 1 : 0.5 * log(wt);
+            // Step 3.2: Update weights for next classifier
+            // Step 3.2.1: Update weights of wrong samples
+            weights += mask_wrong.to(weights.dtype()) * exp(alpha_t) * weights;
+            // Step 3.2.2: Update weights of right samples
+            weights += mask_right.to(weights.dtype()) * exp(-alpha_t) * weights;
+            // Step 3.3: Normalise the weights
+            double totalWeights = torch::sum(weights).item<double>();
+            weights = weights / totalWeights;
+        }
+        return { weights, alpha_t, terminate };
+    }
     std::unordered_set<int> BoostAODE::initializeModels()
     {
         std::unordered_set<int> featuresUsed;
         torch::Tensor weights_ = torch::full({ m }, 1.0 / m, torch::kFloat64);
         int maxFeatures = 0;
-        if (select_features_algorithm == "CFS") {
+        if (select_features_algorithm == SelectFeatures.CFS) {
             featureSelector = new CFS(dataset, features, className, maxFeatures, states.at(className).size(), weights_);
-        } else if (select_features_algorithm == "IWSS") {
+        } else if (select_features_algorithm == SelectFeatures.IWSS) {
             if (threshold < 0 || threshold >0.5) {
-                throw std::invalid_argument("Invalid threshold value for IWSS [0, 0.5]");
+                throw std::invalid_argument("Invalid threshold value for " + SelectFeatures.IWSS + " [0, 0.5]");
             }
             featureSelector = new IWSS(dataset, features, className, maxFeatures, states.at(className).size(), weights_, threshold);
-        } else if (select_features_algorithm == "FCBF") {
+        } else if (select_features_algorithm == SelectFeatures.FCBF) {
             if (threshold < 1e-7 || threshold > 1) {
-                throw std::invalid_argument("Invalid threshold value [1e-7, 1]");
+                throw std::invalid_argument("Invalid threshold value for " + SelectFeatures.FCBF + " [1e-7, 1]");
             }
             featureSelector = new FCBF(dataset, features, className, maxFeatures, states.at(className).size(), weights_, threshold);
         }
         featureSelector->fit();
         auto cfsFeatures = featureSelector->getFeatures();
         for (const int& feature : cfsFeatures) {
-            // std::cout << "Feature: [" << feature << "] " << feature << " " << features.at(feature) << std::endl;
             featuresUsed.insert(feature);
             std::unique_ptr<Classifier> model = std::make_unique<SPODE>(feature);
             model->fit(dataset, features, className, states, weights_);
@@ -128,22 +172,46 @@ namespace bayesnet {
         delete featureSelector;
         return featuresUsed;
     }
+    torch::Tensor BoostAODE::ensemble_predict(torch::Tensor& X, SPODE* model)
+    {
+        if (initialize_prob_table) {
+            initialize_prob_table = false;
+            prob_table = model->predict_proba(X) * 1.0;
+        } else {
+            prob_table += model->predict_proba(X) * 1.0;
+        }
+        // prob_table doesn't store probabilities but the sum of them
+        // to have them we need to divide by the sum of the "weights" used to 
+        // consider the results obtanined in the model's predict_proba.
+        return prob_table.argmax(1);
+    }
     void BoostAODE::trainModel(const torch::Tensor& weights)
     {
-        fitted = true;
         // Algorithm based on the adaboost algorithm for classification
         // as explained in Ensemble methods (Zhi-Hua Zhou, 2012)
+        initialize_prob_table = true;
+        fitted = true;
+        double alpha_t = 0;
+        torch::Tensor weights_ = torch::full({ m }, 1.0 / m, torch::kFloat64);
+        bool exitCondition = false;
         std::unordered_set<int> featuresUsed;
         if (selectFeatures) {
             featuresUsed = initializeModels();
+            auto ypred = predict(X_train);
+            std::tie(weights_, alpha_t, exitCondition) = update_weights(y_train, ypred, weights_);
+            // Update significance of the models
+            for (int i = 0; i < n_models; ++i) {
+                significanceModels[i] = alpha_t;
+            }
+            if (exitCondition) {
+                return;
+            }
         }
         bool resetMaxModels = false;
         if (maxModels == 0) {
             maxModels = .1 * n > 10 ? .1 * n : n;
             resetMaxModels = true; // Flag to unset maxModels
         }
-        torch::Tensor weights_ = torch::full({ m }, 1.0 / m, torch::kFloat64);
-        bool exitCondition = false;
         // Variables to control the accuracy finish condition
         double priorAccuracy = 0.0;
         double delta = 1.0;
@@ -154,12 +222,12 @@ namespace bayesnet {
         // n_models == maxModels
         // epsilon sub t > 0.5 => inverse the weights policy
         // validation error is not decreasing
-        bool ascending = order_algorithm == "asc";
+        bool ascending = order_algorithm == Orders.ASC;
         std::mt19937 g{ 173 };
         while (!exitCondition) {
             // Step 1: Build ranking with mutual information
             auto featureSelection = metrics.SelectKBestWeighted(weights_, ascending, n); // Get all the features sorted
-            if (order_algorithm == "rand") {
+            if (order_algorithm == Orders.RAND) {
                 std::shuffle(featureSelection.begin(), featureSelection.end(), g);
             }
             auto feature = featureSelection[0];
@@ -181,28 +249,17 @@ namespace bayesnet {
             std::unique_ptr<Classifier> model;
             model = std::make_unique<SPODE>(feature);
             model->fit(dataset, features, className, states, weights_);
-            auto ypred = model->predict(X_train);
+            torch::Tensor ypred;
+            if (predict_single) {
+                ypred = model->predict(X_train);
+            } else {
+                ypred = ensemble_predict(X_train, dynamic_cast<SPODE*>(model.get()));
+            }
             // Step 3.1: Compute the classifier amout of say
-            auto mask_wrong = ypred != y_train;
-            auto mask_right = ypred == y_train;
-            auto masked_weights = weights_ * mask_wrong.to(weights_.dtype());
-            double epsilon_t = masked_weights.sum().item<double>();
-            if (epsilon_t > 0.5) {
-                // Inverse the weights policy (plot ln(wt))
-                // "In each round of AdaBoost, there is a sanity check to ensure that the current base 
-                // learner is better than random guess" (Zhi-Hua Zhou, 2012)
+            std::tie(weights_, alpha_t, exitCondition) = update_weights(y_train, ypred, weights_);
+            if (exitCondition) {
                 break;
             }
-            double wt = (1 - epsilon_t) / epsilon_t;
-            double alpha_t = epsilon_t == 0 ? 1 : 0.5 * log(wt);
-            // Step 3.2: Update weights for next classifier
-            // Step 3.2.1: Update weights of wrong samples
-            weights_ += mask_wrong.to(weights_.dtype()) * exp(alpha_t) * weights_;
-            // Step 3.2.2: Update weights of right samples
-            weights_ += mask_right.to(weights_.dtype()) * exp(-alpha_t) * weights_;
-            // Step 3.3: Normalise the weights
-            double totalWeights = torch::sum(weights_).item<double>();
-            weights_ = weights_ / totalWeights;
             // Step 3.4: Store classifier and its accuracy to weigh its future vote
             featuresUsed.insert(feature);
             models.push_back(std::move(model));

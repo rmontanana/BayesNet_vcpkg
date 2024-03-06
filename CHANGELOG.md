@@ -5,11 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.0.4]
 
 ### Added
 
-- Change _ascending_ hyperparameter to _order_ with these possible values _{"asc", "desc", "rand"}_
+- Change _ascending_ hyperparameter to _order_ with these possible values _{"asc", "desc", "rand"}_, Default is _"desc"_.
+- Add the _predict_single_ hyperparameter to control if only the last model created is used to predict in boost training or the whole ensemble (all the models built so far). Default is true.
+- sample app to show how to use the library (make sample)
+
+### Changed
+
+- Change the library structure adding folders for each group of classes (classifiers, ensembles, etc).
+- The significances of the models generated under the feature selection algorithm are now computed after all the models have been generated and an &alpha;<sub>t</sub> value is computed and assigned to each model.
 
 ## [1.0.3]
 

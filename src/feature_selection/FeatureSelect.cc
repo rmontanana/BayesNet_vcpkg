@@ -50,7 +50,6 @@ namespace bayesnet {
     }
     double FeatureSelect::computeMeritCFS()
     {
-        double result;
         double rcf = 0;
         for (auto feature : selectedFeatures) {
             rcf += suLabels[feature];

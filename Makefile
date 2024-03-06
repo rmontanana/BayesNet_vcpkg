@@ -1,11 +1,11 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
-.PHONY: coverage setup help buildr buildd test clean debug release
+.PHONY: coverage setup help buildr buildd test clean debug release sample
 
 f_release = build_release
 f_debug = build_debug
 app_targets = BayesNet
-test_targets = unit_tests_bayesnet 
+test_targets = unit_tests_bayesnet
 n_procs = -j 16
 
 define ClearTests
@@ -59,6 +59,13 @@ release: ## Build a Release version of the project
 	@if [ -d ./$(f_release) ]; then rm -rf ./$(f_release); fi
 	@mkdir $(f_release); 
 	@cmake -S . -B $(f_release) -D CMAKE_BUILD_TYPE=Release
+	@echo ">>> Done";
+
+fname = "tests/data/iris.arff"
+sample: ## Build sample
+	@echo ">>> Building Sample...";
+	cmake --build $(f_release) -t bayesnet_sample $(n_procs)
+	$(f_release)/sample/bayesnet_sample $(fname)
 	@echo ">>> Done";	
 
 opt = ""

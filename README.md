@@ -19,4 +19,14 @@ make test
 make coverage
 ```
 
-## 1. Introduction
+### Sample app
+
+```bash
+make release
+make sample
+make sample fname=tests/data/glass.arff
+```
+
+## Models
+
+### [BoostAODE](docs/BoostAODE.md)

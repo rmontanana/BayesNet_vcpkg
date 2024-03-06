@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 project(BayesNet
-  VERSION 1.0.3
+  VERSION 1.0.4
   DESCRIPTION "Bayesian Network and basic classifiers Library."
   HOMEPAGE_URL "https://github.com/rmontanana/bayesnet"
   LANGUAGES CXX
@@ -36,12 +36,19 @@ option(CODE_COVERAGE "Collect coverage from test library"         OFF)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
 include(AddGitSubmodule)
 
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  MESSAGE("Debug mode")
+  set(ENABLE_TESTING ON)
+  set(CODE_COVERAGE ON)
+endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
+
+
 if (CODE_COVERAGE)
-    enable_testing()
-    include(CodeCoverage)
-    MESSAGE("Code coverage enabled")
-    set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage -O0 -g")
-    SET(GCC_COVERAGE_LINK_FLAGS " ${GCC_COVERAGE_LINK_FLAGS} -lgcov --coverage")
+  enable_testing()
+  include(CodeCoverage)
+  MESSAGE("Code coverage enabled")
+  set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage -O0 -g")
+  SET(GCC_COVERAGE_LINK_FLAGS " ${GCC_COVERAGE_LINK_FLAGS} -lgcov --coverage")
 endif (CODE_COVERAGE)
 
 if (ENABLE_CLANG_TIDY)
@@ -58,9 +65,8 @@ add_git_submodule("lib/json")
 # --------------
 add_subdirectory(config)
 add_subdirectory(lib/Files)
+add_subdirectory(sample)
 add_subdirectory(src)
-
-file(GLOB BayesNet_SOURCES CONFIGURE_DEPENDS ${BayesNet_SOURCE_DIR}/src/*.cc)
 
 # Testing
 # -------
