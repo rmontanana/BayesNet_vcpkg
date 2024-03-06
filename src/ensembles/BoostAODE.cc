@@ -101,7 +101,7 @@ namespace bayesnet {
         }
         if (hyperparameters.contains("select_features")) {
             auto selectedAlgorithm = hyperparameters["select_features"];
-            std::vector<std::string> algos = { SelectFeatures.IWSS, SelectFeatures.CFS, SelectFeatures.CFS };
+            std::vector<std::string> algos = { SelectFeatures.IWSS, SelectFeatures.CFS, SelectFeatures.FCBF };
             selectFeatures = true;
             select_features_algorithm = selectedAlgorithm;
             if (std::find(algos.begin(), algos.end(), selectedAlgorithm) == algos.end()) {
