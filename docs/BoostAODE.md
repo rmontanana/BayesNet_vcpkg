@@ -16,7 +16,7 @@ The hyperparameters defined in the algorithm are:
 
 - ***tolerance*** (*int*): Sets the maximum number of models that can worsen the result without constituting a termination condition. Default value: *0*.
 
-- ***select_features*** (*{"IWSS", "FCBF", "CFS", ""}*): Selects the variable selection method to be used to build initial models for the ensemble that will be included without considering any of the other exit conditions. Once the models of the selected variables are built, the algorithm will update the weights using the ensemble and set the significance of all the models built with the same alpha_t. Default value: *""*.
+- ***select_features*** (*{"IWSS", "FCBF", "CFS", ""}*): Selects the variable selection method to be used to build initial models for the ensemble that will be included without considering any of the other exit conditions. Once the models of the selected variables are built, the algorithm will update the weights using the ensemble and set the significance of all the models built with the same &alpha;<sub>t</sub>. Default value: *""*.
 
 - ***threshold*** (*double*): Sets the necessary value for the IWSS and FCBF algorithms to function. Accepted values are:
   - IWSS: $threshold \in [0, 0.5]$

@@ -181,17 +181,17 @@ namespace bayesnet {
             prob_table += model->predict_proba(X) * 1.0;
         }
         // prob_table doesn't store probabilities but the sum of them
-        // to have them we need to divide by the sum of the significances but we
-        // don't need them to predict label values
+        // to have them we need to divide by the sum of the "weights" used to 
+        // consider the results obtanined in the model's predict_proba.
         return prob_table.argmax(1);
     }
     void BoostAODE::trainModel(const torch::Tensor& weights)
     {
+        // Algorithm based on the adaboost algorithm for classification
+        // as explained in Ensemble methods (Zhi-Hua Zhou, 2012)
         initialize_prob_table = true;
         fitted = true;
         double alpha_t = 0;
-        // Algorithm based on the adaboost algorithm for classification
-        // as explained in Ensemble methods (Zhi-Hua Zhou, 2012)
         torch::Tensor weights_ = torch::full({ m }, 1.0 / m, torch::kFloat64);
         bool exitCondition = false;
         std::unordered_set<int> featuresUsed;
