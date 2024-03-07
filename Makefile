@@ -47,6 +47,11 @@ clean: ## Clean the tests info
 	$(call ClearTests)
 	@echo ">>> Done";
 
+install: ## Install library
+	@echo ">>> Installing BayesNet...";
+	@cmake --install $(f_release)
+	@echo ">>> Done";
+
 debug: ## Build a debug version of the project
 	@echo ">>> Building Debug BayesNet...";
 	@if [ -d ./$(f_debug) ]; then rm -rf ./$(f_debug); fi

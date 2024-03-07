@@ -1,7 +1,7 @@
 #ifndef AODE_H
 #define AODE_H
 #include "Ensemble.h"
-#include "SPODE.h"
+#include "classifiers/SPODE.h"
 namespace bayesnet {
     class AODE : public Ensemble {
     public:

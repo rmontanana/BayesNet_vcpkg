@@ -4,11 +4,6 @@ include_directories(
     ${BayesNet_SOURCE_DIR}/lib/folding
     ${BayesNet_SOURCE_DIR}/lib/json/include
     ${BayesNet_SOURCE_DIR}/src
-    ${BayesNet_SOURCE_DIR}/src/feature_selection
-    ${BayesNet_SOURCE_DIR}/src/bayesian_network
-    ${BayesNet_SOURCE_DIR}/src/classifiers
-    ${BayesNet_SOURCE_DIR}/src/ensembles
-    ${BayesNet_SOURCE_DIR}/src/utils
     ${CMAKE_BINARY_DIR}/configured_files/include
 )
 

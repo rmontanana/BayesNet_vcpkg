@@ -2,7 +2,7 @@
 #define KDB_H
 #include <torch/torch.h>
 #include "Classifier.h"
-#include "bayesnetUtils.h"
+#include "utils/bayesnetUtils.h"
 namespace bayesnet {
     class KDB : public Classifier {
     private:

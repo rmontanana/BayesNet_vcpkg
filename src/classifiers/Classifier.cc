@@ -1,5 +1,5 @@
 #include "Classifier.h"
-#include "bayesnetUtils.h"
+#include "utils/bayesnetUtils.h"
 
 namespace bayesnet {
     Classifier::Classifier(Network model) : model(model), m(0), n(0), metrics(Metrics()), fitted(false) {}

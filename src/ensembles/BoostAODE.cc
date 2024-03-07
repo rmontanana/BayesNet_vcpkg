@@ -2,11 +2,11 @@
 #include <functional>
 #include <limits.h>
 #include <tuple>
+#include <folding.hpp>
 #include "BoostAODE.h"
-#include "CFS.h"
-#include "FCBF.h"
-#include "IWSS.h"
-#include "folding.hpp"
+#include "feature_selection/CFS.h"
+#include "feature_selection/FCBF.h"
+#include "feature_selection/IWSS.h"
 
 namespace bayesnet {
     struct {

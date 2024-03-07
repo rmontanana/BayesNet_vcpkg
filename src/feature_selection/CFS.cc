@@ -1,6 +1,6 @@
 #include "CFS.h"
 #include <limits>
-#include "bayesnetUtils.h"
+#include "utils/bayesnetUtils.h"
 namespace bayesnet {
     void CFS::fit()
     {

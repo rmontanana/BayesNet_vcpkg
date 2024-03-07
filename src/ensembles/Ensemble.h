@@ -1,9 +1,9 @@
 #ifndef ENSEMBLE_H
 #define ENSEMBLE_H
 #include <torch/torch.h>
-#include "Classifier.h"
-#include "BayesMetrics.h"
-#include "bayesnetUtils.h"
+#include "classifiers/Classifier.h"
+#include "utils/BayesMetrics.h"
+#include "utils/bayesnetUtils.h"
 
 namespace bayesnet {
     class Ensemble : public Classifier {

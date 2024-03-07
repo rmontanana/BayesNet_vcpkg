@@ -1,6 +1,6 @@
 #include "FeatureSelect.h"
 #include <limits>
-#include "bayesnetUtils.h"
+#include "utils/bayesnetUtils.h"
 namespace bayesnet {
     FeatureSelect::FeatureSelect(const torch::Tensor& samples, const std::vector<std::string>& features, const std::string& className, const int maxFeatures, const int classNumStates, const torch::Tensor& weights) :
         Metrics(samples, features, className, classNumStates), maxFeatures(maxFeatures == 0 ? samples.size(0) - 1 : maxFeatures), weights(weights)

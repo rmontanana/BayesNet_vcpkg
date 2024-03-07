@@ -2,8 +2,8 @@
 #define CLASSIFIER_H
 #include <torch/torch.h>
 #include "BaseClassifier.h"
-#include "Network.h"
-#include "BayesMetrics.h"
+#include "bayesian_network/Network.h"
+#include "utils/BayesMetrics.h"
 
 namespace bayesnet {
     class Classifier : public BaseClassifier {

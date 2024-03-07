@@ -1,4 +1,4 @@
-#include "bayesnetUtils.h"
+#include "utils/bayesnetUtils.h"
 #include "FCBF.h"
 namespace bayesnet {
 

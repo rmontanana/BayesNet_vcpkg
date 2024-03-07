@@ -3,7 +3,7 @@
 #include <string>
 #include <map>
 #include <torch/torch.h>
-#include "Network.h"
+#include "bayesian_network/Network.h"
 #include "CPPFImdlp.h"
 #include "Classifier.h"
 

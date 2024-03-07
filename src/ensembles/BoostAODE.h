@@ -2,8 +2,8 @@
 #define BOOSTAODE_H
 #include "Ensemble.h"
 #include <map>
-#include "SPODE.h"
-#include "FeatureSelect.h"
+#include "classifiers/SPODE.h"
+#include "feature_selection/FeatureSelect.h"
 namespace bayesnet {
     class BoostAODE : public Ensemble {
     public:

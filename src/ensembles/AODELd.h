@@ -1,8 +1,8 @@
 #ifndef AODELD_H
 #define AODELD_H
 #include "Ensemble.h"
-#include "Proposal.h"
-#include "SPODELd.h"
+#include "classifiers/Proposal.h"
+#include "classifiers/SPODELd.h"
 
 namespace bayesnet {
     class AODELd : public Ensemble, public Proposal {
