@@ -1,6 +1,6 @@
 #include "IWSS.h"
 #include <limits>
-#include "bayesnetUtils.h"
+#include "utils/bayesnetUtils.h"
 namespace bayesnet {
     IWSS::IWSS(const torch::Tensor& samples, const std::vector<std::string>& features, const std::string& className, const int maxFeatures, const int classNumStates, const torch::Tensor& weights, const double threshold) :
         FeatureSelect(samples, features, className, maxFeatures, classNumStates, weights), threshold(threshold)

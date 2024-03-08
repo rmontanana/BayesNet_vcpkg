@@ -47,6 +47,11 @@ clean: ## Clean the tests info
 	$(call ClearTests)
 	@echo ">>> Done";
 
+install: ## Install library
+	@echo ">>> Installing BayesNet...";
+	@cmake --install $(f_release)
+	@echo ">>> Done";
+
 debug: ## Build a debug version of the project
 	@echo ">>> Building Debug BayesNet...";
 	@if [ -d ./$(f_debug) ]; then rm -rf ./$(f_debug); fi
@@ -64,8 +69,8 @@ release: ## Build a Release version of the project
 fname = "tests/data/iris.arff"
 sample: ## Build sample
 	@echo ">>> Building Sample...";
-	cmake --build $(f_release) -t bayesnet_sample $(n_procs)
-	$(f_release)/sample/bayesnet_sample $(fname)
+	@cd sample && cmake -B build -S . && cmake --build build -t bayesnet_sample
+	sample/build/bayesnet_sample $(fname)
 	@echo ">>> Done";	
 
 opt = ""

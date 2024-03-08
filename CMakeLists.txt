@@ -30,6 +30,7 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 option(ENABLE_CLANG_TIDY "Enable to add clang tidy."              OFF)
 option(ENABLE_TESTING "Unit testing build"                        OFF)
 option(CODE_COVERAGE "Collect coverage from test library"         OFF)
+option(INSTALL_GTEST "Enable installation of googletest."         OFF)
 
 # CMakes modules
 # --------------
@@ -65,7 +66,6 @@ add_git_submodule("lib/json")
 # --------------
 add_subdirectory(config)
 add_subdirectory(lib/Files)
-add_subdirectory(sample)
 add_subdirectory(src)
 
 # Testing
@@ -76,3 +76,12 @@ if (ENABLE_TESTING)
   include(CTest)
   add_subdirectory(tests)
 endif (ENABLE_TESTING)
+
+# Installation
+# ------------
+install(TARGETS BayesNet
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib
+        CONFIGURATIONS Release)
+install(DIRECTORY src/ DESTINATION include/bayesnet FILES_MATCHING CONFIGURATIONS Release PATTERN "*.h")
+install(FILES ${CMAKE_BINARY_DIR}/configured_files/include/config.h DESTINATION include/bayesnet CONFIGURATIONS Release)

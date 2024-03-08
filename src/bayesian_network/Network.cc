@@ -1,7 +1,7 @@
 #include <thread>
 #include <mutex>
 #include "Network.h"
-#include "bayesnetUtils.h"
+#include "utils/bayesnetUtils.h"
 namespace bayesnet {
     Network::Network() : features(std::vector<std::string>()), className(""), classNumStates(0), fitted(false), laplaceSmoothing(0) {}
     Network::Network(float maxT) : features(std::vector<std::string>()), className(""), classNumStates(0), maxThreads(maxT), fitted(false), laplaceSmoothing(0) {}

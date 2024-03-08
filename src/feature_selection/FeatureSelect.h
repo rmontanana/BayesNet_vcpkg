@@ -2,7 +2,7 @@
 #define FEATURE_SELECT_H
 #include <torch/torch.h>
 #include <vector>
-#include "BayesMetrics.h"
+#include "utils/BayesMetrics.h"
 namespace bayesnet {
     class FeatureSelect : public Metrics {
     public:

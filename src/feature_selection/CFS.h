@@ -2,7 +2,7 @@
 #define CFS_H
 #include <torch/torch.h>
 #include <vector>
-#include "FeatureSelect.h"
+#include "feature_selection/FeatureSelect.h"
 namespace bayesnet {
     class CFS : public FeatureSelect {
     public:
