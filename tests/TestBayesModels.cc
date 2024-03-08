@@ -2,15 +2,15 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
 #include <catch2/generators/catch_generators.hpp>
-#include "KDB.h"
-#include "TAN.h"
-#include "SPODE.h"
-#include "AODE.h"
-#include "BoostAODE.h"
-#include "TANLd.h"
-#include "KDBLd.h"
-#include "SPODELd.h"
-#include "AODELd.h"
+#include "bayesnet/classifiers/KDB.h"
+#include "bayesnet/classifiers/TAN.h"
+#include "bayesnet/classifiers/SPODE.h"
+#include "bayesnet/classifiers/TANLd.h"
+#include "bayesnet/classifiers/KDBLd.h"
+#include "bayesnet/classifiers/SPODELd.h"
+#include "bayesnet/ensembles/AODE.h"
+#include "bayesnet/ensembles/AODELd.h"
+#include "bayesnet/ensembles/BoostAODE.h"
 #include "TestUtils.h"
 
 const std::string ACTUAL_VERSION = "1.0.4";

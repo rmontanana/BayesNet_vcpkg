@@ -3,7 +3,7 @@
 #include <catch2/generators/catch_generators.hpp>
 #include <string>
 #include "TestUtils.h"
-#include "Network.h"
+#include "bayesnet/network/Network.h"
 
 void buildModel(bayesnet::Network& net, const std::vector<std::string>& features, const std::string& className)
 {

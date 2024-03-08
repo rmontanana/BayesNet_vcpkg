@@ -69,6 +69,7 @@ release: ## Build a Release version of the project
 fname = "tests/data/iris.arff"
 sample: ## Build sample
 	@echo ">>> Building Sample...";
+	@if [ -d ./sample/build ]; then rm -rf ./sample/build; fi
 	@cd sample && cmake -B build -S . && cmake --build build -t bayesnet_sample
 	sample/build/bayesnet_sample $(fname)
 	@echo ">>> Done";	

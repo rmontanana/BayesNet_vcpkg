@@ -10,7 +10,7 @@ Checks: '-*,
          -modernize-use-trailing-return-type,
          -bugprone-exception-escape'
 
-HeaderFilterRegex: 'src/*'
+HeaderFilterRegex: 'bayesnet/*'
 AnalyzeTemporaryDtors: false
 WarningsAsErrors: ''
 FormatStyle: file

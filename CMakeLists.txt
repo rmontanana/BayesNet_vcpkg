@@ -66,7 +66,7 @@ add_git_submodule("lib/json")
 # --------------
 add_subdirectory(config)
 add_subdirectory(lib/Files)
-add_subdirectory(src)
+add_subdirectory(bayesnet)
 
 # Testing
 # -------
@@ -83,5 +83,5 @@ install(TARGETS BayesNet
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
         CONFIGURATIONS Release)
-install(DIRECTORY src/ DESTINATION include/bayesnet FILES_MATCHING CONFIGURATIONS Release PATTERN "*.h")
+install(DIRECTORY bayesnet/ DESTINATION include/bayesnet FILES_MATCHING CONFIGURATIONS Release PATTERN "*.h")
 install(FILES ${CMAKE_BINARY_DIR}/configured_files/include/config.h DESTINATION include/bayesnet CONFIGURATIONS Release)

@@ -11,7 +11,7 @@ include_directories(
     lib/Files
     lib/mdlp
     lib/json/include
-    /usr/local/include/bayesnet
+    /usr/local/include/
 )
 
 add_subdirectory(lib/Files)
