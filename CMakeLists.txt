@@ -66,7 +66,6 @@ add_git_submodule("lib/json")
 # --------------
 add_subdirectory(config)
 add_subdirectory(lib/Files)
-add_subdirectory(sample)
 add_subdirectory(src)
 
 # Testing

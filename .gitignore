@@ -38,3 +38,5 @@ cmake-build*/**
 .idea
 puml/**
 .vscode/settings.json
+sample/build
+

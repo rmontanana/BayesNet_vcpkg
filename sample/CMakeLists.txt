@@ -1,14 +1,20 @@
+cmake_minimum_required(VERSION 3.20)
+
+project(bayesnet_sample)
+
+set(CMAKE_CXX_STANDARD 17)
+
+find_package(Torch REQUIRED)
+find_library(BayesNet NAMES BayesNet libBayesNet REQUIRED)
+
 include_directories(
-    ${BayesNet_SOURCE_DIR}/src
-    ${BayesNet_SOURCE_DIR}/src/classifiers
-    ${BayesNet_SOURCE_DIR}/src/ensembles
-    ${BayesNet_SOURCE_DIR}/src/bayesian_network
-    ${BayesNet_SOURCE_DIR}/src/utils
-    ${BayesNet_SOURCE_DIR}/src/feature_selection
-    ${BayesNet_SOURCE_DIR}/lib/Files
-    ${BayesNet_SOURCE_DIR}/lib/mdlp
-    ${BayesNet_SOURCE_DIR}/lib/json/include
-    ${CMAKE_BINARY_DIR}/configured_files/include
+    lib/Files
+    lib/mdlp
+    lib/json/include
+    /usr/local/include/bayesnet
 )
+
+add_subdirectory(lib/Files)
+add_subdirectory(lib/mdlp)
 add_executable(bayesnet_sample sample.cc) 
-target_link_libraries(bayesnet_sample ArffFiles BayesNet)
+target_link_libraries(bayesnet_sample ArffFiles mdlp "${TORCH_LIBRARIES}" "${BayesNet}")
