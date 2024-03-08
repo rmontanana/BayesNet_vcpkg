@@ -4,11 +4,14 @@
 
 Bayesian Network Classifiers using libtorch from scratch
 
+## Installation
+
 ### Release
 
 ```bash
 make release
 make buildr
+sudo make install
 ```
 
 ### Debug & Tests
@@ -21,8 +24,9 @@ make coverage
 
 ### Sample app
 
+After building and installing the release version, you can run the sample app with the following commands:
+
 ```bash
-make release
 make sample
 make sample fname=tests/data/glass.arff
 ```
