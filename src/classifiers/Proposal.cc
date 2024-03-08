@@ -1,5 +1,5 @@
 #include "Proposal.h"
-#include "ArffFiles.h"
+#include <ArffFiles.h>
 
 namespace bayesnet {
     Proposal::Proposal(torch::Tensor& dataset_, std::vector<std::string>& features_, std::string& className_) : pDataset(dataset_), pFeatures(features_), pClassName(className_) {}

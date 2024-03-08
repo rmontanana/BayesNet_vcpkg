@@ -1,6 +1,6 @@
 #include <ArffFiles.h>
 #include <CPPFImdlp.h>
-#include "ensembles/BoostAODE.h"
+#include <ensembles/BoostAODE.h>
 
 std::vector<mdlp::labels_t> discretizeDataset(std::vector<mdlp::samples_t>& X, mdlp::labels_t& y)
 {
