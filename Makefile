@@ -47,6 +47,11 @@ clean: ## Clean the tests info
 	$(call ClearTests)
 	@echo ">>> Done";
 
+uninstall: ## Uninstall library
+	@echo ">>> Uninstalling BayesNet...";
+	xargs rm < $(f_release)/install_manifest.txt
+	@echo ">>> Done";
+
 install: ## Install library
 	@echo ">>> Installing BayesNet...";
 	@cmake --install $(f_release)

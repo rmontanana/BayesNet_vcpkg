@@ -5,13 +5,13 @@ project(bayesnet_sample)
 set(CMAKE_CXX_STANDARD 17)
 
 find_package(Torch REQUIRED)
-find_library(BayesNet NAMES BayesNet libBayesNet REQUIRED)
+find_library(BayesNet NAMES BayesNet.a libBayesNet.a REQUIRED)
 
 include_directories(
     lib/Files
     lib/mdlp
     lib/json/include
-    /usr/local/include/
+    SYSTEM include
 )
 
 add_subdirectory(lib/Files)

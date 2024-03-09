@@ -84,4 +84,4 @@ install(TARGETS BayesNet
         LIBRARY DESTINATION lib
         CONFIGURATIONS Release)
 install(DIRECTORY bayesnet/ DESTINATION include/bayesnet FILES_MATCHING CONFIGURATIONS Release PATTERN "*.h")
-install(FILES ${CMAKE_BINARY_DIR}/configured_files/include/config.h DESTINATION include/bayesnet CONFIGURATIONS Release)
+install(FILES ${CMAKE_BINARY_DIR}/configured_files/include/bayesnet/config.h DESTINATION include/bayesnet CONFIGURATIONS Release)
