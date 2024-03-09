@@ -6,7 +6,7 @@ if(ENABLE_TESTING)
         ${BayesNet_SOURCE_DIR}/lib/folding
         ${BayesNet_SOURCE_DIR}/lib/json/include
         ${BayesNet_SOURCE_DIR}
-        ${CMAKE_BINARY_DIR}/configured_files/include/bayesnet
+        ${CMAKE_BINARY_DIR}/configured_files/include
     )
     file(GLOB_RECURSE BayesNet_SOURCES "${BayesNet_SOURCE_DIR}/bayesnet/*.cc")
     set(TEST_SOURCES_BAYESNET TestBayesModels.cc TestBayesNetwork.cc TestBayesMetrics.cc TestUtils.cc ${BayesNet_SOURCES})
