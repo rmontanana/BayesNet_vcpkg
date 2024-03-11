@@ -216,7 +216,7 @@ namespace bayesnet {
         double priorAccuracy = 0.0;
         double delta = 1.0;
         double convergence_threshold = 1e-4;
-        int count = 0; // number of times the accuracy is lower than the convergence_threshold
+        int worse_model_count = 0; // number of times the accuracy is lower than the convergence_threshold
         // Step 0: Set the finish condition
         // if not repeatSparent a finish condition is run out of features
         // n_models == maxModels
@@ -274,11 +274,13 @@ namespace bayesnet {
                     delta = accuracy - priorAccuracy;
                 }
                 if (delta < convergence_threshold) {
-                    count++;
+                    worse_model_count++;
+                } else {
+                    worse_model_count = 0; // Reset the counter if the model performs better
                 }
                 priorAccuracy = accuracy;
             }
-            exitCondition = n_models >= maxModels && repeatSparent || count > tolerance;
+            exitCondition = n_models >= maxModels && repeatSparent || worse_model_count > tolerance;
         }
         if (featuresUsed.size() != features.size()) {
             notes.push_back("Used features in train: " + std::to_string(featuresUsed.size()) + " of " + std::to_string(features.size()));
