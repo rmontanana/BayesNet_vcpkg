@@ -282,6 +282,12 @@ namespace bayesnet {
             }
             exitCondition = n_models >= maxModels && repeatSparent || worse_model_count > tolerance;
         }
+        if (worse_model_count > tolerance) {
+            notes.push_back("Convergence threshold reached & last model eliminated");
+            significanceModels.pop_back();
+            models.pop_back();
+            n_models--;
+        }
         if (featuresUsed.size() != features.size()) {
             notes.push_back("Used features in train: " + std::to_string(featuresUsed.size()) + " of " + std::to_string(features.size()));
             status = WARNING;
