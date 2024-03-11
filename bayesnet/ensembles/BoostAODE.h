@@ -7,7 +7,7 @@
 namespace bayesnet {
     class BoostAODE : public Ensemble {
     public:
-        BoostAODE(bool predict_voting = true);
+        BoostAODE(bool predict_voting = false);
         virtual ~BoostAODE() = default;
         std::vector<std::string> graph(const std::string& title = "BoostAODE") const override;
         void setHyperparameters(const nlohmann::json& hyperparameters) override;

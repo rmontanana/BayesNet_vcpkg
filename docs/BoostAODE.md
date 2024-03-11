@@ -24,7 +24,7 @@ The hyperparameters defined in the algorithm are:
 
   Default value is *-1* so every time any of those algorithms are called, the threshold has to be set to the desired value.
 
-- ***predict_voting*** (*boolean*): Sets whether the algorithm will use *model voting* to predict the result. If set to false, the weighted average of the probabilities of each model's prediction will be used. Default value: *true*.
+- ***predict_voting*** (*boolean*): Sets whether the algorithm will use *model voting* to predict the result. If set to false, the weighted average of the probabilities of each model's prediction will be used. Default value: *false*.
 
 - ***predict_single*** (*boolean*): Sets whether the algorithm will use single-model prediction in the learning process. If set to *false*, all models trained up to that point will be used to calculate the prediction necessary to update the weights in the learning process. Default value: *true*.
 
