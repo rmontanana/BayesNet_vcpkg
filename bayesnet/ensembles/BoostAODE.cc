@@ -23,7 +23,7 @@ namespace bayesnet {
     {
         validHyperparameters = {
             "maxModels", "order", "convergence", "threshold",
-            "select_features", "tolerance", "predict_voting", "predict_single"
+            "select_features", "tolerance", "predict_voting"
         };
 
     }
@@ -63,10 +63,6 @@ namespace bayesnet {
     void BoostAODE::setHyperparameters(const nlohmann::json& hyperparameters_)
     {
         auto hyperparameters = hyperparameters_;
-        if (hyperparameters.contains("maxModels")) {
-            maxModels = hyperparameters["maxModels"];
-            hyperparameters.erase("maxModels");
-        }
         if (hyperparameters.contains("order")) {
             std::vector<std::string> algos = { Orders.ASC, Orders.DESC, Orders.RAND };
             order_algorithm = hyperparameters["order"];
@@ -78,10 +74,6 @@ namespace bayesnet {
         if (hyperparameters.contains("convergence")) {
             convergence = hyperparameters["convergence"];
             hyperparameters.erase("convergence");
-        }
-        if (hyperparameters.contains("predict_single")) {
-            predict_single = hyperparameters["predict_single"];
-            hyperparameters.erase("predict_single");
         }
         if (hyperparameters.contains("threshold")) {
             threshold = hyperparameters["threshold"];
@@ -168,24 +160,10 @@ namespace bayesnet {
         delete featureSelector;
         return featuresUsed;
     }
-    torch::Tensor BoostAODE::ensemble_predict(torch::Tensor& X, SPODE* model)
-    {
-        if (initialize_prob_table) {
-            initialize_prob_table = false;
-            prob_table = model->predict_proba(X) * 1.0;
-        } else {
-            prob_table += model->predict_proba(X) * 1.0;
-        }
-        // prob_table doesn't store probabilities but the sum of them
-        // to have them we need to divide by the sum of the "weights" used to 
-        // consider the results obtanined in the model's predict_proba.
-        return prob_table.argmax(1);
-    }
     void BoostAODE::trainModel(const torch::Tensor& weights)
     {
         // Algorithm based on the adaboost algorithm for classification
         // as explained in Ensemble methods (Zhi-Hua Zhou, 2012)
-        initialize_prob_table = true;
         fitted = true;
         double alpha_t = 0;
         torch::Tensor weights_ = torch::full({ m }, 1.0 / m, torch::kFloat64);
@@ -203,19 +181,13 @@ namespace bayesnet {
                 return;
             }
         }
-        bool resetMaxModels = false;
-        if (maxModels == 0) {
-            maxModels = .1 * n > 10 ? .1 * n : n;
-            resetMaxModels = true; // Flag to unset maxModels
-        }
+        int numItemsPack = 0;
         // Variables to control the accuracy finish condition
         double priorAccuracy = 0.0;
         double delta = 1.0;
         double convergence_threshold = 1e-4;
         int worse_model_count = 0; // number of times the accuracy is lower than the convergence_threshold
         // Step 0: Set the finish condition
-        // if not repeatSparent a finish condition is run out of features
-        // n_models == maxModels
         // epsilon sub t > 0.5 => inverse the weights policy
         // validation error is not decreasing
         bool ascending = order_algorithm == Orders.ASC;
@@ -239,11 +211,7 @@ namespace bayesnet {
             model = std::make_unique<SPODE>(feature);
             model->fit(dataset, features, className, states, weights_);
             torch::Tensor ypred;
-            if (predict_single) {
-                ypred = model->predict(X_train);
-            } else {
-                ypred = ensemble_predict(X_train, dynamic_cast<SPODE*>(model.get()));
-            }
+            ypred = model->predict(X_train);
             // Step 3.1: Compute the classifier amout of say
             std::tie(weights_, alpha_t, exitCondition) = update_weights(y_train, ypred, weights_);
             if (exitCondition) {
@@ -269,7 +237,7 @@ namespace bayesnet {
                 }
                 priorAccuracy = accuracy;
             }
-            exitCondition = n_models >= maxModels && repeatSparent || worse_model_count > tolerance;
+            exitCondition = worse_model_count > tolerance;
         }
         if (worse_model_count > tolerance) {
             notes.push_back("Convergence threshold reached & last model eliminated");
@@ -282,9 +250,6 @@ namespace bayesnet {
             status = WARNING;
         }
         notes.push_back("Number of models: " + std::to_string(n_models));
-        if (resetMaxModels) {
-            maxModels = 0;
-        }
     }
     std::vector<std::string> BoostAODE::graph(const std::string& title) const
     {
