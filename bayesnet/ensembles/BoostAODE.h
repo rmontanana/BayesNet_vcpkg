@@ -20,7 +20,7 @@ namespace bayesnet {
         torch::Tensor X_train, y_train, X_test, y_test;
         // Hyperparameters
         bool bisection = false; // if true, use bisection stratety to add k models at once to the ensemble
-        int tolerance = 0;
+        int maxTolerance = 1;
         std::string order_algorithm; // order to process the KBest features asc, desc, rand
         bool convergence = false; //if true, stop when the model does not improve
         bool selectFeatures = false; // if true, use feature selection

@@ -22,8 +22,8 @@ namespace bayesnet {
     BoostAODE::BoostAODE(bool predict_voting) : Ensemble(predict_voting)
     {
         validHyperparameters = {
-            "maxModels", "order", "convergence", "threshold",
-            "select_features", "tolerance", "predict_voting"
+            "maxModels", "bisection", "order", "convergence", "threshold",
+            "select_features", "maxTolerance", "predict_voting"
         };
 
     }
@@ -75,13 +75,19 @@ namespace bayesnet {
             convergence = hyperparameters["convergence"];
             hyperparameters.erase("convergence");
         }
+        if (hyperparameters.contains("bisection")) {
+            bisection = hyperparameters["bisection"];
+            hyperparameters.erase("bisection");
+        }
         if (hyperparameters.contains("threshold")) {
             threshold = hyperparameters["threshold"];
             hyperparameters.erase("threshold");
         }
-        if (hyperparameters.contains("tolerance")) {
-            tolerance = hyperparameters["tolerance"];
-            hyperparameters.erase("tolerance");
+        if (hyperparameters.contains("maxTolerance")) {
+            maxTolerance = hyperparameters["maxTolerance"];
+            if (maxTolerance < 1 || maxTolerance > 4)
+                throw std::invalid_argument("Invalid maxTolerance value, must be greater in [1, 4]");
+            hyperparameters.erase("maxTolerance");
         }
         if (hyperparameters.contains("predict_voting")) {
             predict_voting = hyperparameters["predict_voting"];
@@ -167,17 +173,17 @@ namespace bayesnet {
         fitted = true;
         double alpha_t = 0;
         torch::Tensor weights_ = torch::full({ m }, 1.0 / m, torch::kFloat64);
-        bool exitCondition = false;
+        bool finished = false;
         std::unordered_set<int> featuresUsed;
         if (selectFeatures) {
             featuresUsed = initializeModels();
             auto ypred = predict(X_train);
-            std::tie(weights_, alpha_t, exitCondition) = update_weights(y_train, ypred, weights_);
+            std::tie(weights_, alpha_t, finished) = update_weights(y_train, ypred, weights_);
             // Update significance of the models
             for (int i = 0; i < n_models; ++i) {
                 significanceModels[i] = alpha_t;
             }
-            if (exitCondition) {
+            if (finished) {
                 return;
             }
         }
@@ -186,13 +192,14 @@ namespace bayesnet {
         double priorAccuracy = 0.0;
         double delta = 1.0;
         double convergence_threshold = 1e-4;
-        int worse_model_count = 0; // number of times the accuracy is lower than the convergence_threshold
+        int tolerance = 0; // number of times the accuracy is lower than the convergence_threshold
         // Step 0: Set the finish condition
         // epsilon sub t > 0.5 => inverse the weights policy
         // validation error is not decreasing
         bool ascending = order_algorithm == Orders.ASC;
         std::mt19937 g{ 173 };
-        while (!exitCondition) {
+        torch::Tensor weights_backup;
+        while (!finished) {
             // Step 1: Build ranking with mutual information
             auto featureSelection = metrics.SelectKBestWeighted(weights_, ascending, n); // Get all the features sorted
             if (order_algorithm == Orders.RAND) {
@@ -203,25 +210,33 @@ namespace bayesnet {
                 { return find(begin(featuresUsed), end(featuresUsed), x) != end(featuresUsed);}),
                 end(featureSelection)
             );
-            if (featureSelection.empty()) {
-                break;
+            int k = pow(2, tolerance);
+            if (tolerance == 0) {
+
             }
-            auto feature = featureSelection[0];
-            std::unique_ptr<Classifier> model;
-            model = std::make_unique<SPODE>(feature);
-            model->fit(dataset, features, className, states, weights_);
-            torch::Tensor ypred;
-            ypred = model->predict(X_train);
-            // Step 3.1: Compute the classifier amout of say
-            std::tie(weights_, alpha_t, exitCondition) = update_weights(y_train, ypred, weights_);
-            if (exitCondition) {
-                break;
+            int i = 0;
+            while (i < k && featureSelection.size() > 0) {
+                auto feature = featureSelection[0];
+                featureSelection.erase(featureSelection.begin());
+                std::unique_ptr<Classifier> model;
+                model = std::make_unique<SPODE>(feature);
+                model->fit(dataset, features, className, states, weights_);
+                torch::Tensor ypred;
+                ypred = model->predict(X_train);
+                // Step 3.1: Compute the classifier amout of say
+                weights_backup = weights_.clone();
+                std::tie(weights_, alpha_t, finished) = update_weights(y_train, ypred, weights_);
+                if (finished) {
+                    finished = true;
+                    weights_ = weights_backup.clone();
+                    break;
+                }
+                // Step 3.4: Store classifier and its accuracy to weigh its future vote
+                featuresUsed.insert(feature);
+                models.push_back(std::move(model));
+                significanceModels.push_back(alpha_t);
+                n_models++;
             }
-            // Step 3.4: Store classifier and its accuracy to weigh its future vote
-            featuresUsed.insert(feature);
-            models.push_back(std::move(model));
-            significanceModels.push_back(alpha_t);
-            n_models++;
             if (convergence) {
                 auto y_val_predict = predict(X_test);
                 double accuracy = (y_val_predict == y_test).sum().item<double>() / (double)y_test.size(0);
@@ -231,19 +246,23 @@ namespace bayesnet {
                     delta = accuracy - priorAccuracy;
                 }
                 if (delta < convergence_threshold) {
-                    worse_model_count++;
+                    tolerance++;
                 } else {
-                    worse_model_count = 0; // Reset the counter if the model performs better
+                    tolerance = 0; // Reset the counter if the model performs better
                 }
-                priorAccuracy = accuracy;
+                // Keep the best accuracy until now as the prior accuracy
+                priorAccuracy = std::max(accuracy, priorAccuracy);
             }
-            exitCondition = worse_model_count > tolerance;
+            finished = finished || tolerance == maxTolerance || featuresUsed.size() == features.size();
         }
-        if (worse_model_count > tolerance) {
-            notes.push_back("Convergence threshold reached & last model eliminated");
-            significanceModels.pop_back();
-            models.pop_back();
-            n_models--;
+        if (tolerance == maxTolerance) {
+            notes.push_back("Convergence threshold reached & " + std::to_string(numItemsPack) + " models eliminated");
+            weights_ = weights_backup;
+            for (int i = 0; i < numItemsPack; ++i) {
+                significanceModels.pop_back();
+                models.pop_back();
+                n_models--;
+            }
         }
         if (featuresUsed.size() != features.size()) {
             notes.push_back("Used features in train: " + std::to_string(featuresUsed.size()) + " of " + std::to_string(features.size()));

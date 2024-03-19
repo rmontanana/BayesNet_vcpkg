@@ -24,23 +24,18 @@
 
 13. $numModelsInPack \leftarrow 0$
 
-14.
-
 15. // main loop
 
 16. While (!finished)
 
     1. $\pi \leftarrow SortFeatures(Vars, criterio, D[W])$
 
-    2. if $(bisection) \; k \leftarrow 2^{tolerance} \;$ else
-        $k \leftarrow 1$
+    2. $k \leftarrow 2^{tolerance}$
 
-    3. if ($k tolerance == 0$) $W_B \leftarrow W$;
+    3. if ($tolerance == 0$)
         $numItemsPack \leftarrow0$
 
     4. $P \leftarrow Head(\pi,k)$ // first k features in order
-
-    5. $spodes \leftarrow \emptyset$
 
     6. $i \leftarrow 0$
 
@@ -58,32 +53,29 @@
 
         6. $\hat{y}[] \leftarrow spode.Predict(D[W])$
 
-        7. $e \leftarrow error(\hat{y}[], y[])$
+        7. $\epsilon \leftarrow error(\hat{y}[], y[])$
 
-        8. $\alpha \leftarrow \frac{1}{2} ln \left ( \frac{1-e}{e} \right )$
+        8. $\alpha \leftarrow \frac{1}{2} ln \left ( \frac{1-\epsilon}{\epsilon} \right )$
 
-        9. if ($\alpha > 0.5$)
+        9. if ($\epsilon > 0.5$)
 
             1. $finished \leftarrow True$
 
             2. break
 
-        10. $spodes.add( (spode,\alpha_t) )$
+        10. $AODE.add( (spode,\alpha_t) )$
 
         11. $W \leftarrow UpdateWeights(D[W],\alpha,y[],\hat{y}[])$
 
-    8. $AODE.add( spodes )$
+    8. if ($convergence$ $\And$ $! finished$)
 
-    9. if ($convergence \And ! finished$)
-
-        1. $\hat{y}[] \leftarrow Predict(D,spodes)$
+        1. $\hat{y}[] \leftarrow AODE.Predict(D[W])$
 
         2. $e \leftarrow error(\hat{y}[], y[])$
 
         3. if $(e > (error+\delta))$ // result doesn't improve
 
-            1. if
-                $(tolerance == maxTolerance) \;\; finished\leftarrow True$
+            1. if $(tolerance == maxTolerance)\; finished\leftarrow True$
 
             2. else $tolerance \leftarrow tolerance+1$
 
@@ -93,7 +85,7 @@
 
             2. $error \leftarrow min(error,e)$
 
-    10. If $(Vars == \emptyset) \; finished \leftarrow True$
+    9. if $(Vars == \emptyset) \; finished \leftarrow True$
 
 17. if ($tolerance == maxTolerance$) // algorithm finished because of
     lack of convergence
