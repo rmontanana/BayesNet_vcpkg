@@ -1,25 +1,37 @@
+\section{Algorithm}
+\begin{itemize}
+\item[] // notation
+\item $n$ features ${\cal{X}} = \{X_1, \dots, X_n\}$ and the class $Y$
+\item $m$ instances. 
+\item $D = \{ (x_1^i, \dots, x_n^i, y^i) \}_{i=1}^{m}$
+\item $W$ a weights vector. $W_0$ are the initial weights.
+\item $D[W]$ dataset with weights $W$ for the instances.
+\end{itemize}
+\bigskip
+
+
 \begin{enumerate}
 \item[] // initialization
 \item $W_0 \leftarrow (w_1, \dots, w_m) \leftarrow 1/m$
 \item $W \leftarrow W_0$
 \item $Vars \leftarrow {\cal{X}}$
 \item $\delta \leftarrow 10^{-4}$
-\item $convergence \leftarrow True$
-\item $maxTolerancia \leftarrow 3$
-\item $bisection \leftarrow False$
-\item $error \leftarrow \inf$ 
+\item $convergence \leftarrow True$ // hyperparameter
+\item $maxTolerancia \leftarrow 3$ // hyperparameter
+\item $bisection \leftarrow False$ // hyperparameter
 \item $finished \leftarrow False$
 \item $AODE \leftarrow \emptyset$ \hspace*{2cm} // the ensemble
 \item $tolerance \leftarrow 0$
 \item $numModelsInPack \leftarrow 0$
+\item $maxAccuracy \leftarrow -1$
 \item[] 
 \newpage
 \item[] // main loop
-\item While (!finished)
+\item While $(\lnot finished)$
 \begin{enumerate}
     \item $\pi \leftarrow SortFeatures(Vars, criterio, D[W])$
-    \item if $(bisection) \; k \leftarrow 2^{tolerance} \;$ else $k \leftarrow 1$
-    \item if ($k tolerance == 0$) $W_B \leftarrow W$; $numItemsPack \leftarrow0$
+    \item $k \leftarrow 2^{tolerance}$
+    \item if ($tolerance == 0$) $numItemsPack \leftarrow0$
     \item $P \leftarrow Head(\pi,k)$ \hspace*{2cm} //  first k features in order
     \item $spodes \leftarrow \emptyset$
     \item $i \leftarrow 0$
@@ -31,9 +43,9 @@
         \item $Vars.remove(X)$
         \item $spode \leftarrow BuildSpode(X, {\cal{X}}, D[W])$
         \item $\hat{y}[] \leftarrow spode.Predict(D[W])$
-        \item $e \leftarrow error(\hat{y}[], y[])$
-        \item $\alpha \leftarrow \frac{1}{2} ln \left ( \frac{1-e}{e} \right )$
-        \item if ($\alpha > 0.5$)
+        \item $\epsilon \leftarrow error(\hat{y}[], y[])$
+        \item $\alpha \leftarrow \frac{1}{2} ln \left ( \frac{1-\epsilon}{\epsilon} \right )$
+        \item if ($\epsilon > 0.5$)
         \begin{enumerate}
             \item $finished \leftarrow True$
             \item break
@@ -42,28 +54,27 @@
         \item $W \leftarrow UpdateWeights(D[W],\alpha,y[],\hat{y}[])$
     \end{enumerate}       
     \item $AODE.add( spodes )$
-    \item if ($convergence \And ! finished$) 
+    \item if ($convergence \land \lnot finished$) 
     \begin{enumerate}       
-        \item $\hat{y}[] \leftarrow Predict(D,spodes)$
-        \item $e \leftarrow error(\hat{y}[], y[])$
-        \item if $(e > (error+\delta))$ \hspace*{2cm} // result doesn't improve
+        \item $\hat{y}[] \leftarrow AODE.Predict(D[W])$
+        \item $actualAccuracy \leftarrow accuracy(\hat{y}[], y[])$
+        \item $if (maxAccuracy == -1)\; maxAccuracy \leftarrow actualAccuracy$
+        \item if $((accuracy - maxAccuracy) < \delta)$\hspace*{2cm} // result doesn't improve enough
         \begin{enumerate}
-            \item if $(tolerance == maxTolerance) \;\; finished\leftarrow True$
-            \item else $tolerance \leftarrow tolerance+1$
+            \item $tolerance \leftarrow tolerance + 1$
         \end{enumerate}
         \item else
         \begin{enumerate}
             \item $tolerance \leftarrow 0$
-            \item $error \leftarrow min(error,e)$
+            \item $numItemsPack \leftarrow 0$
          \end{enumerate}
     \end{enumerate}
-    \item If $(Vars == \emptyset) \; finished \leftarrow True$
-
+    \item If $(Vars == \emptyset \lor tolerance>maxTolerance) \; finished \leftarrow True$
+    \item $lastAccuracy \leftarrow max(lastAccuracy, actualAccuracy)$
 \end{enumerate}
-\item if ($tolerance == maxTolerance$) // algorithm finished because of lack of convergence
+\item if ($tolerance > maxTolerance$) \hspace*{1cm} // algorithm finished because of lack of convergence
 \begin{enumerate}
     \item $removeModels(AODE, numItemsPack)$
-    \item $W \leftarrow W_B$
 \end{enumerate}
 \item Return $AODE$
 \end{enumerate}

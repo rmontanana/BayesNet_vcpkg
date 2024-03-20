@@ -8,7 +8,6 @@
 #include "bayesnet/feature_selection/IWSS.h"
 #include "BoostAODE.h"
 
-#define LOGURU_WITH_STREAMS 1
 #include "bayesnet/utils/loguru.cpp"
 
 namespace bayesnet {
@@ -41,8 +40,8 @@ namespace bayesnet {
         if (convergence) {
             // Prepare train & validation sets from train data
             auto fold = folding::StratifiedKFold(5, y_, 271);
-            dataset_ = torch::clone(dataset);
             // save input dataset
+            dataset_ = torch::clone(dataset);
             auto [train, test] = fold.getFold(0);
             auto train_t = torch::tensor(train);
             auto test_t = torch::tensor(test);
@@ -54,9 +53,9 @@ namespace bayesnet {
             dataset = X_train;
             m = X_train.size(1);
             auto n_classes = states.at(className).size();
-            metrics = Metrics(dataset, features, className, n_classes);
             // Build dataset with train data
             buildDataset(y_train);
+            metrics = Metrics(dataset, features, className, n_classes);
         } else {
             // Use all data to train
             X_train = dataset.index({ torch::indexing::Slice(0, dataset.size(0) - 1), "..." });
@@ -137,9 +136,9 @@ namespace bayesnet {
         }
         return { weights, alpha_t, terminate };
     }
-    std::unordered_set<int> BoostAODE::initializeModels()
+    std::vector<int> BoostAODE::initializeModels()
     {
-        std::unordered_set<int> featuresUsed;
+        std::vector<int> featuresUsed;
         torch::Tensor weights_ = torch::full({ m }, 1.0 / m, torch::kFloat64);
         int maxFeatures = 0;
         if (select_features_algorithm == SelectFeatures.CFS) {
@@ -158,7 +157,7 @@ namespace bayesnet {
         featureSelector->fit();
         auto cfsFeatures = featureSelector->getFeatures();
         for (const int& feature : cfsFeatures) {
-            featuresUsed.insert(feature);
+            featuresUsed.push_back(feature);
             std::unique_ptr<Classifier> model = std::make_unique<SPODE>(feature);
             model->fit(dataset, features, className, states, weights_);
             models.push_back(std::move(model));
@@ -183,7 +182,7 @@ namespace bayesnet {
         double alpha_t = 0;
         torch::Tensor weights_ = torch::full({ m }, 1.0 / m, torch::kFloat64);
         bool finished = false;
-        std::unordered_set<int> featuresUsed;
+        std::vector<int> featuresUsed;
         if (selectFeatures) {
             featuresUsed = initializeModels();
             auto ypred = predict(X_train);
@@ -199,7 +198,7 @@ namespace bayesnet {
         int numItemsPack = 0; // The counter of the models inserted in the current pack
         // Variables to control the accuracy finish condition
         double priorAccuracy = 0.0;
-        double delta = 1.0;
+        double improvement = 1.0;
         double convergence_threshold = 1e-4;
         int tolerance = 0; // number of times the accuracy is lower than the convergence_threshold
         // Step 0: Set the finish condition
@@ -222,9 +221,9 @@ namespace bayesnet {
             );
             int k = pow(2, tolerance);
             int counter = 0; // The model counter of the current pack
-            VLOG_SCOPE_F(1, "k=%d", k);
+            VLOG_SCOPE_F(1, "k=%d featureSelection.size: %d", k, featureSelection.size());
             while (counter++ < k && featureSelection.size() > 0) {
-                VLOG_SCOPE_F(2, "counter: %d numItemsPack: %d featureSelection.size: %d", counter, numItemsPack, featureSelection.size());
+                VLOG_SCOPE_F(2, "counter: %d numItemsPack: %d", counter, numItemsPack);
                 auto feature = featureSelection[0];
                 featureSelection.erase(featureSelection.begin());
                 std::unique_ptr<Classifier> model;
@@ -240,10 +239,11 @@ namespace bayesnet {
                 }
                 // Step 3.4: Store classifier and its accuracy to weigh its future vote
                 numItemsPack++;
-                featuresUsed.insert(feature);
+                featuresUsed.push_back(feature);
                 models.push_back(std::move(model));
                 significanceModels.push_back(alpha_t);
                 n_models++;
+                VLOG_SCOPE_F(2, "numItemsPack: %d n_models: %d featuresUsed: %d", numItemsPack, n_models, featuresUsed.size());
             }
             if (convergence && !finished) {
                 auto y_val_predict = predict(X_test);
@@ -252,20 +252,21 @@ namespace bayesnet {
                     priorAccuracy = accuracy;
                     VLOG_SCOPE_F(3, "First accuracy: %f", priorAccuracy);
                 } else {
-                    delta = accuracy - priorAccuracy;
+                    improvement = accuracy - priorAccuracy;
                 }
-                if (delta < convergence_threshold) {
-                    VLOG_SCOPE_F(3, "(delta<threshold) tolerance: %d numItemsPack: %d delta: %f prior: %f current: %f", tolerance, numItemsPack, delta, priorAccuracy, accuracy);
+                if (improvement < convergence_threshold) {
+                    VLOG_SCOPE_F(3, "(improvement<threshold) tolerance: %d numItemsPack: %d improvement: %f prior: %f current: %f", tolerance, numItemsPack, improvement, priorAccuracy, accuracy);
                     tolerance++;
                 } else {
-                    VLOG_SCOPE_F(3, "*(delta>=threshold) Reset. tolerance: %d numItemsPack: %d delta: %f prior: %f current: %f", tolerance, numItemsPack, delta, priorAccuracy, accuracy);
+                    VLOG_SCOPE_F(3, "*(improvement>=threshold) Reset. tolerance: %d numItemsPack: %d improvement: %f prior: %f current: %f", tolerance, numItemsPack, improvement, priorAccuracy, accuracy);
                     tolerance = 0; // Reset the counter if the model performs better
                     numItemsPack = 0;
                 }
                 // Keep the best accuracy until now as the prior accuracy
-                // priorAccuracy = std::max(accuracy, priorAccuracy);
-                priorAccuracy = accuracy;
+                priorAccuracy = std::max(accuracy, priorAccuracy);
+                // priorAccuracy = accuracy;
             }
+            VLOG_SCOPE_F(1, "tolerance: %d featuresUsed.size: %d features.size: %d", tolerance, featuresUsed.size(), features.size());
             finished = finished || tolerance > maxTolerance || featuresUsed.size() == features.size();
         }
         if (tolerance > maxTolerance) {

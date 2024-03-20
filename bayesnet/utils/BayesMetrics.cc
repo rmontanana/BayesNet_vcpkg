@@ -24,7 +24,7 @@ namespace bayesnet {
     std::vector<int> Metrics::SelectKBestWeighted(const torch::Tensor& weights, bool ascending, unsigned k)
     {
         // Return the K Best features 
-        auto n = samples.size(0) - 1;
+        auto n = features.size();
         if (k == 0) {
             k = n;
         }

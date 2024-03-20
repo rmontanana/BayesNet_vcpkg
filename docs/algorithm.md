@@ -1,3 +1,17 @@
+# Algorithm
+
+- // notation
+
+- $n$ features ${\cal{X}} = \{X_1, \dots, X_n\}$ and the class $Y$
+
+- $m$ instances.
+
+- $D = \{ (x_1^i, \dots, x_n^i, y^i) \}_{i=1}^{m}$
+
+- $W$ a weights vector. $W_0$ are the initial weights.
+
+- $D[W]$ dataset with weights $W$ for the instances.
+
 1. // initialization
 
 2. $W_0 \leftarrow (w_1, \dots, w_m) \leftarrow 1/m$
@@ -8,34 +22,37 @@
 
 5. $\delta \leftarrow 10^{-4}$
 
-6. $convergence \leftarrow True$
+6. $convergence \leftarrow True$ // hyperparameter
 
-7. $maxTolerancia \leftarrow 3$
+7. $maxTolerancia \leftarrow 3$ // hyperparameter
 
-8. $bisection \leftarrow False$
+8. $bisection \leftarrow False$ // hyperparameter
 
-9. $error \leftarrow \inf$
+9. $finished \leftarrow False$
 
-10. $finished \leftarrow False$
+10. $AODE \leftarrow \emptyset$ // the ensemble
 
-11. $AODE \leftarrow \emptyset$ // the ensemble
+11. $tolerance \leftarrow 0$
 
-12. $tolerance \leftarrow 0$
+12. $numModelsInPack \leftarrow 0$
 
-13. $numModelsInPack \leftarrow 0$
+13. $maxAccuracy \leftarrow -1$
+
+14.
 
 15. // main loop
 
-16. While (!finished)
+16. While $(\lnot finished)$
 
     1. $\pi \leftarrow SortFeatures(Vars, criterio, D[W])$
 
     2. $k \leftarrow 2^{tolerance}$
 
-    3. if ($tolerance == 0$)
-        $numItemsPack \leftarrow0$
+    3. if ($tolerance == 0$) $numItemsPack \leftarrow0$
 
     4. $P \leftarrow Head(\pi,k)$ // first k features in order
+
+    5. $spodes \leftarrow \emptyset$
 
     6. $i \leftarrow 0$
 
@@ -63,35 +80,39 @@
 
             2. break
 
-        10. $AODE.add( (spode,\alpha_t) )$
+        10. $spodes.add( (spode,\alpha_t) )$
 
         11. $W \leftarrow UpdateWeights(D[W],\alpha,y[],\hat{y}[])$
 
-    8. if ($convergence$ $\And$ $! finished$)
+    8. $AODE.add( spodes )$
+
+    9. if ($convergence \land \lnot finished$)
 
         1. $\hat{y}[] \leftarrow AODE.Predict(D[W])$
 
-        2. $e \leftarrow error(\hat{y}[], y[])$
+        2. $actualAccuracy \leftarrow accuracy(\hat{y}[], y[])$
 
-        3. if $(e > (error+\delta))$ // result doesn't improve
+        3. $if (maxAccuracy == -1)\; maxAccuracy \leftarrow actualAccuracy$
 
-            1. if $(tolerance == maxTolerance)\; finished\leftarrow True$
+        4. if $((accuracy - maxAccuracy) < \delta)$ // result doesn't
+            improve enough
 
-            2. else $tolerance \leftarrow tolerance+1$
+            1. $tolerance \leftarrow tolerance + 1$
 
-        4. else
+        5. else
 
             1. $tolerance \leftarrow 0$
 
-            2. $error \leftarrow min(error,e)$
+            2. $numItemsPack \leftarrow 0$
 
-    9. if $(Vars == \emptyset) \; finished \leftarrow True$
+    10. If
+        $(Vars == \emptyset \lor tolerance>maxTolerance) \; finished \leftarrow True$
 
-17. if ($tolerance == maxTolerance$) // algorithm finished because of
+    11. $lastAccuracy \leftarrow max(lastAccuracy, actualAccuracy)$
+
+17. if ($tolerance > maxTolerance$) // algorithm finished because of
     lack of convergence
 
     1. $removeModels(AODE, numItemsPack)$
-
-    2. $W \leftarrow W_B$
 
 18. Return $AODE$

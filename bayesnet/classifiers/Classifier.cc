@@ -10,7 +10,7 @@ namespace bayesnet {
         this->className = className;
         this->states = states;
         m = dataset.size(1);
-        n = dataset.size(0) - 1;
+        n = features.size();
         checkFitParameters();
         auto n_classes = states.at(className).size();
         metrics = Metrics(dataset, features, className, n_classes);
