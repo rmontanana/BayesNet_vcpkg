@@ -8,6 +8,9 @@
 #include "bayesnet/feature_selection/IWSS.h"
 #include "BoostAODE.h"
 
+#define LOGURU_WITH_STREAMS 1
+#include "bayesnet/utils/loguru.cpp"
+
 namespace bayesnet {
     struct {
         std::string CFS = "CFS";
@@ -168,6 +171,12 @@ namespace bayesnet {
     }
     void BoostAODE::trainModel(const torch::Tensor& weights)
     {
+        //
+        // Logging setup
+        //
+        loguru::set_thread_name("BoostAODE");
+        loguru::g_stderr_verbosity = loguru::Verbosity_OFF;;
+        loguru::add_file("boostAODE.log", loguru::Truncate, loguru::Verbosity_MAX);
         // Algorithm based on the adaboost algorithm for classification
         // as explained in Ensemble methods (Zhi-Hua Zhou, 2012)
         fitted = true;
@@ -187,7 +196,7 @@ namespace bayesnet {
                 return;
             }
         }
-        int numItemsPack = 0;
+        int numItemsPack = 0; // The counter of the models inserted in the current pack
         // Variables to control the accuracy finish condition
         double priorAccuracy = 0.0;
         double delta = 1.0;
@@ -196,72 +205,100 @@ namespace bayesnet {
         // Step 0: Set the finish condition
         // epsilon sub t > 0.5 => inverse the weights policy
         // validation error is not decreasing
+        // run out of features
         bool ascending = order_algorithm == Orders.ASC;
         std::mt19937 g{ 173 };
         torch::Tensor weights_backup;
+        // LOG_SCOPE_FUNCTION(INFO);
+        // LOG_F(INFO, "Train model...");
         while (!finished) {
             // Step 1: Build ranking with mutual information
             auto featureSelection = metrics.SelectKBestWeighted(weights_, ascending, n); // Get all the features sorted
+            //LOG_S(INFO) << "1:featureSelection.size: " << featureSelection.size() << " featuresUsed.size: " << featuresUsed.size();
+            VLOG_SCOPE_F(1, "featureSelection.size: %d featuresUsed.size: %d", featureSelection.size(), featuresUsed.size());
             if (order_algorithm == Orders.RAND) {
                 std::shuffle(featureSelection.begin(), featureSelection.end(), g);
             }
             // Remove used features
             featureSelection.erase(remove_if(begin(featureSelection), end(featureSelection), [&](auto x)
-                { return find(begin(featuresUsed), end(featuresUsed), x) != end(featuresUsed);}),
+                { return std::find(begin(featuresUsed), end(featuresUsed), x) != end(featuresUsed);}),
                 end(featureSelection)
             );
             int k = pow(2, tolerance);
-            if (tolerance == 0) {
-
-            }
-            int i = 0;
-            while (i < k && featureSelection.size() > 0) {
+            int counter = 0; // The model counter of the current pack
+            // LOG_S(INFO) << "k=" << k;
+            VLOG_SCOPE_F(1, "k=%d", k);
+            while (counter++ < k && featureSelection.size() > 0) {
+                // LOG_S(INFO) << "2:counter: " << counter << " numItemsPack: " << numItemsPack << " featureSelection.size: " << featureSelection.size();
+                VLOG_SCOPE_F(2, "counter: %d numItemsPack: %d featureSelection.size: %d", counter, numItemsPack, featureSelection.size());
                 auto feature = featureSelection[0];
                 featureSelection.erase(featureSelection.begin());
                 std::unique_ptr<Classifier> model;
                 model = std::make_unique<SPODE>(feature);
                 model->fit(dataset, features, className, states, weights_);
                 torch::Tensor ypred;
+                //LOG_S(INFO) << "2:Begin model predict";
                 ypred = model->predict(X_train);
+                //LOG_S(INFO) << "2:End model predict";
                 // Step 3.1: Compute the classifier amout of say
                 weights_backup = weights_.clone();
                 std::tie(weights_, alpha_t, finished) = update_weights(y_train, ypred, weights_);
                 if (finished) {
-                    finished = true;
                     weights_ = weights_backup.clone();
+                    // LOG_S(INFO) << "2:** epsilon_t > 0.5 **";
+                    VLOG_SCOPE_F(2, "** epsilon_t > 0.5 **");
                     break;
                 }
                 // Step 3.4: Store classifier and its accuracy to weigh its future vote
+                numItemsPack++;
                 featuresUsed.insert(feature);
                 models.push_back(std::move(model));
                 significanceModels.push_back(alpha_t);
                 n_models++;
             }
-            if (convergence) {
+            if (convergence && !finished) {
+                //LOG_S(INFO) << "3:Begin ensemble predict";
                 auto y_val_predict = predict(X_test);
+                //LOG_S(INFO) << "3:End ensemble predict";
                 double accuracy = (y_val_predict == y_test).sum().item<double>() / (double)y_test.size(0);
                 if (priorAccuracy == 0) {
                     priorAccuracy = accuracy;
+                    // LOG_S(INFO) << "3:First accuracyb_manage: " << std::to_string(priorAccuracy);
+                    VLOG_SCOPE_F(3, "First accuracy: %f", priorAccuracy);
                 } else {
                     delta = accuracy - priorAccuracy;
                 }
                 if (delta < convergence_threshold) {
+                    // LOG_S(INFO) << "3:* tolerance: " << tolerance << " numItemsPack: " << numItemsPack << " delta: " << delta << " prior: " << priorAccuracy << " current: " << accuracy << std::endl;
+                    VLOG_SCOPE_F(3, "(delta<threshold) tolerance: %d numItemsPack: %d delta: %f prior: %f current: %f", tolerance, numItemsPack, delta, priorAccuracy, accuracy);
                     tolerance++;
                 } else {
+                    // LOG_S(INFO) << "*Reset. tolerance: " << tolerance << " numItemsPack: " << numItemsPack << " delta: " << delta << " prior: " << priorAccuracy << " current: " << accuracy << std::endl;
+                    VLOG_SCOPE_F(3, "*(delta>=threshold) Reset. tolerance: %d numItemsPack: %d delta: %f prior: %f current: %f", tolerance, numItemsPack, delta, priorAccuracy, accuracy);
                     tolerance = 0; // Reset the counter if the model performs better
+                    numItemsPack = 0;
                 }
                 // Keep the best accuracy until now as the prior accuracy
-                priorAccuracy = std::max(accuracy, priorAccuracy);
+                // priorAccuracy = std::max(accuracy, priorAccuracy);
+                priorAccuracy = accuracy;
             }
-            finished = finished || tolerance == maxTolerance || featuresUsed.size() == features.size();
+            finished = finished || tolerance > maxTolerance || featuresUsed.size() == features.size();
         }
-        if (tolerance == maxTolerance) {
-            notes.push_back("Convergence threshold reached & " + std::to_string(numItemsPack) + " models eliminated");
-            weights_ = weights_backup;
-            for (int i = 0; i < numItemsPack; ++i) {
-                significanceModels.pop_back();
-                models.pop_back();
-                n_models--;
+        if (tolerance > maxTolerance) {
+            if (numItemsPack < n_models) {
+                notes.push_back("Convergence threshold reached & " + std::to_string(numItemsPack) + " models eliminated");
+                // LOG_S(INFO) << "4:Convergence threshold reached & " << numItemsPack << " models eliminated" << " of " << n_models << std::endl;
+                VLOG_SCOPE_F(4, "Convergence threshold reached & %d models eliminated of %d", numItemsPack, n_models);
+                weights_ = weights_backup;
+                for (int i = 0; i < numItemsPack; ++i) {
+                    significanceModels.pop_back();
+                    models.pop_back();
+                    n_models--;
+                }
+            } else {
+                // LOG_S(INFO) << "4:Convergence threshold reached & 0 models eliminated n_models=" << n_models << " numItemsPack=" << numItemsPack;
+                VLOG_SCOPE_F(4, "Convergence threshold reached & 0 models eliminated n_models=%d numItemsPack=%d", n_models, numItemsPack);
+                notes.push_back("Convergence threshold reached & 0 models eliminated");
             }
         }
         if (featuresUsed.size() != features.size()) {
