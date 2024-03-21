@@ -16,7 +16,6 @@ namespace bayesnet {
         void trainModel(const torch::Tensor& weights) override;
     private:
         std::vector<int> initializeModels();
-        torch::Tensor dataset_; // Backup the original dataset
         torch::Tensor X_train, y_train, X_test, y_test;
         // Hyperparameters
         bool bisection = false; // if true, use bisection stratety to add k models at once to the ensemble

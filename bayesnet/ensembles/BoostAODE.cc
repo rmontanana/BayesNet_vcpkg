@@ -40,8 +40,6 @@ namespace bayesnet {
         if (convergence) {
             // Prepare train & validation sets from train data
             auto fold = folding::StratifiedKFold(5, y_, 271);
-            // save input dataset
-            dataset_ = torch::clone(dataset);
             auto [train, test] = fold.getFold(0);
             auto train_t = torch::tensor(train);
             auto test_t = torch::tensor(test);
