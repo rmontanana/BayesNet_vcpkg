@@ -215,7 +215,7 @@ namespace bayesnet {
         while (!finished) {
             // Step 1: Build ranking with mutual information
             auto featureSelection = metrics.SelectKBestWeighted(weights_, ascending, n); // Get all the features sorted
-            VLOG_SCOPE_F(1, "featureSelection.size: %d featuresUsed.size: %d", featureSelection.size(), featuresUsed.size());
+            VLOG_SCOPE_F(1, "featureSelection.size: %zu featuresUsed.size: %zu", featureSelection.size(), featuresUsed.size());
             if (order_algorithm == Orders.RAND) {
                 std::shuffle(featureSelection.begin(), featureSelection.end(), g);
             }
@@ -226,7 +226,7 @@ namespace bayesnet {
             );
             int k = pow(2, tolerance);
             int counter = 0; // The model counter of the current pack
-            VLOG_SCOPE_F(1, "k=%d featureSelection.size: %d", k, featureSelection.size());
+            VLOG_SCOPE_F(1, "k=%d featureSelection.size: %zu", k, featureSelection.size());
             while (counter++ < k && featureSelection.size() > 0) {
                 VLOG_SCOPE_F(2, "counter: %d numItemsPack: %d", counter, numItemsPack);
                 auto feature = featureSelection[0];
@@ -248,7 +248,7 @@ namespace bayesnet {
                 models.push_back(std::move(model));
                 significanceModels.push_back(alpha_t);
                 n_models++;
-                VLOG_SCOPE_F(2, "numItemsPack: %d n_models: %d featuresUsed: %d", numItemsPack, n_models, featuresUsed.size());
+                VLOG_SCOPE_F(2, "numItemsPack: %d n_models: %d featuresUsed: %zu", numItemsPack, n_models, featuresUsed.size());
             }
             if (convergence && !finished) {
                 auto y_val_predict = predict(X_test);
@@ -271,7 +271,7 @@ namespace bayesnet {
                 priorAccuracy = std::max(accuracy, priorAccuracy);
                 // priorAccuracy = accuracy;
             }
-            VLOG_SCOPE_F(1, "tolerance: %d featuresUsed.size: %d features.size: %d", tolerance, featuresUsed.size(), features.size());
+            VLOG_SCOPE_F(1, "tolerance: %d featuresUsed.size: %zu features.size: %zu", tolerance, featuresUsed.size(), features.size());
             finished = finished || tolerance > maxTolerance || featuresUsed.size() == features.size();
         }
         if (tolerance > maxTolerance) {
