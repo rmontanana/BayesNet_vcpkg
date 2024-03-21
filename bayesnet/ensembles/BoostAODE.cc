@@ -194,6 +194,11 @@ namespace bayesnet {
             if (finished) {
                 return;
             }
+            LOG_F(INFO, "Initial models: %d", n_models);
+            LOG_F(INFO, "Significances: ");
+            for (int i = 0; i < n_models; ++i) {
+                LOG_F(INFO, "i=%d significance=%f", i, significanceModels[i]);
+            }
         }
         int numItemsPack = 0; // The counter of the models inserted in the current pack
         // Variables to control the accuracy finish condition
