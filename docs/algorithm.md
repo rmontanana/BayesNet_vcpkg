@@ -68,7 +68,7 @@
 
         5. $spode \leftarrow BuildSpode(X, {\cal{X}}, D[W])$
 
-        6. $\hat{y}[] \leftarrow spode.Predict(D[W])$
+        6. $\hat{y}[] \leftarrow spode.Predict(D)$
 
         7. $\epsilon \leftarrow error(\hat{y}[], y[])$
 
@@ -82,13 +82,13 @@
 
         10. $spodes.add( (spode,\alpha_t) )$
 
-        11. $W \leftarrow UpdateWeights(D[W],\alpha,y[],\hat{y}[])$
+        11. $W \leftarrow UpdateWeights(W,\alpha,y[],\hat{y}[])$
 
     8. $AODE.add( spodes )$
 
     9. if ($convergence \land \lnot finished$)
 
-        1. $\hat{y}[] \leftarrow AODE.Predict(D[W])$
+        1. $\hat{y}[] \leftarrow AODE.Predict(D)$
 
         2. $actualAccuracy \leftarrow accuracy(\hat{y}[], y[])$
 

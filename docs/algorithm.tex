@@ -42,7 +42,7 @@
         \item $numItemsPack \leftarrow numItemsPack + 1$
         \item $Vars.remove(X)$
         \item $spode \leftarrow BuildSpode(X, {\cal{X}}, D[W])$
-        \item $\hat{y}[] \leftarrow spode.Predict(D[W])$
+        \item $\hat{y}[] \leftarrow spode.Predict(D)$
         \item $\epsilon \leftarrow error(\hat{y}[], y[])$
         \item $\alpha \leftarrow \frac{1}{2} ln \left ( \frac{1-\epsilon}{\epsilon} \right )$
         \item if ($\epsilon > 0.5$)
@@ -51,12 +51,12 @@
             \item break
         \end{enumerate}
         \item $spodes.add( (spode,\alpha_t) )$
-        \item $W \leftarrow UpdateWeights(D[W],\alpha,y[],\hat{y}[])$
+        \item $W \leftarrow UpdateWeights(W,\alpha,y[],\hat{y}[])$
     \end{enumerate}       
     \item $AODE.add( spodes )$
     \item if ($convergence \land \lnot finished$) 
     \begin{enumerate}       
-        \item $\hat{y}[] \leftarrow AODE.Predict(D[W])$
+        \item $\hat{y}[] \leftarrow AODE.Predict(D)$
         \item $actualAccuracy \leftarrow accuracy(\hat{y}[], y[])$
         \item $if (maxAccuracy == -1)\; maxAccuracy \leftarrow actualAccuracy$
         \item if $((accuracy - maxAccuracy) < \delta)$\hspace*{2cm} // result doesn't improve enough
