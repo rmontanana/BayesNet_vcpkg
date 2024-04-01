@@ -3,7 +3,7 @@
         {
             "name": "Mac",
             "includePath": [
-                "${workspaceFolder}/**"
+                "/home/rmontanana/Code/BayesNet/**"
             ],
             "defines": [],
             "macFrameworkPath": [
@@ -11,7 +11,38 @@
             ],
             "cStandard": "c17",
             "cppStandard": "c++17",
-            "compileCommands": "${workspaceFolder}/cmake-build-release/compile_commands.json"
+            "compileCommands": "/home/rmontanana/Code/BayesNet/cmake-build-release/compile_commands.json",
+            "compileCommandsInCppPropertiesJson": "${workspaceFolder}/cmake-build-release/compile_commands.json",
+            "intelliSenseMode": "macos-clang-arm64",
+            "mergeConfigurations": false,
+            "browse": {
+                "path": [
+                    "/home/rmontanana/Code/BayesNet/**",
+                    "${workspaceFolder}"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            }
+        },
+        {
+            "name": "Linux",
+            "includePath": [
+                "/home/rmontanana/Code/BayesNet/**",
+                "/home/rmontanana/Code/libtorch/include/torch/csrc/api/include/"
+            ],
+            "defines": [],
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-gcc-x64",
+            "mergeConfigurations": false,
+            "compilerPath": "/usr/bin/g++",
+            "browse": {
+                "path": [
+                    "/home/rmontanana/Code/BayesNet/**",
+                    "${workspaceFolder}"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "configurationProvider": "ms-vscode.cmake-tools"
         }
     ],
     "version": 4
