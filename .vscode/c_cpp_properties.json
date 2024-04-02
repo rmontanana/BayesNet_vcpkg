@@ -3,25 +3,25 @@
         {
             "name": "Mac",
             "includePath": [
-                "/home/rmontanana/Code/BayesNet/**"
+                "/Users/rmontanana/Code/BayesNet/**"
             ],
             "defines": [],
             "macFrameworkPath": [
-                "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks"
+                "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include"
             ],
             "cStandard": "c17",
             "cppStandard": "c++17",
-            "compileCommands": "/home/rmontanana/Code/BayesNet/cmake-build-release/compile_commands.json",
-            "compileCommandsInCppPropertiesJson": "${workspaceFolder}/cmake-build-release/compile_commands.json",
+            "compileCommands": "",
             "intelliSenseMode": "macos-clang-arm64",
             "mergeConfigurations": false,
             "browse": {
                 "path": [
-                    "/home/rmontanana/Code/BayesNet/**",
+                    "/Users/rmontanana/Code/BayesNet/**",
                     "${workspaceFolder}"
                 ],
                 "limitSymbolsToIncludedHeaders": true
-            }
+            },
+            "configurationProvider": "ms-vscode.cmake-tools"
         },
         {
             "name": "Linux",
