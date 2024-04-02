@@ -5,7 +5,7 @@ SHELL := /bin/bash
 f_release = build_release
 f_debug = build_debug
 app_targets = BayesNet
-test_targets = unit_tests_bayesnet
+test_targets = TestBayesNet
 n_procs = -j 16
 
 define ClearTests
@@ -85,9 +85,11 @@ test: ## Run tests (opt="-s") to verbose output the tests, (opt="-c='Test Maximu
 	@$(MAKE) clean
 	@cmake --build $(f_debug) -t $(test_targets) $(n_procs)
 	@for t in $(test_targets); do \
+		echo ">>> Running $$t...";\
 		if [ -f $(f_debug)/tests/$$t ]; then \
 			cd $(f_debug)/tests ; \
 			./$$t $(opt) ; \
+			cd ../.. ; \
 		fi ; \
 	done
 	@echo ">>> Done";

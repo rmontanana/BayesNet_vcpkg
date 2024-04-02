@@ -1,3 +1,4 @@
+#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
 #include <catch2/generators/catch_generators.hpp>
@@ -20,7 +21,7 @@ void buildModel(bayesnet::Network& net, const std::vector<std::string>& features
     }
 }
 
-TEST_CASE("Test Bayesian Network", "[BayesNet]")
+TEST_CASE("Test Bayesian Network", "[Network]")
 {
 
     auto raw = RawDatasets("iris", true);

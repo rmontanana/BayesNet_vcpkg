@@ -5,7 +5,7 @@
 #include "TestUtils.h"
 
 
-TEST_CASE("Metrics Test", "[BayesNet]")
+TEST_CASE("Metrics Test", "[Metrics]")
 {
     std::string file_name = GENERATE("glass", "iris", "ecoli", "diabetes");
     map<std::string, pair<int, std::vector<int>>> resultsKBest = {
