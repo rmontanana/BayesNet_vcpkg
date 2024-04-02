@@ -11,16 +11,7 @@
 #include "bayesnet/utils/loguru.cpp"
 
 namespace bayesnet {
-    struct {
-        std::string CFS = "CFS";
-        std::string FCBF = "FCBF";
-        std::string IWSS = "IWSS";
-    }SelectFeatures;
-    struct {
-        std::string ASC = "asc";
-        std::string DESC = "desc";
-        std::string RAND = "rand";
-    }Orders;
+
     BoostAODE::BoostAODE(bool predict_voting) : Ensemble(predict_voting)
     {
         validHyperparameters = {

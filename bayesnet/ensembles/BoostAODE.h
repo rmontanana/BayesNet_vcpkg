@@ -5,6 +5,16 @@
 #include "bayesnet/feature_selection/FeatureSelect.h"
 #include "Ensemble.h"
 namespace bayesnet {
+    struct {
+        std::string CFS = "CFS";
+        std::string FCBF = "FCBF";
+        std::string IWSS = "IWSS";
+    }SelectFeatures;
+    struct {
+        std::string ASC = "asc";
+        std::string DESC = "desc";
+        std::string RAND = "rand";
+    }Orders;
     class BoostAODE : public Ensemble {
     public:
         BoostAODE(bool predict_voting = false);
@@ -23,7 +33,7 @@ namespace bayesnet {
         std::string order_algorithm; // order to process the KBest features asc, desc, rand
         bool convergence = false; //if true, stop when the model does not improve
         bool selectFeatures = false; // if true, use feature selection
-        std::string select_features_algorithm = "desc"; // Selected feature selection algorithm
+        std::string select_features_algorithm = Orders.DESC; // Selected feature selection algorithm
         FeatureSelect* featureSelector = nullptr;
         double threshold = -1;
     };
