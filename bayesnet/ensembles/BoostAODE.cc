@@ -145,6 +145,10 @@ namespace bayesnet {
         }
         featureSelector->fit();
         auto cfsFeatures = featureSelector->getFeatures();
+        auto scores = featureSelector->getScores();
+        for (int i = 0; i < cfsFeatures.size(); ++i) {
+            LOG_F(INFO, "Feature: %d Score: %f", cfsFeatures[i], scores[i]);
+        }
         for (const int& feature : cfsFeatures) {
             featuresUsed.push_back(feature);
             std::unique_ptr<Classifier> model = std::make_unique<SPODE>(feature);
