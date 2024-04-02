@@ -27,7 +27,8 @@
             "name": "Linux",
             "includePath": [
                 "/home/rmontanana/Code/BayesNet/**",
-                "/home/rmontanana/Code/libtorch/include/torch/csrc/api/include/"
+                "/home/rmontanana/Code/libtorch/include/torch/csrc/api/include/",
+                "/home/rmontanana/Code/BayesNet/lib/"
             ],
             "defines": [],
             "cStandard": "c17",

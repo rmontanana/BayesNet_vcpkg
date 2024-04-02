@@ -98,26 +98,26 @@ TEST_CASE("BoostAODE feature_select CFS", "[Models]")
     REQUIRE(clf.getNotes()[0] == "Used features in initialization: 6 of 9 with CFS");
     REQUIRE(clf.getNotes()[1] == "Number of models: 9");
 }
-// TEST_CASE("BoostAODE test used features in train note and score", "[BayesNet]")
-// {
-//     auto raw = RawDatasets("diabetes", true);
-//     auto clf = bayesnet::BoostAODE(true);
-//     clf.setHyperparameters({
-//         {"order", "asc"},
-//         {"convergence", true},
-//         {"select_features","CFS"},
-//         });
-//     clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
-//     REQUIRE(clf.getNumberOfNodes() == 72);
-//     REQUIRE(clf.getNumberOfEdges() == 120);
-//     REQUIRE(clf.getNotes().size() == 2);
-//     REQUIRE(clf.getNotes()[0] == "Used features in initialization: 7 of 8 with CFS");
-//     REQUIRE(clf.getNotes()[1] == "Number of models: 8");
-//     auto score = clf.score(raw.Xv, raw.yv);
-//     auto scoret = clf.score(raw.Xt, raw.yt);
-//     REQUIRE(score == Catch::Approx(0.82031).epsilon(raw.epsilon));
-//     REQUIRE(scoret == Catch::Approx(0.82031).epsilon(raw.epsilon));
-// }
+TEST_CASE("BoostAODE test used features in train note and score", "[Models]")
+{
+    auto raw = RawDatasets("diabetes", true);
+    auto clf = bayesnet::BoostAODE(true);
+    clf.setHyperparameters({
+        {"order", "asc"},
+        {"convergence", true},
+        {"select_features","CFS"},
+        });
+    clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
+    REQUIRE(clf.getNumberOfNodes() == 72);
+    REQUIRE(clf.getNumberOfEdges() == 120);
+    REQUIRE(clf.getNotes().size() == 2);
+    REQUIRE(clf.getNotes()[0] == "Used features in initialization: 6 of 8 with CFS");
+    REQUIRE(clf.getNotes()[1] == "Number of models: 8");
+    auto score = clf.score(raw.Xv, raw.yv);
+    auto scoret = clf.score(raw.Xt, raw.yt);
+    REQUIRE(score == Catch::Approx(0.82031).epsilon(raw.epsilon));
+    REQUIRE(scoret == Catch::Approx(0.82031).epsilon(raw.epsilon));
+}
 TEST_CASE("Model predict_proba", "[Models]")
 {
     std::string model = GENERATE("TAN", "SPODE", "BoostAODEproba", "BoostAODEvoting");
