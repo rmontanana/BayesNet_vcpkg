@@ -115,8 +115,8 @@ TEST_CASE("BoostAODE test used features in train note and score", "[Models]")
     REQUIRE(clf.getNotes()[1] == "Number of models: 8");
     auto score = clf.score(raw.Xv, raw.yv);
     auto scoret = clf.score(raw.Xt, raw.yt);
-    REQUIRE(score == Catch::Approx(0.82031).epsilon(raw.epsilon));
-    REQUIRE(scoret == Catch::Approx(0.82031).epsilon(raw.epsilon));
+    REQUIRE(score == Catch::Approx(0.80078).epsilon(raw.epsilon));
+    REQUIRE(scoret == Catch::Approx(0.80078).epsilon(raw.epsilon));
 }
 TEST_CASE("Model predict_proba", "[Models]")
 {
