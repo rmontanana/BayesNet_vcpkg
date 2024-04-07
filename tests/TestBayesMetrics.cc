@@ -32,31 +32,41 @@ TEST_CASE("Metrics Test", "[Metrics]")
     };
     auto raw = RawDatasets(file_name, true);
     bayesnet::Metrics metrics(raw.dataset, raw.featurest, raw.classNamet, raw.classNumStates);
+    bayesnet::Metrics metricsv(raw.Xv, raw.yv, raw.featurest, raw.classNamet, raw.classNumStates);
 
     SECTION("Test Constructor")
     {
         REQUIRE(metrics.getScoresKBest().size() == 0);
+        REQUIRE(metricsv.getScoresKBest().size() == 0);
     }
 
     SECTION("Test SelectKBestWeighted")
     {
         std::vector<int> kBest = metrics.SelectKBestWeighted(raw.weights, true, resultsKBest.at(file_name).first);
+        std::vector<int> kBestv = metricsv.SelectKBestWeighted(raw.weights, true, resultsKBest.at(file_name).first);
         REQUIRE(kBest.size() == resultsKBest.at(file_name).first);
+        REQUIRE(kBestv.size() == resultsKBest.at(file_name).first);
         REQUIRE(kBest == resultsKBest.at(file_name).second);
+        REQUIRE(kBestv == resultsKBest.at(file_name).second);
     }
 
     SECTION("Test Mutual Information")
     {
         auto result = metrics.mutualInformation(raw.dataset.index({ 1, "..." }), raw.dataset.index({ 2, "..." }), raw.weights);
+        auto resultv = metricsv.mutualInformation(raw.dataset.index({ 1, "..." }), raw.dataset.index({ 2, "..." }), raw.weights);
         REQUIRE(result == Catch::Approx(resultsMI.at(file_name)).epsilon(raw.epsilon));
+        REQUIRE(resultv == Catch::Approx(resultsMI.at(file_name)).epsilon(raw.epsilon));
     }
 
     SECTION("Test Maximum Spanning Tree")
     {
         auto weights_matrix = metrics.conditionalEdge(raw.weights);
+        auto weights_matrixv = metricsv.conditionalEdge(raw.weights);
         for (int i = 0; i < 2; ++i) {
             auto result = metrics.maximumSpanningTree(raw.featurest, weights_matrix, i);
+            auto resultv = metricsv.maximumSpanningTree(raw.featurest, weights_matrixv, i);
             REQUIRE(result == resultsMST.at({ file_name, i }));
+            REQUIRE(resultv == resultsMST.at({ file_name, i }));
         }
     }
 }

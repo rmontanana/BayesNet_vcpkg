@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
-.PHONY: coverage setup help buildr buildd test clean debug release sample
+.PHONY: viewcoverage coverage setup help install uninstall buildr buildd test clean debug release sample 
 
 f_release = build_release
 f_debug = build_debug
@@ -29,6 +29,7 @@ setup: ## Install dependencies for tests and coverage
 	fi
 	@if [ "$(shell uname)" = "Linux" ]; then \
 		pip install gcovr; \
+		sudo dnf install lcov;\
 	fi
 
 dependency: ## Create a dependency graph diagram of the project (build/dependency.png)
@@ -99,6 +100,21 @@ coverage: ## Run tests and generate coverage report (build/index.html)
 	@$(MAKE) test
 	@gcovr $(f_debug)/tests
 	@echo ">>> Done";	
+
+viewcoverage: ## Run tests, generate coverage report and upload it to codecov (build/index.html)
+	@echo ">>> Building tests with coverage..."
+	@$(MAKE) coverage
+	@echo ">>> Building report..."
+	@cd $(f_debug)/tests; \
+	lcov --directory . --capture --output-file coverage.info >/dev/null 2>&1; \
+	lcov --remove coverage.info '/usr/*' --output-file coverage.info >/dev/null 2>&1; \
+	lcov --remove coverage.info 'lib/*' --output-file coverage.info >/dev/null 2>&1; \
+	lcov --remove coverage.info 'libtorch/*' --output-file coverage.info >/dev/null 2>&1; \
+	lcov --remove coverage.info 'tests/*' --output-file coverage.info >/dev/null 2>&1; \
+	lcov --remove coverage.info 'bayesnet/utils/loguru.*' --output-file coverage.info >/dev/null 2>&1; \
+	genhtml coverage.info --output-directory $(f_debug)/tests/coverage >/dev/null 2>&1; \
+	xdg-open $(f_debug)/tests/coverage/index.html || open $(f_debug)/tests/coverage/index.html 2>/dev/null
+	@echo ">>> Done";
 
 
 help: ## Show help message

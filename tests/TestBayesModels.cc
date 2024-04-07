@@ -1,3 +1,4 @@
+#include <type_traits>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
 #include <catch2/generators/catch_generators.hpp>
@@ -96,6 +97,30 @@ TEST_CASE("BoostAODE feature_select CFS", "[Models]")
     REQUIRE(clf.getNumberOfEdges() == 153);
     REQUIRE(clf.getNotes().size() == 2);
     REQUIRE(clf.getNotes()[0] == "Used features in initialization: 6 of 9 with CFS");
+    REQUIRE(clf.getNotes()[1] == "Number of models: 9");
+}
+TEST_CASE("BoostAODE feature_select IWSS", "[Models]")
+{
+    auto raw = RawDatasets("glass", true);
+    auto clf = bayesnet::BoostAODE();
+    clf.setHyperparameters({ {"select_features", "IWSS"}, {"threshold", 0.5 } });
+    clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
+    REQUIRE(clf.getNumberOfNodes() == 90);
+    REQUIRE(clf.getNumberOfEdges() == 153);
+    REQUIRE(clf.getNotes().size() == 2);
+    REQUIRE(clf.getNotes()[0] == "Used features in initialization: 5 of 9 with IWSS");
+    REQUIRE(clf.getNotes()[1] == "Number of models: 9");
+}
+TEST_CASE("BoostAODE feature_select FCBF", "[Models]")
+{
+    auto raw = RawDatasets("glass", true);
+    auto clf = bayesnet::BoostAODE();
+    clf.setHyperparameters({ {"select_features", "FCBF"}, {"threshold", 1e-7 } });
+    clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
+    REQUIRE(clf.getNumberOfNodes() == 90);
+    REQUIRE(clf.getNumberOfEdges() == 153);
+    REQUIRE(clf.getNotes().size() == 2);
+    REQUIRE(clf.getNotes()[0] == "Used features in initialization: 5 of 9 with FCBF");
     REQUIRE(clf.getNotes()[1] == "Number of models: 9");
 }
 TEST_CASE("BoostAODE test used features in train note and score", "[Models]")
@@ -246,7 +271,7 @@ TEST_CASE("SPODELd dataset", "[Models]")
 {
     auto raw = RawDatasets("iris", false);
     auto clf = bayesnet::SPODELd(0);
-    raw.dataset.to(torch::kFloat32);
+    // raw.dataset.to(torch::kFloat32);
     clf.fit(raw.dataset, raw.featuresv, raw.classNamev, raw.statesv);
     auto score = clf.score(raw.Xt, raw.yt);
     clf.fit(raw.Xt, raw.yt, raw.featurest, raw.classNamet, raw.statest);

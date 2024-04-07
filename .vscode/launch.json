@@ -16,7 +16,7 @@
             "name": "test",
             "program": "${workspaceFolder}/build_debug/tests/TestBayesNet",
             "args": [
-                "[FeatureSelection]"
+                "[Network]"
                 //"-c=\"Metrics Test\"",
                 // "-s",
             ],

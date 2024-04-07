@@ -5,11 +5,16 @@
 #include <torch/torch.h>
 namespace bayesnet {
     class Metrics {
-    private:
-        int classNumStates = 0;
-        std::vector<double> scoresKBest;
-        std::vector<int> featuresKBest; // sorted indices of the features
-        double conditionalEntropy(const torch::Tensor& firstFeature, const torch::Tensor& secondFeature, const torch::Tensor& weights);
+    public:
+        Metrics() = default;
+        Metrics(const torch::Tensor& samples, const std::vector<std::string>& features, const std::string& className, const int classNumStates);
+        Metrics(const std::vector<std::vector<int>>& vsamples, const std::vector<int>& labels, const std::vector<std::string>& features, const std::string& className, const int classNumStates);
+        std::vector<int> SelectKBestWeighted(const torch::Tensor& weights, bool ascending = false, unsigned k = 0);
+        std::vector<double> getScoresKBest() const;
+        double mutualInformation(const torch::Tensor& firstFeature, const torch::Tensor& secondFeature, const torch::Tensor& weights);
+        std::vector<float> conditionalEdgeWeights(std::vector<float>& weights); // To use in Python
+        torch::Tensor conditionalEdge(const torch::Tensor& weights);
+        std::vector<std::pair<int, int>> maximumSpanningTree(const std::vector<std::string>& features, const torch::Tensor& weights, const int root);
     protected:
         torch::Tensor samples; // n+1xm torch::Tensor used to fit the model where samples[-1] is the y std::vector
         std::string className;
@@ -34,16 +39,11 @@ namespace bayesnet {
             v.erase(v.begin());
             return temp;
         }
-    public:
-        Metrics() = default;
-        Metrics(const torch::Tensor& samples, const std::vector<std::string>& features, const std::string& className, const int classNumStates);
-        Metrics(const std::vector<std::vector<int>>& vsamples, const std::vector<int>& labels, const std::vector<std::string>& features, const std::string& className, const int classNumStates);
-        std::vector<int> SelectKBestWeighted(const torch::Tensor& weights, bool ascending = false, unsigned k = 0);
-        std::vector<double> getScoresKBest() const;
-        double mutualInformation(const torch::Tensor& firstFeature, const torch::Tensor& secondFeature, const torch::Tensor& weights);
-        std::vector<float> conditionalEdgeWeights(std::vector<float>& weights); // To use in Python
-        torch::Tensor conditionalEdge(const torch::Tensor& weights);
-        std::vector<std::pair<int, int>> maximumSpanningTree(const std::vector<std::string>& features, const torch::Tensor& weights, const int root);
+    private:
+        int classNumStates = 0;
+        std::vector<double> scoresKBest;
+        std::vector<int> featuresKBest; // sorted indices of the features
+        double conditionalEntropy(const torch::Tensor& firstFeature, const torch::Tensor& secondFeature, const torch::Tensor& weights);
     };
 }
 #endif

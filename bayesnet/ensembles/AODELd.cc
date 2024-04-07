@@ -3,19 +3,6 @@
 namespace bayesnet {
     AODELd::AODELd(bool predict_voting) : Ensemble(predict_voting), Proposal(dataset, features, className)
     {
-        validHyperparameters = { "predict_voting" };
-
-    }
-    void AODELd::setHyperparameters(const nlohmann::json& hyperparameters_)
-    {
-        auto hyperparameters = hyperparameters_;
-        if (hyperparameters.contains("predict_voting")) {
-            predict_voting = hyperparameters["predict_voting"];
-            hyperparameters.erase("predict_voting");
-        }
-        if (!hyperparameters.empty()) {
-            throw std::invalid_argument("Invalid hyperparameters" + hyperparameters.dump());
-        }
     }
     AODELd& AODELd::fit(torch::Tensor& X_, torch::Tensor& y_, const std::vector<std::string>& features_, const std::string& className_, map<std::string, std::vector<int>>& states_)
     {
