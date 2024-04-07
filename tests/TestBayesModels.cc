@@ -246,7 +246,7 @@ TEST_CASE("BoostAODE voting-proba", "[Models]")
     REQUIRE(score_voting == Catch::Approx(0.98).epsilon(raw.epsilon));
     REQUIRE(pred_voting[83][2] == Catch::Approx(0.552091).epsilon(raw.epsilon));
     REQUIRE(pred_proba[83][2] == Catch::Approx(0.546017).epsilon(raw.epsilon));
-    clf.dump_cpt();
+    REQUIRE(clf.dump_cpt() == "");
     REQUIRE(clf.topological_order() == std::vector<std::string>());
 }
 TEST_CASE("AODE voting-proba", "[Models]")

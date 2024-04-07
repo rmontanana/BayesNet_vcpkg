@@ -30,7 +30,7 @@ namespace bayesnet {
         virtual std::string getVersion() = 0;
         std::vector<std::string> virtual topological_order() = 0;
         std::vector<std::string> virtual getNotes() const = 0;
-        void virtual dump_cpt()const = 0;
+        std::string virtual dump_cpt()const = 0;
         virtual void setHyperparameters(const nlohmann::json& hyperparameters) = 0;
         std::vector<std::string>& getValidHyperparameters() { return validHyperparameters; }
     protected:

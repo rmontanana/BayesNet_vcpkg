@@ -25,8 +25,9 @@ namespace bayesnet {
         {
             return std::vector<std::string>();
         }
-        void dump_cpt() const override
+        std::string dump_cpt() const override
         {
+            return "";
         }
     protected:
         torch::Tensor predict_average_voting(torch::Tensor& X);
