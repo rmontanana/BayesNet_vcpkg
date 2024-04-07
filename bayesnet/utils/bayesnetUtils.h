@@ -4,7 +4,6 @@
 #include <torch/torch.h>
 namespace bayesnet {
     std::vector<int> argsort(std::vector<double>& nums);
-    std::vector<std::vector<int>> tensorToVector(torch::Tensor& dtensor);
     std::vector<std::vector<double>> tensorToVectorDouble(torch::Tensor& dtensor);
     torch::Tensor vectorToTensor(std::vector<std::vector<int>>& vector, bool transpose = true);
 }

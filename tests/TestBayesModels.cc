@@ -207,7 +207,7 @@ TEST_CASE("Model predict_proba", "[Models]")
 }
 TEST_CASE("BoostAODE voting-proba", "[Models]")
 {
-    auto raw = RawDatasets("iris", false);
+    auto raw = RawDatasets("iris", true);
     auto clf = bayesnet::BoostAODE(false);
     clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
     auto score_proba = clf.score(raw.Xv, raw.yv);
@@ -224,9 +224,53 @@ TEST_CASE("BoostAODE voting-proba", "[Models]")
     clf.dump_cpt();
     REQUIRE(clf.topological_order() == std::vector<std::string>());
 }
+TEST_CASE("AODE voting-proba", "[Models]")
+{
+    auto raw = RawDatasets("glass", true);
+    auto clf = bayesnet::AODE(false);
+    clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
+    auto score_proba = clf.score(raw.Xv, raw.yv);
+    auto pred_proba = clf.predict_proba(raw.Xv);
+    clf.setHyperparameters({
+        {"predict_voting",true},
+        });
+    auto score_voting = clf.score(raw.Xv, raw.yv);
+    auto pred_voting = clf.predict_proba(raw.Xv);
+    REQUIRE(score_proba == Catch::Approx(0.79439f).epsilon(raw.epsilon));
+    REQUIRE(score_voting == Catch::Approx(0.78972f).epsilon(raw.epsilon));
+    REQUIRE(pred_voting[67][0] == Catch::Approx(0.888889).epsilon(raw.epsilon));
+    REQUIRE(pred_proba[67][0] == Catch::Approx(0.702184).epsilon(raw.epsilon));
+    REQUIRE(clf.topological_order() == std::vector<std::string>());
+}
+TEST_CASE("SPODELd dataset", "[Models]")
+{
+    auto raw = RawDatasets("iris", false);
+    auto clf = bayesnet::SPODELd(0);
+    raw.dataset.to(torch::kFloat32);
+    clf.fit(raw.dataset, raw.featuresv, raw.classNamev, raw.statesv);
+    auto score = clf.score(raw.Xt, raw.yt);
+    clf.fit(raw.Xt, raw.yt, raw.featurest, raw.classNamet, raw.statest);
+    auto scoret = clf.score(raw.Xt, raw.yt);
+    REQUIRE(score == Catch::Approx(0.97333f).epsilon(raw.epsilon));
+    REQUIRE(scoret == Catch::Approx(0.97333f).epsilon(raw.epsilon));
+}
+TEST_CASE("KDB with hyperparameters", "[Models]")
+{
+    auto raw = RawDatasets("glass", true);
+    auto clf = bayesnet::KDB(2);
+    clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
+    auto score = clf.score(raw.Xv, raw.yv);
+    clf.setHyperparameters({
+        {"k", 3},
+        {"theta", 0.7},
+        });
+    clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
+    auto scoret = clf.score(raw.Xv, raw.yv);
+    REQUIRE(score == Catch::Approx(0.827103).epsilon(raw.epsilon));
+    REQUIRE(scoret == Catch::Approx(0.761682).epsilon(raw.epsilon));
+}
 TEST_CASE("BoostAODE order asc, desc & random", "[Models]")
 {
-
     auto raw = RawDatasets("glass", true);
     std::map<std::string, double> scores{
         {"asc", 0.83645f }, { "desc", 0.84579f }, { "rand", 0.84112 }
