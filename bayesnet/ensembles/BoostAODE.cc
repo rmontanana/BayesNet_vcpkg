@@ -94,9 +94,7 @@ namespace bayesnet {
             }
             hyperparameters.erase("select_features");
         }
-        if (!hyperparameters.empty()) {
-            throw std::invalid_argument("Invalid hyperparameters" + hyperparameters.dump());
-        }
+        Classifier::setHyperparameters(hyperparameters);
     }
     std::tuple<torch::Tensor&, double, bool> update_weights(torch::Tensor& ytrain, torch::Tensor& ypred, torch::Tensor& weights)
     {

@@ -6,14 +6,18 @@ namespace bayesnet {
         validHyperparameters = { "k", "theta" };
 
     }
-    void KDB::setHyperparameters(const nlohmann::json& hyperparameters)
+    void KDB::setHyperparameters(const nlohmann::json& hyperparameters_)
     {
+        auto hyperparameters = hyperparameters_;
         if (hyperparameters.contains("k")) {
             k = hyperparameters["k"];
+            hyperparameters.erase("k");
         }
         if (hyperparameters.contains("theta")) {
             theta = hyperparameters["theta"];
+            hyperparameters.erase("theta");
         }
+        Classifier::setHyperparameters(hyperparameters);
     }
     void KDB::buildModel(const torch::Tensor& weights)
     {

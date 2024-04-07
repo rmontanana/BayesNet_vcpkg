@@ -13,9 +13,7 @@ namespace bayesnet {
             predict_voting = hyperparameters["predict_voting"];
             hyperparameters.erase("predict_voting");
         }
-        if (!hyperparameters.empty()) {
-            throw std::invalid_argument("Invalid hyperparameters" + hyperparameters.dump());
-        }
+        Classifier::setHyperparameters(hyperparameters);
     }
     void AODE::buildModel(const torch::Tensor& weights)
     {
