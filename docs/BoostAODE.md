@@ -1,7 +1,5 @@
 # BoostAODE Algorithm Operation
 
-## Algorithm
-
 ## Hyperparameters
 
 The hyperparameters defined in the algorithm are:
@@ -25,43 +23,5 @@ The hyperparameters defined in the algorithm are:
 - ***predict_voting*** (*boolean*): Sets whether the algorithm will use *model voting* to predict the result. If set to false, the weighted average of the probabilities of each model's prediction will be used. Default value: *false*.
 
 ## Operation
-
-The algorithm performs the following steps:
-
-1. **Initialization**
-
-    - If ***select_features*** is set, as many *SPODEs* are created as variables selected by the corresponding feature selection algorithm, and these variables are marked as used.
-
-    - Initial weights of the examples are set to *1/m*.
-
-1. **Main Training Loop:**
-
-   - Variables are sorted by mutual information order with the class variable and processed in ascending, descending or random order, according to the value of the *order* hyperparameter. If it is random, the variables are shuffled.
-
-   - If the parent repetition is not established, the variable is marked as used.
-
-   - A *SPODE* is created using the selected variable as the parent.
-
-   - The model is trained, and the class variable corresponding to the training dataset is calculated. The calculation can be done using the last trained model or the set of models trained up to that point, according to the value of the *predict_single* hyperparameter.
-
-   - The weights associated with the examples are updated using this expression:
-
-     - w<sub>i</sub> · e<sup>&alpha;<sub>t</sub></sup> (if the example has been misclassified)
-
-     - w<sub>i</sub> · e<sup>-&alpha;<sub>t</sub></sup> (if the example has been correctly classified)
-
-   - The model significance is set to &alpha;<sub>t</sub>.
-
-   - If the ***convergence*** hyperparameter is set, the accuracy value on the test dataset that we separated in an initial step is calculated.
-
-1. **Exit Conditions:**
-
-   - &epsilon;<sub>t</sub> > 0.5 => misclassified examples are penalized.
-
-   - Number of models with worse accuracy greater than ***tolerance*** and ***convergence*** established.
-
-   - There are no more variables to create models, and ***repeatSparent*** is not set.
-
-   - Number of models > ***maxModels*** if ***repeatSparent*** is set.
 
 ### [Algorithm](./algorithm.md)
