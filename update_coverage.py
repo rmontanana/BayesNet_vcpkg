@@ -10,6 +10,10 @@ output = subprocess.check_output(
     "tail -1",
     shell=True,
 )
+value = float(output.decode("utf-8").strip().replace("%", ""))
+if value < 90:
+    print("Coverage is less than 90%. I won't update the badge.")
+    sys.exit(1)
 percentage = output.decode("utf-8").strip().replace(".", ",")
 coverage_line = (
     f"![Static Badge](https://img.shields.io/badge/Coverage-{percentage}25-green)"
@@ -23,3 +27,4 @@ with open(readme_file, "w") as f:
             f.write(coverage_line + "\n")
         else:
             f.write(line)
+print(f"Coverage updated with value: {percentage}")

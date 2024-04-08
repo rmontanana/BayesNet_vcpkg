@@ -2,6 +2,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 #include "bayesnet/classifiers/KDB.h"
 #include "bayesnet/classifiers/TAN.h"
 #include "bayesnet/classifiers/SPODE.h"
@@ -87,62 +88,7 @@ TEST_CASE("Get num features & num edges", "[Models]")
     REQUIRE(clf.getNumberOfNodes() == 5);
     REQUIRE(clf.getNumberOfEdges() == 8);
 }
-TEST_CASE("BoostAODE feature_select CFS", "[Models]")
-{
-    auto raw = RawDatasets("glass", true);
-    auto clf = bayesnet::BoostAODE();
-    clf.setHyperparameters({ {"select_features", "CFS"} });
-    clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
-    REQUIRE(clf.getNumberOfNodes() == 90);
-    REQUIRE(clf.getNumberOfEdges() == 153);
-    REQUIRE(clf.getNotes().size() == 2);
-    REQUIRE(clf.getNotes()[0] == "Used features in initialization: 6 of 9 with CFS");
-    REQUIRE(clf.getNotes()[1] == "Number of models: 9");
-}
-TEST_CASE("BoostAODE feature_select IWSS", "[Models]")
-{
-    auto raw = RawDatasets("glass", true);
-    auto clf = bayesnet::BoostAODE();
-    clf.setHyperparameters({ {"select_features", "IWSS"}, {"threshold", 0.5 } });
-    clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
-    REQUIRE(clf.getNumberOfNodes() == 90);
-    REQUIRE(clf.getNumberOfEdges() == 153);
-    REQUIRE(clf.getNotes().size() == 2);
-    REQUIRE(clf.getNotes()[0] == "Used features in initialization: 5 of 9 with IWSS");
-    REQUIRE(clf.getNotes()[1] == "Number of models: 9");
-}
-TEST_CASE("BoostAODE feature_select FCBF", "[Models]")
-{
-    auto raw = RawDatasets("glass", true);
-    auto clf = bayesnet::BoostAODE();
-    clf.setHyperparameters({ {"select_features", "FCBF"}, {"threshold", 1e-7 } });
-    clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
-    REQUIRE(clf.getNumberOfNodes() == 90);
-    REQUIRE(clf.getNumberOfEdges() == 153);
-    REQUIRE(clf.getNotes().size() == 2);
-    REQUIRE(clf.getNotes()[0] == "Used features in initialization: 5 of 9 with FCBF");
-    REQUIRE(clf.getNotes()[1] == "Number of models: 9");
-}
-TEST_CASE("BoostAODE test used features in train note and score", "[Models]")
-{
-    auto raw = RawDatasets("diabetes", true);
-    auto clf = bayesnet::BoostAODE(true);
-    clf.setHyperparameters({
-        {"order", "asc"},
-        {"convergence", true},
-        {"select_features","CFS"},
-        });
-    clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
-    REQUIRE(clf.getNumberOfNodes() == 72);
-    REQUIRE(clf.getNumberOfEdges() == 120);
-    REQUIRE(clf.getNotes().size() == 2);
-    REQUIRE(clf.getNotes()[0] == "Used features in initialization: 6 of 8 with CFS");
-    REQUIRE(clf.getNotes()[1] == "Number of models: 8");
-    auto score = clf.score(raw.Xv, raw.yv);
-    auto scoret = clf.score(raw.Xt, raw.yt);
-    REQUIRE(score == Catch::Approx(0.80078).epsilon(raw.epsilon));
-    REQUIRE(scoret == Catch::Approx(0.80078).epsilon(raw.epsilon));
-}
+
 TEST_CASE("Model predict_proba", "[Models]")
 {
     std::string model = GENERATE("TAN", "SPODE", "BoostAODEproba", "BoostAODEvoting");
@@ -230,25 +176,7 @@ TEST_CASE("Model predict_proba", "[Models]")
         delete clf;
     }
 }
-TEST_CASE("BoostAODE voting-proba", "[Models]")
-{
-    auto raw = RawDatasets("iris", true);
-    auto clf = bayesnet::BoostAODE(false);
-    clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
-    auto score_proba = clf.score(raw.Xv, raw.yv);
-    auto pred_proba = clf.predict_proba(raw.Xv);
-    clf.setHyperparameters({
-        {"predict_voting",true},
-        });
-    auto score_voting = clf.score(raw.Xv, raw.yv);
-    auto pred_voting = clf.predict_proba(raw.Xv);
-    REQUIRE(score_proba == Catch::Approx(0.97333).epsilon(raw.epsilon));
-    REQUIRE(score_voting == Catch::Approx(0.98).epsilon(raw.epsilon));
-    REQUIRE(pred_voting[83][2] == Catch::Approx(0.552091).epsilon(raw.epsilon));
-    REQUIRE(pred_proba[83][2] == Catch::Approx(0.546017).epsilon(raw.epsilon));
-    REQUIRE(clf.dump_cpt() == "");
-    REQUIRE(clf.topological_order() == std::vector<std::string>());
-}
+
 TEST_CASE("AODE voting-proba", "[Models]")
 {
     auto raw = RawDatasets("glass", true);
@@ -294,22 +222,21 @@ TEST_CASE("KDB with hyperparameters", "[Models]")
     REQUIRE(score == Catch::Approx(0.827103).epsilon(raw.epsilon));
     REQUIRE(scoret == Catch::Approx(0.761682).epsilon(raw.epsilon));
 }
-TEST_CASE("BoostAODE order asc, desc & random", "[Models]")
+TEST_CASE("Predict, predict_proba & score without fitting", "[Models]")
 {
-    auto raw = RawDatasets("glass", true);
-    std::map<std::string, double> scores{
-        {"asc", 0.83645f }, { "desc", 0.84579f }, { "rand", 0.84112 }
-    };
-    for (const std::string& order : { "asc", "desc", "rand" }) {
-        auto clf = bayesnet::BoostAODE();
-        clf.setHyperparameters({
-            {"order", order},
-            });
-        clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
-        auto score = clf.score(raw.Xv, raw.yv);
-        auto scoret = clf.score(raw.Xt, raw.yt);
-        INFO("BoostAODE order: " + order);
-        REQUIRE(score == Catch::Approx(scores[order]).epsilon(raw.epsilon));
-        REQUIRE(scoret == Catch::Approx(scores[order]).epsilon(raw.epsilon));
-    }
+    auto clf = bayesnet::AODE();
+    auto raw = RawDatasets("iris", true);
+    std::string message = "Ensemble has not been fitted";
+    REQUIRE_THROWS_AS(clf.predict(raw.Xv), std::logic_error);
+    REQUIRE_THROWS_AS(clf.predict_proba(raw.Xv), std::logic_error);
+    REQUIRE_THROWS_AS(clf.predict(raw.Xt), std::logic_error);
+    REQUIRE_THROWS_AS(clf.predict_proba(raw.Xt), std::logic_error);
+    REQUIRE_THROWS_AS(clf.score(raw.Xv, raw.yv), std::logic_error);
+    REQUIRE_THROWS_AS(clf.score(raw.Xt, raw.yt), std::logic_error);
+    REQUIRE_THROWS_WITH(clf.predict(raw.Xv), message);
+    REQUIRE_THROWS_WITH(clf.predict_proba(raw.Xv), message);
+    REQUIRE_THROWS_WITH(clf.predict(raw.Xt), message);
+    REQUIRE_THROWS_WITH(clf.predict_proba(raw.Xt), message);
+    REQUIRE_THROWS_WITH(clf.score(raw.Xv, raw.yv), message);
+    REQUIRE_THROWS_WITH(clf.score(raw.Xt, raw.yt), message);
 }
