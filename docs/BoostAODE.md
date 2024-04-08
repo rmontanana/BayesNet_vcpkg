@@ -64,4 +64,4 @@ The algorithm performs the following steps:
 
    - Number of models > ***maxModels*** if ***repeatSparent*** is set.
 
-### [Proposal for *predict_single = false*](./BoostAODE_train_predict.pdf)
+### [Algorithm](./algorithm.md)

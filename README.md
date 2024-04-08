@@ -9,7 +9,16 @@
 
 Bayesian Network Classifiers using libtorch from scratch
 
-## Installation
+## Dependencies
+
+The only external dependency is [libtorch](https://pytorch.org/cppdocs/installing.html) which can be installed with the following commands:
+
+```bash
+wget https://download.pytorch.org/libtorch/nightly/cpu/libtorch-shared-with-deps-latest.zip
+unzip libtorch-shared-with-deps-latest.zips
+```
+
+## Setup
 
 ### Release
 
