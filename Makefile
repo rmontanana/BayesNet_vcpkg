@@ -1,11 +1,11 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
-.PHONY: coverage setup help buildr buildd test clean debug release sample
+.PHONY: viewcoverage coverage setup help install uninstall buildr buildd test clean debug release sample updatebadge
 
 f_release = build_release
 f_debug = build_debug
 app_targets = BayesNet
-test_targets = unit_tests_bayesnet
+test_targets = TestBayesNet
 n_procs = -j 16
 
 define ClearTests
@@ -29,6 +29,7 @@ setup: ## Install dependencies for tests and coverage
 	fi
 	@if [ "$(shell uname)" = "Linux" ]; then \
 		pip install gcovr; \
+		sudo dnf install lcov;\
 	fi
 
 dependency: ## Create a dependency graph diagram of the project (build/dependency.png)
@@ -85,9 +86,11 @@ test: ## Run tests (opt="-s") to verbose output the tests, (opt="-c='Test Maximu
 	@$(MAKE) clean
 	@cmake --build $(f_debug) -t $(test_targets) $(n_procs)
 	@for t in $(test_targets); do \
+		echo ">>> Running $$t...";\
 		if [ -f $(f_debug)/tests/$$t ]; then \
 			cd $(f_debug)/tests ; \
 			./$$t $(opt) ; \
+			cd ../.. ; \
 		fi ; \
 	done
 	@echo ">>> Done";
@@ -98,6 +101,27 @@ coverage: ## Run tests and generate coverage report (build/index.html)
 	@gcovr $(f_debug)/tests
 	@echo ">>> Done";	
 
+viewcoverage: ## Run tests, generate coverage report and upload it to codecov (build/index.html)
+	@echo ">>> Building tests with coverage..."
+	@folder=`pwd` ;
+	@$(MAKE) coverage
+	@echo ">>> Building report..."
+	@cd $(f_debug)/tests; \
+	lcov --directory . --capture --output-file coverage.info >/dev/null 2>&1; \
+	lcov --remove coverage.info '/usr/*' --output-file coverage.info >/dev/null 2>&1; \
+	lcov --remove coverage.info 'lib/*' --output-file coverage.info >/dev/null 2>&1; \
+	lcov --remove coverage.info 'libtorch/*' --output-file coverage.info >/dev/null 2>&1; \
+	lcov --remove coverage.info 'tests/*' --output-file coverage.info >/dev/null 2>&1; \
+	lcov --remove coverage.info 'bayesnet/utils/loguru.*' --output-file coverage.info >/dev/null 2>&1; \
+	genhtml coverage.info --output-directory $(f_debug)/tests/coverage >/dev/null 2>&1;
+	@$(MAKE) updatebadge
+	@xdg-open $(f_debug)/tests/coverage/index.html || open $(f_debug)/tests/coverage/index.html 2>/dev/null
+	@echo ">>> Done";
+
+updatebadge: ## Update the coverage badge in README.md
+	@echo ">>> Updating coverage badge..."
+	@env python update_coverage.py $(f_debug)/tests
+	@echo ">>> Done";
 
 help: ## Show help message
 	@IFS=$$'\n' ; \

@@ -9,12 +9,12 @@ namespace bayesnet {
         , classNumStates(classNumStates)
     {
     }
-    //samples is nxm std::vector used to fit the model
+    //samples is n+1xm std::vector used to fit the model
     Metrics::Metrics(const std::vector<std::vector<int>>& vsamples, const std::vector<int>& labels, const std::vector<std::string>& features, const std::string& className, const int classNumStates)
         : features(features)
         , className(className)
         , classNumStates(classNumStates)
-        , samples(torch::zeros({ static_cast<int>(vsamples[0].size()), static_cast<int>(vsamples.size() + 1) }, torch::kInt32))
+        , samples(torch::zeros({ static_cast<int>(vsamples.size() + 1), static_cast<int>(vsamples[0].size()) }, torch::kInt32))
     {
         for (int i = 0; i < vsamples.size(); ++i) {
             samples.index_put_({ i,  "..." }, torch::tensor(vsamples[i], torch::kInt32));
@@ -24,7 +24,7 @@ namespace bayesnet {
     std::vector<int> Metrics::SelectKBestWeighted(const torch::Tensor& weights, bool ascending, unsigned k)
     {
         // Return the K Best features 
-        auto n = samples.size(0) - 1;
+        auto n = features.size();
         if (k == 0) {
             k = n;
         }

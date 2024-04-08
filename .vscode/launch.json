@@ -14,8 +14,9 @@
             "type": "lldb",
             "request": "launch",
             "name": "test",
-            "program": "${workspaceFolder}/build_debug/tests/unit_tests_bayesnet",
+            "program": "${workspaceFolder}/build_debug/tests/TestBayesNet",
             "args": [
+                "[Network]"
                 //"-c=\"Metrics Test\"",
                 // "-s",
             ],

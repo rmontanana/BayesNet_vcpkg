@@ -10,18 +10,6 @@ namespace bayesnet {
         sort(indices.begin(), indices.end(), [&nums](int i, int j) {return nums[i] > nums[j];});
         return indices;
     }
-    std::vector<std::vector<int>> tensorToVector(torch::Tensor& dtensor)
-    {
-        // convert mxn tensor to nxm std::vector
-        std::vector<std::vector<int>> result;
-        // Iterate over cols
-        for (int i = 0; i < dtensor.size(1); ++i) {
-            auto col_tensor = dtensor.index({ "...", i });
-            auto col = std::vector<int>(col_tensor.data_ptr<int>(), col_tensor.data_ptr<int>() + dtensor.size(0));
-            result.push_back(col);
-        }
-        return result;
-    }
     std::vector<std::vector<double>> tensorToVectorDouble(torch::Tensor& dtensor)
     {
         // convert mxn tensor to mxn std::vector

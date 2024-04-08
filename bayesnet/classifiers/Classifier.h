@@ -30,7 +30,7 @@ namespace bayesnet {
         std::vector<std::string> show() const override;
         std::vector<std::string> topological_order()  override;
         std::vector<std::string> getNotes() const override { return notes; }
-        void dump_cpt() const override;
+        std::string dump_cpt() const override;
         void setHyperparameters(const nlohmann::json& hyperparameters) override; //For classifiers that don't have hyperparameters
     protected:
         bool fitted;

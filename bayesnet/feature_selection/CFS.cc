@@ -11,7 +11,7 @@ namespace bayesnet {
         auto feature = featureOrder[0];
         selectedFeatures.push_back(feature);
         selectedScores.push_back(suLabels[feature]);
-        selectedFeatures.erase(selectedFeatures.begin());
+        featureOrder.erase(featureOrder.begin());
         while (continueCondition) {
             double merit = std::numeric_limits<double>::lowest();
             int bestFeature = -1;

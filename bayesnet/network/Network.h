@@ -10,10 +10,10 @@ namespace bayesnet {
     public:
         Network();
         explicit Network(float);
-        explicit Network(Network&);
+        explicit Network(const Network&);
         ~Network() = default;
         torch::Tensor& getSamples();
-        float getmaxThreads();
+        float getMaxThreads() const;
         void addNode(const std::string&);
         void addEdge(const std::string&, const std::string&);
         std::map<std::string, std::unique_ptr<Node>>& getNodes();
@@ -39,7 +39,7 @@ namespace bayesnet {
         std::vector<std::string> show() const;
         std::vector<std::string> graph(const std::string& title) const; // Returns a std::vector of std::strings representing the graph in graphviz format
         void initialize();
-        void dump_cpt() const;
+        std::string dump_cpt() const;
         inline std::string version() { return  { project_version.begin(), project_version.end() }; }
     private:
         std::map<std::string, std::unique_ptr<Node>> nodes;
@@ -49,7 +49,7 @@ namespace bayesnet {
         std::vector<std::string> features; // Including classname
         std::string className;
         double laplaceSmoothing;
-        torch::Tensor samples; // nxm tensor used to fit the model
+        torch::Tensor samples; // n+1xm tensor used to fit the model
         bool isCyclic(const std::string&, std::unordered_set<std::string>&, std::unordered_set<std::string>&);
         std::vector<double> predict_sample(const std::vector<int>&);
         std::vector<double> predict_sample(const torch::Tensor&);
