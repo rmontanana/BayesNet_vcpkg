@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
-.PHONY: viewcoverage coverage setup help install uninstall buildr buildd test clean debug release sample 
+.PHONY: viewcoverage coverage setup help install uninstall buildr buildd test clean debug release sample updatebadge
 
 f_release = build_release
 f_debug = build_debug
@@ -103,6 +103,7 @@ coverage: ## Run tests and generate coverage report (build/index.html)
 
 viewcoverage: ## Run tests, generate coverage report and upload it to codecov (build/index.html)
 	@echo ">>> Building tests with coverage..."
+	@folder=`pwd` ;
 	@$(MAKE) coverage
 	@echo ">>> Building report..."
 	@cd $(f_debug)/tests; \
@@ -112,10 +113,15 @@ viewcoverage: ## Run tests, generate coverage report and upload it to codecov (b
 	lcov --remove coverage.info 'libtorch/*' --output-file coverage.info >/dev/null 2>&1; \
 	lcov --remove coverage.info 'tests/*' --output-file coverage.info >/dev/null 2>&1; \
 	lcov --remove coverage.info 'bayesnet/utils/loguru.*' --output-file coverage.info >/dev/null 2>&1; \
-	genhtml coverage.info --output-directory $(f_debug)/tests/coverage >/dev/null 2>&1; \
-	xdg-open $(f_debug)/tests/coverage/index.html || open $(f_debug)/tests/coverage/index.html 2>/dev/null
+	genhtml coverage.info --output-directory $(f_debug)/tests/coverage >/dev/null 2>&1;
+	@$(MAKE) updatebadge
+	@xdg-open $(f_debug)/tests/coverage/index.html || open $(f_debug)/tests/coverage/index.html 2>/dev/null
 	@echo ">>> Done";
 
+updatebadge: ## Update the coverage badge in README.md
+	@echo ">>> Updating coverage badge..."
+	@env python update_coverage.py $(f_debug)/tests
+	@echo ">>> Done";
 
 help: ## Show help message
 	@IFS=$$'\n' ; \
