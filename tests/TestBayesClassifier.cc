@@ -3,6 +3,8 @@
 #include <string>
 #include "TestUtils.h"
 #include "bayesnet/classifiers/TAN.h"
+#include "bayesnet/classifiers/KDB.h"
+#include "bayesnet/classifiers/KDBLd.h"
 
 
 TEST_CASE("Test Cannot build dataset with wrong data vector", "[Classifier]")
@@ -83,4 +85,20 @@ TEST_CASE("Not fitted model", "[Classifier]")
     REQUIRE_THROWS_WITH(model.predict_proba(raw.Xv), message);
     REQUIRE_THROWS_AS(model.score(raw.Xv, raw.yv), std::logic_error);
     REQUIRE_THROWS_WITH(model.score(raw.Xv, raw.yv), message);
+}
+TEST_CASE("KDB Graph", "[Classifier]")
+{
+    auto model = bayesnet::KDB(2);
+    auto raw = RawDatasets("iris", true);
+    model.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
+    auto graph = model.graph();
+    REQUIRE(graph.size() == 15);
+}
+TEST_CASE("KDBLd Graph", "[Classifier]")
+{
+    auto model = bayesnet::KDBLd(2);
+    auto raw = RawDatasets("iris", false);
+    model.fit(raw.Xt, raw.yt, raw.featurest, raw.classNamet, raw.statest);
+    auto graph = model.graph();
+    REQUIRE(graph.size() == 15);
 }
