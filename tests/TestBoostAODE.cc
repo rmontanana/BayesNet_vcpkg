@@ -136,6 +136,30 @@ TEST_CASE("Bisection", "[BoostAODE]")
         {"bisection", true},
         {"maxTolerance", 3},
         {"convergence", true},
+        {"block_update", false},
+        });
+    clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
+    REQUIRE(clf.getNumberOfNodes() == 217);
+    REQUIRE(clf.getNumberOfEdges() == 431);
+    REQUIRE(clf.getNotes().size() == 3);
+    REQUIRE(clf.getNotes()[0] == "Convergence threshold reached & 15 models eliminated");
+    REQUIRE(clf.getNotes()[1] == "Used features in train: 16 of 216");
+    REQUIRE(clf.getNotes()[2] == "Number of models: 1");
+    auto score = clf.score(raw.Xv, raw.yv);
+    auto scoret = clf.score(raw.Xt, raw.yt);
+    REQUIRE(score == Catch::Approx(1.0f).epsilon(raw.epsilon));
+    REQUIRE(scoret == Catch::Approx(1.0f).epsilon(raw.epsilon));
+}
+
+TEST_CASE("Block Update", "[BoostAODE]")
+{
+    auto clf = bayesnet::BoostAODE();
+    auto raw = RawDatasets("mfeat-factors", true);
+    clf.setHyperparameters({
+        {"bisection", true},
+        {"block_update", true},
+        {"maxTolerance", 3},
+        {"convergence", true},
         });
     clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
     REQUIRE(clf.getNumberOfNodes() == 217);

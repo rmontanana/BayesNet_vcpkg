@@ -16,7 +16,7 @@ namespace bayesnet {
     {
         validHyperparameters = {
             "maxModels", "bisection", "order", "convergence", "threshold",
-            "select_features", "maxTolerance", "predict_voting"
+            "select_features", "maxTolerance", "predict_voting", "block_update"
         };
 
     }
@@ -93,6 +93,10 @@ namespace bayesnet {
                 throw std::invalid_argument("Invalid selectFeatures value, valid values [" + SelectFeatures.IWSS + ", " + SelectFeatures.CFS + ", " + SelectFeatures.FCBF + "]");
             }
             hyperparameters.erase("select_features");
+        }
+        if (hyperparameters.contains("block_update")) {
+            block_update = hyperparameters["block_update"];
+            hyperparameters.erase("block_update");
         }
         Classifier::setHyperparameters(hyperparameters);
     }
