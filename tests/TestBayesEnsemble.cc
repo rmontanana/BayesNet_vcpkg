@@ -33,6 +33,11 @@ TEST_CASE("Show", "[Ensemble]")
 {
     auto clf = bayesnet::BoostAODE();
     auto raw = RawDatasets("iris", true);
+    clf.setHyperparameters({
+            {"bisection", false},
+            {"maxTolerance", 1},
+            {"convergence", false},
+        });
     clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
     std::vector<std::string> expected = {
         "class -> sepallength, sepalwidth, petallength, petalwidth, ",

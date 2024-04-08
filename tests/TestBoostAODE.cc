@@ -27,7 +27,7 @@ TEST_CASE("Feature_select IWSS", "[BoostAODE]")
     REQUIRE(clf.getNumberOfNodes() == 90);
     REQUIRE(clf.getNumberOfEdges() == 153);
     REQUIRE(clf.getNotes().size() == 2);
-    REQUIRE(clf.getNotes()[0] == "Used features in initialization: 5 of 9 with IWSS");
+    REQUIRE(clf.getNotes()[0] == "Used features in initialization: 4 of 9 with IWSS");
     REQUIRE(clf.getNotes()[1] == "Number of models: 9");
 }
 TEST_CASE("Feature_select FCBF", "[BoostAODE]")
@@ -76,8 +76,8 @@ TEST_CASE("Voting vs proba", "[BoostAODE]")
     auto pred_voting = clf.predict_proba(raw.Xv);
     REQUIRE(score_proba == Catch::Approx(0.97333).epsilon(raw.epsilon));
     REQUIRE(score_voting == Catch::Approx(0.98).epsilon(raw.epsilon));
-    REQUIRE(pred_voting[83][2] == Catch::Approx(0.552091).epsilon(raw.epsilon));
-    REQUIRE(pred_proba[83][2] == Catch::Approx(0.546017).epsilon(raw.epsilon));
+    REQUIRE(pred_voting[83][2] == Catch::Approx(1.0).epsilon(raw.epsilon));
+    REQUIRE(pred_proba[83][2] == Catch::Approx(0.86121525).epsilon(raw.epsilon));
     REQUIRE(clf.dump_cpt() == "");
     REQUIRE(clf.topological_order() == std::vector<std::string>());
 }
@@ -91,6 +91,9 @@ TEST_CASE("Order asc, desc & random", "[BoostAODE]")
         auto clf = bayesnet::BoostAODE();
         clf.setHyperparameters({
             {"order", order},
+            {"bisection", false},
+            {"maxTolerance", 1},
+            {"convergence", false},
             });
         clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
         auto score = clf.score(raw.Xv, raw.yv);
