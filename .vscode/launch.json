@@ -8,7 +8,7 @@
             "program": "${workspaceFolder}/build_release/sample/bayesnet_sample",
             "args": [
                 "${workspaceFolder}/tests/data/glass.arff"
-            ],
+            ]
         },
         {
             "type": "lldb",
@@ -16,11 +16,33 @@
             "name": "test",
             "program": "${workspaceFolder}/build_debug/tests/TestBayesNet",
             "args": [
-                "[Network]"
-                //"-c=\"Metrics Test\"",
-                // "-s",
+                "Block Update"
             ],
-            "cwd": "${workspaceFolder}/build_debug/tests",
+            "cwd": "${workspaceFolder}/build_debug/tests"
+        },
+        {
+            "name": "(gdb) Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "enter program name, for example ${workspaceFolder}/a.out",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
         }
     ]
 }

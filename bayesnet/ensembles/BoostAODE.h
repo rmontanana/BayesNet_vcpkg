@@ -25,6 +25,7 @@ namespace bayesnet {
         void buildModel(const torch::Tensor& weights) override;
         void trainModel(const torch::Tensor& weights) override;
     private:
+        std::tuple<torch::Tensor&, double, bool> update_weights_block(int k, torch::Tensor& ytrain, torch::Tensor& weights);
         std::vector<int> initializeModels();
         torch::Tensor X_train, y_train, X_test, y_test;
         // Hyperparameters
@@ -36,7 +37,7 @@ namespace bayesnet {
         std::string select_features_algorithm = Orders.DESC; // Selected feature selection algorithm
         FeatureSelect* featureSelector = nullptr;
         double threshold = -1;
-        bool block_update = true;
+        bool block_update = false;
     };
 }
 #endif

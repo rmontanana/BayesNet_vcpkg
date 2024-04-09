@@ -127,6 +127,50 @@ namespace bayesnet {
         }
         return { weights, alpha_t, terminate };
     }
+    std::tuple<torch::Tensor&, double, bool> BoostAODE::update_weights_block(int k, torch::Tensor& ytrain, torch::Tensor& weights)
+    {
+        //
+        // Make predict with only the last k models
+        //
+        std::unique_ptr<Classifier> model;
+        std::vector<std::unique_ptr<Classifier>> models_bak;
+        auto significance_bak = significanceModels;
+        auto n_models_bak = n_models;
+        // Remove the first n_models - k models
+        for (int i = 0; i < n_models - k; ++i) {
+            model = std::move(models[0]);
+            models.erase(models.begin());
+            models_bak.push_back(std::move(model));
+        }
+        assert(models.size() == k);
+        significanceModels = std::vector<double>(k, 1.0);
+        n_models = k;
+        auto ypred = predict(X_train);
+        //
+        // Update weights
+        //
+        double alpha_t;
+        bool terminate;
+        std::tie(weights, alpha_t, terminate) = update_weights(y_train, ypred, weights);
+        //
+        // Restore the models if needed
+        //
+        if (k != n_models_bak) {
+            for (int i = k - 1; i >= 0; --i) {
+                model = std::move(models_bak[i]);
+                models.insert(models.begin(), std::move(model));
+            }
+        }
+        significanceModels = significance_bak;
+        n_models = n_models_bak;
+        //
+        // Update the significance of the last k models
+        //
+        for (int i = 0; i < k; ++i) {
+            significanceModels[n_models - k + i] = alpha_t;
+        }
+        return { weights, alpha_t, terminate };
+    }
     std::vector<int> BoostAODE::initializeModels()
     {
         std::vector<int> featuresUsed;
@@ -156,7 +200,7 @@ namespace bayesnet {
             std::unique_ptr<Classifier> model = std::make_unique<SPODE>(feature);
             model->fit(dataset, features, className, states, weights_);
             models.push_back(std::move(model));
-            significanceModels.push_back(1.0);
+            significanceModels.push_back(1.0); // They will be updated later in trainModel
             n_models++;
         }
         notes.push_back("Used features in initialization: " + std::to_string(featuresUsed.size()) + " of " + std::to_string(features.size()) + " with " + select_features_algorithm);
@@ -229,13 +273,15 @@ namespace bayesnet {
                 std::unique_ptr<Classifier> model;
                 model = std::make_unique<SPODE>(feature);
                 model->fit(dataset, features, className, states, weights_);
-                torch::Tensor ypred;
-                ypred = model->predict(X_train);
-                // Step 3.1: Compute the classifier amout of say
-                std::tie(weights_, alpha_t, finished) = update_weights(y_train, ypred, weights_);
-                if (finished) {
-                    VLOG_SCOPE_F(2, "** epsilon_t > 0.5 **");
-                    break;
+                alpha_t = 0.0;
+                if (!block_update) {
+                    auto ypred = model->predict(X_train);
+                    // Step 3.1: Compute the classifier amout of say
+                    std::tie(weights_, alpha_t, finished) = update_weights(y_train, ypred, weights_);
+                    if (finished) {
+                        VLOG_SCOPE_F(2, "** epsilon_t > 0.5 **");
+                        break;
+                    }
                 }
                 // Step 3.4: Store classifier and its accuracy to weigh its future vote
                 numItemsPack++;
@@ -244,6 +290,9 @@ namespace bayesnet {
                 significanceModels.push_back(alpha_t);
                 n_models++;
                 VLOG_SCOPE_F(2, "numItemsPack: %d n_models: %d featuresUsed: %zu", numItemsPack, n_models, featuresUsed.size());
+            }
+            if (block_update) {
+                std::tie(weights_, alpha_t, finished) = update_weights_block(k, y_train, weights_);
             }
             if (convergence && !finished) {
                 auto y_val_predict = predict(X_test);
