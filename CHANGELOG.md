@@ -10,18 +10,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Install command and instructions in README.md
+- Prefix to install command to install the package in the any location.
+- The 'block_update' hyperparameter to the BoostAODE class, to control the way weights/significances are updated. Default value is false.
+- Html report of coverage in the coverage folder. It is created with *make viewcoverage*
+- Badges of coverage and code quality (codacy) in README.md. Coverage badge is updated with *make viewcoverage*
+- Added tests to reach 95% of coverage.
 
 ### Changed
 
 - Sample app now is a separate target in the Makefile and shows how to use the library with a sample dataset
 - The worse model count in BoostAODE is reset to 0 every time a new model produces better accuracy, so the tolerance of the model is meant to be the number of **consecutive** models that produce worse accuracy.
+- Default hyperparameter values in BoostAODE: bisection is true, maxTolerance is 3, convergence is true
 
 ## [1.0.4] 2024-03-06
 
 ### Added
 
-- Change _ascending_ hyperparameter to _order_ with these possible values _{"asc", "desc", "rand"}_, Default is _"desc"_.
-- Add the _predict_single_ hyperparameter to control if only the last model created is used to predict in boost training or the whole ensemble (all the models built so far). Default is true.
+- Change *ascending* hyperparameter to *order* with these possible values *{"asc", "desc", "rand"}*, Default is *"desc"*.
+- Add the *predict_single* hyperparameter to control if only the last model created is used to predict in boost training or the whole ensemble (all the models built so far). Default is true.
 - sample app to show how to use the library (make sample)
 
 ### Changed
