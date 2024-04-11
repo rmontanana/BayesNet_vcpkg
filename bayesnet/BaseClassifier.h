@@ -1,5 +1,10 @@
-#ifndef BASE_H
-#define BASE_H
+// ***************************************************************
+// SPDX-FileCopyrightText: Copyright 2024 Ricardo Montañana Gómez
+// SPDX-FileType: SOURCE
+// SPDX-License-Identifier: MIT
+// ***************************************************************
+
+#pragma once
 #include <vector>
 #include <torch/torch.h>
 #include <nlohmann/json.hpp>
@@ -38,4 +43,3 @@ namespace bayesnet {
         std::vector<std::string> validHyperparameters;
     };
 }
-#endif

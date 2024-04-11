@@ -1,3 +1,9 @@
+// ***************************************************************
+// SPDX-FileCopyrightText: Copyright 2024 Ricardo Montañana Gómez
+// SPDX-FileType: SOURCE
+// SPDX-License-Identifier: MIT
+// ***************************************************************
+
 #ifndef FEATURE_SELECT_H
 #define FEATURE_SELECT_H
 #include <torch/torch.h>

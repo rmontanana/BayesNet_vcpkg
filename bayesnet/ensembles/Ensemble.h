@@ -1,3 +1,9 @@
+// ***************************************************************
+// SPDX-FileCopyrightText: Copyright 2024 Ricardo Montañana Gómez
+// SPDX-FileType: SOURCE
+// SPDX-License-Identifier: MIT
+// ***************************************************************
+
 #ifndef ENSEMBLE_H
 #define ENSEMBLE_H
 #include <torch/torch.h>

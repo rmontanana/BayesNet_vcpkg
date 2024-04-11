@@ -1,3 +1,9 @@
+// ***************************************************************
+// SPDX-FileCopyrightText: Copyright 2024 Ricardo Montañana Gómez
+// SPDX-FileType: SOURCE
+// SPDX-License-Identifier: MIT
+// ***************************************************************
+
 #ifndef MST_H
 #define MST_H
 #include <vector>

@@ -14,7 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The 'block_update' hyperparameter to the BoostAODE class, to control the way weights/significances are updated. Default value is false.
 - Html report of coverage in the coverage folder. It is created with *make viewcoverage*
 - Badges of coverage and code quality (codacy) in README.md. Coverage badge is updated with *make viewcoverage*
-- Added tests to reach 95% of coverage.
+- Tests to reach 97% of coverage.
+- Copyright header to source files.
 
 ### Changed
 
