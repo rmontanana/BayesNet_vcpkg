@@ -79,6 +79,14 @@ TEST_CASE("Topological order", "[Classifier]")
     REQUIRE(order[2] == "sepalwidth");
     REQUIRE(order[3] == "petalwidth");
 }
+TEST_CASE("Dump_cpt", "[Classifier]")
+{
+    auto model = bayesnet::TAN();
+    auto raw = RawDatasets("iris", true);
+    model.fit(raw.Xt, raw.yt, raw.featurest, raw.classNamet, raw.statest);
+    auto cpt = model.dump_cpt();
+    REQUIRE(cpt.size() == 1713);
+}
 TEST_CASE("Not fitted model", "[Classifier]")
 {
     auto model = bayesnet::TAN();
