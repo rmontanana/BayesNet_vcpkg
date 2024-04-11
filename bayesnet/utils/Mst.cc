@@ -1,3 +1,4 @@
+#include <sstream>
 #include <vector>
 #include <list>
 #include "Mst.h"
@@ -43,15 +44,6 @@ namespace bayesnet {
                 T.push_back(G[i]); // add to mst std::vector
                 union_set(uSt, vEd);
             }
-        }
-    }
-    void Graph::display_mst()
-    {
-        std::cout << "Edge :" << " Weight" << std::endl;
-        for (int i = 0; i < T.size(); i++) {
-            std::cout << T[i].second.first << " - " << T[i].second.second << " : "
-                << T[i].first;
-            std::cout << std::endl;
         }
     }
 

@@ -54,6 +54,13 @@ TEST_CASE("Invalid feature name", "[Classifier]")
     REQUIRE_THROWS_AS(model.fit(raw.Xt, raw.yt, raw.featurest, raw.classNamet, statest), std::invalid_argument);
     REQUIRE_THROWS_WITH(model.fit(raw.Xt, raw.yt, raw.featurest, raw.classNamet, statest), "feature [petallength] not found in states");
 }
+TEST_CASE("Invalid hyperparameter", "[Classifier]")
+{
+    auto model = bayesnet::KDB(2);
+    auto raw = RawDatasets("iris", true);
+    REQUIRE_THROWS_AS(model.setHyperparameters({ { "alpha", "0.0" } }), std::invalid_argument);
+    REQUIRE_THROWS_WITH(model.setHyperparameters({ { "alpha", "0.0" } }), "Invalid hyperparameters{\"alpha\":\"0.0\"}");
+}
 TEST_CASE("Topological order", "[Classifier]")
 {
     auto model = bayesnet::TAN();

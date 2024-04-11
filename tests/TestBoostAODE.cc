@@ -157,18 +157,13 @@ TEST_CASE("Bisection", "[BoostAODE]")
 TEST_CASE("Block Update", "[BoostAODE]")
 {
     auto clf = bayesnet::BoostAODE();
-    // auto raw = RawDatasets("mfeat-factors", true);
-    auto raw = RawDatasets("glass", true);
+    auto raw = RawDatasets("mfeat-factors", true);
     clf.setHyperparameters({
         {"bisection", true},
         {"block_update", true},
         {"maxTolerance", 3},
         {"convergence", true},
         });
-    // clf.setHyperparameters({
-    //     {"block_update", true},
-    //     });
-
     clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
     REQUIRE(clf.getNumberOfNodes() == 217);
     REQUIRE(clf.getNumberOfEdges() == 431);

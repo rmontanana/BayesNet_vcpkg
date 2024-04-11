@@ -14,7 +14,7 @@
 #include "bayesnet/ensembles/BoostAODE.h"
 #include "TestUtils.h"
 
-const std::string ACTUAL_VERSION = "1.0.4";
+const std::string ACTUAL_VERSION = "1.0.4.1";
 
 TEST_CASE("Test Bayesian Classifiers score & version", "[Models]")
 {
@@ -52,6 +52,7 @@ TEST_CASE("Test Bayesian Classifiers score & version", "[Models]")
             auto score = clf->score(raw.Xt, raw.yt);
             INFO("Classifier: " + name + " File: " + file_name);
             REQUIRE(score == Catch::Approx(scores[{file_name, name}]).epsilon(raw.epsilon));
+            REQUIRE(clf->getStatus() == bayesnet::NORMAL);
         }
     }
     SECTION("Library check version")
@@ -61,7 +62,7 @@ TEST_CASE("Test Bayesian Classifiers score & version", "[Models]")
     }
     delete clf;
 }
-TEST_CASE("Models features", "[Models]")
+TEST_CASE("Models features & Graph", "[Models]")
 {
     auto graph = std::vector<std::string>({ "digraph BayesNet {\nlabel=<BayesNet Test>\nfontsize=30\nfontcolor=blue\nlabelloc=t\nlayout=circo\n",
         "class [shape=circle, fontcolor=red, fillcolor=lightblue, style=filled ] \n",
@@ -70,15 +71,30 @@ TEST_CASE("Models features", "[Models]")
         "sepallength -> sepalwidth", "sepalwidth [shape=circle] \n", "sepalwidth -> petalwidth", "}\n"
         }
     );
-    auto raw = RawDatasets("iris", true);
-    auto clf = bayesnet::TAN();
-    clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
-    REQUIRE(clf.getNumberOfNodes() == 5);
-    REQUIRE(clf.getNumberOfEdges() == 7);
-    REQUIRE(clf.getNumberOfStates() == 19);
-    REQUIRE(clf.getClassNumStates() == 3);
-    REQUIRE(clf.show() == std::vector<std::string>{"class -> sepallength, sepalwidth, petallength, petalwidth, ", "petallength -> sepallength, ", "petalwidth -> ", "sepallength -> sepalwidth, ", "sepalwidth -> petalwidth, "});
-    REQUIRE(clf.graph("Test") == graph);
+    SECTION("Test TAN")
+    {
+        auto raw = RawDatasets("iris", true);
+        auto clf = bayesnet::TAN();
+        clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
+        REQUIRE(clf.getNumberOfNodes() == 5);
+        REQUIRE(clf.getNumberOfEdges() == 7);
+        REQUIRE(clf.getNumberOfStates() == 19);
+        REQUIRE(clf.getClassNumStates() == 3);
+        REQUIRE(clf.show() == std::vector<std::string>{"class -> sepallength, sepalwidth, petallength, petalwidth, ", "petallength -> sepallength, ", "petalwidth -> ", "sepallength -> sepalwidth, ", "sepalwidth -> petalwidth, "});
+        REQUIRE(clf.graph("Test") == graph);
+    }
+    SECTION("Test TANLd")
+    {
+        auto clf = bayesnet::TANLd();
+        auto raw = RawDatasets("iris", false);
+        clf.fit(raw.Xt, raw.yt, raw.featurest, raw.classNamet, raw.statest);
+        REQUIRE(clf.getNumberOfNodes() == 5);
+        REQUIRE(clf.getNumberOfEdges() == 7);
+        REQUIRE(clf.getNumberOfStates() == 19);
+        REQUIRE(clf.getClassNumStates() == 3);
+        REQUIRE(clf.show() == std::vector<std::string>{"class -> sepallength, sepalwidth, petallength, petalwidth, ", "petallength -> sepallength, ", "petalwidth -> ", "sepallength -> sepalwidth, ", "sepalwidth -> petalwidth, "});
+        REQUIRE(clf.graph("Test") == graph);
+    }
 }
 TEST_CASE("Get num features & num edges", "[Models]")
 {
@@ -221,6 +237,12 @@ TEST_CASE("KDB with hyperparameters", "[Models]")
     auto scoret = clf.score(raw.Xv, raw.yv);
     REQUIRE(score == Catch::Approx(0.827103).epsilon(raw.epsilon));
     REQUIRE(scoret == Catch::Approx(0.761682).epsilon(raw.epsilon));
+}
+TEST_CASE("Incorrect type of data for SPODELd", "[Models]")
+{
+    auto raw = RawDatasets("iris", true);
+    auto clf = bayesnet::SPODELd(0);
+    REQUIRE_THROWS_AS(clf.fit(raw.dataset, raw.featurest, raw.classNamet, raw.statest), std::runtime_error);
 }
 TEST_CASE("Predict, predict_proba & score without fitting", "[Models]")
 {
