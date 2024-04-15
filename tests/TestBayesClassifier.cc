@@ -1,3 +1,9 @@
+// ***************************************************************
+// SPDX-FileCopyrightText: Copyright 2024 Ricardo Montañana Gómez
+// SPDX-FileType: SOURCE
+// SPDX-License-Identifier: MIT
+// ***************************************************************
+
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <string>
@@ -54,6 +60,13 @@ TEST_CASE("Invalid feature name", "[Classifier]")
     REQUIRE_THROWS_AS(model.fit(raw.Xt, raw.yt, raw.featurest, raw.classNamet, statest), std::invalid_argument);
     REQUIRE_THROWS_WITH(model.fit(raw.Xt, raw.yt, raw.featurest, raw.classNamet, statest), "feature [petallength] not found in states");
 }
+TEST_CASE("Invalid hyperparameter", "[Classifier]")
+{
+    auto model = bayesnet::KDB(2);
+    auto raw = RawDatasets("iris", true);
+    REQUIRE_THROWS_AS(model.setHyperparameters({ { "alpha", "0.0" } }), std::invalid_argument);
+    REQUIRE_THROWS_WITH(model.setHyperparameters({ { "alpha", "0.0" } }), "Invalid hyperparameters{\"alpha\":\"0.0\"}");
+}
 TEST_CASE("Topological order", "[Classifier]")
 {
     auto model = bayesnet::TAN();
@@ -65,6 +78,14 @@ TEST_CASE("Topological order", "[Classifier]")
     REQUIRE(order[1] == "sepallength");
     REQUIRE(order[2] == "sepalwidth");
     REQUIRE(order[3] == "petalwidth");
+}
+TEST_CASE("Dump_cpt", "[Classifier]")
+{
+    auto model = bayesnet::TAN();
+    auto raw = RawDatasets("iris", true);
+    model.fit(raw.Xt, raw.yt, raw.featurest, raw.classNamet, raw.statest);
+    auto cpt = model.dump_cpt();
+    REQUIRE(cpt.size() == 1713);
 }
 TEST_CASE("Not fitted model", "[Classifier]")
 {

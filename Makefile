@@ -53,9 +53,10 @@ uninstall: ## Uninstall library
 	xargs rm < $(f_release)/install_manifest.txt
 	@echo ">>> Done";
 
+prefix = "/usr/local"
 install: ## Install library
 	@echo ">>> Installing BayesNet...";
-	@cmake --install $(f_release)
+	@cmake --install $(f_release) --prefix $(prefix)
 	@echo ">>> Done";
 
 debug: ## Build a debug version of the project

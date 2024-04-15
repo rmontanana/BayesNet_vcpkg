@@ -1,6 +1,13 @@
+// ***************************************************************
+// SPDX-FileCopyrightText: Copyright 2024 Ricardo Montañana Gómez
+// SPDX-FileType: SOURCE
+// SPDX-License-Identifier: MIT
+// ***************************************************************
+
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 #include "bayesnet/utils/BayesMetrics.h"
 #include "bayesnet/feature_selection/CFS.h"
 #include "bayesnet/feature_selection/FCBF.h"
@@ -68,4 +75,15 @@ TEST_CASE("Features Selected", "[FeatureSelection]")
             delete featureSelector;
         }
     }
+}
+TEST_CASE("Oddities", "[FeatureSelection]")
+{
+    auto raw = RawDatasets("iris", true);
+    // FCBF Limits
+    REQUIRE_THROWS_AS(bayesnet::FCBF(raw.dataset, raw.featuresv, raw.classNamev, raw.featuresv.size(), raw.classNumStates, raw.weights, 1e-8), std::invalid_argument);
+    REQUIRE_THROWS_WITH(bayesnet::FCBF(raw.dataset, raw.featuresv, raw.classNamev, raw.featuresv.size(), raw.classNumStates, raw.weights, 1e-8), "Threshold cannot be less than 1e-7");
+    REQUIRE_THROWS_AS(bayesnet::IWSS(raw.dataset, raw.featuresv, raw.classNamev, raw.featuresv.size(), raw.classNumStates, raw.weights, -1e4), std::invalid_argument);
+    REQUIRE_THROWS_WITH(bayesnet::IWSS(raw.dataset, raw.featuresv, raw.classNamev, raw.featuresv.size(), raw.classNumStates, raw.weights, -1e4), "Threshold has to be in [0, 0.5]");
+    REQUIRE_THROWS_AS(bayesnet::IWSS(raw.dataset, raw.featuresv, raw.classNamev, raw.featuresv.size(), raw.classNumStates, raw.weights, 0.501), std::invalid_argument);
+    REQUIRE_THROWS_WITH(bayesnet::IWSS(raw.dataset, raw.featuresv, raw.classNamev, raw.featuresv.size(), raw.classNumStates, raw.weights, 0.501), "Threshold has to be in [0, 0.5]");
 }

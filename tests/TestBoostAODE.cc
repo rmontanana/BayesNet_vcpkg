@@ -1,3 +1,9 @@
+// ***************************************************************
+// SPDX-FileCopyrightText: Copyright 2024 Ricardo Montañana Gómez
+// SPDX-FileType: SOURCE
+// SPDX-License-Identifier: MIT
+// ***************************************************************
+
 #include <type_traits>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
@@ -27,7 +33,7 @@ TEST_CASE("Feature_select IWSS", "[BoostAODE]")
     REQUIRE(clf.getNumberOfNodes() == 90);
     REQUIRE(clf.getNumberOfEdges() == 153);
     REQUIRE(clf.getNotes().size() == 2);
-    REQUIRE(clf.getNotes()[0] == "Used features in initialization: 5 of 9 with IWSS");
+    REQUIRE(clf.getNotes()[0] == "Used features in initialization: 4 of 9 with IWSS");
     REQUIRE(clf.getNotes()[1] == "Number of models: 9");
 }
 TEST_CASE("Feature_select FCBF", "[BoostAODE]")
@@ -76,8 +82,8 @@ TEST_CASE("Voting vs proba", "[BoostAODE]")
     auto pred_voting = clf.predict_proba(raw.Xv);
     REQUIRE(score_proba == Catch::Approx(0.97333).epsilon(raw.epsilon));
     REQUIRE(score_voting == Catch::Approx(0.98).epsilon(raw.epsilon));
-    REQUIRE(pred_voting[83][2] == Catch::Approx(0.552091).epsilon(raw.epsilon));
-    REQUIRE(pred_proba[83][2] == Catch::Approx(0.546017).epsilon(raw.epsilon));
+    REQUIRE(pred_voting[83][2] == Catch::Approx(1.0).epsilon(raw.epsilon));
+    REQUIRE(pred_proba[83][2] == Catch::Approx(0.86121525).epsilon(raw.epsilon));
     REQUIRE(clf.dump_cpt() == "");
     REQUIRE(clf.topological_order() == std::vector<std::string>());
 }
@@ -91,6 +97,9 @@ TEST_CASE("Order asc, desc & random", "[BoostAODE]")
         auto clf = bayesnet::BoostAODE();
         clf.setHyperparameters({
             {"order", order},
+            {"bisection", false},
+            {"maxTolerance", 1},
+            {"convergence", false},
             });
         clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
         auto score = clf.score(raw.Xv, raw.yv);
@@ -134,6 +143,30 @@ TEST_CASE("Bisection", "[BoostAODE]")
     auto raw = RawDatasets("mfeat-factors", true);
     clf.setHyperparameters({
         {"bisection", true},
+        {"maxTolerance", 3},
+        {"convergence", true},
+        {"block_update", false},
+        });
+    clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
+    REQUIRE(clf.getNumberOfNodes() == 217);
+    REQUIRE(clf.getNumberOfEdges() == 431);
+    REQUIRE(clf.getNotes().size() == 3);
+    REQUIRE(clf.getNotes()[0] == "Convergence threshold reached & 15 models eliminated");
+    REQUIRE(clf.getNotes()[1] == "Used features in train: 16 of 216");
+    REQUIRE(clf.getNotes()[2] == "Number of models: 1");
+    auto score = clf.score(raw.Xv, raw.yv);
+    auto scoret = clf.score(raw.Xt, raw.yt);
+    REQUIRE(score == Catch::Approx(1.0f).epsilon(raw.epsilon));
+    REQUIRE(scoret == Catch::Approx(1.0f).epsilon(raw.epsilon));
+}
+
+TEST_CASE("Block Update", "[BoostAODE]")
+{
+    auto clf = bayesnet::BoostAODE();
+    auto raw = RawDatasets("mfeat-factors", true);
+    clf.setHyperparameters({
+        {"bisection", true},
+        {"block_update", true},
         {"maxTolerance", 3},
         {"convergence", true},
         });

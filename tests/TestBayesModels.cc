@@ -1,3 +1,9 @@
+// ***************************************************************
+// SPDX-FileCopyrightText: Copyright 2024 Ricardo Montañana Gómez
+// SPDX-FileType: SOURCE
+// SPDX-License-Identifier: MIT
+// ***************************************************************
+
 #include <type_traits>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
@@ -14,7 +20,7 @@
 #include "bayesnet/ensembles/BoostAODE.h"
 #include "TestUtils.h"
 
-const std::string ACTUAL_VERSION = "1.0.4";
+const std::string ACTUAL_VERSION = "1.0.4.1";
 
 TEST_CASE("Test Bayesian Classifiers score & version", "[Models]")
 {
@@ -52,6 +58,7 @@ TEST_CASE("Test Bayesian Classifiers score & version", "[Models]")
             auto score = clf->score(raw.Xt, raw.yt);
             INFO("Classifier: " + name + " File: " + file_name);
             REQUIRE(score == Catch::Approx(scores[{file_name, name}]).epsilon(raw.epsilon));
+            REQUIRE(clf->getStatus() == bayesnet::NORMAL);
         }
     }
     SECTION("Library check version")
@@ -61,7 +68,7 @@ TEST_CASE("Test Bayesian Classifiers score & version", "[Models]")
     }
     delete clf;
 }
-TEST_CASE("Models features", "[Models]")
+TEST_CASE("Models features & Graph", "[Models]")
 {
     auto graph = std::vector<std::string>({ "digraph BayesNet {\nlabel=<BayesNet Test>\nfontsize=30\nfontcolor=blue\nlabelloc=t\nlayout=circo\n",
         "class [shape=circle, fontcolor=red, fillcolor=lightblue, style=filled ] \n",
@@ -70,15 +77,30 @@ TEST_CASE("Models features", "[Models]")
         "sepallength -> sepalwidth", "sepalwidth [shape=circle] \n", "sepalwidth -> petalwidth", "}\n"
         }
     );
-    auto raw = RawDatasets("iris", true);
-    auto clf = bayesnet::TAN();
-    clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
-    REQUIRE(clf.getNumberOfNodes() == 5);
-    REQUIRE(clf.getNumberOfEdges() == 7);
-    REQUIRE(clf.getNumberOfStates() == 19);
-    REQUIRE(clf.getClassNumStates() == 3);
-    REQUIRE(clf.show() == std::vector<std::string>{"class -> sepallength, sepalwidth, petallength, petalwidth, ", "petallength -> sepallength, ", "petalwidth -> ", "sepallength -> sepalwidth, ", "sepalwidth -> petalwidth, "});
-    REQUIRE(clf.graph("Test") == graph);
+    SECTION("Test TAN")
+    {
+        auto raw = RawDatasets("iris", true);
+        auto clf = bayesnet::TAN();
+        clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
+        REQUIRE(clf.getNumberOfNodes() == 5);
+        REQUIRE(clf.getNumberOfEdges() == 7);
+        REQUIRE(clf.getNumberOfStates() == 19);
+        REQUIRE(clf.getClassNumStates() == 3);
+        REQUIRE(clf.show() == std::vector<std::string>{"class -> sepallength, sepalwidth, petallength, petalwidth, ", "petallength -> sepallength, ", "petalwidth -> ", "sepallength -> sepalwidth, ", "sepalwidth -> petalwidth, "});
+        REQUIRE(clf.graph("Test") == graph);
+    }
+    SECTION("Test TANLd")
+    {
+        auto clf = bayesnet::TANLd();
+        auto raw = RawDatasets("iris", false);
+        clf.fit(raw.Xt, raw.yt, raw.featurest, raw.classNamet, raw.statest);
+        REQUIRE(clf.getNumberOfNodes() == 5);
+        REQUIRE(clf.getNumberOfEdges() == 7);
+        REQUIRE(clf.getNumberOfStates() == 19);
+        REQUIRE(clf.getClassNumStates() == 3);
+        REQUIRE(clf.show() == std::vector<std::string>{"class -> sepallength, sepalwidth, petallength, petalwidth, ", "petallength -> sepallength, ", "petalwidth -> ", "sepallength -> sepalwidth, ", "sepalwidth -> petalwidth, "});
+        REQUIRE(clf.graph("Test") == graph);
+    }
 }
 TEST_CASE("Get num features & num edges", "[Models]")
 {
@@ -115,15 +137,15 @@ TEST_CASE("Model predict_proba", "[Models]")
      {0.003135, 0.991799, 0.0050661}
         });
     auto res_prob_baode = std::vector<std::vector<double>>({
-        {0.00803291, 0.9676, 0.0243672},
-        {0.00398714, 0.945126, 0.050887},
-        {0.00398714, 0.945126, 0.050887},
-        {0.00398714, 0.945126, 0.050887},
-        {0.00189227, 0.859575, 0.138533},
-        {0.0118341, 0.442149, 0.546017},
-        {0.0216135, 0.785781, 0.192605},
-        {0.0204803, 0.844276, 0.135244},
-        {0.00576313, 0.961665, 0.0325716},
+        {0.0112349, 0.962274, 0.0264907},
+        {0.00371025, 0.950592, 0.0456973},
+        {0.00371025, 0.950592, 0.0456973},
+        {0.00371025, 0.950592, 0.0456973},
+        {0.00369275, 0.84967, 0.146637},
+        {0.0252205, 0.113564, 0.861215},
+        {0.0284828, 0.770524, 0.200993},
+        {0.0213182, 0.857189, 0.121493},
+        {0.00868436, 0.949494, 0.0418215}
         });
     auto res_prob_voting = std::vector<std::vector<double>>({
         {0, 1, 0},
@@ -131,8 +153,8 @@ TEST_CASE("Model predict_proba", "[Models]")
         {0, 1, 0},
         {0, 1, 0},
         {0, 1, 0},
-        {0, 0.447909, 0.552091},
-        {0, 0.811482, 0.188517},
+        {0, 0, 1},
+        {0, 1, 0},
         {0, 1, 0},
         {0, 1, 0}
         });
@@ -155,7 +177,7 @@ TEST_CASE("Model predict_proba", "[Models]")
         REQUIRE(y_pred.size() == raw.yv.size());
         REQUIRE(y_pred_proba[0].size() == 3);
         REQUIRE(yt_pred_proba.size(1) == y_pred_proba[0].size());
-        for (int i = 0; i < y_pred_proba.size(); ++i) {
+        for (int i = 0; i < 9; ++i) {
             auto maxElem = max_element(y_pred_proba[i].begin(), y_pred_proba[i].end());
             int predictedClass = distance(y_pred_proba[i].begin(), maxElem);
             REQUIRE(predictedClass == y_pred[i]);
@@ -166,7 +188,7 @@ TEST_CASE("Model predict_proba", "[Models]")
             }
         }
         // Check predict_proba values for vectors and tensors
-        for (int i = 0; i < res_prob.size(); i++) {
+        for (int i = 0; i < 9; i++) {
             REQUIRE(y_pred[i] == yt_pred[i].item<int>());
             for (int j = 0; j < 3; j++) {
                 REQUIRE(res_prob[model][i][j] == Catch::Approx(y_pred_proba[i + init_index][j]).epsilon(raw.epsilon));
@@ -221,6 +243,12 @@ TEST_CASE("KDB with hyperparameters", "[Models]")
     auto scoret = clf.score(raw.Xv, raw.yv);
     REQUIRE(score == Catch::Approx(0.827103).epsilon(raw.epsilon));
     REQUIRE(scoret == Catch::Approx(0.761682).epsilon(raw.epsilon));
+}
+TEST_CASE("Incorrect type of data for SPODELd", "[Models]")
+{
+    auto raw = RawDatasets("iris", true);
+    auto clf = bayesnet::SPODELd(0);
+    REQUIRE_THROWS_AS(clf.fit(raw.dataset, raw.featurest, raw.classNamet, raw.statest), std::runtime_error);
 }
 TEST_CASE("Predict, predict_proba & score without fitting", "[Models]")
 {

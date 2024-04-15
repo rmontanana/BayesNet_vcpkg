@@ -1,8 +1,16 @@
+// ***************************************************************
+// SPDX-FileCopyrightText: Copyright 2024 Ricardo Montañana Gómez
+// SPDX-FileType: SOURCE
+// SPDX-License-Identifier: MIT
+// ***************************************************************
+
 #include <type_traits>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
 #include <catch2/generators/catch_generators.hpp>
 #include "bayesnet/ensembles/BoostAODE.h"
+#include "bayesnet/ensembles/AODE.h"
+#include "bayesnet/ensembles/AODELd.h"
 #include "TestUtils.h"
 
 
@@ -33,6 +41,11 @@ TEST_CASE("Show", "[Ensemble]")
 {
     auto clf = bayesnet::BoostAODE();
     auto raw = RawDatasets("iris", true);
+    clf.setHyperparameters({
+            {"bisection", false},
+            {"maxTolerance", 1},
+            {"convergence", false},
+        });
     clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
     std::vector<std::string> expected = {
         "class -> sepallength, sepalwidth, petallength, petalwidth, ",
@@ -68,6 +81,15 @@ TEST_CASE("Graph", "[Ensemble]")
     clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
     auto graph = clf.graph();
     REQUIRE(graph.size() == 56);
+    auto clf2 = bayesnet::AODE();
+    clf2.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
+    graph = clf2.graph();
+    REQUIRE(graph.size() == 56);
+    raw = RawDatasets("glass", false);
+    auto clf3 = bayesnet::AODELd();
+    clf3.fit(raw.Xt, raw.yt, raw.featurest, raw.classNamet, raw.statest);
+    graph = clf3.graph();
+    REQUIRE(graph.size() == 261);
 }
 TEST_CASE("Compute ArgMax", "[Ensemble]")
 {
