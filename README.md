@@ -48,3 +48,13 @@ make sample fname=tests/data/glass.arff
 ## Models
 
 ### [BoostAODE](docs/BoostAODE.md)
+
+## Diagrams
+
+### UML Class Diagram
+
+![BayesNet UML Class Diagram](diagrams/BayesNet.svg)
+
+### Dependency Diagram
+
+![BayesNet Dependency Diagram](diagrams/dependency.svg)

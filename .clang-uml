@@ -1,0 +1,39 @@
+compilation_database_dir: build_debug
+output_directory: diagrams
+diagrams:
+  BayesNet:
+    type: class
+    glob:
+      - bayesnet/*.h
+      - bayesnet/classifiers/*.h
+      - bayesnet/classifiers/*.cc
+      - bayesnet/ensembles/*.h
+      - bayesnet/ensembles/*.cc
+      - bayesnet/feature_selection/*.h
+      - bayesnet/feature_selection/*.cc
+      - bayesnet/network/*.h
+      - bayesnet/network/*.cc
+      - bayesnet/utils/*.h
+      - bayesnet/utils/*.cc
+    include:
+      # Only include entities from the following namespaces
+      namespaces:
+        - bayesnet
+    exclude:
+      access:
+        - private
+    plantuml:
+      style:
+        # Apply this style to all classes in the diagram
+        class: "#aliceblue;line:blue;line.dotted;text:blue"
+        # Apply this style to all packages in the diagram
+        package: "#back:grey"
+        # Make all template instantiation relations point upwards and draw them
+        # as green and dotted lines
+        instantiation: "up[#green,dotted]"
+      cmd: "/usr/bin/plantuml -tsvg \"diagrams/{}.puml\""
+      before:
+        - 'title clang-uml class diagram model'
+    mermaid:
+      before:
+        - 'classDiagram'

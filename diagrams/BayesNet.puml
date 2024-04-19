@@ -1,0 +1,412 @@
+@startuml
+title clang-uml class diagram model
+class "bayesnet::Metrics" as C_0000736965376885623323
+class C_0000736965376885623323 #aliceblue;line:blue;line.dotted;text:blue {
++Metrics() = default : void
++Metrics(const torch::Tensor & samples, const std::vector<std::string> & features, const std::string & className, const int classNumStates) : void
++Metrics(const std::vector<std::vector<int>> & vsamples, const std::vector<int> & labels, const std::vector<std::string> & features, const std::string & className, const int classNumStates) : void
+..
++SelectKBestWeighted(const torch::Tensor & weights, bool ascending = false, unsigned int k = 0) : std::vector<int>
++conditionalEdge(const torch::Tensor & weights) : torch::Tensor
++conditionalEdgeWeights(std::vector<float> & weights) : std::vector<float>
+#doCombinations<T>(const std::vector<T> & source) : std::vector<std::pair<T, T> >
+#entropy(const torch::Tensor & feature, const torch::Tensor & weights) : double
++getScoresKBest() const : std::vector<double>
++maximumSpanningTree(const std::vector<std::string> & features, const torch::Tensor & weights, const int root) : std::vector<std::pair<int,int>>
++mutualInformation(const torch::Tensor & firstFeature, const torch::Tensor & secondFeature, const torch::Tensor & weights) : double
+#pop_first<T>(std::vector<T> & v) : T
+__
+#className : std::string
+#features : std::vector<std::string>
+#samples : torch::Tensor
+}
+class "bayesnet::Node" as C_0001303524929067080934
+class C_0001303524929067080934 #aliceblue;line:blue;line.dotted;text:blue {
++Node(const std::string &) : void
+..
++addChild(Node *) : void
++addParent(Node *) : void
++clear() : void
++computeCPT(const torch::Tensor & dataset, const std::vector<std::string> & features, const double laplaceSmoothing, const torch::Tensor & weights) : void
++getCPT() : torch::Tensor &
++getChildren() : std::vector<Node *> &
++getFactorValue(std::map<std::string,int> &) : float
++getName() const : std::string
++getNumStates() const : int
++getParents() : std::vector<Node *> &
++graph(const std::string & clasName) : std::vector<std::string>
++minFill() : unsigned int
++removeChild(Node *) : void
++removeParent(Node *) : void
++setNumStates(int) : void
+__
+}
+class "bayesnet::Network" as C_0001186707649890429575
+class C_0001186707649890429575 #aliceblue;line:blue;line.dotted;text:blue {
++Network() : void
++Network(float) : void
++Network(const Network &) : void
++~Network() = default : void
+..
++addEdge(const std::string &, const std::string &) : void
++addNode(const std::string &) : void
++dump_cpt() const : std::string
++fit(const torch::Tensor & samples, const torch::Tensor & weights, const std::vector<std::string> & featureNames, const std::string & className, const std::map<std::string,std::vector<int>> & states) : void
++fit(const torch::Tensor & X, const torch::Tensor & y, const torch::Tensor & weights, const std::vector<std::string> & featureNames, const std::string & className, const std::map<std::string,std::vector<int>> & states) : void
++fit(const std::vector<std::vector<int>> & input_data, const std::vector<int> & labels, const std::vector<double> & weights, const std::vector<std::string> & featureNames, const std::string & className, const std::map<std::string,std::vector<int>> & states) : void
++getClassName() const : std::string
++getClassNumStates() const : int
++getEdges() const : std::vector<std::pair<std::string,std::string>>
++getFeatures() const : std::vector<std::string>
++getMaxThreads() const : float
++getNodes() : std::map<std::string,std::unique_ptr<Node>> &
++getNumEdges() const : int
++getSamples() : torch::Tensor &
++getStates() const : int
++graph(const std::string & title) const : std::vector<std::string>
++initialize() : void
++predict(const std::vector<std::vector<int>> &) : std::vector<int>
++predict(const torch::Tensor &) : torch::Tensor
++predict_proba(const std::vector<std::vector<int>> &) : std::vector<std::vector<double>>
++predict_proba(const torch::Tensor &) : torch::Tensor
++predict_tensor(const torch::Tensor & samples, const bool proba) : torch::Tensor
++score(const std::vector<std::vector<int>> &, const std::vector<int> &) : double
++show() const : std::vector<std::string>
++topological_sort() : std::vector<std::string>
++version() : std::string
+__
+}
+enum "bayesnet::status_t" as C_0000738420730783851375
+enum C_0000738420730783851375 {
+NORMAL
+WARNING
+ERROR
+}
+abstract "bayesnet::BaseClassifier" as C_0000327135989451974539
+abstract C_0000327135989451974539 #aliceblue;line:blue;line.dotted;text:blue {
++~BaseClassifier() = default : void
+..
+{abstract} +dump_cpt() const = 0 : std::string
+{abstract} +fit(torch::Tensor & X, torch::Tensor & y, const std::vector<std::string> & features, const std::string & className, std::map<std::string,std::vector<int>> & states) = 0 : BaseClassifier &
+{abstract} +fit(torch::Tensor & dataset, const std::vector<std::string> & features, const std::string & className, std::map<std::string,std::vector<int>> & states) = 0 : BaseClassifier &
+{abstract} +fit(torch::Tensor & dataset, const std::vector<std::string> & features, const std::string & className, std::map<std::string,std::vector<int>> & states, const torch::Tensor & weights) = 0 : BaseClassifier &
+{abstract} +fit(std::vector<std::vector<int>> & X, std::vector<int> & y, const std::vector<std::string> & features, const std::string & className, std::map<std::string,std::vector<int>> & states) = 0 : BaseClassifier &
+{abstract} +getClassNumStates() const = 0 : int
+{abstract} +getNotes() const = 0 : std::vector<std::string>
+{abstract} +getNumberOfEdges() const = 0 : int
+{abstract} +getNumberOfNodes() const = 0 : int
+{abstract} +getNumberOfStates() const = 0 : int
+{abstract} +getStatus() const = 0 : status_t
++getValidHyperparameters() : std::vector<std::string> &
+{abstract} +getVersion() = 0 : std::string
+{abstract} +graph(const std::string & title = "") const = 0 : std::vector<std::string>
+{abstract} +predict(std::vector<std::vector<int>> & X) = 0 : std::vector<int>
+{abstract} +predict(torch::Tensor & X) = 0 : torch::Tensor
+{abstract} +predict_proba(std::vector<std::vector<int>> & X) = 0 : std::vector<std::vector<double>>
+{abstract} +predict_proba(torch::Tensor & X) = 0 : torch::Tensor
+{abstract} +score(std::vector<std::vector<int>> & X, std::vector<int> & y) = 0 : float
+{abstract} +score(torch::Tensor & X, torch::Tensor & y) = 0 : float
+{abstract} +setHyperparameters(const nlohmann::json & hyperparameters) = 0 : void
+{abstract} +show() const = 0 : std::vector<std::string>
+{abstract} +topological_order() = 0 : std::vector<std::string>
+{abstract} #trainModel(const torch::Tensor & weights) = 0 : void
+__
+#validHyperparameters : std::vector<std::string>
+}
+abstract "bayesnet::Classifier" as C_0002043996622900301644
+abstract C_0002043996622900301644 #aliceblue;line:blue;line.dotted;text:blue {
++Classifier(Network model) : void
++~Classifier() = default : void
+..
++addNodes() : void
+#buildDataset(torch::Tensor & y) : void
+{abstract} #buildModel(const torch::Tensor & weights) = 0 : void
+#checkFitParameters() : void
++dump_cpt() const : std::string
++fit(torch::Tensor & X, torch::Tensor & y, const std::vector<std::string> & features, const std::string & className, std::map<std::string,std::vector<int>> & states) : Classifier &
++fit(std::vector<std::vector<int>> & X, std::vector<int> & y, const std::vector<std::string> & features, const std::string & className, std::map<std::string,std::vector<int>> & states) : Classifier &
++fit(torch::Tensor & dataset, const std::vector<std::string> & features, const std::string & className, std::map<std::string,std::vector<int>> & states) : Classifier &
++fit(torch::Tensor & dataset, const std::vector<std::string> & features, const std::string & className, std::map<std::string,std::vector<int>> & states, const torch::Tensor & weights) : Classifier &
++getClassNumStates() const : int
++getNotes() const : std::vector<std::string>
++getNumberOfEdges() const : int
++getNumberOfNodes() const : int
++getNumberOfStates() const : int
++getStatus() const : status_t
++getVersion() : std::string
++predict(std::vector<std::vector<int>> & X) : std::vector<int>
++predict(torch::Tensor & X) : torch::Tensor
++predict_proba(std::vector<std::vector<int>> & X) : std::vector<std::vector<double>>
++predict_proba(torch::Tensor & X) : torch::Tensor
++score(torch::Tensor & X, torch::Tensor & y) : float
++score(std::vector<std::vector<int>> & X, std::vector<int> & y) : float
++setHyperparameters(const nlohmann::json & hyperparameters) : void
++show() const : std::vector<std::string>
++topological_order() : std::vector<std::string>
+#trainModel(const torch::Tensor & weights) : void
+__
+#className : std::string
+#dataset : torch::Tensor
+#features : std::vector<std::string>
+#fitted : bool
+#m : unsigned int
+#metrics : Metrics
+#model : Network
+#n : unsigned int
+#notes : std::vector<std::string>
+#states : std::map<std::string,std::vector<int>>
+#status : status_t
+}
+class "bayesnet::KDB" as C_0001112865019015250005
+class C_0001112865019015250005 #aliceblue;line:blue;line.dotted;text:blue {
++KDB(int k, float theta = 0.03) : void
++~KDB() = default : void
+..
+#buildModel(const torch::Tensor & weights) : void
++graph(const std::string & name = "KDB") const : std::vector<std::string>
++setHyperparameters(const nlohmann::json & hyperparameters_) : void
+__
+}
+class "bayesnet::TAN" as C_0001760994424884323017
+class C_0001760994424884323017 #aliceblue;line:blue;line.dotted;text:blue {
++TAN() : void
++~TAN() = default : void
+..
+#buildModel(const torch::Tensor & weights) : void
++graph(const std::string & name = "TAN") const : std::vector<std::string>
+__
+}
+class "bayesnet::Proposal" as C_0002219995589162262979
+class C_0002219995589162262979 #aliceblue;line:blue;line.dotted;text:blue {
++Proposal(torch::Tensor & pDataset, std::vector<std::string> & features_, std::string & className_) : void
++~Proposal() : void
+..
+#checkInput(const torch::Tensor & X, const torch::Tensor & y) : void
+#fit_local_discretization(const torch::Tensor & y) : std::map<std::string,std::vector<int>>
+#localDiscretizationProposal(const std::map<std::string,std::vector<int>> & states, Network & model) : std::map<std::string,std::vector<int>>
+#prepareX(torch::Tensor & X) : torch::Tensor
+__
+#Xf : torch::Tensor
+#discretizers : map<std::string,mdlp::CPPFImdlp *>
+#y : torch::Tensor
+}
+class "bayesnet::TANLd" as C_0001668829096702037834
+class C_0001668829096702037834 #aliceblue;line:blue;line.dotted;text:blue {
++TANLd() : void
++~TANLd() = default : void
+..
++fit(torch::Tensor & X, torch::Tensor & y, const std::vector<std::string> & features, const std::string & className, std::map<std::string,std::vector<int>> & states) : TANLd &
++graph(const std::string & name = "TAN") const : std::vector<std::string>
++predict(torch::Tensor & X) : torch::Tensor
+{static} +version() : std::string
+__
+}
+abstract "bayesnet::FeatureSelect" as C_0001695326193250580823
+abstract C_0001695326193250580823 #aliceblue;line:blue;line.dotted;text:blue {
++FeatureSelect(const torch::Tensor & samples, const std::vector<std::string> & features, const std::string & className, const int maxFeatures, const int classNumStates, const torch::Tensor & weights) : void
++~FeatureSelect() : void
+..
+#computeMeritCFS() : double
+#computeSuFeatures(const int a, const int b) : double
+#computeSuLabels() : void
+{abstract} +fit() = 0 : void
++getFeatures() const : std::vector<int>
++getScores() const : std::vector<double>
+#initialize() : void
+#symmetricalUncertainty(int a, int b) : double
+__
+#fitted : bool
+#maxFeatures : int
+#selectedFeatures : std::vector<int>
+#selectedScores : std::vector<double>
+#suFeatures : std::map<std::pair<int,int>,double>
+#suLabels : std::vector<double>
+#weights : const torch::Tensor &
+}
+class "bayesnet::CFS" as C_0000011627355691342494
+class C_0000011627355691342494 #aliceblue;line:blue;line.dotted;text:blue {
++CFS(const torch::Tensor & samples, const std::vector<std::string> & features, const std::string & className, const int maxFeatures, const int classNumStates, const torch::Tensor & weights) : void
++~CFS() : void
+..
++fit() : void
+__
+}
+class "bayesnet::FCBF" as C_0000144682015341746929
+class C_0000144682015341746929 #aliceblue;line:blue;line.dotted;text:blue {
++FCBF(const torch::Tensor & samples, const std::vector<std::string> & features, const std::string & className, const int maxFeatures, const int classNumStates, const torch::Tensor & weights, const double threshold) : void
++~FCBF() : void
+..
++fit() : void
+__
+}
+class "bayesnet::IWSS" as C_0000008268514674428553
+class C_0000008268514674428553 #aliceblue;line:blue;line.dotted;text:blue {
++IWSS(const torch::Tensor & samples, const std::vector<std::string> & features, const std::string & className, const int maxFeatures, const int classNumStates, const torch::Tensor & weights, const double threshold) : void
++~IWSS() : void
+..
++fit() : void
+__
+}
+class "bayesnet::SPODE" as C_0000512022813807538451
+class C_0000512022813807538451 #aliceblue;line:blue;line.dotted;text:blue {
++SPODE(int root) : void
++~SPODE() = default : void
+..
+#buildModel(const torch::Tensor & weights) : void
++graph(const std::string & name = "SPODE") const : std::vector<std::string>
+__
+}
+class "bayesnet::Ensemble" as C_0001985241386355360576
+class C_0001985241386355360576 #aliceblue;line:blue;line.dotted;text:blue {
++Ensemble(bool predict_voting = true) : void
++~Ensemble() = default : void
+..
+#compute_arg_max(std::vector<std::vector<double>> & X) : std::vector<int>
+#compute_arg_max(torch::Tensor & X) : torch::Tensor
++dump_cpt() const : std::string
++getNumberOfEdges() const : int
++getNumberOfNodes() const : int
++getNumberOfStates() const : int
++graph(const std::string & title) const : std::vector<std::string>
++predict(std::vector<std::vector<int>> & X) : std::vector<int>
++predict(torch::Tensor & X) : torch::Tensor
+#predict_average_proba(torch::Tensor & X) : torch::Tensor
+#predict_average_proba(std::vector<std::vector<int>> & X) : std::vector<std::vector<double>>
+#predict_average_voting(torch::Tensor & X) : torch::Tensor
+#predict_average_voting(std::vector<std::vector<int>> & X) : std::vector<std::vector<double>>
++predict_proba(std::vector<std::vector<int>> & X) : std::vector<std::vector<double>>
++predict_proba(torch::Tensor & X) : torch::Tensor
++score(std::vector<std::vector<int>> & X, std::vector<int> & y) : float
++score(torch::Tensor & X, torch::Tensor & y) : float
++show() const : std::vector<std::string>
++topological_order() : std::vector<std::string>
+#trainModel(const torch::Tensor & weights) : void
+#voting(torch::Tensor & votes) : torch::Tensor
+__
+#models : std::vector<std::unique_ptr<Classifier>>
+#n_models : unsigned int
+#predict_voting : bool
+#significanceModels : std::vector<double>
+}
+class "bayesnet::(anonymous_45089536)" as C_0001186398587753535158
+class C_0001186398587753535158 #aliceblue;line:blue;line.dotted;text:blue {
+__
++CFS : std::string
++FCBF : std::string
++IWSS : std::string
+}
+class "bayesnet::(anonymous_45090163)" as C_0000602764946063116717
+class C_0000602764946063116717 #aliceblue;line:blue;line.dotted;text:blue {
+__
++ASC : std::string
++DESC : std::string
++RAND : std::string
+}
+class "bayesnet::BoostAODE" as C_0000358471592399852382
+class C_0000358471592399852382 #aliceblue;line:blue;line.dotted;text:blue {
++BoostAODE(bool predict_voting = false) : void
++~BoostAODE() = default : void
+..
+#buildModel(const torch::Tensor & weights) : void
++graph(const std::string & title = "BoostAODE") const : std::vector<std::string>
++setHyperparameters(const nlohmann::json & hyperparameters_) : void
+#trainModel(const torch::Tensor & weights) : void
+__
+}
+class "bayesnet::MST" as C_0000131858426172291700
+class C_0000131858426172291700 #aliceblue;line:blue;line.dotted;text:blue {
++MST() = default : void
++MST(const std::vector<std::string> & features, const torch::Tensor & weights, const int root) : void
+..
++maximumSpanningTree() : std::vector<std::pair<int,int>>
+__
+}
+class "bayesnet::Graph" as C_0001197041682001898467
+class C_0001197041682001898467 #aliceblue;line:blue;line.dotted;text:blue {
++Graph(int V) : void
+..
++addEdge(int u, int v, float wt) : void
++find_set(int i) : int
++get_mst() : std::vector<std::pair<float,std::pair<int,int>>>
++kruskal_algorithm() : void
++union_set(int u, int v) : void
+__
+}
+class "bayesnet::KDBLd" as C_0000344502277874806837
+class C_0000344502277874806837 #aliceblue;line:blue;line.dotted;text:blue {
++KDBLd(int k) : void
++~KDBLd() = default : void
+..
++fit(torch::Tensor & X, torch::Tensor & y, const std::vector<std::string> & features, const std::string & className, std::map<std::string,std::vector<int>> & states) : KDBLd &
++graph(const std::string & name = "KDB") const : std::vector<std::string>
++predict(torch::Tensor & X) : torch::Tensor
+{static} +version() : std::string
+__
+}
+class "bayesnet::AODE" as C_0000786111576121788282
+class C_0000786111576121788282 #aliceblue;line:blue;line.dotted;text:blue {
++AODE(bool predict_voting = false) : void
++~AODE() : void
+..
+#buildModel(const torch::Tensor & weights) : void
++graph(const std::string & title = "AODE") const : std::vector<std::string>
++setHyperparameters(const nlohmann::json & hyperparameters) : void
+__
+}
+class "bayesnet::SPODELd" as C_0001369655639257755354
+class C_0001369655639257755354 #aliceblue;line:blue;line.dotted;text:blue {
++SPODELd(int root) : void
++~SPODELd() = default : void
+..
++commonFit(const std::vector<std::string> & features, const std::string & className, std::map<std::string,std::vector<int>> & states) : SPODELd &
++fit(torch::Tensor & X, torch::Tensor & y, const std::vector<std::string> & features, const std::string & className, std::map<std::string,std::vector<int>> & states) : SPODELd &
++fit(torch::Tensor & dataset, const std::vector<std::string> & features, const std::string & className, std::map<std::string,std::vector<int>> & states) : SPODELd &
++graph(const std::string & name = "SPODE") const : std::vector<std::string>
++predict(torch::Tensor & X) : torch::Tensor
+{static} +version() : std::string
+__
+}
+class "bayesnet::AODELd" as C_0000487273479333793647
+class C_0000487273479333793647 #aliceblue;line:blue;line.dotted;text:blue {
++AODELd(bool predict_voting = true) : void
++~AODELd() = default : void
+..
+#buildModel(const torch::Tensor & weights) : void
++fit(torch::Tensor & X_, torch::Tensor & y_, const std::vector<std::string> & features_, const std::string & className_, std::map<std::string,std::vector<int>> & states_) : AODELd &
++graph(const std::string & name = "AODELd") const : std::vector<std::string>
+#trainModel(const torch::Tensor & weights) : void
+__
+}
+C_0001303524929067080934 --> C_0001303524929067080934 : -parents
+C_0001303524929067080934 --> C_0001303524929067080934 : -children
+C_0001186707649890429575 o-- C_0001303524929067080934 : -nodes
+C_0000327135989451974539 ..> C_0000738420730783851375
+C_0002043996622900301644 o-- C_0001186707649890429575 : #model
+C_0002043996622900301644 o-- C_0000736965376885623323 : #metrics
+C_0002043996622900301644 o-- C_0000738420730783851375 : #status
+C_0000327135989451974539 <|-- C_0002043996622900301644
+C_0002043996622900301644 <|-- C_0001112865019015250005
+C_0002043996622900301644 <|-- C_0001760994424884323017
+C_0002219995589162262979 ..> C_0001186707649890429575
+C_0001760994424884323017 <|-- C_0001668829096702037834
+C_0002219995589162262979 <|-- C_0001668829096702037834
+C_0000736965376885623323 <|-- C_0001695326193250580823
+C_0001695326193250580823 <|-- C_0000011627355691342494
+C_0001695326193250580823 <|-- C_0000144682015341746929
+C_0001695326193250580823 <|-- C_0000008268514674428553
+C_0002043996622900301644 <|-- C_0000512022813807538451
+C_0001985241386355360576 o-- C_0002043996622900301644 : #models
+C_0002043996622900301644 <|-- C_0001985241386355360576
+C_0000358471592399852382 --> C_0001695326193250580823 : -featureSelector
+C_0001985241386355360576 <|-- C_0000358471592399852382
+C_0001112865019015250005 <|-- C_0000344502277874806837
+C_0002219995589162262979 <|-- C_0000344502277874806837
+C_0001985241386355360576 <|-- C_0000786111576121788282
+C_0000512022813807538451 <|-- C_0001369655639257755354
+C_0002219995589162262979 <|-- C_0001369655639257755354
+C_0001985241386355360576 <|-- C_0000487273479333793647
+C_0002219995589162262979 <|-- C_0000487273479333793647
+
+'Generated with clang-uml, version 0.5.1
+'LLVM version clang version 17.0.6 (Fedora 17.0.6-2.fc39)
+@enduml

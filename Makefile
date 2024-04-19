@@ -1,9 +1,10 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
-.PHONY: viewcoverage coverage setup help install uninstall buildr buildd test clean debug release sample updatebadge
+.PHONY: viewcoverage coverage setup help install uninstall diagrams buildr buildd test clean debug release sample updatebadge
 
 f_release = build_release
 f_debug = build_debug
+f_diagrams = diagrams
 app_targets = BayesNet
 test_targets = TestBayesNet
 n_procs = -j 16
@@ -31,11 +32,18 @@ setup: ## Install dependencies for tests and coverage
 		pip install gcovr; \
 		sudo dnf install lcov;\
 	fi
+	@echo "* You should install plantuml & graphviz for the diagrams"
 
-dependency: ## Create a dependency graph diagram of the project (build/dependency.png)
+diagrams: ## Create an UML class diagram & depnendency of the project (diagrams/BayesNet.png)
+	@export PLANTUML_LIMIT_SIZE=16384
+	@echo ">>> Creating UML class diagram of the project...";
+	@clang-uml -p 
+	@cd $(f_diagrams); \
+	plantuml -tsvg BayesNet.puml
 	@echo ">>> Creating dependency graph diagram of the project...";
 	$(MAKE) debug
-	cd $(f_debug) && cmake .. --graphviz=dependency.dot && dot -Tpng dependency.dot -o dependency.png
+	cd $(f_debug) && cmake .. --graphviz=dependency.dot 
+	@dot -Tsvg $(f_debug)/dependency.dot -o $(f_diagrams)/dependency.svg
 
 buildd: ## Build the debug targets
 	cmake --build $(f_debug) -t $(app_targets) $(n_procs)
