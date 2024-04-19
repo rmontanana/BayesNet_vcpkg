@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Badges of coverage and code quality (codacy) in README.md. Coverage badge is updated with *make viewcoverage*
 - Tests to reach 97% of coverage.
 - Copyright header to source files.
+- Diagrams to README.md: UML class diagram & dependency diagram
+- Action to create diagrams to Makefile: *make diagrams*
 
 ### Changed
 
