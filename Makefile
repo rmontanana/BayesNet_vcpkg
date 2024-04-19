@@ -7,6 +7,9 @@ f_debug = build_debug
 f_diagrams = diagrams
 app_targets = BayesNet
 test_targets = TestBayesNet
+clang-uml = clang-uml
+plantuml = plantuml
+dot = dot
 n_procs = -j 16
 
 define ClearTests
@@ -35,15 +38,18 @@ setup: ## Install dependencies for tests and coverage
 	@echo "* You should install plantuml & graphviz for the diagrams"
 
 diagrams: ## Create an UML class diagram & depnendency of the project (diagrams/BayesNet.png)
+	@which $(plantuml) || (echo ">>> Please install plantuml"; exit 1)
+	@which $(dot) || (echo ">>> Please install graphviz"; exit 1)
+	@which $(clang-uml) || (echo ">>> Please install clang-uml"; exit 1)
 	@export PLANTUML_LIMIT_SIZE=16384
 	@echo ">>> Creating UML class diagram of the project...";
-	@clang-uml -p 
+	@$(clang-uml) -p 
 	@cd $(f_diagrams); \
-	plantuml -tsvg BayesNet.puml
+	$(plantuml) -tsvg BayesNet.puml
 	@echo ">>> Creating dependency graph diagram of the project...";
 	$(MAKE) debug
 	cd $(f_debug) && cmake .. --graphviz=dependency.dot 
-	@dot -Tsvg $(f_debug)/dependency.dot -o $(f_diagrams)/dependency.svg
+	@$(dot) -Tsvg $(f_debug)/dependency.dot -o $(f_diagrams)/dependency.svg
 
 buildd: ## Build the debug targets
 	cmake --build $(f_debug) -t $(app_targets) $(n_procs)
