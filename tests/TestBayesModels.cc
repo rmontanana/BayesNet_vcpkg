@@ -20,7 +20,7 @@
 #include "bayesnet/ensembles/BoostAODE.h"
 #include "TestUtils.h"
 
-const std::string ACTUAL_VERSION = "1.0.4.1";
+const std::string ACTUAL_VERSION = "1.0.5";
 
 TEST_CASE("Test Bayesian Classifiers score & version", "[Models]")
 {

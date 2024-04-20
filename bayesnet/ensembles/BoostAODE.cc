@@ -14,8 +14,6 @@
 #include "bayesnet/feature_selection/IWSS.h"
 #include "BoostAODE.h"
 
-#include "bayesnet/utils/loguru.cpp"
-
 namespace bayesnet {
 
     BoostAODE::BoostAODE(bool predict_voting) : Ensemble(predict_voting)
@@ -186,7 +184,6 @@ namespace bayesnet {
         significanceModels = std::vector<double>(k, 1.0);
         // 4. Move first n classifiers to models_bak
         // backup the first n_models - k models (if n_models == k, don't backup any)
-        VLOG_SCOPE_F(1, "upd_weights_block n_models=%d k=%d", n_models, k);
         for (int i = 0; i < n_models - k; ++i) {
             model = std::move(models[0]);
             models.erase(models.begin());
@@ -251,9 +248,6 @@ namespace bayesnet {
         featureSelector->fit();
         auto cfsFeatures = featureSelector->getFeatures();
         auto scores = featureSelector->getScores();
-        for (int i = 0; i < cfsFeatures.size(); ++i) {
-            LOG_F(INFO, "Feature: %d Score: %f", cfsFeatures[i], scores[i]);
-        }
         for (const int& feature : cfsFeatures) {
             featuresUsed.push_back(feature);
             std::unique_ptr<Classifier> model = std::make_unique<SPODE>(feature);
@@ -268,12 +262,6 @@ namespace bayesnet {
     }
     void BoostAODE::trainModel(const torch::Tensor& weights)
     {
-        //
-        // Logging setup
-        //
-        loguru::set_thread_name("BoostAODE");
-        loguru::g_stderr_verbosity = loguru::Verbosity_OFF;;
-        loguru::add_file("boostAODE.log", loguru::Truncate, loguru::Verbosity_MAX);
         // Algorithm based on the adaboost algorithm for classification
         // as explained in Ensemble methods (Zhi-Hua Zhou, 2012)
         fitted = true;
@@ -292,11 +280,6 @@ namespace bayesnet {
             if (finished) {
                 return;
             }
-            LOG_F(INFO, "Initial models: %d", n_models);
-            LOG_F(INFO, "Significances: ");
-            for (int i = 0; i < n_models; ++i) {
-                LOG_F(INFO, "i=%d significance=%f", i, significanceModels[i]);
-            }
         }
         int numItemsPack = 0; // The counter of the models inserted in the current pack
         // Variables to control the accuracy finish condition
@@ -313,7 +296,6 @@ namespace bayesnet {
         while (!finished) {
             // Step 1: Build ranking with mutual information
             auto featureSelection = metrics.SelectKBestWeighted(weights_, ascending, n); // Get all the features sorted
-            VLOG_SCOPE_F(1, "featureSelection.size: %zu featuresUsed.size: %zu", featureSelection.size(), featuresUsed.size());
             if (order_algorithm == Orders.RAND) {
                 std::shuffle(featureSelection.begin(), featureSelection.end(), g);
             }
@@ -324,7 +306,6 @@ namespace bayesnet {
             );
             int k = pow(2, tolerance);
             int counter = 0; // The model counter of the current pack
-            VLOG_SCOPE_F(1, "counter=%d k=%d featureSelection.size: %zu", counter, k, featureSelection.size());
             while (counter++ < k && featureSelection.size() > 0) {
                 auto feature = featureSelection[0];
                 featureSelection.erase(featureSelection.begin());
@@ -336,10 +317,6 @@ namespace bayesnet {
                     auto ypred = model->predict(X_train);
                     // Step 3.1: Compute the classifier amout of say
                     std::tie(weights_, alpha_t, finished) = update_weights(y_train, ypred, weights_);
-                    if (finished) {
-                        VLOG_SCOPE_F(2, "** epsilon_t > 0.5 **");
-                        break;
-                    }
                 }
                 // Step 3.4: Store classifier and its accuracy to weigh its future vote
                 numItemsPack++;
@@ -347,7 +324,6 @@ namespace bayesnet {
                 models.push_back(std::move(model));
                 significanceModels.push_back(alpha_t);
                 n_models++;
-                VLOG_SCOPE_F(2, "numItemsPack: %d n_models: %d featuresUsed: %zu", numItemsPack, n_models, featuresUsed.size());
             }
             if (block_update) {
                 std::tie(weights_, alpha_t, finished) = update_weights_block(k, y_train, weights_);
@@ -357,15 +333,12 @@ namespace bayesnet {
                 double accuracy = (y_val_predict == y_test).sum().item<double>() / (double)y_test.size(0);
                 if (priorAccuracy == 0) {
                     priorAccuracy = accuracy;
-                    VLOG_SCOPE_F(3, "First accuracy: %f", priorAccuracy);
                 } else {
                     improvement = accuracy - priorAccuracy;
                 }
                 if (improvement < convergence_threshold) {
-                    VLOG_SCOPE_F(3, "(improvement<threshold) tolerance: %d numItemsPack: %d improvement: %f prior: %f current: %f", tolerance, numItemsPack, improvement, priorAccuracy, accuracy);
                     tolerance++;
                 } else {
-                    VLOG_SCOPE_F(3, "*(improvement>=threshold) Reset. tolerance: %d numItemsPack: %d improvement: %f prior: %f current: %f", tolerance, numItemsPack, improvement, priorAccuracy, accuracy);
                     tolerance = 0; // Reset the counter if the model performs better
                     numItemsPack = 0;
                 }
@@ -373,20 +346,17 @@ namespace bayesnet {
                 priorAccuracy = std::max(accuracy, priorAccuracy);
                 // priorAccuracy = accuracy;
             }
-            VLOG_SCOPE_F(1, "tolerance: %d featuresUsed.size: %zu features.size: %zu", tolerance, featuresUsed.size(), features.size());
             finished = finished || tolerance > maxTolerance || featuresUsed.size() == features.size();
         }
         if (tolerance > maxTolerance) {
             if (numItemsPack < n_models) {
                 notes.push_back("Convergence threshold reached & " + std::to_string(numItemsPack) + " models eliminated");
-                VLOG_SCOPE_F(4, "Convergence threshold reached & %d models eliminated of %d", numItemsPack, n_models);
                 for (int i = 0; i < numItemsPack; ++i) {
                     significanceModels.pop_back();
                     models.pop_back();
                     n_models--;
                 }
             } else {
-                VLOG_SCOPE_F(4, "Convergence threshold reached & 0 models eliminated n_models=%d numItemsPack=%d", n_models, numItemsPack);
                 notes.push_back("Convergence threshold reached & 0 models eliminated");
             }
         }

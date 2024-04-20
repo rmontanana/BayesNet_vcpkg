@@ -49,7 +49,7 @@ diagrams: ## Create an UML class diagram & depnendency of the project (diagrams/
 	@echo ">>> Creating dependency graph diagram of the project...";
 	$(MAKE) debug
 	cd $(f_debug) && cmake .. --graphviz=dependency.dot 
-	@$(dot) -Tsvg $(f_debug)/dependency.dot -o $(f_diagrams)/dependency.svg
+	@$(dot) -Tsvg $(f_debug)/dependency.dot.BayesNet -o $(f_diagrams)/dependency.svg
 
 buildd: ## Build the debug targets
 	cmake --build $(f_debug) -t $(app_targets) $(n_procs)
