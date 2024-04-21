@@ -100,7 +100,7 @@ sample: ## Build sample
 
 opt = ""
 test: ## Run tests (opt="-s") to verbose output the tests, (opt="-c='Test Maximum Spanning Tree'") to run only that section
-	@echo ">>> Running BayesNet & Platform tests...";
+	@echo ">>> Running BayesNet tests...";
 	@$(MAKE) clean
 	@cmake --build $(f_debug) -t $(test_targets) $(n_procs)
 	@for t in $(test_targets); do \
@@ -116,15 +116,10 @@ test: ## Run tests (opt="-s") to verbose output the tests, (opt="-c='Test Maximu
 coverage: ## Run tests and generate coverage report (build/index.html)
 	@echo ">>> Building tests with coverage..."
 	@which $(gcovr) || (echo ">>> Please install gcovr"; exit 1)
-	@$(MAKE) test
-	@$(gcovr) $(f_debug)/tests
-	@echo ">>> Done";	
-
-viewcoverage: ## Run tests, generate coverage report and upload it to codecov (build/index.html)
 	@which $(lcov) || (echo ">>> Please install lcov"; exit 1)
 	@which $(genhtml) || (echo ">>> Please install lcov"; exit 1)
-	@echo ">>> Building tests with coverage..."
-	@$(MAKE) coverage
+	@$(MAKE) test
+	@$(gcovr) $(f_debug)/tests
 	@echo ">>> Building report..."
 	@cd $(f_debug)/tests; \
 	$(lcov) --directory . --capture --output-file coverage.info >/dev/null 2>&1; \
@@ -135,10 +130,18 @@ viewcoverage: ## Run tests, generate coverage report and upload it to codecov (b
 	$(lcov) --remove coverage.info 'bayesnet/utils/loguru.*' --ignore-errors unused --output-file coverage.info >/dev/null 2>&1
 	@$(genhtml) $(f_debug)/tests/coverage.info --output-directory html >/dev/null 2>&1;
 	@$(MAKE) updatebadge
+	@echo ">>> Done";	
+
+viewcoverage: ## View the html coverage report
 	@xdg-open html/index.html || open html/index.html 2>/dev/null
 	@echo ">>> Done";
 
 updatebadge: ## Update the coverage badge in README.md
+	@which python || (echo ">>> Please install python"; exit 1)
+	@if [ ! -f $(f_debug)/tests/coverage.info ]; then \
+		echo ">>> No coverage.info file found. Run make coverage first!"; \
+		exit 1; \
+	fi
 	@echo ">>> Updating coverage badge..."
 	@env python update_coverage.py $(f_debug)/tests
 	@echo ">>> Done";

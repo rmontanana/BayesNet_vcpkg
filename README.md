@@ -7,7 +7,7 @@
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=rmontanana_BayesNet&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=rmontanana_BayesNet)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=rmontanana_BayesNet&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=rmontanana_BayesNet)
 ![Gitea Last Commit](https://img.shields.io/gitea/last-commit/rmontanana/bayesnet?gitea_url=https://gitea.rmontanana.es:3000&logo=gitea)
-[![Static Badge](https://img.shields.io/badge/Coverage-97,2%25-green)](html/index.html)
+[![Coverage Badge](https://img.shields.io/badge/Coverage-97,2%25-green)](html/index.html)
 
 Bayesian Network Classifiers using libtorch from scratch
 
@@ -22,6 +22,12 @@ unzip libtorch-shared-with-deps-latest.zips
 
 ## Setup
 
+### Getting the code
+
+```bash
+git clone --recurse-submodules https://github.com/doctorado-ml/bayesnet
+```
+
 ### Release
 
 ```bash
@@ -35,7 +41,18 @@ sudo make install
 ```bash
 make debug
 make test
+```
+
+### Coverage
+
+```bash
 make coverage
+```
+
+or
+
+```bash
+make viewcoverage
 ```
 
 ### Sample app
@@ -60,3 +77,7 @@ make sample fname=tests/data/glass.arff
 ### Dependency Diagram
 
 ![BayesNet Dependency Diagram](diagrams/dependency.svg)
+
+## Coverage report
+
+[Coverage report](html/index.html)
