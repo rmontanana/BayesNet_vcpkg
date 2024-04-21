@@ -9,6 +9,9 @@ app_targets = BayesNet
 test_targets = TestBayesNet
 clang-uml = clang-uml
 plantuml = plantuml
+gcovr = gcovr
+lcov = lcov
+genhtml = genhtml
 dot = dot
 n_procs = -j 16
 
@@ -112,24 +115,27 @@ test: ## Run tests (opt="-s") to verbose output the tests, (opt="-c='Test Maximu
 
 coverage: ## Run tests and generate coverage report (build/index.html)
 	@echo ">>> Building tests with coverage..."
+	@which $(gcovr) || (echo ">>> Please install gcovr"; exit 1)
 	@$(MAKE) test
-	@gcovr $(f_debug)/tests
+	@$(gcovr) $(f_debug)/tests
 	@echo ">>> Done";	
 
 viewcoverage: ## Run tests, generate coverage report and upload it to codecov (build/index.html)
+	@which $(lcov) || (echo ">>> Please install lcov"; exit 1)
+	@which $(genhtml) || (echo ">>> Please install lcov"; exit 1)
 	@echo ">>> Building tests with coverage..."
 	@$(MAKE) coverage
 	@echo ">>> Building report..."
 	@cd $(f_debug)/tests; \
-	lcov --directory . --capture --output-file coverage.info >/dev/null 2>&1; \
-	lcov --remove coverage.info '/usr/*' --output-file coverage.info >/dev/null 2>&1; \
-	lcov --remove coverage.info 'lib/*' --output-file coverage.info >/dev/null 2>&1; \
-	lcov --remove coverage.info 'libtorch/*' --output-file coverage.info >/dev/null 2>&1; \
-	lcov --remove coverage.info 'tests/*' --output-file coverage.info >/dev/null 2>&1; \
-	lcov --remove coverage.info 'bayesnet/utils/loguru.*' --output-file coverage.info >/dev/null 2>&1; \
-	genhtml coverage.info --output-directory coverage >/dev/null 2>&1;
+	$(lcov) --directory . --capture --output-file coverage.info >/dev/null 2>&1; \
+	$(lcov) --remove coverage.info '/usr/*' --output-file coverage.info >/dev/null 2>&1; \
+	$(lcov) --remove coverage.info 'lib/*' --output-file coverage.info >/dev/null 2>&1; \
+	$(lcov) --remove coverage.info 'libtorch/*' --output-file coverage.info >/dev/null 2>&1; \
+	$(lcov) --remove coverage.info 'tests/*' --output-file coverage.info >/dev/null 2>&1; \
+	$(lcov) --remove coverage.info 'bayesnet/utils/loguru.*' --ignore-errors unused --output-file coverage.info >/dev/null 2>&1
+	@$(genhtml) $(f_debug)/tests/coverage.info --output-directory html >/dev/null 2>&1;
 	@$(MAKE) updatebadge
-	@xdg-open $(f_debug)/tests/coverage/index.html || open $(f_debug)/tests/coverage/index.html 2>/dev/null
+	@xdg-open html/index.html || open html/index.html 2>/dev/null
 	@echo ">>> Done";
 
 updatebadge: ## Update the coverage badge in README.md

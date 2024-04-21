@@ -20,15 +20,13 @@ if value < 90:
     print("⛔Coverage is less than 90%. I won't update the badge.")
     sys.exit(1)
 percentage = output.decode("utf-8").strip().replace(".", ",")
-coverage_line = (
-    f"![Static Badge](https://img.shields.io/badge/Coverage-{percentage}25-green)"
-)
+coverage_line = f"[![Static Badge](https://img.shields.io/badge/Coverage-{percentage}25-green)](html/index.html)"
 # Update README.md
 with open(readme_file, "r") as f:
     lines = f.readlines()
 with open(readme_file, "w") as f:
     for line in lines:
-        if "Coverage" in line:
+        if "img.shields.io/badge/Coverage" in line:
             f.write(coverage_line + "\n")
         else:
             f.write(line)
