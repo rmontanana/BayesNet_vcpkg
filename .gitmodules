@@ -3,8 +3,8 @@
 	url = https://github.com/rmontanana/mdlp
 	main = main
 	update = merge
-[submodule "lib/catch2"]
-	path = lib/catch2
+[submodule "tests/lib/catch2"]
+	path = tests/lib/catch2
     main  = v2.x
 	update = merge
 	url = https://github.com/catchorg/Catch2.git

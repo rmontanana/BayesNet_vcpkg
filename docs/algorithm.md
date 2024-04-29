@@ -105,8 +105,7 @@
 
             2. $numItemsPack \leftarrow 0$
 
-    10. If
-        $(Vars == \emptyset \lor tolerance>maxTolerance) \; finished \leftarrow True$
+    10. If $(Vars == \emptyset \lor tolerance>maxTolerance) \; finished \leftarrow True$
 
     11. $lastAccuracy \leftarrow max(lastAccuracy, actualAccuracy)$
 

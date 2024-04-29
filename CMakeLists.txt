@@ -66,14 +66,14 @@ add_git_submodule("lib/json")
 # Subdirectories
 # --------------
 add_subdirectory(config)
-add_subdirectory(lib/Files)
 add_subdirectory(bayesnet)
 
 # Testing
 # -------
 if (ENABLE_TESTING)
-  MESSAGE("Testing enabled")
-  add_git_submodule("lib/catch2")  
+MESSAGE("Testing enabled")
+  add_git_submodule("tests/lib/catch2")  
+  add_subdirectory(tests/lib/Files)
   include(CTest)
   add_subdirectory(tests)
 endif (ENABLE_TESTING)

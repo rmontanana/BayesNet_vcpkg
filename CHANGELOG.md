@@ -10,7 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add the Library logo generated with <https://openart.ai> to README.md
-- Add link to the coverage report in the README.md coverage label
+- Add link to the coverage report in the README.md coverage label.
+- Add the *convergence_best* hyperparameter to the BoostAODE class, to control the way the prior accuracy is computed if convergence is set. Default value is *false*.
+
+### Internal
+
+- Refactor library ArffFile to limit the number of samples with a parameter.
+- Refactor tests libraries location to test/lib
+- Refactor loadDataset function in tests.
 
 ## [1.0.5] 2024-04-20
 

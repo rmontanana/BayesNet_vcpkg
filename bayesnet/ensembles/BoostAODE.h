@@ -39,6 +39,7 @@ namespace bayesnet {
         int maxTolerance = 3;
         std::string order_algorithm; // order to process the KBest features asc, desc, rand
         bool convergence = true; //if true, stop when the model does not improve
+        bool convergence_best = false; // wether to keep the best accuracy to the moment or the last accuracy as prior accuracy
         bool selectFeatures = false; // if true, use feature selection
         std::string select_features_algorithm = Orders.DESC; // Selected feature selection algorithm
         FeatureSelect* featureSelector = nullptr;

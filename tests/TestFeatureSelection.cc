@@ -17,11 +17,11 @@
 bayesnet::FeatureSelect* build_selector(RawDatasets& raw, std::string selector, double threshold)
 {
     if (selector == "CFS") {
-        return new bayesnet::CFS(raw.dataset, raw.featuresv, raw.classNamev, raw.featuresv.size(), raw.classNumStates, raw.weights);
+        return new bayesnet::CFS(raw.dataset, raw.features, raw.className, raw.features.size(), raw.classNumStates, raw.weights);
     } else if (selector == "FCBF") {
-        return new bayesnet::FCBF(raw.dataset, raw.featuresv, raw.classNamev, raw.featuresv.size(), raw.classNumStates, raw.weights, threshold);
+        return new bayesnet::FCBF(raw.dataset, raw.features, raw.className, raw.features.size(), raw.classNumStates, raw.weights, threshold);
     } else if (selector == "IWSS") {
-        return new bayesnet::IWSS(raw.dataset, raw.featuresv, raw.classNamev, raw.featuresv.size(), raw.classNumStates, raw.weights, threshold);
+        return new bayesnet::IWSS(raw.dataset, raw.features, raw.className, raw.features.size(), raw.classNumStates, raw.weights, threshold);
     }
     return nullptr;
 }
@@ -80,10 +80,10 @@ TEST_CASE("Oddities", "[FeatureSelection]")
 {
     auto raw = RawDatasets("iris", true);
     // FCBF Limits
-    REQUIRE_THROWS_AS(bayesnet::FCBF(raw.dataset, raw.featuresv, raw.classNamev, raw.featuresv.size(), raw.classNumStates, raw.weights, 1e-8), std::invalid_argument);
-    REQUIRE_THROWS_WITH(bayesnet::FCBF(raw.dataset, raw.featuresv, raw.classNamev, raw.featuresv.size(), raw.classNumStates, raw.weights, 1e-8), "Threshold cannot be less than 1e-7");
-    REQUIRE_THROWS_AS(bayesnet::IWSS(raw.dataset, raw.featuresv, raw.classNamev, raw.featuresv.size(), raw.classNumStates, raw.weights, -1e4), std::invalid_argument);
-    REQUIRE_THROWS_WITH(bayesnet::IWSS(raw.dataset, raw.featuresv, raw.classNamev, raw.featuresv.size(), raw.classNumStates, raw.weights, -1e4), "Threshold has to be in [0, 0.5]");
-    REQUIRE_THROWS_AS(bayesnet::IWSS(raw.dataset, raw.featuresv, raw.classNamev, raw.featuresv.size(), raw.classNumStates, raw.weights, 0.501), std::invalid_argument);
-    REQUIRE_THROWS_WITH(bayesnet::IWSS(raw.dataset, raw.featuresv, raw.classNamev, raw.featuresv.size(), raw.classNumStates, raw.weights, 0.501), "Threshold has to be in [0, 0.5]");
+    REQUIRE_THROWS_AS(bayesnet::FCBF(raw.dataset, raw.features, raw.className, raw.features.size(), raw.classNumStates, raw.weights, 1e-8), std::invalid_argument);
+    REQUIRE_THROWS_WITH(bayesnet::FCBF(raw.dataset, raw.features, raw.className, raw.features.size(), raw.classNumStates, raw.weights, 1e-8), "Threshold cannot be less than 1e-7");
+    REQUIRE_THROWS_AS(bayesnet::IWSS(raw.dataset, raw.features, raw.className, raw.features.size(), raw.classNumStates, raw.weights, -1e4), std::invalid_argument);
+    REQUIRE_THROWS_WITH(bayesnet::IWSS(raw.dataset, raw.features, raw.className, raw.features.size(), raw.classNumStates, raw.weights, -1e4), "Threshold has to be in [0, 0.5]");
+    REQUIRE_THROWS_AS(bayesnet::IWSS(raw.dataset, raw.features, raw.className, raw.features.size(), raw.classNumStates, raw.weights, 0.501), std::invalid_argument);
+    REQUIRE_THROWS_WITH(bayesnet::IWSS(raw.dataset, raw.features, raw.className, raw.features.size(), raw.classNumStates, raw.weights, 0.501), "Threshold has to be in [0, 0.5]");
 }

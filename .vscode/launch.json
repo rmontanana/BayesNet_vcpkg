@@ -16,7 +16,7 @@
             "name": "test",
             "program": "${workspaceFolder}/build_debug/tests/TestBayesNet",
             "args": [
-                "Block Update"
+                "\"Test Cannot build dataset with wrong data vector\""
             ],
             "cwd": "${workspaceFolder}/build_debug/tests"
         },
