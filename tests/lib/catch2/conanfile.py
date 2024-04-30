@@ -19,6 +19,7 @@ class CatchConan(ConanFile):
     license = "BSL-1.0"
     version = "latest"
     settings = "os", "compiler", "build_type", "arch"
+    extension_properties = {"compatibility_cppstd": False}
 
     options = {
         "shared": [True, False],
@@ -115,6 +116,7 @@ class CatchConan(ConanFile):
 
         # Catch2
         self.cpp_info.components["catch2base"].set_property("cmake_file_name", "Catch2::Catch2")
+        self.cpp_info.components["catch2base"].set_property("cmake_target_name", "Catch2::Catch2")
         self.cpp_info.components["catch2base"].set_property("pkg_config_name", "catch2")
         self.cpp_info.components["catch2base"].libs = ["Catch2" + lib_suffix]
         self.cpp_info.components["catch2base"].builddirs.append("lib/cmake/Catch2")

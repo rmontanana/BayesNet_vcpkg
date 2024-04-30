@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactor library ArffFile to limit the number of samples with a parameter.
 - Refactor tests libraries location to test/lib
 - Refactor loadDataset function in tests.
+- Remove conditionalEdgeWeights method in BayesMetrics.
 
 ## [1.0.5] 2024-04-20
 
@@ -38,6 +39,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sample app now is a separate target in the Makefile and shows how to use the library with a sample dataset
 - The worse model count in BoostAODE is reset to 0 every time a new model produces better accuracy, so the tolerance of the model is meant to be the number of **consecutive** models that produce worse accuracy.
 - Default hyperparameter values in BoostAODE: bisection is true, maxTolerance is 3, convergence is true
+
+### Removed
+
+- The 'predict_single' hyperparameter from the BoostAODE class.
+- The 'repeatSparent' hyperparameter from the BoostAODE class.
 
 ## [1.0.4] 2024-03-06
 

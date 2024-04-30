@@ -18,23 +18,23 @@ public:
 
 class ShuffleArffFiles : public ArffFiles {
 public:
-    ShuffleArffFiles(int num_lines = 0, bool shuffle = false) : ArffFiles(), num_lines(num_lines), shuffle(shuffle) {}
+    ShuffleArffFiles(int num_samples = 0, bool shuffle = false) : ArffFiles(), num_samples(num_samples), shuffle(shuffle) {}
     void load(const std::string& file_name, bool class_last = true)
     {
         ArffFiles::load(file_name, class_last);
-        if (num_lines > 0) {
-            if (num_lines > getY().size()) {
+        if (num_samples > 0) {
+            if (num_samples > getY().size()) {
                 throw std::invalid_argument("num_lines must be less than the number of lines in the file");
             }
-            auto indices = std::vector<int>(num_lines);
+            auto indices = std::vector<int>(num_samples);
             std::iota(indices.begin(), indices.end(), 0);
             if (shuffle) {
                 std::mt19937 g{ 173 };
                 std::shuffle(indices.begin(), indices.end(), g);
             }
-            auto XX = std::vector<std::vector<float>>(attributes.size(), std::vector<float>(num_lines));
-            auto yy = std::vector<int>(num_lines);
-            for (int i = 0; i < num_lines; i++) {
+            auto XX = std::vector<std::vector<float>>(attributes.size(), std::vector<float>(num_samples));
+            auto yy = std::vector<int>(num_samples);
+            for (int i = 0; i < num_samples; i++) {
                 yy[i] = getY()[indices[i]];
                 for (int j = 0; j < attributes.size(); j++) {
                     XX[j][i] = X[j][indices[i]];
@@ -45,18 +45,18 @@ public:
         }
     }
 private:
-    int num_lines;
+    int num_samples;
     bool shuffle;
 };
 
-RawDatasets::RawDatasets(const std::string& file_name, bool discretize_, int num_lines_, bool shuffle_)
+RawDatasets::RawDatasets(const std::string& file_name, bool discretize_, int num_samples_, bool shuffle_, bool class_last, bool debug)
 {
-    num_lines = num_lines_;
+    num_samples = num_samples_;
     shuffle = shuffle_;
     discretize = discretize_;
     // Xt can be either discretized or not
     // Xv is always discretized
-    loadDataset(file_name);
+    loadDataset(file_name, class_last);
     auto yresized = torch::transpose(yt.view({ yt.size(0), 1 }), 0, 1);
     dataset = torch::cat({ Xt, yresized }, 0);
     nSamples = dataset.size(1);
@@ -72,7 +72,8 @@ RawDatasets::RawDatasets(const std::string& file_name, bool discretize_, int num
     y_train = dataset.index({ -1, train_t });
     X_test = dataset.index({ torch::indexing::Slice(0, dataset.size(0) - 1), test_t });
     y_test = dataset.index({ -1, test_t });
-    std::cout << to_string();
+    if (debug)
+        std::cout << to_string();
 }
 
 map<std::string, int> RawDatasets::discretizeDataset(std::vector<mdlp::samples_t>& X)
@@ -89,10 +90,10 @@ map<std::string, int> RawDatasets::discretizeDataset(std::vector<mdlp::samples_t
     return maxes;
 }
 
-void RawDatasets::loadDataset(const std::string& name)
+void RawDatasets::loadDataset(const std::string& name, bool class_last)
 {
-    auto handler = ShuffleArffFiles(num_lines, shuffle);
-    handler.load(Paths::datasets() + static_cast<std::string>(name) + ".arff", true);
+    auto handler = ShuffleArffFiles(num_samples, shuffle);
+    handler.load(Paths::datasets() + static_cast<std::string>(name) + ".arff", class_last);
     // Get Dataset X, y
     std::vector<mdlp::samples_t>& X = handler.getX();
     yv = handler.getY();

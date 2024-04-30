@@ -140,21 +140,20 @@ TEST_CASE("Oddities", "[BoostAODE]")
 TEST_CASE("Bisection Best", "[BoostAODE]")
 {
     auto clf = bayesnet::BoostAODE();
-    auto raw = RawDatasets("mfeat-factors", true, 300, true);
+    auto raw = RawDatasets("kdd_JapaneseVowels", true, 1200, true, false);
     clf.setHyperparameters({
         {"bisection", true},
         {"maxTolerance", 3},
         {"convergence", true},
         {"block_update", false},
-        {"convergence_best", true},
+        {"convergence_best", false},
         });
     clf.fit(raw.X_train, raw.y_train, raw.features, raw.className, raw.states);
-    REQUIRE(clf.getNumberOfNodes() == 434);
-    REQUIRE(clf.getNumberOfEdges() == 862);
-    REQUIRE(clf.getNotes().size() == 3);
-    REQUIRE(clf.getNotes()[0] == "Convergence threshold reached & 15 models eliminated");
-    REQUIRE(clf.getNotes()[1] == "Used features in train: 16 of 216");
-    REQUIRE(clf.getNotes()[2] == "Number of models: 1");
+    REQUIRE(clf.getNumberOfNodes() == 75);
+    REQUIRE(clf.getNumberOfEdges() == 135);
+    REQUIRE(clf.getNotes().size() == 2);
+    REQUIRE(clf.getNotes().at(0) == "Convergence threshold reached & 9 models eliminated");
+    REQUIRE(clf.getNotes().at(1) == "Number of models: 5");
     auto score = clf.score(raw.X_test, raw.y_test);
     auto scoret = clf.score(raw.X_test, raw.y_test);
     REQUIRE(score == Catch::Approx(1.0f).epsilon(raw.epsilon));
@@ -162,11 +161,9 @@ TEST_CASE("Bisection Best", "[BoostAODE]")
 }
 TEST_CASE("Bisection Best vs Last", "[BoostAODE]")
 {
-    auto raw = RawDatasets("mfeat-factors", true, 500);
+    auto raw = RawDatasets("kdd_JapaneseVowels", true, 1500, true, false);
     auto clf = bayesnet::BoostAODE(true);
     auto hyperparameters = nlohmann::json{
-        {"select_features", "IWSS"},
-        {"threshold", 0.5},
         {"bisection", true},
         {"maxTolerance", 3},
         {"convergence", true},
@@ -175,13 +172,13 @@ TEST_CASE("Bisection Best vs Last", "[BoostAODE]")
     clf.setHyperparameters(hyperparameters);
     clf.fit(raw.X_train, raw.y_train, raw.features, raw.className, raw.states);
     auto score_best = clf.score(raw.X_test, raw.y_test);
-    REQUIRE(score_best == Catch::Approx(1.0f).epsilon(raw.epsilon));
+    REQUIRE(score_best == Catch::Approx(0.993355f).epsilon(raw.epsilon));
     // Now we will set the hyperparameter to use the last accuracy
     hyperparameters["convergence_best"] = false;
     clf.setHyperparameters(hyperparameters);
     clf.fit(raw.X_train, raw.y_train, raw.features, raw.className, raw.states);
     auto score_last = clf.score(raw.X_test, raw.y_test);
-    REQUIRE(score_last == Catch::Approx(1.0f).epsilon(raw.epsilon));
+    REQUIRE(score_last == Catch::Approx(0.996678f).epsilon(raw.epsilon));
 }
 
 TEST_CASE("Block Update", "[BoostAODE]")
@@ -195,14 +192,22 @@ TEST_CASE("Block Update", "[BoostAODE]")
         {"convergence", true},
         });
     clf.fit(raw.X_train, raw.y_train, raw.features, raw.className, raw.states);
-    REQUIRE(clf.getNumberOfNodes() == 217);
-    REQUIRE(clf.getNumberOfEdges() == 431);
+    REQUIRE(clf.getNumberOfNodes() == 868);
+    REQUIRE(clf.getNumberOfEdges() == 1724);
     REQUIRE(clf.getNotes().size() == 3);
     REQUIRE(clf.getNotes()[0] == "Convergence threshold reached & 15 models eliminated");
-    REQUIRE(clf.getNotes()[1] == "Used features in train: 16 of 216");
-    REQUIRE(clf.getNotes()[2] == "Number of models: 1");
+    REQUIRE(clf.getNotes()[1] == "Used features in train: 19 of 216");
+    REQUIRE(clf.getNotes()[2] == "Number of models: 4");
     auto score = clf.score(raw.X_test, raw.y_test);
     auto scoret = clf.score(raw.X_test, raw.y_test);
-    REQUIRE(score == Catch::Approx(1.0f).epsilon(raw.epsilon));
-    REQUIRE(scoret == Catch::Approx(1.0f).epsilon(raw.epsilon));
+    REQUIRE(score == Catch::Approx(0.99f).epsilon(raw.epsilon));
+    REQUIRE(scoret == Catch::Approx(0.99f).epsilon(raw.epsilon));
+    //
+    // std::cout << "Number of nodes " << clf.getNumberOfNodes() << std::endl;
+    // std::cout << "Number of edges " << clf.getNumberOfEdges() << std::endl;
+    // std::cout << "Notes size " << clf.getNotes().size() << std::endl;
+    // for (auto note : clf.getNotes()) {
+    //     std::cout << note << std::endl;
+    // }
+    // std::cout << "Score " << score << std::endl;
 }

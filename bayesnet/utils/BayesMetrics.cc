@@ -10,17 +10,17 @@ namespace bayesnet {
     //samples is n+1xm tensor used to fit the model
     Metrics::Metrics(const torch::Tensor& samples, const std::vector<std::string>& features, const std::string& className, const int classNumStates)
         : samples(samples)
-        , features(features)
         , className(className)
+        , features(features)
         , classNumStates(classNumStates)
     {
     }
     //samples is n+1xm std::vector used to fit the model
     Metrics::Metrics(const std::vector<std::vector<int>>& vsamples, const std::vector<int>& labels, const std::vector<std::string>& features, const std::string& className, const int classNumStates)
-        : features(features)
+        : samples(torch::zeros({ static_cast<int>(vsamples.size() + 1), static_cast<int>(vsamples[0].size()) }, torch::kInt32))
         , className(className)
+        , features(features)
         , classNumStates(classNumStates)
-        , samples(torch::zeros({ static_cast<int>(vsamples.size() + 1), static_cast<int>(vsamples[0].size()) }, torch::kInt32))
     {
         for (int i = 0; i < vsamples.size(); ++i) {
             samples.index_put_({ i,  "..." }, torch::tensor(vsamples[i], torch::kInt32));
@@ -104,14 +104,6 @@ namespace bayesnet {
             matrix[y][x] = result[i];
         }
         return matrix;
-    }
-    // To use in Python
-    std::vector<float> Metrics::conditionalEdgeWeights(std::vector<float>& weights_)
-    {
-        const torch::Tensor weights = torch::tensor(weights_);
-        auto matrix = conditionalEdge(weights);
-        std::vector<float> v(matrix.data_ptr<float>(), matrix.data_ptr<float>() + matrix.numel());
-        return v;
     }
     double Metrics::entropy(const torch::Tensor& feature, const torch::Tensor& weights)
     {

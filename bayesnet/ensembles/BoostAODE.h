@@ -11,19 +11,19 @@
 #include "bayesnet/feature_selection/FeatureSelect.h"
 #include "Ensemble.h"
 namespace bayesnet {
-    struct {
+    const struct {
         std::string CFS = "CFS";
         std::string FCBF = "FCBF";
         std::string IWSS = "IWSS";
     }SelectFeatures;
-    struct {
+    const struct {
         std::string ASC = "asc";
         std::string DESC = "desc";
         std::string RAND = "rand";
     }Orders;
     class BoostAODE : public Ensemble {
     public:
-        BoostAODE(bool predict_voting = false);
+        explicit BoostAODE(bool predict_voting = false);
         virtual ~BoostAODE() = default;
         std::vector<std::string> graph(const std::string& title = "BoostAODE") const override;
         void setHyperparameters(const nlohmann::json& hyperparameters_) override;

@@ -18,7 +18,7 @@
 
 class RawDatasets {
 public:
-    RawDatasets(const std::string& file_name, bool discretize_, int num_lines_ = 0, bool shuffle_ = false);
+    RawDatasets(const std::string& file_name, bool discretize_, int num_samples_ = 0, bool shuffle_ = false, bool class_last = true, bool debug = false);
     torch::Tensor Xt, yt, dataset, weights;
     torch::Tensor X_train, y_train, X_test, y_test;
     std::vector<vector<int>> Xv;
@@ -30,7 +30,7 @@ public:
     int nSamples, classNumStates;
     double epsilon = 1e-5;
     bool discretize;
-    int num_lines = 0;
+    int num_samples = 0;
     bool shuffle = false;
 private:
     std::string to_string()
@@ -62,11 +62,9 @@ private:
             + "nSamples: " + std::to_string(nSamples) + "\n"
             + "classNumStates: " + std::to_string(classNumStates) + "\n"
             + "states: " + states_ + "\n";
-
-
     }
     map<std::string, int> discretizeDataset(std::vector<mdlp::samples_t>& X);
-    void loadDataset(const std::string& name);
+    void loadDataset(const std::string& name, bool class_last);
 };
 
 #endif //TEST_UTILS_H

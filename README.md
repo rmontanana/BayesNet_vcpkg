@@ -75,4 +75,4 @@ make sample fname=tests/data/glass.arff
 
 ## Coverage report
 
-[Coverage report](html/index.html)
+### [Coverage report](docs/coverage.pdf)
