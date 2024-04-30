@@ -18,7 +18,7 @@ TEST_CASE("Topological Order", "[Ensemble]")
 {
     auto raw = RawDatasets("glass", true);
     auto clf = bayesnet::BoostAODE();
-    clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
+    clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states);
     auto order = clf.topological_order();
     REQUIRE(order.size() == 0);
 }
@@ -26,7 +26,7 @@ TEST_CASE("Dump CPT", "[Ensemble]")
 {
     auto raw = RawDatasets("glass", true);
     auto clf = bayesnet::BoostAODE();
-    clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
+    clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states);
     auto dump = clf.dump_cpt();
     REQUIRE(dump == "");
 }
@@ -34,7 +34,7 @@ TEST_CASE("Number of States", "[Ensemble]")
 {
     auto clf = bayesnet::BoostAODE();
     auto raw = RawDatasets("iris", true);
-    clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
+    clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states);
     REQUIRE(clf.getNumberOfStates() == 76);
 }
 TEST_CASE("Show", "[Ensemble]")
@@ -46,7 +46,7 @@ TEST_CASE("Show", "[Ensemble]")
             {"maxTolerance", 1},
             {"convergence", false},
         });
-    clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
+    clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states);
     std::vector<std::string> expected = {
         "class -> sepallength, sepalwidth, petallength, petalwidth, ",
         "petallength -> sepallength, sepalwidth, petalwidth, ",
@@ -78,16 +78,16 @@ TEST_CASE("Graph", "[Ensemble]")
 {
     auto clf = bayesnet::BoostAODE();
     auto raw = RawDatasets("iris", true);
-    clf.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
+    clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states);
     auto graph = clf.graph();
     REQUIRE(graph.size() == 56);
     auto clf2 = bayesnet::AODE();
-    clf2.fit(raw.Xv, raw.yv, raw.featuresv, raw.classNamev, raw.statesv);
+    clf2.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states);
     graph = clf2.graph();
     REQUIRE(graph.size() == 56);
     raw = RawDatasets("glass", false);
     auto clf3 = bayesnet::AODELd();
-    clf3.fit(raw.Xt, raw.yt, raw.featurest, raw.classNamet, raw.statest);
+    clf3.fit(raw.Xt, raw.yt, raw.features, raw.className, raw.states);
     graph = clf3.graph();
     REQUIRE(graph.size() == 261);
 }

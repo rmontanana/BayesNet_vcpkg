@@ -37,8 +37,8 @@ TEST_CASE("Metrics Test", "[Metrics]")
         { {"diabetes", 1}, { {1, 4}, {4, 3}, {3, 2}, {3, 5}, {2, 0}, {0, 7}, {0, 6} } }
     };
     auto raw = RawDatasets(file_name, true);
-    bayesnet::Metrics metrics(raw.dataset, raw.featurest, raw.classNamet, raw.classNumStates);
-    bayesnet::Metrics metricsv(raw.Xv, raw.yv, raw.featurest, raw.classNamet, raw.classNumStates);
+    bayesnet::Metrics metrics(raw.dataset, raw.features, raw.className, raw.classNumStates);
+    bayesnet::Metrics metricsv(raw.Xv, raw.yv, raw.features, raw.className, raw.classNumStates);
 
     SECTION("Test Constructor")
     {
@@ -69,8 +69,8 @@ TEST_CASE("Metrics Test", "[Metrics]")
         auto weights_matrix = metrics.conditionalEdge(raw.weights);
         auto weights_matrixv = metricsv.conditionalEdge(raw.weights);
         for (int i = 0; i < 2; ++i) {
-            auto result = metrics.maximumSpanningTree(raw.featurest, weights_matrix, i);
-            auto resultv = metricsv.maximumSpanningTree(raw.featurest, weights_matrixv, i);
+            auto result = metrics.maximumSpanningTree(raw.features, weights_matrix, i);
+            auto resultv = metricsv.maximumSpanningTree(raw.features, weights_matrixv, i);
             REQUIRE(result == resultsMST.at({ file_name, i }));
             REQUIRE(resultv == resultsMST.at({ file_name, i }));
         }

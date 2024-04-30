@@ -5,6 +5,7 @@
 The hyperparameters defined in the algorithm are:
 
 - ***bisection*** (*boolean*): If set to true allows the algorithm to add *k* models at once (as specified in the algorithm) to the ensemble. Default value: *true*.
+- ***biesection_best*** (*boolean*): If set to *true*, the algorithm will take as *priorAccuracy* the best accuracy computed. If set to *false⁺ it will take the last accuracy as *priorAccuracy*. Default value: *false*.
 
 - ***order*** (*{"asc", "desc", "rand"}*): Sets the order (ascending/descending/random) in which dataset variables will be processed to choose the parents of the *SPODEs*. Default value: *"desc"*.
 

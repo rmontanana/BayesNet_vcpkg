@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: MIT
 // ***************************************************************
 
+#include <random>
 #include "TestUtils.h"
 #include "bayesnet/config.h"
 
@@ -15,97 +16,110 @@ public:
     }
 };
 
-pair<std::vector<mdlp::labels_t>, map<std::string, int>> discretize(std::vector<mdlp::samples_t>& X, mdlp::labels_t& y, std::vector<std::string> features)
+class ShuffleArffFiles : public ArffFiles {
+public:
+    ShuffleArffFiles(int num_samples = 0, bool shuffle = false) : ArffFiles(), num_samples(num_samples), shuffle(shuffle) {}
+    void load(const std::string& file_name, bool class_last = true)
+    {
+        ArffFiles::load(file_name, class_last);
+        if (num_samples > 0) {
+            if (num_samples > getY().size()) {
+                throw std::invalid_argument("num_lines must be less than the number of lines in the file");
+            }
+            auto indices = std::vector<int>(num_samples);
+            std::iota(indices.begin(), indices.end(), 0);
+            if (shuffle) {
+                std::mt19937 g{ 173 };
+                std::shuffle(indices.begin(), indices.end(), g);
+            }
+            auto XX = std::vector<std::vector<float>>(attributes.size(), std::vector<float>(num_samples));
+            auto yy = std::vector<int>(num_samples);
+            for (int i = 0; i < num_samples; i++) {
+                yy[i] = getY()[indices[i]];
+                for (int j = 0; j < attributes.size(); j++) {
+                    XX[j][i] = X[j][indices[i]];
+                }
+            }
+            X = XX;
+            y = yy;
+        }
+    }
+private:
+    int num_samples;
+    bool shuffle;
+};
+
+RawDatasets::RawDatasets(const std::string& file_name, bool discretize_, int num_samples_, bool shuffle_, bool class_last, bool debug)
 {
-    std::vector<mdlp::labels_t> Xd;
+    num_samples = num_samples_;
+    shuffle = shuffle_;
+    discretize = discretize_;
+    // Xt can be either discretized or not
+    // Xv is always discretized
+    loadDataset(file_name, class_last);
+    auto yresized = torch::transpose(yt.view({ yt.size(0), 1 }), 0, 1);
+    dataset = torch::cat({ Xt, yresized }, 0);
+    nSamples = dataset.size(1);
+    weights = torch::full({ nSamples }, 1.0 / nSamples, torch::kDouble);
+    weightsv = std::vector<double>(nSamples, 1.0 / nSamples);
+    classNumStates = discretize ? states.at(className).size() : 0;
+    auto fold = folding::StratifiedKFold(5, yt, 271);
+    auto [train, test] = fold.getFold(0);
+    auto train_t = torch::tensor(train);
+    auto test_t = torch::tensor(test);
+    // Get train and validation sets
+    X_train = dataset.index({ torch::indexing::Slice(0, dataset.size(0) - 1), train_t });
+    y_train = dataset.index({ -1, train_t });
+    X_test = dataset.index({ torch::indexing::Slice(0, dataset.size(0) - 1), test_t });
+    y_test = dataset.index({ -1, test_t });
+    if (debug)
+        std::cout << to_string();
+}
+
+map<std::string, int> RawDatasets::discretizeDataset(std::vector<mdlp::samples_t>& X)
+{
+
     map<std::string, int> maxes;
     auto fimdlp = mdlp::CPPFImdlp();
     for (int i = 0; i < X.size(); i++) {
-        fimdlp.fit(X[i], y);
+        fimdlp.fit(X[i], yv);
         mdlp::labels_t& xd = fimdlp.transform(X[i]);
         maxes[features[i]] = *max_element(xd.begin(), xd.end()) + 1;
-        Xd.push_back(xd);
+        Xv.push_back(xd);
     }
-    return { Xd, maxes };
+    return maxes;
 }
 
-std::vector<mdlp::labels_t> discretizeDataset(std::vector<mdlp::samples_t>& X, mdlp::labels_t& y)
+void RawDatasets::loadDataset(const std::string& name, bool class_last)
 {
-    std::vector<mdlp::labels_t> Xd;
-    auto fimdlp = mdlp::CPPFImdlp();
-    for (int i = 0; i < X.size(); i++) {
-        fimdlp.fit(X[i], y);
-        mdlp::labels_t& xd = fimdlp.transform(X[i]);
-        Xd.push_back(xd);
-    }
-    return Xd;
-}
-
-bool file_exists(const std::string& name)
-{
-    if (FILE* file = fopen(name.c_str(), "r")) {
-        fclose(file);
-        return true;
-    } else {
-        return false;
-    }
-}
-
-tuple<torch::Tensor, torch::Tensor, std::vector<std::string>, std::string, map<std::string, std::vector<int>>> loadDataset(const std::string& name, bool class_last, bool discretize_dataset)
-{
-    auto handler = ArffFiles();
+    auto handler = ShuffleArffFiles(num_samples, shuffle);
     handler.load(Paths::datasets() + static_cast<std::string>(name) + ".arff", class_last);
     // Get Dataset X, y
     std::vector<mdlp::samples_t>& X = handler.getX();
-    mdlp::labels_t& y = handler.getY();
+    yv = handler.getY();
     // Get className & Features
-    auto className = handler.getClassName();
-    std::vector<std::string> features;
-    auto attributes = handler.getAttributes();
-    transform(attributes.begin(), attributes.end(), back_inserter(features), [](const auto& pair) { return pair.first; });
-    torch::Tensor Xd;
-    auto states = map<std::string, std::vector<int>>();
-    if (discretize_dataset) {
-        auto Xr = discretizeDataset(X, y);
-        Xd = torch::zeros({ static_cast<int>(Xr.size()), static_cast<int>(Xr[0].size()) }, torch::kInt32);
-        for (int i = 0; i < features.size(); ++i) {
-            states[features[i]] = std::vector<int>(*max_element(Xr[i].begin(), Xr[i].end()) + 1);
-            auto item = states.at(features[i]);
-            iota(begin(item), end(item), 0);
-            Xd.index_put_({ i, "..." }, torch::tensor(Xr[i], torch::kInt32));
-        }
-        states[className] = std::vector<int>(*max_element(y.begin(), y.end()) + 1);
-        iota(begin(states.at(className)), end(states.at(className)), 0);
-    } else {
-        Xd = torch::zeros({ static_cast<int>(X.size()), static_cast<int>(X[0].size()) }, torch::kFloat32);
-        for (int i = 0; i < features.size(); ++i) {
-            Xd.index_put_({ i, "..." }, torch::tensor(X[i]));
-        }
-    }
-    return { Xd, torch::tensor(y, torch::kInt32), features, className, states };
-}
-
-tuple<std::vector<std::vector<int>>, std::vector<int>, std::vector<std::string>, std::string, map<std::string, std::vector<int>>> loadFile(const std::string& name)
-{
-    auto handler = ArffFiles();
-    handler.load(Paths::datasets() + static_cast<std::string>(name) + ".arff");
-    // Get Dataset X, y
-    std::vector<mdlp::samples_t>& X = handler.getX();
-    mdlp::labels_t& y = handler.getY();
-    // Get className & Features
-    auto className = handler.getClassName();
-    std::vector<std::string> features;
+    className = handler.getClassName();
     auto attributes = handler.getAttributes();
     transform(attributes.begin(), attributes.end(), back_inserter(features), [](const auto& pair) { return pair.first; });
     // Discretize Dataset
-    std::vector<mdlp::labels_t> Xd;
-    map<std::string, int> maxes;
-    tie(Xd, maxes) = discretize(X, y, features);
-    maxes[className] = *max_element(y.begin(), y.end()) + 1;
-    map<std::string, std::vector<int>> states;
-    for (auto feature : features) {
-        states[feature] = std::vector<int>(maxes[feature]);
+    auto maxValues = discretizeDataset(X);
+    maxValues[className] = *max_element(yv.begin(), yv.end()) + 1;
+    if (discretize) {
+        // discretize the tensor as well
+        Xt = torch::zeros({ static_cast<int>(Xv.size()), static_cast<int>(Xv[0].size()) }, torch::kInt32);
+        for (int i = 0; i < features.size(); ++i) {
+            states[features[i]] = std::vector<int>(maxValues[features[i]]);
+            iota(begin(states.at(features[i])), end(states.at(features[i])), 0);
+            Xt.index_put_({ i, "..." }, torch::tensor(Xv[i], torch::kInt32));
+        }
+        states[className] = std::vector<int>(maxValues[className]);
+        iota(begin(states.at(className)), end(states.at(className)), 0);
+    } else {
+        Xt = torch::zeros({ static_cast<int>(X.size()), static_cast<int>(X[0].size()) }, torch::kFloat32);
+        for (int i = 0; i < features.size(); ++i) {
+            Xt.index_put_({ i, "..." }, torch::tensor(X[i]));
+        }
     }
-    states[className] = std::vector<int>(maxes[className]);
-    return { Xd, y, features, className, states };
+    yt = torch::tensor(yv, torch::kInt32);
 }
+

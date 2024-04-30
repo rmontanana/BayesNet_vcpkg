@@ -1,0 +1,106 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - coverage.info - libtorch/include/ATen/ops/tensor.h</title>
+  <link rel="stylesheet" type="text/css" href="../../../../gcov.css">
+</head>
+
+<body>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="title">LCOV - code coverage report</td></tr>
+            <tr><td class="ruler"><img src="../../../../glass.png" width=3 height=3 alt=""></td></tr>
+
+            <tr>
+              <td width="100%">
+                <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="10%" class="headerValue"><a href="../../../../index.html">top level</a> - <a href="index.html">libtorch/include/ATen/ops</a> - tensor.h<span style="font-size: 80%;"> (source / <a href="tensor.h.func-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="5%"></td>
+            <td width="5%" class="headerCovTableHead">Coverage</td>
+            <td width="5%" class="headerCovTableHead" title="Covered + Uncovered code">Total</td>
+            <td width="5%" class="headerCovTableHead" title="Exercised code only">Hit</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">coverage.info</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntryHi">100.0&nbsp;%</td>
+            <td class="headerCovTableEntry">1</td>
+            <td class="headerCovTableEntry">1</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test Date:</td>
+            <td class="headerValue">2024-04-30 13:17:26</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntryHi">100.0&nbsp;%</td>
+            <td class="headerCovTableEntry">2</td>
+            <td class="headerCovTableEntry">2</td>
+          </tr>
+                  <tr><td><img src="../../../../glass.png" width=3 height=3 alt=""></td></tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr><td class="ruler"><img src="../../../../glass.png" width=3 height=3 alt=""></td></tr>
+          </table>
+
+          <table cellpadding=0 cellspacing=0 border=0>
+            <tr>
+              <td><br></td>
+            </tr>
+            <tr>
+              <td>
+<pre class="sourceHeading">            Line data    Source code</pre>
+<pre class="source">
+<span id="L1"><span class="lineNum">       1</span>              : #pragma once</span>
+<span id="L2"><span class="lineNum">       2</span>              : #include &lt;ATen/core/Tensor.h&gt;</span>
+<span id="L3"><span class="lineNum">       3</span>              : #include &lt;c10/core/ScalarType.h&gt;</span>
+<span id="L4"><span class="lineNum">       4</span>              : </span>
+<span id="L5"><span class="lineNum">       5</span>              : namespace at {</span>
+<span id="L6"><span class="lineNum">       6</span>              : </span>
+<span id="L7"><span class="lineNum">       7</span>              : // These functions are defined in ATen/Utils.cpp.</span>
+<span id="L8"><span class="lineNum">       8</span>              : #define TENSOR(T, S)                                                          \</span>
+<span id="L9"><span class="lineNum">       9</span>              :   TORCH_API Tensor tensor(ArrayRef&lt;T&gt; values, const TensorOptions&amp; options);  \</span>
+<span id="L10"><span class="lineNum">      10</span>              :   inline Tensor tensor(                                                       \</span>
+<span id="L11"><span class="lineNum">      11</span>              :       std::initializer_list&lt;T&gt; values, const TensorOptions&amp; options) {        \</span>
+<span id="L12"><span class="lineNum">      12</span>              :     return at::tensor(ArrayRef&lt;T&gt;(values), options);                          \</span>
+<span id="L13"><span class="lineNum">      13</span>              :   }                                                                           \</span>
+<span id="L14"><span class="lineNum">      14</span>              :   inline Tensor tensor(T value, const TensorOptions&amp; options) {               \</span>
+<span id="L15"><span class="lineNum">      15</span>              :     return at::tensor(ArrayRef&lt;T&gt;(value), options);                           \</span>
+<span id="L16"><span class="lineNum">      16</span>              :   }                                                                           \</span>
+<span id="L17"><span class="lineNum">      17</span>              :   inline Tensor tensor(ArrayRef&lt;T&gt; values) {                                  \</span>
+<span id="L18"><span class="lineNum">      18</span>              :     return at::tensor(std::move(values), at::dtype(k##S));                    \</span>
+<span id="L19"><span class="lineNum">      19</span>              :   }                                                                           \</span>
+<span id="L20"><span class="lineNum">      20</span>              :   inline Tensor tensor(std::initializer_list&lt;T&gt; values) {                     \</span>
+<span id="L21"><span class="lineNum">      21</span>              :     return at::tensor(ArrayRef&lt;T&gt;(values));                                   \</span>
+<span id="L22"><span class="lineNum">      22</span>              :   }                                                                           \</span>
+<span id="L23"><span class="lineNum">      23</span>              :   inline Tensor tensor(T value) {                                             \</span>
+<span id="L24"><span class="lineNum">      24</span>              :     return at::tensor(ArrayRef&lt;T&gt;(value));                                    \</span>
+<span id="L25"><span class="lineNum">      25</span>              :   }</span>
+<span id="L26"><span class="lineNum">      26</span> <span class="tlaGNC tlaBgGNC">   181257936 : AT_FORALL_SCALAR_TYPES_AND3(Bool, Half, BFloat16, TENSOR)</span></span>
+<span id="L27"><span class="lineNum">      27</span>              : AT_FORALL_COMPLEX_TYPES(TENSOR)</span>
+<span id="L28"><span class="lineNum">      28</span>              : #undef TENSOR</span>
+<span id="L29"><span class="lineNum">      29</span>              : </span>
+<span id="L30"><span class="lineNum">      30</span>              : }  // namespace at</span>
+        </pre>
+              </td>
+            </tr>
+          </table>
+          <br>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="ruler"><img src="../../../../glass.png" width=3 height=3 alt=""></td></tr>
+            <tr><td class="versionInfo">Generated by: <a href="https://github.com//linux-test-project/lcov" target="_parent">LCOV version 2.0-1</a></td></tr>
+          </table>
+          <br>
+
+</body>
+</html>

@@ -18,7 +18,6 @@ namespace bayesnet {
         std::vector<int> SelectKBestWeighted(const torch::Tensor& weights, bool ascending = false, unsigned k = 0);
         std::vector<double> getScoresKBest() const;
         double mutualInformation(const torch::Tensor& firstFeature, const torch::Tensor& secondFeature, const torch::Tensor& weights);
-        std::vector<float> conditionalEdgeWeights(std::vector<float>& weights); // To use in Python
         torch::Tensor conditionalEdge(const torch::Tensor& weights);
         std::vector<std::pair<int, int>> maximumSpanningTree(const std::vector<std::string>& features, const torch::Tensor& weights, const int root);
     protected:

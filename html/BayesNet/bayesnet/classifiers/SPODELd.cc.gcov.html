@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - coverage.info - BayesNet/bayesnet/classifiers/SPODELd.cc</title>
+  <link rel="stylesheet" type="text/css" href="../../../gcov.css">
+</head>
+
+<body>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="title">LCOV - code coverage report</td></tr>
+            <tr><td class="ruler"><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+
+            <tr>
+              <td width="100%">
+                <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="10%" class="headerValue"><a href="../../../index.html">top level</a> - <a href="index.html">BayesNet/bayesnet/classifiers</a> - SPODELd.cc<span style="font-size: 80%;"> (source / <a href="SPODELd.cc.func-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="5%"></td>
+            <td width="5%" class="headerCovTableHead">Coverage</td>
+            <td width="5%" class="headerCovTableHead" title="Covered + Uncovered code">Total</td>
+            <td width="5%" class="headerCovTableHead" title="Exercised code only">Hit</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">coverage.info</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntryHi">100.0&nbsp;%</td>
+            <td class="headerCovTableEntry">26</td>
+            <td class="headerCovTableEntry">26</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test Date:</td>
+            <td class="headerValue">2024-04-30 13:17:26</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntryHi">100.0&nbsp;%</td>
+            <td class="headerCovTableEntry">6</td>
+            <td class="headerCovTableEntry">6</td>
+          </tr>
+                  <tr><td><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr><td class="ruler"><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+          </table>
+
+          <table cellpadding=0 cellspacing=0 border=0>
+            <tr>
+              <td><br></td>
+            </tr>
+            <tr>
+              <td>
+<pre class="sourceHeading">            Line data    Source code</pre>
+<pre class="source">
+<span id="L1"><span class="lineNum">       1</span>              : // ***************************************************************</span>
+<span id="L2"><span class="lineNum">       2</span>              : // SPDX-FileCopyrightText: Copyright 2024 Ricardo Montañana Gómez</span>
+<span id="L3"><span class="lineNum">       3</span>              : // SPDX-FileType: SOURCE</span>
+<span id="L4"><span class="lineNum">       4</span>              : // SPDX-License-Identifier: MIT</span>
+<span id="L5"><span class="lineNum">       5</span>              : // ***************************************************************</span>
+<span id="L6"><span class="lineNum">       6</span>              : </span>
+<span id="L7"><span class="lineNum">       7</span>              : #include &quot;SPODELd.h&quot;</span>
+<span id="L8"><span class="lineNum">       8</span>              : </span>
+<span id="L9"><span class="lineNum">       9</span>              : namespace bayesnet {</span>
+<span id="L10"><span class="lineNum">      10</span> <span class="tlaGNC tlaBgGNC">         110 :     SPODELd::SPODELd(int root) : SPODE(root), Proposal(dataset, features, className) {}</span></span>
+<span id="L11"><span class="lineNum">      11</span> <span class="tlaGNC">          84 :     SPODELd&amp; SPODELd::fit(torch::Tensor&amp; X_, torch::Tensor&amp; y_, const std::vector&lt;std::string&gt;&amp; features_, const std::string&amp; className_, map&lt;std::string, std::vector&lt;int&gt;&gt;&amp; states_)</span></span>
+<span id="L12"><span class="lineNum">      12</span>              :     {</span>
+<span id="L13"><span class="lineNum">      13</span> <span class="tlaGNC">          84 :         checkInput(X_, y_);</span></span>
+<span id="L14"><span class="lineNum">      14</span> <span class="tlaGNC">          84 :         Xf = X_;</span></span>
+<span id="L15"><span class="lineNum">      15</span> <span class="tlaGNC">          84 :         y = y_;</span></span>
+<span id="L16"><span class="lineNum">      16</span> <span class="tlaGNC">          84 :         return commonFit(features_, className_, states_);</span></span>
+<span id="L17"><span class="lineNum">      17</span>              :     }</span>
+<span id="L18"><span class="lineNum">      18</span>              : </span>
+<span id="L19"><span class="lineNum">      19</span> <span class="tlaGNC">           4 :     SPODELd&amp; SPODELd::fit(torch::Tensor&amp; dataset, const std::vector&lt;std::string&gt;&amp; features_, const std::string&amp; className_, map&lt;std::string, std::vector&lt;int&gt;&gt;&amp; states_)</span></span>
+<span id="L20"><span class="lineNum">      20</span>              :     {</span>
+<span id="L21"><span class="lineNum">      21</span> <span class="tlaGNC">           4 :         if (!torch::is_floating_point(dataset)) {</span></span>
+<span id="L22"><span class="lineNum">      22</span> <span class="tlaGNC">           2 :             throw std::runtime_error(&quot;Dataset must be a floating point tensor&quot;);</span></span>
+<span id="L23"><span class="lineNum">      23</span>              :         }</span>
+<span id="L24"><span class="lineNum">      24</span> <span class="tlaGNC">           8 :         Xf = dataset.index({ torch::indexing::Slice(0, dataset.size(0) - 1), &quot;...&quot; }).clone();</span></span>
+<span id="L25"><span class="lineNum">      25</span> <span class="tlaGNC">           6 :         y = dataset.index({ -1, &quot;...&quot; }).clone().to(torch::kInt32);</span></span>
+<span id="L26"><span class="lineNum">      26</span> <span class="tlaGNC">           2 :         return commonFit(features_, className_, states_);</span></span>
+<span id="L27"><span class="lineNum">      27</span> <span class="tlaGNC">           6 :     }</span></span>
+<span id="L28"><span class="lineNum">      28</span>              : </span>
+<span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC">          86 :     SPODELd&amp; SPODELd::commonFit(const std::vector&lt;std::string&gt;&amp; features_, const std::string&amp; className_, map&lt;std::string, std::vector&lt;int&gt;&gt;&amp; states_)</span></span>
+<span id="L30"><span class="lineNum">      30</span>              :     {</span>
+<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">          86 :         features = features_;</span></span>
+<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">          86 :         className = className_;</span></span>
+<span id="L33"><span class="lineNum">      33</span>              :         // Fills std::vectors Xv &amp; yv with the data from tensors X_ (discretized) &amp; y</span>
+<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC">          86 :         states = fit_local_discretization(y);</span></span>
+<span id="L35"><span class="lineNum">      35</span>              :         // We have discretized the input data</span>
+<span id="L36"><span class="lineNum">      36</span>              :         // 1st we need to fit the model to build the normal SPODE structure, SPODE::fit initializes the base Bayesian network</span>
+<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">          86 :         SPODE::fit(dataset, features, className, states);</span></span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">          86 :         states = localDiscretizationProposal(states, model);</span></span>
+<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">          86 :         return *this;</span></span>
+<span id="L40"><span class="lineNum">      40</span>              :     }</span>
+<span id="L41"><span class="lineNum">      41</span> <span class="tlaGNC">          68 :     torch::Tensor SPODELd::predict(torch::Tensor&amp; X)</span></span>
+<span id="L42"><span class="lineNum">      42</span>              :     {</span>
+<span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC">          68 :         auto Xt = prepareX(X);</span></span>
+<span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC">         136 :         return SPODE::predict(Xt);</span></span>
+<span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">          68 :     }</span></span>
+<span id="L46"><span class="lineNum">      46</span> <span class="tlaGNC">          18 :     std::vector&lt;std::string&gt; SPODELd::graph(const std::string&amp; name) const</span></span>
+<span id="L47"><span class="lineNum">      47</span>              :     {</span>
+<span id="L48"><span class="lineNum">      48</span> <span class="tlaGNC">          18 :         return SPODE::graph(name);</span></span>
+<span id="L49"><span class="lineNum">      49</span>              :     }</span>
+<span id="L50"><span class="lineNum">      50</span>              : }</span>
+        </pre>
+              </td>
+            </tr>
+          </table>
+          <br>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="ruler"><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+            <tr><td class="versionInfo">Generated by: <a href="https://github.com//linux-test-project/lcov" target="_parent">LCOV version 2.0-1</a></td></tr>
+          </table>
+          <br>
+
+</body>
+</html>

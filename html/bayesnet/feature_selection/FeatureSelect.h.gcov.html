@@ -37,11 +37,11 @@
           </tr>
           <tr>
             <td class="headerItem">Test Date:</td>
-            <td class="headerValue">2024-04-21 17:30:26</td>
+            <td class="headerValue">2024-04-30 13:59:18</td>
             <td></td>
             <td class="headerItem">Functions:</td>
-            <td class="headerCovTableEntryLo">50.0&nbsp;%</td>
-            <td class="headerCovTableEntry">2</td>
+            <td class="headerCovTableEntryHi">100.0&nbsp;%</td>
+            <td class="headerCovTableEntry">1</td>
             <td class="headerCovTableEntry">1</td>
           </tr>
                   <tr><td><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
@@ -76,7 +76,7 @@
 <span id="L14"><span class="lineNum">      14</span>              :     public:</span>
 <span id="L15"><span class="lineNum">      15</span>              :         // dataset is a n+1xm tensor of integers where dataset[-1] is the y std::vector</span>
 <span id="L16"><span class="lineNum">      16</span>              :         FeatureSelect(const torch::Tensor&amp; samples, const std::vector&lt;std::string&gt;&amp; features, const std::string&amp; className, const int maxFeatures, const int classNumStates, const torch::Tensor&amp; weights);</span>
-<span id="L17"><span class="lineNum">      17</span> <span class="tlaGNC tlaBgGNC">          22 :         virtual ~FeatureSelect() {};</span></span>
+<span id="L17"><span class="lineNum">      17</span> <span class="tlaGNC tlaBgGNC">          88 :         virtual ~FeatureSelect() {};</span></span>
 <span id="L18"><span class="lineNum">      18</span>              :         virtual void fit() = 0;</span>
 <span id="L19"><span class="lineNum">      19</span>              :         std::vector&lt;int&gt; getFeatures() const;</span>
 <span id="L20"><span class="lineNum">      20</span>              :         std::vector&lt;double&gt; getScores() const;</span>

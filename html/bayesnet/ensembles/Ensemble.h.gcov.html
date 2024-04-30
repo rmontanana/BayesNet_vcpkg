@@ -37,11 +37,11 @@
           </tr>
           <tr>
             <td class="headerItem">Test Date:</td>
-            <td class="headerValue">2024-04-21 17:30:26</td>
+            <td class="headerValue">2024-04-30 13:59:18</td>
             <td></td>
             <td class="headerItem">Functions:</td>
-            <td class="headerCovTableEntryMed">75.0&nbsp;%</td>
-            <td class="headerCovTableEntry">4</td>
+            <td class="headerCovTableEntryHi">100.0&nbsp;%</td>
+            <td class="headerCovTableEntry">3</td>
             <td class="headerCovTableEntry">3</td>
           </tr>
                   <tr><td><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
@@ -77,7 +77,7 @@
 <span id="L15"><span class="lineNum">      15</span>              :     class Ensemble : public Classifier {</span>
 <span id="L16"><span class="lineNum">      16</span>              :     public:</span>
 <span id="L17"><span class="lineNum">      17</span>              :         Ensemble(bool predict_voting = true);</span>
-<span id="L18"><span class="lineNum">      18</span> <span class="tlaGNC tlaBgGNC">          27 :         virtual ~Ensemble() = default;</span></span>
+<span id="L18"><span class="lineNum">      18</span> <span class="tlaGNC tlaBgGNC">         168 :         virtual ~Ensemble() = default;</span></span>
 <span id="L19"><span class="lineNum">      19</span>              :         torch::Tensor predict(torch::Tensor&amp; X) override;</span>
 <span id="L20"><span class="lineNum">      20</span>              :         std::vector&lt;int&gt; predict(std::vector&lt;std::vector&lt;int&gt;&gt;&amp; X) override;</span>
 <span id="L21"><span class="lineNum">      21</span>              :         torch::Tensor predict_proba(torch::Tensor&amp; X) override;</span>
@@ -89,13 +89,13 @@
 <span id="L27"><span class="lineNum">      27</span>              :         int getNumberOfStates() const override;</span>
 <span id="L28"><span class="lineNum">      28</span>              :         std::vector&lt;std::string&gt; show() const override;</span>
 <span id="L29"><span class="lineNum">      29</span>              :         std::vector&lt;std::string&gt; graph(const std::string&amp; title) const override;</span>
-<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">           3 :         std::vector&lt;std::string&gt; topological_order()  override</span></span>
+<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">          18 :         std::vector&lt;std::string&gt; topological_order()  override</span></span>
 <span id="L31"><span class="lineNum">      31</span>              :         {</span>
-<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">           3 :             return std::vector&lt;std::string&gt;();</span></span>
+<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">          18 :             return std::vector&lt;std::string&gt;();</span></span>
 <span id="L33"><span class="lineNum">      33</span>              :         }</span>
-<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC">           2 :         std::string dump_cpt() const override</span></span>
+<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC">          12 :         std::string dump_cpt() const override</span></span>
 <span id="L35"><span class="lineNum">      35</span>              :         {</span>
-<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">           4 :             return &quot;&quot;;</span></span>
+<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">          24 :             return &quot;&quot;;</span></span>
 <span id="L37"><span class="lineNum">      37</span>              :         }</span>
 <span id="L38"><span class="lineNum">      38</span>              :     protected:</span>
 <span id="L39"><span class="lineNum">      39</span>              :         torch::Tensor predict_average_voting(torch::Tensor&amp; X);</span>

@@ -1,1 +1,1 @@
-genhtml build_debug/tests/coverage.info --output-directory html
+genhtml build_debug/tests/coverage.info --demangle-cpp --output-directory html

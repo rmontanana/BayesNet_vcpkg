@@ -1,8 +1,8 @@
 if(ENABLE_TESTING)
     include_directories(
-        ${BayesNet_SOURCE_DIR}/lib/Files
-        ${BayesNet_SOURCE_DIR}/lib/mdlp
+        ${BayesNet_SOURCE_DIR}/tests/lib/Files
         ${BayesNet_SOURCE_DIR}/lib/folding
+        ${BayesNet_SOURCE_DIR}/lib/mdlp
         ${BayesNet_SOURCE_DIR}/lib/json/include
         ${BayesNet_SOURCE_DIR}
         ${CMAKE_BINARY_DIR}/configured_files/include
@@ -11,7 +11,7 @@ if(ENABLE_TESTING)
     add_executable(TestBayesNet TestBayesNetwork.cc TestBayesNode.cc TestBayesClassifier.cc 
         TestBayesModels.cc TestBayesMetrics.cc TestFeatureSelection.cc TestBoostAODE.cc
         TestUtils.cc TestBayesEnsemble.cc ${BayesNet_SOURCES})
-    target_link_libraries(TestBayesNet PUBLIC "${TORCH_LIBRARIES}" ArffFiles mdlp Catch2::Catch2WithMain )
+    target_link_libraries(TestBayesNet PUBLIC "${TORCH_LIBRARIES}" ArffFiles mdlp PRIVATE Catch2::Catch2WithMain)
     add_test(NAME BayesNetworkTest COMMAND TestBayesNet)
     add_test(NAME Network COMMAND TestBayesNet "[Network]")
     add_test(NAME Node COMMAND TestBayesNet "[Node]")

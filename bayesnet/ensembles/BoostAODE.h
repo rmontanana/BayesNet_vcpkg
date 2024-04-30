@@ -11,19 +11,19 @@
 #include "bayesnet/feature_selection/FeatureSelect.h"
 #include "Ensemble.h"
 namespace bayesnet {
-    struct {
+    const struct {
         std::string CFS = "CFS";
         std::string FCBF = "FCBF";
         std::string IWSS = "IWSS";
     }SelectFeatures;
-    struct {
+    const struct {
         std::string ASC = "asc";
         std::string DESC = "desc";
         std::string RAND = "rand";
     }Orders;
     class BoostAODE : public Ensemble {
     public:
-        BoostAODE(bool predict_voting = false);
+        explicit BoostAODE(bool predict_voting = false);
         virtual ~BoostAODE() = default;
         std::vector<std::string> graph(const std::string& title = "BoostAODE") const override;
         void setHyperparameters(const nlohmann::json& hyperparameters_) override;
@@ -39,6 +39,7 @@ namespace bayesnet {
         int maxTolerance = 3;
         std::string order_algorithm; // order to process the KBest features asc, desc, rand
         bool convergence = true; //if true, stop when the model does not improve
+        bool convergence_best = false; // wether to keep the best accuracy to the moment or the last accuracy as prior accuracy
         bool selectFeatures = false; // if true, use feature selection
         std::string select_features_algorithm = Orders.DESC; // Selected feature selection algorithm
         FeatureSelect* featureSelector = nullptr;

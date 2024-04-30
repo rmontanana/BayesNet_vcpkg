@@ -122,13 +122,13 @@ coverage: ## Run tests and generate coverage report (build/index.html)
 	@$(gcovr) $(f_debug)/tests
 	@echo ">>> Building report..."
 	@cd $(f_debug)/tests; \
-	$(lcov) --directory . --capture --output-file coverage.info >/dev/null 2>&1; \
+	$(lcov) --directory CMakeFiles --capture --ignore-errors source,source --output-file coverage.info >/dev/null 2>&1; \
 	$(lcov) --remove coverage.info '/usr/*' --output-file coverage.info >/dev/null 2>&1; \
 	$(lcov) --remove coverage.info 'lib/*' --output-file coverage.info >/dev/null 2>&1; \
 	$(lcov) --remove coverage.info 'libtorch/*' --output-file coverage.info >/dev/null 2>&1; \
 	$(lcov) --remove coverage.info 'tests/*' --output-file coverage.info >/dev/null 2>&1; \
 	$(lcov) --remove coverage.info 'bayesnet/utils/loguru.*' --ignore-errors unused --output-file coverage.info >/dev/null 2>&1
-	@$(genhtml) $(f_debug)/tests/coverage.info --output-directory html >/dev/null 2>&1;
+	@$(genhtml) $(f_debug)/tests/coverage.info --demangle-cpp --output-directory html >/dev/null 2>&1;
 	@$(MAKE) updatebadge
 	@echo ">>> Done";	
 
