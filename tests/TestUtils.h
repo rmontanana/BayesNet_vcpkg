@@ -13,37 +13,60 @@
 #include <tuple>
 #include <ArffFiles.h>
 #include <CPPFImdlp.h>
+#include <folding.hpp>
 
-bool file_exists(const std::string& name);
-std::pair<vector<mdlp::labels_t>, map<std::string, int>> discretize(std::vector<mdlp::samples_t>& X, mdlp::labels_t& y, std::vector<string> features);
-std::vector<mdlp::labels_t> discretizeDataset(std::vector<mdlp::samples_t>& X, mdlp::labels_t& y);
-std::tuple<vector<vector<int>>, std::vector<int>, std::vector<string>, std::string, map<std::string, std::vector<int>>> loadFile(const std::string& name);
-std::tuple<torch::Tensor, torch::Tensor, std::vector<string>, std::string, map<std::string, std::vector<int>>> loadDataset(const std::string& name, bool class_last, bool discretize_dataset);
 
 class RawDatasets {
 public:
-    RawDatasets(const std::string& file_name, bool discretize)
-    {
-        // Xt can be either discretized or not
-        tie(Xt, yt, featurest, classNamet, statest) = loadDataset(file_name, true, discretize);
-        // Xv is always discretized
-        tie(Xv, yv, featuresv, classNamev, statesv) = loadFile(file_name);
-        auto yresized = torch::transpose(yt.view({ yt.size(0), 1 }), 0, 1);
-        dataset = torch::cat({ Xt, yresized }, 0);
-        nSamples = dataset.size(1);
-        weights = torch::full({ nSamples }, 1.0 / nSamples, torch::kDouble);
-        weightsv = std::vector<double>(nSamples, 1.0 / nSamples);
-        classNumStates = discretize ? statest.at(classNamet).size() : 0;
-    }
+    RawDatasets(const std::string& file_name, bool discretize_, int num_lines_ = 0, bool shuffle_ = false);
     torch::Tensor Xt, yt, dataset, weights;
+    torch::Tensor X_train, y_train, X_test, y_test;
     std::vector<vector<int>> Xv;
-    std::vector<double> weightsv;
     std::vector<int> yv;
-    std::vector<string> featurest, featuresv;
-    map<std::string, std::vector<int>> statest, statesv;
-    std::string classNamet, classNamev;
+    std::vector<double> weightsv;
+    std::vector<string> features;
+    std::string className;
+    map<std::string, std::vector<int>> states;
     int nSamples, classNumStates;
     double epsilon = 1e-5;
+    bool discretize;
+    int num_lines = 0;
+    bool shuffle = false;
+private:
+    std::string to_string()
+    {
+        std::string features_ = "";
+        for (auto& f : features) {
+            features_ += f + " ";
+        }
+        std::string states_ = "";
+        for (auto& s : states) {
+            states_ += s.first + " ";
+            for (auto& v : s.second) {
+                states_ += std::to_string(v) + " ";
+            }
+            states_ += "\n";
+        }
+        return "Xt dimensions: " + std::to_string(Xt.size(0)) + " " + std::to_string(Xt.size(1)) + "\n"
+            "Xv dimensions: " + std::to_string(Xv.size()) + " " + std::to_string(Xv[0].size()) + "\n"
+            + "yt dimensions: " + std::to_string(yt.size(0)) + "\n"
+            + "yv dimensions: " + std::to_string(yv.size()) + "\n"
+            + "X_train dimensions: " + std::to_string(X_train.size(0)) + " " + std::to_string(X_train.size(1)) + "\n"
+            + "X_test dimensions: " + std::to_string(X_test.size(0)) + " " + std::to_string(X_test.size(1)) + "\n"
+            + "y_train dimensions: " + std::to_string(y_train.size(0)) + "\n"
+            + "y_test dimensions: " + std::to_string(y_test.size(0)) + "\n"
+            + "features: " + std::to_string(features.size()) + "\n"
+            + features_ + "\n"
+            + "className: " + className + "\n"
+            + "states: " + std::to_string(states.size()) + "\n"
+            + "nSamples: " + std::to_string(nSamples) + "\n"
+            + "classNumStates: " + std::to_string(classNumStates) + "\n"
+            + "states: " + states_ + "\n";
+
+
+    }
+    map<std::string, int> discretizeDataset(std::vector<mdlp::samples_t>& X);
+    void loadDataset(const std::string& name);
 };
 
 #endif //TEST_UTILS_H

@@ -140,7 +140,7 @@ TEST_CASE("Oddities", "[BoostAODE]")
 TEST_CASE("Bisection Best", "[BoostAODE]")
 {
     auto clf = bayesnet::BoostAODE();
-    auto raw = RawDatasets("mfeat-factors", true, 500);
+    auto raw = RawDatasets("mfeat-factors", true, 300, true);
     clf.setHyperparameters({
         {"bisection", true},
         {"maxTolerance", 3},
@@ -149,8 +149,8 @@ TEST_CASE("Bisection Best", "[BoostAODE]")
         {"convergence_best", true},
         });
     clf.fit(raw.X_train, raw.y_train, raw.features, raw.className, raw.states);
-    REQUIRE(clf.getNumberOfNodes() == 217);
-    REQUIRE(clf.getNumberOfEdges() == 431);
+    REQUIRE(clf.getNumberOfNodes() == 434);
+    REQUIRE(clf.getNumberOfEdges() == 862);
     REQUIRE(clf.getNotes().size() == 3);
     REQUIRE(clf.getNotes()[0] == "Convergence threshold reached & 15 models eliminated");
     REQUIRE(clf.getNotes()[1] == "Used features in train: 16 of 216");
@@ -162,7 +162,7 @@ TEST_CASE("Bisection Best", "[BoostAODE]")
 }
 TEST_CASE("Bisection Best vs Last", "[BoostAODE]")
 {
-    auto raw = RawDatasets("mfeat-factors", true, 1500);
+    auto raw = RawDatasets("mfeat-factors", true, 500);
     auto clf = bayesnet::BoostAODE(true);
     auto hyperparameters = nlohmann::json{
         {"select_features", "IWSS"},

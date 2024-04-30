@@ -16,7 +16,7 @@
             "name": "test",
             "program": "${workspaceFolder}/build_debug/tests/TestBayesNet",
             "args": [
-                "\"Test Cannot build dataset with wrong data vector\""
+                "\"Bisection Best\""
             ],
             "cwd": "${workspaceFolder}/build_debug/tests"
         },
