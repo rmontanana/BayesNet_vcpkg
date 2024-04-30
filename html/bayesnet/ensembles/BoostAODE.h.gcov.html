@@ -37,12 +37,12 @@
           </tr>
           <tr>
             <td class="headerItem">Test Date:</td>
-            <td class="headerValue">2024-04-29 20:48:03</td>
+            <td class="headerValue">2024-04-30 13:59:18</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntryHi">100.0&nbsp;%</td>
-            <td class="headerCovTableEntry">2</td>
-            <td class="headerCovTableEntry">2</td>
+            <td class="headerCovTableEntry">1</td>
+            <td class="headerCovTableEntry">1</td>
           </tr>
                   <tr><td><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
                 </table>
@@ -73,20 +73,20 @@
 <span id="L11"><span class="lineNum">      11</span>              : #include &quot;bayesnet/feature_selection/FeatureSelect.h&quot;</span>
 <span id="L12"><span class="lineNum">      12</span>              : #include &quot;Ensemble.h&quot;</span>
 <span id="L13"><span class="lineNum">      13</span>              : namespace bayesnet {</span>
-<span id="L14"><span class="lineNum">      14</span>              :     struct {</span>
+<span id="L14"><span class="lineNum">      14</span>              :     const struct {</span>
 <span id="L15"><span class="lineNum">      15</span>              :         std::string CFS = &quot;CFS&quot;;</span>
 <span id="L16"><span class="lineNum">      16</span>              :         std::string FCBF = &quot;FCBF&quot;;</span>
 <span id="L17"><span class="lineNum">      17</span>              :         std::string IWSS = &quot;IWSS&quot;;</span>
 <span id="L18"><span class="lineNum">      18</span>              :     }SelectFeatures;</span>
-<span id="L19"><span class="lineNum">      19</span>              :     struct {</span>
+<span id="L19"><span class="lineNum">      19</span>              :     const struct {</span>
 <span id="L20"><span class="lineNum">      20</span>              :         std::string ASC = &quot;asc&quot;;</span>
 <span id="L21"><span class="lineNum">      21</span>              :         std::string DESC = &quot;desc&quot;;</span>
 <span id="L22"><span class="lineNum">      22</span>              :         std::string RAND = &quot;rand&quot;;</span>
 <span id="L23"><span class="lineNum">      23</span>              :     }Orders;</span>
 <span id="L24"><span class="lineNum">      24</span>              :     class BoostAODE : public Ensemble {</span>
 <span id="L25"><span class="lineNum">      25</span>              :     public:</span>
-<span id="L26"><span class="lineNum">      26</span>              :         BoostAODE(bool predict_voting = false);</span>
-<span id="L27"><span class="lineNum">      27</span> <span class="tlaGNC tlaBgGNC">          21 :         virtual ~BoostAODE() = default;</span></span>
+<span id="L26"><span class="lineNum">      26</span>              :         explicit BoostAODE(bool predict_voting = false);</span>
+<span id="L27"><span class="lineNum">      27</span> <span class="tlaGNC tlaBgGNC">         132 :         virtual ~BoostAODE() = default;</span></span>
 <span id="L28"><span class="lineNum">      28</span>              :         std::vector&lt;std::string&gt; graph(const std::string&amp; title = &quot;BoostAODE&quot;) const override;</span>
 <span id="L29"><span class="lineNum">      29</span>              :         void setHyperparameters(const nlohmann::json&amp; hyperparameters_) override;</span>
 <span id="L30"><span class="lineNum">      30</span>              :     protected:</span>

@@ -86,4 +86,12 @@ TEST_CASE("Oddities", "[FeatureSelection]")
     REQUIRE_THROWS_WITH(bayesnet::IWSS(raw.dataset, raw.features, raw.className, raw.features.size(), raw.classNumStates, raw.weights, -1e4), "Threshold has to be in [0, 0.5]");
     REQUIRE_THROWS_AS(bayesnet::IWSS(raw.dataset, raw.features, raw.className, raw.features.size(), raw.classNumStates, raw.weights, 0.501), std::invalid_argument);
     REQUIRE_THROWS_WITH(bayesnet::IWSS(raw.dataset, raw.features, raw.className, raw.features.size(), raw.classNumStates, raw.weights, 0.501), "Threshold has to be in [0, 0.5]");
+    // Not fitted error
+    auto selector = build_selector(raw, "CFS", 0);
+    const std::string message = "FeatureSelect not fitted";
+    REQUIRE_THROWS_AS(selector->getFeatures(), std::runtime_error);
+    REQUIRE_THROWS_AS(selector->getScores(), std::runtime_error);
+    REQUIRE_THROWS_WITH(selector->getFeatures(), message);
+    REQUIRE_THROWS_WITH(selector->getScores(), message);
+    delete selector;
 }

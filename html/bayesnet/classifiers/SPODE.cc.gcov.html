@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Test Date:</td>
-            <td class="headerValue">2024-04-29 20:48:03</td>
+            <td class="headerValue">2024-04-30 13:59:18</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntryHi">100.0&nbsp;%</td>
@@ -70,24 +70,24 @@
 <span id="L8"><span class="lineNum">       8</span>              : </span>
 <span id="L9"><span class="lineNum">       9</span>              : namespace bayesnet {</span>
 <span id="L10"><span class="lineNum">      10</span>              : </span>
-<span id="L11"><span class="lineNum">      11</span> <span class="tlaGNC tlaBgGNC">        2962 :     SPODE::SPODE(int root) : Classifier(Network()), root(root) {}</span></span>
+<span id="L11"><span class="lineNum">      11</span> <span class="tlaGNC tlaBgGNC">        1686 :     SPODE::SPODE(int root) : Classifier(Network()), root(root) {}</span></span>
 <span id="L12"><span class="lineNum">      12</span>              : </span>
-<span id="L13"><span class="lineNum">      13</span> <span class="tlaGNC">        2665 :     void SPODE::buildModel(const torch::Tensor&amp; weights)</span></span>
+<span id="L13"><span class="lineNum">      13</span> <span class="tlaGNC">        1524 :     void SPODE::buildModel(const torch::Tensor&amp; weights)</span></span>
 <span id="L14"><span class="lineNum">      14</span>              :     {</span>
 <span id="L15"><span class="lineNum">      15</span>              :         // 0. Add all nodes to the model</span>
-<span id="L16"><span class="lineNum">      16</span> <span class="tlaGNC">        2665 :         addNodes();</span></span>
+<span id="L16"><span class="lineNum">      16</span> <span class="tlaGNC">        1524 :         addNodes();</span></span>
 <span id="L17"><span class="lineNum">      17</span>              :         // 1. Add edges from the class node to all other nodes</span>
 <span id="L18"><span class="lineNum">      18</span>              :         // 2. Add edges from the root node to all other nodes</span>
-<span id="L19"><span class="lineNum">      19</span> <span class="tlaGNC">      113941 :         for (int i = 0; i &lt; static_cast&lt;int&gt;(features.size()); ++i) {</span></span>
-<span id="L20"><span class="lineNum">      20</span> <span class="tlaGNC">      111276 :             model.addEdge(className, features[i]);</span></span>
-<span id="L21"><span class="lineNum">      21</span> <span class="tlaGNC">      111276 :             if (i != root) {</span></span>
-<span id="L22"><span class="lineNum">      22</span> <span class="tlaGNC">      108611 :                 model.addEdge(features[root], features[i]);</span></span>
+<span id="L19"><span class="lineNum">      19</span> <span class="tlaGNC">       38520 :         for (int i = 0; i &lt; static_cast&lt;int&gt;(features.size()); ++i) {</span></span>
+<span id="L20"><span class="lineNum">      20</span> <span class="tlaGNC">       36996 :             model.addEdge(className, features[i]);</span></span>
+<span id="L21"><span class="lineNum">      21</span> <span class="tlaGNC">       36996 :             if (i != root) {</span></span>
+<span id="L22"><span class="lineNum">      22</span> <span class="tlaGNC">       35472 :                 model.addEdge(features[root], features[i]);</span></span>
 <span id="L23"><span class="lineNum">      23</span>              :             }</span>
 <span id="L24"><span class="lineNum">      24</span>              :         }</span>
-<span id="L25"><span class="lineNum">      25</span> <span class="tlaGNC">        2665 :     }</span></span>
-<span id="L26"><span class="lineNum">      26</span> <span class="tlaGNC">         187 :     std::vector&lt;std::string&gt; SPODE::graph(const std::string&amp; name) const</span></span>
+<span id="L25"><span class="lineNum">      25</span> <span class="tlaGNC">        1524 :     }</span></span>
+<span id="L26"><span class="lineNum">      26</span> <span class="tlaGNC">         102 :     std::vector&lt;std::string&gt; SPODE::graph(const std::string&amp; name) const</span></span>
 <span id="L27"><span class="lineNum">      27</span>              :     {</span>
-<span id="L28"><span class="lineNum">      28</span> <span class="tlaGNC">         187 :         return model.graph(name);</span></span>
+<span id="L28"><span class="lineNum">      28</span> <span class="tlaGNC">         102 :         return model.graph(name);</span></span>
 <span id="L29"><span class="lineNum">      29</span>              :     }</span>
 <span id="L30"><span class="lineNum">      30</span>              : </span>
 <span id="L31"><span class="lineNum">      31</span>              : }</span>

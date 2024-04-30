@@ -410,11 +410,7 @@ namespace bayesnet {
                                 result.insert(it2, fatherName);
                                 ending = false;
                             }
-                        } else {
-                            throw std::logic_error("Error in topological sort because of node " + feature + " is not in result");
                         }
-                    } else {
-                        throw std::logic_error("Error in topological sort because of node father " + fatherName + " is not in result");
                     }
                 }
             }

@@ -72,7 +72,7 @@ add_subdirectory(bayesnet)
 # -------
 if (ENABLE_TESTING)
 MESSAGE("Testing enabled")
-  add_subdirectory("tests/lib/catch2")  
+  add_subdirectory(tests/lib/catch2)
   add_subdirectory(tests/lib/Files)
   include(CTest)
   add_subdirectory(tests)
