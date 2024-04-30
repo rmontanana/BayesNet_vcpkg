@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Test Date:</td>
-            <td class="headerValue">2024-04-30 13:59:18</td>
+            <td class="headerValue">2024-04-30 20:26:57</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntryHi">100.0&nbsp;%</td>
@@ -70,46 +70,46 @@
 <span id="L8"><span class="lineNum">       8</span>              : #include &quot;bayesnet/utils/bayesnetUtils.h&quot;</span>
 <span id="L9"><span class="lineNum">       9</span>              : #include &quot;CFS.h&quot;</span>
 <span id="L10"><span class="lineNum">      10</span>              : namespace bayesnet {</span>
-<span id="L11"><span class="lineNum">      11</span> <span class="tlaGNC tlaBgGNC">          40 :     void CFS::fit()</span></span>
+<span id="L11"><span class="lineNum">      11</span> <span class="tlaGNC tlaBgGNC">          12 :     void CFS::fit()</span></span>
 <span id="L12"><span class="lineNum">      12</span>              :     {</span>
-<span id="L13"><span class="lineNum">      13</span> <span class="tlaGNC">          40 :         initialize();</span></span>
-<span id="L14"><span class="lineNum">      14</span> <span class="tlaGNC">          40 :         computeSuLabels();</span></span>
-<span id="L15"><span class="lineNum">      15</span> <span class="tlaGNC">          40 :         auto featureOrder = argsort(suLabels); // sort descending order</span></span>
-<span id="L16"><span class="lineNum">      16</span> <span class="tlaGNC">          40 :         auto continueCondition = true;</span></span>
-<span id="L17"><span class="lineNum">      17</span> <span class="tlaGNC">          40 :         auto feature = featureOrder[0];</span></span>
-<span id="L18"><span class="lineNum">      18</span> <span class="tlaGNC">          40 :         selectedFeatures.push_back(feature);</span></span>
-<span id="L19"><span class="lineNum">      19</span> <span class="tlaGNC">          40 :         selectedScores.push_back(suLabels[feature]);</span></span>
-<span id="L20"><span class="lineNum">      20</span> <span class="tlaGNC">          40 :         featureOrder.erase(featureOrder.begin());</span></span>
-<span id="L21"><span class="lineNum">      21</span> <span class="tlaGNC">         226 :         while (continueCondition) {</span></span>
-<span id="L22"><span class="lineNum">      22</span> <span class="tlaGNC">         186 :             double merit = std::numeric_limits&lt;double&gt;::lowest();</span></span>
-<span id="L23"><span class="lineNum">      23</span> <span class="tlaGNC">         186 :             int bestFeature = -1;</span></span>
-<span id="L24"><span class="lineNum">      24</span> <span class="tlaGNC">        1083 :             for (auto feature : featureOrder) {</span></span>
-<span id="L25"><span class="lineNum">      25</span> <span class="tlaGNC">         897 :                 selectedFeatures.push_back(feature);</span></span>
+<span id="L13"><span class="lineNum">      13</span> <span class="tlaGNC">          12 :         initialize();</span></span>
+<span id="L14"><span class="lineNum">      14</span> <span class="tlaGNC">          12 :         computeSuLabels();</span></span>
+<span id="L15"><span class="lineNum">      15</span> <span class="tlaGNC">          12 :         auto featureOrder = argsort(suLabels); // sort descending order</span></span>
+<span id="L16"><span class="lineNum">      16</span> <span class="tlaGNC">          12 :         auto continueCondition = true;</span></span>
+<span id="L17"><span class="lineNum">      17</span> <span class="tlaGNC">          12 :         auto feature = featureOrder[0];</span></span>
+<span id="L18"><span class="lineNum">      18</span> <span class="tlaGNC">          12 :         selectedFeatures.push_back(feature);</span></span>
+<span id="L19"><span class="lineNum">      19</span> <span class="tlaGNC">          12 :         selectedScores.push_back(suLabels[feature]);</span></span>
+<span id="L20"><span class="lineNum">      20</span> <span class="tlaGNC">          12 :         featureOrder.erase(featureOrder.begin());</span></span>
+<span id="L21"><span class="lineNum">      21</span> <span class="tlaGNC">          68 :         while (continueCondition) {</span></span>
+<span id="L22"><span class="lineNum">      22</span> <span class="tlaGNC">          56 :             double merit = std::numeric_limits&lt;double&gt;::lowest();</span></span>
+<span id="L23"><span class="lineNum">      23</span> <span class="tlaGNC">          56 :             int bestFeature = -1;</span></span>
+<span id="L24"><span class="lineNum">      24</span> <span class="tlaGNC">         328 :             for (auto feature : featureOrder) {</span></span>
+<span id="L25"><span class="lineNum">      25</span> <span class="tlaGNC">         272 :                 selectedFeatures.push_back(feature);</span></span>
 <span id="L26"><span class="lineNum">      26</span>              :                 // Compute merit with selectedFeatures</span>
-<span id="L27"><span class="lineNum">      27</span> <span class="tlaGNC">         897 :                 auto meritNew = computeMeritCFS();</span></span>
-<span id="L28"><span class="lineNum">      28</span> <span class="tlaGNC">         897 :                 if (meritNew &gt; merit) {</span></span>
-<span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC">         379 :                     merit = meritNew;</span></span>
-<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">         379 :                     bestFeature = feature;</span></span>
+<span id="L27"><span class="lineNum">      27</span> <span class="tlaGNC">         272 :                 auto meritNew = computeMeritCFS();</span></span>
+<span id="L28"><span class="lineNum">      28</span> <span class="tlaGNC">         272 :                 if (meritNew &gt; merit) {</span></span>
+<span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC">         114 :                     merit = meritNew;</span></span>
+<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">         114 :                     bestFeature = feature;</span></span>
 <span id="L31"><span class="lineNum">      31</span>              :                 }</span>
-<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">         897 :                 selectedFeatures.pop_back();</span></span>
+<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">         272 :                 selectedFeatures.pop_back();</span></span>
 <span id="L33"><span class="lineNum">      33</span>              :             }</span>
-<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC">         186 :             if (bestFeature == -1) {</span></span>
+<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC">          56 :             if (bestFeature == -1) {</span></span>
 <span id="L35"><span class="lineNum">      35</span>              :                 // meritNew has to be nan due to constant features</span>
 <span id="L36"><span class="lineNum">      36</span> <span class="tlaUNC tlaBgUNC">           0 :                 break;</span></span>
 <span id="L37"><span class="lineNum">      37</span>              :             }</span>
-<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC tlaBgGNC">         186 :             selectedFeatures.push_back(bestFeature);</span></span>
-<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">         186 :             selectedScores.push_back(merit);</span></span>
-<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">         186 :             featureOrder.erase(remove(featureOrder.begin(), featureOrder.end(), bestFeature), featureOrder.end());</span></span>
-<span id="L41"><span class="lineNum">      41</span> <span class="tlaGNC">         186 :             continueCondition = computeContinueCondition(featureOrder);</span></span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC tlaBgGNC">          56 :             selectedFeatures.push_back(bestFeature);</span></span>
+<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">          56 :             selectedScores.push_back(merit);</span></span>
+<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">          56 :             featureOrder.erase(remove(featureOrder.begin(), featureOrder.end(), bestFeature), featureOrder.end());</span></span>
+<span id="L41"><span class="lineNum">      41</span> <span class="tlaGNC">          56 :             continueCondition = computeContinueCondition(featureOrder);</span></span>
 <span id="L42"><span class="lineNum">      42</span>              :         }</span>
-<span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC">          40 :         fitted = true;</span></span>
-<span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC">          40 :     }</span></span>
-<span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">         186 :     bool CFS::computeContinueCondition(const std::vector&lt;int&gt;&amp; featureOrder)</span></span>
+<span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC">          12 :         fitted = true;</span></span>
+<span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC">          12 :     }</span></span>
+<span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">          56 :     bool CFS::computeContinueCondition(const std::vector&lt;int&gt;&amp; featureOrder)</span></span>
 <span id="L46"><span class="lineNum">      46</span>              :     {</span>
-<span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC">         186 :         if (selectedFeatures.size() == maxFeatures || featureOrder.size() == 0) {</span></span>
-<span id="L48"><span class="lineNum">      48</span> <span class="tlaGNC">           7 :             return false;</span></span>
+<span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC">          56 :         if (selectedFeatures.size() == maxFeatures || featureOrder.size() == 0) {</span></span>
+<span id="L48"><span class="lineNum">      48</span> <span class="tlaGNC">           2 :             return false;</span></span>
 <span id="L49"><span class="lineNum">      49</span>              :         }</span>
-<span id="L50"><span class="lineNum">      50</span> <span class="tlaGNC">         179 :         if (selectedScores.size() &gt;= 5) {</span></span>
+<span id="L50"><span class="lineNum">      50</span> <span class="tlaGNC">          54 :         if (selectedScores.size() &gt;= 5) {</span></span>
 <span id="L51"><span class="lineNum">      51</span>              :             /*</span>
 <span id="L52"><span class="lineNum">      52</span>              :             &quot;To prevent the best first search from exploring the entire</span>
 <span id="L53"><span class="lineNum">      53</span>              :             feature subset search space, a stopping criterion is imposed.</span>
@@ -117,25 +117,25 @@
 <span id="L55"><span class="lineNum">      55</span>              :             subsets show no improvement over the current best subset.&quot;</span>
 <span id="L56"><span class="lineNum">      56</span>              :             as stated in Mark A.Hall Thesis</span>
 <span id="L57"><span class="lineNum">      57</span>              :             */</span>
-<span id="L58"><span class="lineNum">      58</span> <span class="tlaGNC">          66 :             double item_ant = std::numeric_limits&lt;double&gt;::lowest();</span></span>
-<span id="L59"><span class="lineNum">      59</span> <span class="tlaGNC">          66 :             int num = 0;</span></span>
-<span id="L60"><span class="lineNum">      60</span> <span class="tlaGNC">          66 :             std::vector&lt;double&gt; lastFive(selectedScores.end() - 5, selectedScores.end());</span></span>
-<span id="L61"><span class="lineNum">      61</span> <span class="tlaGNC">         264 :             for (auto item : lastFive) {</span></span>
-<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC">         231 :                 if (item_ant == std::numeric_limits&lt;double&gt;::lowest()) {</span></span>
-<span id="L63"><span class="lineNum">      63</span> <span class="tlaGNC">          66 :                     item_ant = item;</span></span>
+<span id="L58"><span class="lineNum">      58</span> <span class="tlaGNC">          20 :             double item_ant = std::numeric_limits&lt;double&gt;::lowest();</span></span>
+<span id="L59"><span class="lineNum">      59</span> <span class="tlaGNC">          20 :             int num = 0;</span></span>
+<span id="L60"><span class="lineNum">      60</span> <span class="tlaGNC">          20 :             std::vector&lt;double&gt; lastFive(selectedScores.end() - 5, selectedScores.end());</span></span>
+<span id="L61"><span class="lineNum">      61</span> <span class="tlaGNC">          80 :             for (auto item : lastFive) {</span></span>
+<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC">          70 :                 if (item_ant == std::numeric_limits&lt;double&gt;::lowest()) {</span></span>
+<span id="L63"><span class="lineNum">      63</span> <span class="tlaGNC">          20 :                     item_ant = item;</span></span>
 <span id="L64"><span class="lineNum">      64</span>              :                 }</span>
-<span id="L65"><span class="lineNum">      65</span> <span class="tlaGNC">         231 :                 if (item &gt; item_ant) {</span></span>
-<span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC">          33 :                     break;</span></span>
+<span id="L65"><span class="lineNum">      65</span> <span class="tlaGNC">          70 :                 if (item &gt; item_ant) {</span></span>
+<span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC">          10 :                     break;</span></span>
 <span id="L67"><span class="lineNum">      67</span>              :                 } else {</span>
-<span id="L68"><span class="lineNum">      68</span> <span class="tlaGNC">         198 :                     num++;</span></span>
-<span id="L69"><span class="lineNum">      69</span> <span class="tlaGNC">         198 :                     item_ant = item;</span></span>
+<span id="L68"><span class="lineNum">      68</span> <span class="tlaGNC">          60 :                     num++;</span></span>
+<span id="L69"><span class="lineNum">      69</span> <span class="tlaGNC">          60 :                     item_ant = item;</span></span>
 <span id="L70"><span class="lineNum">      70</span>              :                 }</span>
 <span id="L71"><span class="lineNum">      71</span>              :             }</span>
-<span id="L72"><span class="lineNum">      72</span> <span class="tlaGNC">          66 :             if (num == 5) {</span></span>
-<span id="L73"><span class="lineNum">      73</span> <span class="tlaGNC">          33 :                 return false;</span></span>
+<span id="L72"><span class="lineNum">      72</span> <span class="tlaGNC">          20 :             if (num == 5) {</span></span>
+<span id="L73"><span class="lineNum">      73</span> <span class="tlaGNC">          10 :                 return false;</span></span>
 <span id="L74"><span class="lineNum">      74</span>              :             }</span>
-<span id="L75"><span class="lineNum">      75</span> <span class="tlaGNC">          66 :         }</span></span>
-<span id="L76"><span class="lineNum">      76</span> <span class="tlaGNC">         146 :         return true;</span></span>
+<span id="L75"><span class="lineNum">      75</span> <span class="tlaGNC">          20 :         }</span></span>
+<span id="L76"><span class="lineNum">      76</span> <span class="tlaGNC">          44 :         return true;</span></span>
 <span id="L77"><span class="lineNum">      77</span>              :     }</span>
 <span id="L78"><span class="lineNum">      78</span>              : }</span>
         </pre>

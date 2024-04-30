@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Test Date:</td>
-            <td class="headerValue">2024-04-30 13:59:18</td>
+            <td class="headerValue">2024-04-30 20:26:57</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntryHi">100.0&nbsp;%</td>
@@ -80,7 +80,7 @@
 <span id="L18"><span class="lineNum">      18</span>              :         virtual BaseClassifier&amp; fit(torch::Tensor&amp; X, torch::Tensor&amp; y, const std::vector&lt;std::string&gt;&amp; features, const std::string&amp; className, std::map&lt;std::string, std::vector&lt;int&gt;&gt;&amp; states) = 0;</span>
 <span id="L19"><span class="lineNum">      19</span>              :         virtual BaseClassifier&amp; fit(torch::Tensor&amp; dataset, const std::vector&lt;std::string&gt;&amp; features, const std::string&amp; className, std::map&lt;std::string, std::vector&lt;int&gt;&gt;&amp; states) = 0;</span>
 <span id="L20"><span class="lineNum">      20</span>              :         virtual BaseClassifier&amp; fit(torch::Tensor&amp; dataset, const std::vector&lt;std::string&gt;&amp; features, const std::string&amp; className, std::map&lt;std::string, std::vector&lt;int&gt;&gt;&amp; states, const torch::Tensor&amp; weights) = 0;</span>
-<span id="L21"><span class="lineNum">      21</span> <span class="tlaGNC tlaBgGNC">        1818 :         virtual ~BaseClassifier() = default;</span></span>
+<span id="L21"><span class="lineNum">      21</span> <span class="tlaGNC tlaBgGNC">         606 :         virtual ~BaseClassifier() = default;</span></span>
 <span id="L22"><span class="lineNum">      22</span>              :         torch::Tensor virtual predict(torch::Tensor&amp; X) = 0;</span>
 <span id="L23"><span class="lineNum">      23</span>              :         std::vector&lt;int&gt; virtual predict(std::vector&lt;std::vector&lt;int &gt;&gt;&amp; X) = 0;</span>
 <span id="L24"><span class="lineNum">      24</span>              :         torch::Tensor virtual predict_proba(torch::Tensor&amp; X) = 0;</span>

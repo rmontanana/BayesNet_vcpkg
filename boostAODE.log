@@ -1,0 +1,35 @@
+File verbosity level: 9
+date       time         ( uptime  ) [ thread name/id ]                   file:line     v| 
+2024-04-30 20:24:40.507 (   0.002s) [BoostAODE       ]             loguru.cpp:825   INFO| Logging to 'boostAODE.log', mode: 'w', verbosity: 9
+2024-04-30 20:24:40.517 (   0.011s) [BoostAODE       ]           BoostAODE.cc:321      1| { counter=0 k=1 featureSelection.size: 4
+2024-04-30 20:24:40.531 (   0.025s) [BoostAODE       ]           BoostAODE.cc:340      2| .   { numItemsPack: 1 n_models: 1 featuresUsed: 1
+2024-04-30 20:24:40.531 (   0.025s) [BoostAODE       ]           BoostAODE.cc:340      2| .   } 0.000 s: numItemsPack: 1 n_models: 1 featuresUsed: 1
+2024-04-30 20:24:40.533 (   0.028s) [BoostAODE       ]           BoostAODE.cc:357      3| .   { * (improvement>=threshold) Reset. tolerance: 0 numItemsPack: 1 improvement: 1.000000 prior: 0.933333 current: 0.933333
+2024-04-30 20:24:40.533 (   0.028s) [BoostAODE       ]           BoostAODE.cc:357      3| .   } 0.000 s: * (improvement>=threshold) Reset. tolerance: 0 numItemsPack: 1 improvement: 1.000000 prior: 0.933333 current: 0.933333
+2024-04-30 20:24:40.533 (   0.028s) [BoostAODE       ]           BoostAODE.cc:369      1| .   { tolerance: 0 featuresUsed.size: 1 features.size: 4
+2024-04-30 20:24:40.533 (   0.028s) [BoostAODE       ]           BoostAODE.cc:369      1| .   } 0.000 s: tolerance: 0 featuresUsed.size: 1 features.size: 4
+2024-04-30 20:24:40.533 (   0.028s) [BoostAODE       ]           BoostAODE.cc:321      1| } 0.016 s: counter=0 k=1 featureSelection.size: 4
+2024-04-30 20:24:40.534 (   0.029s) [BoostAODE       ]           BoostAODE.cc:321      1| { counter=0 k=1 featureSelection.size: 3
+2024-04-30 20:24:40.546 (   0.040s) [BoostAODE       ]           BoostAODE.cc:340      2| .   { numItemsPack: 1 n_models: 2 featuresUsed: 2
+2024-04-30 20:24:40.546 (   0.040s) [BoostAODE       ]           BoostAODE.cc:340      2| .   } 0.000 s: numItemsPack: 1 n_models: 2 featuresUsed: 2
+2024-04-30 20:24:40.549 (   0.044s) [BoostAODE       ]           BoostAODE.cc:357      3| .   { * (improvement>=threshold) Reset. tolerance: 0 numItemsPack: 1 improvement: 0.033333 prior: 0.933333 current: 0.966667
+2024-04-30 20:24:40.549 (   0.044s) [BoostAODE       ]           BoostAODE.cc:357      3| .   } 0.000 s: * (improvement>=threshold) Reset. tolerance: 0 numItemsPack: 1 improvement: 0.033333 prior: 0.933333 current: 0.966667
+2024-04-30 20:24:40.549 (   0.044s) [BoostAODE       ]           BoostAODE.cc:369      1| .   { tolerance: 0 featuresUsed.size: 2 features.size: 4
+2024-04-30 20:24:40.549 (   0.044s) [BoostAODE       ]           BoostAODE.cc:369      1| .   } 0.000 s: tolerance: 0 featuresUsed.size: 2 features.size: 4
+2024-04-30 20:24:40.549 (   0.044s) [BoostAODE       ]           BoostAODE.cc:321      1| } 0.015 s: counter=0 k=1 featureSelection.size: 3
+2024-04-30 20:24:40.551 (   0.045s) [BoostAODE       ]           BoostAODE.cc:321      1| { counter=0 k=1 featureSelection.size: 2
+2024-04-30 20:24:40.563 (   0.058s) [BoostAODE       ]           BoostAODE.cc:340      2| .   { numItemsPack: 1 n_models: 3 featuresUsed: 3
+2024-04-30 20:24:40.563 (   0.058s) [BoostAODE       ]           BoostAODE.cc:340      2| .   } 0.000 s: numItemsPack: 1 n_models: 3 featuresUsed: 3
+2024-04-30 20:24:40.568 (   0.063s) [BoostAODE       ]           BoostAODE.cc:354      3| .   {   (improvement<threshold) tolerance: 0 numItemsPack: 1 improvement: -0.033333 prior: 0.966667 current: 0.933333
+2024-04-30 20:24:40.568 (   0.063s) [BoostAODE       ]           BoostAODE.cc:354      3| .   } 0.000 s:   (improvement<threshold) tolerance: 0 numItemsPack: 1 improvement: -0.033333 prior: 0.966667 current: 0.933333
+2024-04-30 20:24:40.568 (   0.063s) [BoostAODE       ]           BoostAODE.cc:369      1| .   { tolerance: 1 featuresUsed.size: 3 features.size: 4
+2024-04-30 20:24:40.568 (   0.063s) [BoostAODE       ]           BoostAODE.cc:369      1| .   } 0.000 s: tolerance: 1 featuresUsed.size: 3 features.size: 4
+2024-04-30 20:24:40.568 (   0.063s) [BoostAODE       ]           BoostAODE.cc:321      1| } 0.018 s: counter=0 k=1 featureSelection.size: 2
+2024-04-30 20:24:40.570 (   0.065s) [BoostAODE       ]           BoostAODE.cc:321      1| { counter=0 k=2 featureSelection.size: 1
+2024-04-30 20:24:40.584 (   0.079s) [BoostAODE       ]           BoostAODE.cc:340      2| .   { numItemsPack: 2 n_models: 4 featuresUsed: 4
+2024-04-30 20:24:40.584 (   0.079s) [BoostAODE       ]           BoostAODE.cc:340      2| .   } 0.000 s: numItemsPack: 2 n_models: 4 featuresUsed: 4
+2024-04-30 20:24:40.590 (   0.084s) [BoostAODE       ]           BoostAODE.cc:354      3| .   {   (improvement<threshold) tolerance: 1 numItemsPack: 2 improvement: 0.000000 prior: 0.933333 current: 0.933333
+2024-04-30 20:24:40.590 (   0.084s) [BoostAODE       ]           BoostAODE.cc:354      3| .   } 0.000 s:   (improvement<threshold) tolerance: 1 numItemsPack: 2 improvement: 0.000000 prior: 0.933333 current: 0.933333
+2024-04-30 20:24:40.590 (   0.084s) [BoostAODE       ]           BoostAODE.cc:369      1| .   { tolerance: 2 featuresUsed.size: 4 features.size: 4
+2024-04-30 20:24:40.590 (   0.084s) [BoostAODE       ]           BoostAODE.cc:369      1| .   } 0.000 s: tolerance: 2 featuresUsed.size: 4 features.size: 4
+2024-04-30 20:24:40.590 (   0.084s) [BoostAODE       ]           BoostAODE.cc:321      1| } 0.020 s: counter=0 k=2 featureSelection.size: 1

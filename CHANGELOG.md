@@ -15,8 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Internal
 
-- Refactor library ArffFile to limit the number of samples with a parameter.
-- Refactor tests libraries location to test/lib
+- Create library ShuffleArffFile to limit the number of samples with a parameter and shuffle them.
+- Refactor catch2 library location to test/lib
 - Refactor loadDataset function in tests.
 - Remove conditionalEdgeWeights method in BayesMetrics.
 

@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Test Date:</td>
-            <td class="headerValue">2024-04-30 13:59:18</td>
+            <td class="headerValue">2024-04-30 20:26:57</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntryHi">100.0&nbsp;%</td>
@@ -77,7 +77,7 @@
 <span id="L15"><span class="lineNum">      15</span>              :     class Classifier : public BaseClassifier {</span>
 <span id="L16"><span class="lineNum">      16</span>              :     public:</span>
 <span id="L17"><span class="lineNum">      17</span>              :         Classifier(Network model);</span>
-<span id="L18"><span class="lineNum">      18</span> <span class="tlaGNC tlaBgGNC">        1818 :         virtual ~Classifier() = default;</span></span>
+<span id="L18"><span class="lineNum">      18</span> <span class="tlaGNC tlaBgGNC">         606 :         virtual ~Classifier() = default;</span></span>
 <span id="L19"><span class="lineNum">      19</span>              :         Classifier&amp; fit(std::vector&lt;std::vector&lt;int&gt;&gt;&amp; X, std::vector&lt;int&gt;&amp; y, const std::vector&lt;std::string&gt;&amp; features, const std::string&amp; className, std::map&lt;std::string, std::vector&lt;int&gt;&gt;&amp; states) override;</span>
 <span id="L20"><span class="lineNum">      20</span>              :         Classifier&amp; fit(torch::Tensor&amp; X, torch::Tensor&amp; y, const std::vector&lt;std::string&gt;&amp; features, const std::string&amp; className, std::map&lt;std::string, std::vector&lt;int&gt;&gt;&amp; states) override;</span>
 <span id="L21"><span class="lineNum">      21</span>              :         Classifier&amp; fit(torch::Tensor&amp; dataset, const std::vector&lt;std::string&gt;&amp; features, const std::string&amp; className, std::map&lt;std::string, std::vector&lt;int&gt;&gt;&amp; states) override;</span>
@@ -91,13 +91,13 @@
 <span id="L29"><span class="lineNum">      29</span>              :         std::vector&lt;int&gt; predict(std::vector&lt;std::vector&lt;int&gt;&gt;&amp; X) override;</span>
 <span id="L30"><span class="lineNum">      30</span>              :         torch::Tensor predict_proba(torch::Tensor&amp; X) override;</span>
 <span id="L31"><span class="lineNum">      31</span>              :         std::vector&lt;std::vector&lt;double&gt;&gt; predict_proba(std::vector&lt;std::vector&lt;int&gt;&gt;&amp; X) override;</span>
-<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">         192 :         status_t getStatus() const override { return status; }</span></span>
-<span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">         144 :         std::string getVersion() override { return { project_version.begin(), project_version.end() }; };</span></span>
+<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">          64 :         status_t getStatus() const override { return status; }</span></span>
+<span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">          48 :         std::string getVersion() override { return { project_version.begin(), project_version.end() }; };</span></span>
 <span id="L34"><span class="lineNum">      34</span>              :         float score(torch::Tensor&amp; X, torch::Tensor&amp; y) override;</span>
 <span id="L35"><span class="lineNum">      35</span>              :         float score(std::vector&lt;std::vector&lt;int&gt;&gt;&amp; X, std::vector&lt;int&gt;&amp; y) override;</span>
 <span id="L36"><span class="lineNum">      36</span>              :         std::vector&lt;std::string&gt; show() const override;</span>
 <span id="L37"><span class="lineNum">      37</span>              :         std::vector&lt;std::string&gt; topological_order()  override;</span>
-<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">         114 :         std::vector&lt;std::string&gt; getNotes() const override { return notes; }</span></span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">          38 :         std::vector&lt;std::string&gt; getNotes() const override { return notes; }</span></span>
 <span id="L39"><span class="lineNum">      39</span>              :         std::string dump_cpt() const override;</span>
 <span id="L40"><span class="lineNum">      40</span>              :         void setHyperparameters(const nlohmann::json&amp; hyperparameters) override; //For classifiers that don't have hyperparameters</span>
 <span id="L41"><span class="lineNum">      41</span>              :     protected:</span>

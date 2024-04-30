@@ -60,8 +60,9 @@ endif (ENABLE_CLANG_TIDY)
 # External libraries - dependencies of BayesNet
 # ---------------------------------------------
 # include(FetchContent)
-add_git_submodule("lib/mdlp")
 add_git_submodule("lib/json")
+add_git_submodule("lib/mdlp")
+add_subdirectory("lib/Files")
 
 # Subdirectories
 # --------------
@@ -73,7 +74,6 @@ add_subdirectory(bayesnet)
 if (ENABLE_TESTING)
 MESSAGE("Testing enabled")
   add_subdirectory(tests/lib/catch2)
-  add_subdirectory(tests/lib/Files)
   include(CTest)
   add_subdirectory(tests)
 endif (ENABLE_TESTING)
