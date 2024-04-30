@@ -61,7 +61,25 @@ make sample fname=tests/data/glass.arff
 
 ## Models
 
-### [BoostAODE](docs/BoostAODE.md)
+#### - TAN
+
+#### - KDB
+
+#### - SPODE
+
+#### - AODE
+
+#### - [BoostAODE](docs/BoostAODE.md)
+
+### With Local Discretization
+
+#### - TANLd
+
+#### - KDBLd
+
+#### - SPODELd
+
+#### - AODELd
 
 ## Diagrams
 
