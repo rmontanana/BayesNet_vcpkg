@@ -16,7 +16,7 @@
             "name": "test",
             "program": "${workspaceFolder}/build_debug/tests/TestBayesNet",
             "args": [
-                "\"Bisection Best\""
+                "[A2DE]"
             ],
             "cwd": "${workspaceFolder}/build_debug/tests"
         },

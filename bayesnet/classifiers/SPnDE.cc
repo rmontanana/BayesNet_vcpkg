@@ -16,7 +16,7 @@ namespace bayesnet {
         addNodes();
         std::vector<int> attributes;
         for (int i = 0; i < static_cast<int>(features.size()); ++i) {
-            if (std::find(parents.begin(), parents.end(), i) != parents.end()) {
+            if (std::find(parents.begin(), parents.end(), i) == parents.end()) {
                 attributes.push_back(i);
             }
         }
@@ -25,6 +25,7 @@ namespace bayesnet {
         for (const auto& attribute : attributes) {
             model.addEdge(className, features[attribute]);
             for (const auto& root : parents) {
+
                 model.addEdge(features[root], features[attribute]);
             }
         }

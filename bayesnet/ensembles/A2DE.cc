@@ -27,10 +27,11 @@ namespace bayesnet {
         significanceModels.clear();
         for (int i = 0; i < features.size() - 1; ++i) {
             for (int j = i + 1; j < features.size(); ++j) {
-                models.push_back(std::make_unique<SPnDE>(std::vector<int>({ i, j })));
+                auto model = std::make_unique<SPnDE>(std::vector<int>({ i, j }));
+                models.push_back(std::move(model));
             }
         }
-        n_models = models.size();
+        n_models = static_cast<unsigned>(models.size());
         significanceModels = std::vector<double>(n_models, 1.0);
     }
     std::vector<std::string> A2DE::graph(const std::string& title) const

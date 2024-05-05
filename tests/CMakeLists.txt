@@ -9,7 +9,7 @@ if(ENABLE_TESTING)
     )
     file(GLOB_RECURSE BayesNet_SOURCES "${BayesNet_SOURCE_DIR}/bayesnet/*.cc")
     add_executable(TestBayesNet TestBayesNetwork.cc TestBayesNode.cc TestBayesClassifier.cc 
-        TestBayesModels.cc TestBayesMetrics.cc TestFeatureSelection.cc TestBoostAODE.cc
+        TestBayesModels.cc TestBayesMetrics.cc TestFeatureSelection.cc TestBoostAODE.cc TestA2DE.cc
         TestUtils.cc TestBayesEnsemble.cc ${BayesNet_SOURCES})
     target_link_libraries(TestBayesNet PUBLIC "${TORCH_LIBRARIES}" ArffFiles mdlp PRIVATE Catch2::Catch2WithMain)
     add_test(NAME BayesNetworkTest COMMAND TestBayesNet)
