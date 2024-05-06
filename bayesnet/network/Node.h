@@ -12,14 +12,6 @@
 #include <torch/torch.h>
 namespace bayesnet {
     class Node {
-    private:
-        std::string name;
-        std::vector<Node*> parents;
-        std::vector<Node*> children;
-        int numStates; // number of states of the variable
-        torch::Tensor cpTable; // Order of indices is 0-> node variable, 1-> 1st parent, 2-> 2nd parent, ...
-        std::vector<int64_t> dimensions; // dimensions of the cpTable
-        std::vector<std::pair<std::string, std::string>> combinations(const std::vector<std::string>&);
     public:
         explicit Node(const std::string&);
         void clear();
@@ -37,6 +29,14 @@ namespace bayesnet {
         unsigned minFill();
         std::vector<std::string> graph(const std::string& clasName); // Returns a std::vector of std::strings representing the graph in graphviz format
         float getFactorValue(std::map<std::string, int>&);
+    private:
+        std::string name;
+        std::vector<Node*> parents;
+        std::vector<Node*> children;
+        int numStates = 0; // number of states of the variable
+        torch::Tensor cpTable; // Order of indices is 0-> node variable, 1-> 1st parent, 2-> 2nd parent, ...
+        std::vector<int64_t> dimensions; // dimensions of the cpTable
+        std::vector<std::pair<std::string, std::string>> combinations(const std::vector<std::string>&);
     };
 }
 #endif

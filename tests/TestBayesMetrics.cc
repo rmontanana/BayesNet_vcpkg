@@ -76,3 +76,11 @@ TEST_CASE("Metrics Test", "[Metrics]")
         }
     }
 }
+TEST_CASE("Select all features ordered by Mutual Information", "[Metrics]")
+{
+    auto raw = RawDatasets("iris", true);
+    bayesnet::Metrics metrics(raw.dataset, raw.features, raw.className, raw.classNumStates);
+    auto kBest = metrics.SelectKBestWeighted(raw.weights, true, 0);
+    REQUIRE(kBest.size() == raw.features.size());
+    REQUIRE(kBest == std::vector<int>({ 1, 0, 3, 2 }));
+}

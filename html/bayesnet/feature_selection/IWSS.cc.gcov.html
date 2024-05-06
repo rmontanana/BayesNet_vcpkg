@@ -4,7 +4,7 @@
 
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <title>LCOV - coverage.info - bayesnet/feature_selection/IWSS.cc</title>
+  <title>LCOV - BayesNet Coverage Report - bayesnet/feature_selection/IWSS.cc</title>
   <link rel="stylesheet" type="text/css" href="../../gcov.css">
 </head>
 
@@ -19,7 +19,7 @@
                 <table cellpadding=1 border=0 width="100%">
           <tr>
             <td width="10%" class="headerItem">Current view:</td>
-            <td width="10%" class="headerValue"><a href="../../index.html">top level</a> - <a href="index.html">bayesnet/feature_selection</a> - IWSS.cc<span style="font-size: 80%;"> (source / <a href="IWSS.cc.func-c.html">functions</a>)</span></td>
+            <td width="10%" class="headerValue"><a href="../../index.html" target="_parent">top level</a> - <a href="index.html" target="_parent">bayesnet/feature_selection</a> - IWSS.cc<span style="font-size: 80%;"> (source / <a href="IWSS.cc.func-c.html">functions</a>)</span></td>
             <td width="5%"></td>
             <td width="5%"></td>
             <td width="5%" class="headerCovTableHead">Coverage</td>
@@ -28,21 +28,29 @@
           </tr>
           <tr>
             <td class="headerItem">Test:</td>
-            <td class="headerValue">coverage.info</td>
+            <td class="headerValue">BayesNet Coverage Report</td>
             <td></td>
             <td class="headerItem">Lines:</td>
-            <td class="headerCovTableEntryHi">93.3&nbsp;%</td>
+            <td class="headerCovTableEntryHi">96.7&nbsp;%</td>
             <td class="headerCovTableEntry">30</td>
-            <td class="headerCovTableEntry">28</td>
+            <td class="headerCovTableEntry">29</td>
           </tr>
           <tr>
             <td class="headerItem">Test Date:</td>
-            <td class="headerValue">2024-04-30 20:26:57</td>
+            <td class="headerValue">2024-05-06 17:54:04</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntryHi">100.0&nbsp;%</td>
             <td class="headerCovTableEntry">2</td>
             <td class="headerCovTableEntry">2</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Legend:</td>
+            <td class="headerValueLeg">            Lines:
+            <span class="coverLegendCov">hit</span>
+            <span class="coverLegendNoCov">not hit</span>
+</td>
+            <td></td>
           </tr>
                   <tr><td><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
                 </table>
@@ -70,48 +78,48 @@
 <span id="L8"><span class="lineNum">       8</span>              : #include &quot;bayesnet/utils/bayesnetUtils.h&quot;</span>
 <span id="L9"><span class="lineNum">       9</span>              : #include &quot;IWSS.h&quot;</span>
 <span id="L10"><span class="lineNum">      10</span>              : namespace bayesnet {</span>
-<span id="L11"><span class="lineNum">      11</span> <span class="tlaGNC tlaBgGNC">          18 :     IWSS::IWSS(const torch::Tensor&amp; samples, const std::vector&lt;std::string&gt;&amp; features, const std::string&amp; className, const int maxFeatures, const int classNumStates, const torch::Tensor&amp; weights, const double threshold) :</span></span>
-<span id="L12"><span class="lineNum">      12</span> <span class="tlaGNC">          18 :         FeatureSelect(samples, features, className, maxFeatures, classNumStates, weights), threshold(threshold)</span></span>
+<span id="L11"><span class="lineNum">      11</span> <span class="tlaGNC tlaBgGNC">          87 :     IWSS::IWSS(const torch::Tensor&amp; samples, const std::vector&lt;std::string&gt;&amp; features, const std::string&amp; className, const int maxFeatures, const int classNumStates, const torch::Tensor&amp; weights, const double threshold) :</span></span>
+<span id="L12"><span class="lineNum">      12</span> <span class="tlaGNC">          87 :         FeatureSelect(samples, features, className, maxFeatures, classNumStates, weights), threshold(threshold)</span></span>
 <span id="L13"><span class="lineNum">      13</span>              :     {</span>
-<span id="L14"><span class="lineNum">      14</span> <span class="tlaGNC">          18 :         if (threshold &lt; 0 || threshold &gt; .5) {</span></span>
-<span id="L15"><span class="lineNum">      15</span> <span class="tlaGNC">           8 :             throw std::invalid_argument(&quot;Threshold has to be in [0, 0.5]&quot;);</span></span>
+<span id="L14"><span class="lineNum">      14</span> <span class="tlaGNC">          87 :         if (threshold &lt; 0 || threshold &gt; .5) {</span></span>
+<span id="L15"><span class="lineNum">      15</span> <span class="tlaGNC">          40 :             throw std::invalid_argument(&quot;Threshold has to be in [0, 0.5]&quot;);</span></span>
 <span id="L16"><span class="lineNum">      16</span>              :         }</span>
-<span id="L17"><span class="lineNum">      17</span> <span class="tlaGNC">          18 :     }</span></span>
-<span id="L18"><span class="lineNum">      18</span> <span class="tlaGNC">          10 :     void IWSS::fit()</span></span>
+<span id="L17"><span class="lineNum">      17</span> <span class="tlaGNC">          87 :     }</span></span>
+<span id="L18"><span class="lineNum">      18</span> <span class="tlaGNC">          47 :     void IWSS::fit()</span></span>
 <span id="L19"><span class="lineNum">      19</span>              :     {</span>
-<span id="L20"><span class="lineNum">      20</span> <span class="tlaGNC">          10 :         initialize();</span></span>
-<span id="L21"><span class="lineNum">      21</span> <span class="tlaGNC">          10 :         computeSuLabels();</span></span>
-<span id="L22"><span class="lineNum">      22</span> <span class="tlaGNC">          10 :         auto featureOrder = argsort(suLabels); // sort descending order</span></span>
-<span id="L23"><span class="lineNum">      23</span> <span class="tlaGNC">          10 :         auto featureOrderCopy = featureOrder;</span></span>
+<span id="L20"><span class="lineNum">      20</span> <span class="tlaGNC">          47 :         initialize();</span></span>
+<span id="L21"><span class="lineNum">      21</span> <span class="tlaGNC">          47 :         computeSuLabels();</span></span>
+<span id="L22"><span class="lineNum">      22</span> <span class="tlaGNC">          47 :         auto featureOrder = argsort(suLabels); // sort descending order</span></span>
+<span id="L23"><span class="lineNum">      23</span> <span class="tlaGNC">          47 :         auto featureOrderCopy = featureOrder;</span></span>
 <span id="L24"><span class="lineNum">      24</span>              :         // Add first and second features to result</span>
 <span id="L25"><span class="lineNum">      25</span>              :         //     First with its own score</span>
-<span id="L26"><span class="lineNum">      26</span> <span class="tlaGNC">          10 :         auto first_feature = pop_first(featureOrderCopy);</span></span>
-<span id="L27"><span class="lineNum">      27</span> <span class="tlaGNC">          10 :         selectedFeatures.push_back(first_feature);</span></span>
-<span id="L28"><span class="lineNum">      28</span> <span class="tlaGNC">          10 :         selectedScores.push_back(suLabels.at(first_feature));</span></span>
+<span id="L26"><span class="lineNum">      26</span> <span class="tlaGNC">          47 :         auto first_feature = pop_first(featureOrderCopy);</span></span>
+<span id="L27"><span class="lineNum">      27</span> <span class="tlaGNC">          47 :         selectedFeatures.push_back(first_feature);</span></span>
+<span id="L28"><span class="lineNum">      28</span> <span class="tlaGNC">          47 :         selectedScores.push_back(suLabels.at(first_feature));</span></span>
 <span id="L29"><span class="lineNum">      29</span>              :         //     Second with the score of the candidates</span>
-<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">          10 :         selectedFeatures.push_back(pop_first(featureOrderCopy));</span></span>
-<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">          10 :         auto merit = computeMeritCFS();</span></span>
-<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">          10 :         selectedScores.push_back(merit);</span></span>
-<span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">          34 :         for (const auto feature : featureOrderCopy) {</span></span>
-<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC">          34 :             selectedFeatures.push_back(feature);</span></span>
+<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">          47 :         selectedFeatures.push_back(pop_first(featureOrderCopy));</span></span>
+<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">          47 :         auto merit = computeMeritCFS();</span></span>
+<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">          47 :         selectedScores.push_back(merit);</span></span>
+<span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">         162 :         for (const auto feature : featureOrderCopy) {</span></span>
+<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC">         162 :             selectedFeatures.push_back(feature);</span></span>
 <span id="L35"><span class="lineNum">      35</span>              :             // Compute merit with selectedFeatures</span>
-<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">          34 :             auto meritNew = computeMeritCFS();</span></span>
-<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">          34 :             double delta = merit != 0.0 ? std::abs(merit - meritNew) / merit : 0.0;</span></span>
-<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">          34 :             if (meritNew &gt; merit || delta &lt; threshold) {</span></span>
-<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">          24 :                 if (meritNew &gt; merit) {</span></span>
+<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">         162 :             auto meritNew = computeMeritCFS();</span></span>
+<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">         162 :             double delta = merit != 0.0 ? std::abs(merit - meritNew) / merit : 0.0;</span></span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">         162 :             if (meritNew &gt; merit || delta &lt; threshold) {</span></span>
+<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">         117 :                 if (meritNew &gt; merit) {</span></span>
 <span id="L40"><span class="lineNum">      40</span> <span class="tlaUNC tlaBgUNC">           0 :                     merit = meritNew;</span></span>
 <span id="L41"><span class="lineNum">      41</span>              :                 }</span>
-<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC tlaBgGNC">          24 :                 selectedScores.push_back(meritNew);</span></span>
+<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC tlaBgGNC">         117 :                 selectedScores.push_back(meritNew);</span></span>
 <span id="L43"><span class="lineNum">      43</span>              :             } else {</span>
-<span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC">          10 :                 selectedFeatures.pop_back();</span></span>
-<span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">          10 :                 break;</span></span>
+<span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC">          45 :                 selectedFeatures.pop_back();</span></span>
+<span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">          47 :                 break;</span></span>
 <span id="L46"><span class="lineNum">      46</span>              :             }</span>
-<span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC">          24 :             if (selectedFeatures.size() == maxFeatures) {</span></span>
-<span id="L48"><span class="lineNum">      48</span> <span class="tlaUNC tlaBgUNC">           0 :                 break;</span></span>
+<span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC">         117 :             if (selectedFeatures.size() == maxFeatures) {</span></span>
+<span id="L48"><span class="lineNum">      48</span> <span class="tlaGNC">           2 :                 break;</span></span>
 <span id="L49"><span class="lineNum">      49</span>              :             }</span>
 <span id="L50"><span class="lineNum">      50</span>              :         }</span>
-<span id="L51"><span class="lineNum">      51</span> <span class="tlaGNC tlaBgGNC">          10 :         fitted = true;</span></span>
-<span id="L52"><span class="lineNum">      52</span> <span class="tlaGNC">          10 :     }</span></span>
+<span id="L51"><span class="lineNum">      51</span> <span class="tlaGNC">          47 :         fitted = true;</span></span>
+<span id="L52"><span class="lineNum">      52</span> <span class="tlaGNC">          47 :     }</span></span>
 <span id="L53"><span class="lineNum">      53</span>              : }</span>
         </pre>
               </td>

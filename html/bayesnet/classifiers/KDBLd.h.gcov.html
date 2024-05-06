@@ -4,7 +4,7 @@
 
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <title>LCOV - coverage.info - bayesnet/classifiers/KDBLd.h</title>
+  <title>LCOV - BayesNet Coverage Report - bayesnet/classifiers/KDBLd.h</title>
   <link rel="stylesheet" type="text/css" href="../../gcov.css">
 </head>
 
@@ -19,7 +19,7 @@
                 <table cellpadding=1 border=0 width="100%">
           <tr>
             <td width="10%" class="headerItem">Current view:</td>
-            <td width="10%" class="headerValue"><a href="../../index.html">top level</a> - <a href="index.html">bayesnet/classifiers</a> - KDBLd.h<span style="font-size: 80%;"> (source / <a href="KDBLd.h.func-c.html">functions</a>)</span></td>
+            <td width="10%" class="headerValue"><a href="../../index.html" target="_parent">top level</a> - <a href="index.html" target="_parent">bayesnet/classifiers</a> - KDBLd.h<span style="font-size: 80%;"> (source / <a href="KDBLd.h.func-c.html">functions</a>)</span></td>
             <td width="5%"></td>
             <td width="5%"></td>
             <td width="5%" class="headerCovTableHead">Coverage</td>
@@ -28,7 +28,7 @@
           </tr>
           <tr>
             <td class="headerItem">Test:</td>
-            <td class="headerValue">coverage.info</td>
+            <td class="headerValue">BayesNet Coverage Report</td>
             <td></td>
             <td class="headerItem">Lines:</td>
             <td class="headerCovTableEntryHi">100.0&nbsp;%</td>
@@ -37,12 +37,20 @@
           </tr>
           <tr>
             <td class="headerItem">Test Date:</td>
-            <td class="headerValue">2024-04-30 20:26:57</td>
+            <td class="headerValue">2024-05-06 17:54:04</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntryHi">100.0&nbsp;%</td>
             <td class="headerCovTableEntry">1</td>
             <td class="headerCovTableEntry">1</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Legend:</td>
+            <td class="headerValueLeg">            Lines:
+            <span class="coverLegendCov">hit</span>
+            <span class="coverLegendNoCov">not hit</span>
+</td>
+            <td></td>
           </tr>
                   <tr><td><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
                 </table>
@@ -76,7 +84,7 @@
 <span id="L14"><span class="lineNum">      14</span>              :     private:</span>
 <span id="L15"><span class="lineNum">      15</span>              :     public:</span>
 <span id="L16"><span class="lineNum">      16</span>              :         explicit KDBLd(int k);</span>
-<span id="L17"><span class="lineNum">      17</span> <span class="tlaGNC tlaBgGNC">          10 :         virtual ~KDBLd() = default;</span></span>
+<span id="L17"><span class="lineNum">      17</span> <span class="tlaGNC tlaBgGNC">          20 :         virtual ~KDBLd() = default;</span></span>
 <span id="L18"><span class="lineNum">      18</span>              :         KDBLd&amp; fit(torch::Tensor&amp; X, torch::Tensor&amp; y, const std::vector&lt;std::string&gt;&amp; features, const std::string&amp; className, map&lt;std::string, std::vector&lt;int&gt;&gt;&amp; states) override;</span>
 <span id="L19"><span class="lineNum">      19</span>              :         std::vector&lt;std::string&gt; graph(const std::string&amp; name = &quot;KDB&quot;) const override;</span>
 <span id="L20"><span class="lineNum">      20</span>              :         torch::Tensor predict(torch::Tensor&amp; X) override;</span>

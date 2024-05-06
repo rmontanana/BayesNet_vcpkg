@@ -10,7 +10,6 @@ namespace bayesnet {
     A2DE::A2DE(bool predict_voting) : Ensemble(predict_voting)
     {
         validHyperparameters = { "predict_voting" };
-
     }
     void A2DE::setHyperparameters(const nlohmann::json& hyperparameters_)
     {

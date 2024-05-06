@@ -14,14 +14,15 @@
 #include "bayesnet/feature_selection/IWSS.h"
 #include "TestUtils.h"
 
-bayesnet::FeatureSelect* build_selector(RawDatasets& raw, std::string selector, double threshold)
+bayesnet::FeatureSelect* build_selector(RawDatasets& raw, std::string selector, double threshold, int max_features = 0)
 {
+    max_features = max_features == 0 ? raw.features.size() : max_features;
     if (selector == "CFS") {
-        return new bayesnet::CFS(raw.dataset, raw.features, raw.className, raw.features.size(), raw.classNumStates, raw.weights);
+        return new bayesnet::CFS(raw.dataset, raw.features, raw.className, max_features, raw.classNumStates, raw.weights);
     } else if (selector == "FCBF") {
-        return new bayesnet::FCBF(raw.dataset, raw.features, raw.className, raw.features.size(), raw.classNumStates, raw.weights, threshold);
+        return new bayesnet::FCBF(raw.dataset, raw.features, raw.className, max_features, raw.classNumStates, raw.weights, threshold);
     } else if (selector == "IWSS") {
-        return new bayesnet::IWSS(raw.dataset, raw.features, raw.className, raw.features.size(), raw.classNumStates, raw.weights, threshold);
+        return new bayesnet::IWSS(raw.dataset, raw.features, raw.className, max_features, raw.classNumStates, raw.weights, threshold);
     }
     return nullptr;
 }
@@ -93,5 +94,22 @@ TEST_CASE("Oddities", "[FeatureSelection]")
     REQUIRE_THROWS_AS(selector->getScores(), std::runtime_error);
     REQUIRE_THROWS_WITH(selector->getFeatures(), message);
     REQUIRE_THROWS_WITH(selector->getScores(), message);
+    delete selector;
+}
+TEST_CASE("Test threshold limits", "[FeatureSelection]")
+{
+    auto raw = RawDatasets("diabetes", true);
+    // FCBF Limits
+    auto selector = build_selector(raw, "FCBF", 0.051);
+    selector->fit();
+    REQUIRE(selector->getFeatures().size() == 2);
+    delete selector;
+    selector = build_selector(raw, "FCBF", 1e-7, 3);
+    selector->fit();
+    REQUIRE(selector->getFeatures().size() == 3);
+    delete selector;
+    selector = build_selector(raw, "IWSS", 0.5, 5);
+    selector->fit();
+    REQUIRE(selector->getFeatures().size() == 5);
     delete selector;
 }

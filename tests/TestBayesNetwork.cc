@@ -12,6 +12,7 @@
 #include <string>
 #include "TestUtils.h"
 #include "bayesnet/network/Network.h"
+#include "bayesnet/network/Node.h"
 #include "bayesnet/utils/bayesnetUtils.h"
 
 void buildModel(bayesnet::Network& net, const std::vector<std::string>& features, const std::string& className)
@@ -312,6 +313,15 @@ TEST_CASE("Test Bayesian Network", "[Network]")
         std::string invalid_feature = "Feature duck not found in Network::features";
         REQUIRE_THROWS_AS(net.fit(raw.Xv, raw.yv, raw.weightsv, features2, raw.className, raw.states), std::invalid_argument);
         REQUIRE_THROWS_WITH(net.fit(raw.Xv, raw.yv, raw.weightsv, features2, raw.className, raw.states), invalid_feature);
+        // Add twice the same node name to the network => Nothing should happen
+        net.addNode("A");
+        net.addNode("A");
+        // invalid state in checkfit
+        auto net4 = bayesnet::Network();
+        buildModel(net4, raw.features, raw.className);
+        std::string invalid_state = "Feature sepallength not found in states";
+        REQUIRE_THROWS_AS(net4.fit(raw.Xv, raw.yv, raw.weightsv, raw.features, raw.className, std::map<std::string, std::vector<int>>()), std::invalid_argument);
+        REQUIRE_THROWS_WITH(net4.fit(raw.Xv, raw.yv, raw.weightsv, raw.features, raw.className, std::map<std::string, std::vector<int>>()), invalid_state);
     }
 
 }

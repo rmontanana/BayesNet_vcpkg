@@ -16,7 +16,7 @@
             "name": "test",
             "program": "${workspaceFolder}/build_debug/tests/TestBayesNet",
             "args": [
-                "[A2DE]"
+                "[Node]"
             ],
             "cwd": "${workspaceFolder}/build_debug/tests"
         },

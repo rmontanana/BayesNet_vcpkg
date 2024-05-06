@@ -9,7 +9,6 @@ app_targets = BayesNet
 test_targets = TestBayesNet
 clang-uml = clang-uml
 plantuml = plantuml
-gcovr = gcovr
 lcov = lcov
 genhtml = genhtml
 dot = dot
@@ -115,24 +114,23 @@ test: ## Run tests (opt="-s") to verbose output the tests, (opt="-c='Test Maximu
 
 coverage: ## Run tests and generate coverage report (build/index.html)
 	@echo ">>> Building tests with coverage..."
-	@which $(gcovr) || (echo ">>> Please install gcovr"; exit 1)
 	@which $(lcov) || (echo ">>> Please install lcov"; exit 1)
-	@which $(genhtml) || (echo ">>> Please install lcov"; exit 1)
-	@$(MAKE) test
-	@$(gcovr) $(f_debug)/tests
+	@if [ ! -f $(f_debug)/tests/coverage.info ] ; then $(MAKE) test ; fi
 	@echo ">>> Building report..."
 	@cd $(f_debug)/tests; \
-	$(lcov) --directory CMakeFiles --capture --ignore-errors source,source --output-file coverage.info >/dev/null 2>&1; \
+	$(lcov) --directory CMakeFiles --capture --demangle-cpp --ignore-errors source,source --output-file coverage.info >/dev/null 2>&1; \
 	$(lcov) --remove coverage.info '/usr/*' --output-file coverage.info >/dev/null 2>&1; \
 	$(lcov) --remove coverage.info 'lib/*' --output-file coverage.info >/dev/null 2>&1; \
 	$(lcov) --remove coverage.info 'libtorch/*' --output-file coverage.info >/dev/null 2>&1; \
 	$(lcov) --remove coverage.info 'tests/*' --output-file coverage.info >/dev/null 2>&1; \
+	$(lcov) --summary coverage.info; \
 	$(lcov) --remove coverage.info 'bayesnet/utils/loguru.*' --ignore-errors unused --output-file coverage.info >/dev/null 2>&1
-	@$(genhtml) $(f_debug)/tests/coverage.info --demangle-cpp --output-directory html >/dev/null 2>&1;
 	@$(MAKE) updatebadge
 	@echo ">>> Done";	
 
 viewcoverage: ## View the html coverage report
+	@which $(genhtml) || (echo ">>> Please install lcov (genhtml not found)"; exit 1)
+	@$(genhtml) $(f_debug)/tests/coverage.info --demangle-cpp --output-directory html --title "BayesNet Coverage Report" -s -k -f --legend >/dev/null 2>&1;
 	@xdg-open html/index.html || open html/index.html 2>/dev/null
 	@echo ">>> Done";
 
