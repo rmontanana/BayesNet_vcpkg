@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactor loadDataset function in tests.
 - Remove conditionalEdgeWeights method in BayesMetrics.
 - Refactor Coverage Report generation.
+- Add devcontainer to work on apple silicon.
+- Change build cmake folder names to Debug & Release.
 
 ## [1.0.5] 2024-04-20
 

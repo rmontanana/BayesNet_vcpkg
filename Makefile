@@ -2,8 +2,8 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := help
 .PHONY: viewcoverage coverage setup help install uninstall diagrams buildr buildd test clean debug release sample updatebadge
 
-f_release = build_release
-f_debug = build_debug
+f_release = build_Release
+f_debug = build_Debug
 f_diagrams = diagrams
 app_targets = BayesNet
 test_targets = TestBayesNet
