@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A2DE model.
 - A2DE & SPnDE tests.
 - Add tests to reach 99% of coverage.
+- Add tests to check the correct version of the mdlp, folding and json libraries.
 
 ### Internal
 
