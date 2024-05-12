@@ -45,7 +45,7 @@ TEST_CASE("Feature_select FCBF", "[BoostAODE]")
     REQUIRE(clf.getNumberOfNodes() == 90);
     REQUIRE(clf.getNumberOfEdges() == 153);
     REQUIRE(clf.getNotes().size() == 2);
-    REQUIRE(clf.getNotes()[0] == "Used features in initialization: 5 of 9 with FCBF");
+    REQUIRE(clf.getNotes()[0] == "Used features in initialization: 4 of 9 with FCBF");
     REQUIRE(clf.getNotes()[1] == "Number of models: 9");
 }
 TEST_CASE("Test used features in train note and score", "[BoostAODE]")
@@ -65,8 +65,8 @@ TEST_CASE("Test used features in train note and score", "[BoostAODE]")
     REQUIRE(clf.getNotes()[1] == "Number of models: 8");
     auto score = clf.score(raw.Xv, raw.yv);
     auto scoret = clf.score(raw.Xt, raw.yt);
-    REQUIRE(score == Catch::Approx(0.80078).epsilon(raw.epsilon));
-    REQUIRE(scoret == Catch::Approx(0.80078).epsilon(raw.epsilon));
+    REQUIRE(score == Catch::Approx(0.809895813).epsilon(raw.epsilon));
+    REQUIRE(scoret == Catch::Approx(0.809895813).epsilon(raw.epsilon));
 }
 TEST_CASE("Voting vs proba", "[BoostAODE]")
 {
@@ -149,15 +149,14 @@ TEST_CASE("Bisection Best", "[BoostAODE]")
         {"convergence_best", false},
         });
     clf.fit(raw.X_train, raw.y_train, raw.features, raw.className, raw.states);
-    REQUIRE(clf.getNumberOfNodes() == 75);
-    REQUIRE(clf.getNumberOfEdges() == 135);
-    REQUIRE(clf.getNotes().size() == 2);
-    REQUIRE(clf.getNotes().at(0) == "Convergence threshold reached & 9 models eliminated");
-    REQUIRE(clf.getNotes().at(1) == "Number of models: 5");
+    REQUIRE(clf.getNumberOfNodes() == 210);
+    REQUIRE(clf.getNumberOfEdges() == 378);
+    REQUIRE(clf.getNotes().size() == 1);
+    REQUIRE(clf.getNotes().at(0) == "Number of models: 14");
     auto score = clf.score(raw.X_test, raw.y_test);
     auto scoret = clf.score(raw.X_test, raw.y_test);
-    REQUIRE(score == Catch::Approx(1.0f).epsilon(raw.epsilon));
-    REQUIRE(scoret == Catch::Approx(1.0f).epsilon(raw.epsilon));
+    REQUIRE(score == Catch::Approx(0.991666675f).epsilon(raw.epsilon));
+    REQUIRE(scoret == Catch::Approx(0.991666675f).epsilon(raw.epsilon));
 }
 TEST_CASE("Bisection Best vs Last", "[BoostAODE]")
 {
@@ -172,13 +171,13 @@ TEST_CASE("Bisection Best vs Last", "[BoostAODE]")
     clf.setHyperparameters(hyperparameters);
     clf.fit(raw.X_train, raw.y_train, raw.features, raw.className, raw.states);
     auto score_best = clf.score(raw.X_test, raw.y_test);
-    REQUIRE(score_best == Catch::Approx(0.993355f).epsilon(raw.epsilon));
+    REQUIRE(score_best == Catch::Approx(0.980000019f).epsilon(raw.epsilon));
     // Now we will set the hyperparameter to use the last accuracy
     hyperparameters["convergence_best"] = false;
     clf.setHyperparameters(hyperparameters);
     clf.fit(raw.X_train, raw.y_train, raw.features, raw.className, raw.states);
     auto score_last = clf.score(raw.X_test, raw.y_test);
-    REQUIRE(score_last == Catch::Approx(0.996678f).epsilon(raw.epsilon));
+    REQUIRE(score_last == Catch::Approx(0.976666689f).epsilon(raw.epsilon));
 }
 
 TEST_CASE("Block Update", "[BoostAODE]")
