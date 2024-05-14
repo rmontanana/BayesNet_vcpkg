@@ -84,3 +84,31 @@ TEST_CASE("Select all features ordered by Mutual Information", "[Metrics]")
     REQUIRE(kBest.size() == raw.features.size());
     REQUIRE(kBest == std::vector<int>({ 1, 0, 3, 2 }));
 }
+TEST_CASE("Entropy Test", "[Metrics]")
+{
+    auto raw = RawDatasets("iris", true);
+    bayesnet::Metrics metrics(raw.dataset, raw.features, raw.className, raw.classNumStates);
+    auto result = metrics.entropy(raw.dataset.index({ 0, "..." }), raw.weights);
+    REQUIRE(result == Catch::Approx(0.9848175048828125).epsilon(raw.epsilon));
+    auto data = torch::tensor({ 0, 0, 0, 0, 0, 0, 0, 1, 1, 1 }, torch::kInt32);
+    auto weights = torch::tensor({ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, torch::kFloat32);
+    result = metrics.entropy(data, weights);
+    REQUIRE(result == Catch::Approx(0.61086434125900269).epsilon(raw.epsilon));
+    data = torch::tensor({ 0, 0, 0, 0, 0, 1, 1, 1, 1, 1 }, torch::kInt32);
+    result = metrics.entropy(data, weights);
+    REQUIRE(result == Catch::Approx(0.693147180559945).epsilon(raw.epsilon));
+}
+TEST_CASE("Conditional Entropy", "[Metrics]")
+{
+    auto raw = RawDatasets("iris", true);
+    bayesnet::Metrics metrics(raw.dataset, raw.features, raw.className, raw.classNumStates);
+    auto feature0 = raw.dataset.index({ 0, "..." });
+    auto feature1 = raw.dataset.index({ 1, "..." });
+    auto feature2 = raw.dataset.index({ 2, "..." });
+    auto feature3 = raw.dataset.index({ 3, "..." });
+    auto labels = raw.dataset.index({ 4, "..." });
+    auto result = metrics.conditionalEntropy(feature0, feature1, labels, raw.weights);
+    auto result2 = metrics.conditionalEntropy2(feature0, feature1, labels, raw.weights);
+    std::cout << "Result=" << result << "\n";
+    std::cout << "Result2=" << result2 << "\n";
+}

@@ -18,12 +18,17 @@ namespace bayesnet {
         std::vector<int> SelectKBestWeighted(const torch::Tensor& weights, bool ascending = false, unsigned k = 0);
         std::vector<double> getScoresKBest() const;
         double mutualInformation(const torch::Tensor& firstFeature, const torch::Tensor& secondFeature, const torch::Tensor& weights);
+        double conditionalMutualInformation(const torch::Tensor& firstFeature, const torch::Tensor& secondFeature, const torch::Tensor& labels, const torch::Tensor& weights);
         torch::Tensor conditionalEdge(const torch::Tensor& weights);
         std::vector<std::pair<int, int>> maximumSpanningTree(const std::vector<std::string>& features, const torch::Tensor& weights, const int root);
+        // Measured in nats (natural logarithm (log) base e)
+        // Elements of Information Theory, 2nd Edition, Thomas M. Cover, Joy A. Thomas p. 14
+        double entropy(const torch::Tensor& feature, const torch::Tensor& weights);
+        double conditionalEntropy(const torch::Tensor& firstFeature, const torch::Tensor& secondFeature, const torch::Tensor& labels, const torch::Tensor& weights);
+        double conditionalEntropy2(const torch::Tensor& firstFeature, const torch::Tensor& secondFeature, const torch::Tensor& labels, const torch::Tensor& weights);
     protected:
         torch::Tensor samples; // n+1xm torch::Tensor used to fit the model where samples[-1] is the y std::vector
         std::string className;
-        double entropy(const torch::Tensor& feature, const torch::Tensor& weights);
         std::vector<std::string> features;
         template <class T>
         std::vector<std::pair<T, T>> doCombinations(const std::vector<T>& source)
