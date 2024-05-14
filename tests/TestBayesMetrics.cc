@@ -9,6 +9,7 @@
 #include <catch2/generators/catch_generators.hpp>
 #include "bayesnet/utils/BayesMetrics.h"
 #include "TestUtils.h"
+#include "Timer.h"
 
 
 TEST_CASE("Metrics Test", "[Metrics]")
@@ -100,15 +101,32 @@ TEST_CASE("Entropy Test", "[Metrics]")
 }
 TEST_CASE("Conditional Entropy", "[Metrics]")
 {
-    auto raw = RawDatasets("iris", true);
+    auto raw = RawDatasets("mfeat-factors", true);
     bayesnet::Metrics metrics(raw.dataset, raw.features, raw.className, raw.classNumStates);
+    bayesnet::Metrics metrics2(raw.dataset, raw.features, raw.className, raw.classNumStates);
     auto feature0 = raw.dataset.index({ 0, "..." });
     auto feature1 = raw.dataset.index({ 1, "..." });
     auto feature2 = raw.dataset.index({ 2, "..." });
     auto feature3 = raw.dataset.index({ 3, "..." });
-    auto labels = raw.dataset.index({ 4, "..." });
-    auto result = metrics.conditionalEntropy(feature0, feature1, labels, raw.weights);
-    auto result2 = metrics.conditionalEntropy2(feature0, feature1, labels, raw.weights);
-    std::cout << "Result=" << result << "\n";
-    std::cout << "Result2=" << result2 << "\n";
+    platform::Timer timer;
+    double result, greatest = 0;
+    int best_i, best_j;
+    timer.start();
+    for (int i = 0; i < raw.features.size() - 1; ++i) {
+        if (i % 50 == 0) {
+            std::cout << "i=" << i << " Time=" << timer.getDurationString(true) << std::endl;
+        }
+        for (int j = i + 1; j < raw.features.size(); ++j) {
+            result = metrics.conditionalMutualInformation(raw.dataset.index({ i, "..." }), raw.dataset.index({ j, "..." }), raw.yt, raw.weights);
+            if (result > greatest) {
+                greatest = result;
+                best_i = i;
+                best_j = j;
+            }
+        }
+    }
+    timer.stop();
+    std::cout << "CMI(" << best_i << "," << best_j << ")=" << greatest << "\n";
+    std::cout << "Time=" << timer.getDurationString() << std::endl;
+    // Se pueden precalcular estos valores y utilizarlos en el algoritmo como entrada
 }

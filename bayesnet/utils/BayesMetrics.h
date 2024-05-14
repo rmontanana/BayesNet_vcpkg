@@ -25,7 +25,6 @@ namespace bayesnet {
         // Elements of Information Theory, 2nd Edition, Thomas M. Cover, Joy A. Thomas p. 14
         double entropy(const torch::Tensor& feature, const torch::Tensor& weights);
         double conditionalEntropy(const torch::Tensor& firstFeature, const torch::Tensor& secondFeature, const torch::Tensor& labels, const torch::Tensor& weights);
-        double conditionalEntropy2(const torch::Tensor& firstFeature, const torch::Tensor& secondFeature, const torch::Tensor& labels, const torch::Tensor& weights);
     protected:
         torch::Tensor samples; // n+1xm torch::Tensor used to fit the model where samples[-1] is the y std::vector
         std::string className;
