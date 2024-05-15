@@ -4,26 +4,23 @@
 // SPDX-License-Identifier: MIT
 // ***************************************************************
 
-#ifndef BOOSTAODE_H
-#define BOOSTAODE_H
+#ifndef BOOSTA2DE_H
+#define BOOSTA2DE_H
 #include <map>
-#include "bayesnet/classifiers/SPODE.h"
-#include "bayesnet/feature_selection/FeatureSelect.h"
 #include "boost.h"
+#include "bayesnet/classifiers/SPnDE.h"
+#include "bayesnet/feature_selection/FeatureSelect.h"
 #include "Ensemble.h"
 namespace bayesnet {
-    class BoostAODE : public Ensemble {
+    class BoostA2DE : public Ensemble {
     public:
-        explicit BoostAODE(bool predict_voting = false);
-        virtual ~BoostAODE() = default;
-        std::vector<std::string> graph(const std::string& title = "BoostAODE") const override;
+        explicit BoostA2DE(bool predict_voting = false);
+        virtual ~BoostA2DE() = default;
+        std::vector<std::string> graph(const std::string& title = "BoostA2DE") const override;
         void setHyperparameters(const nlohmann::json& hyperparameters_) override;
     protected:
         void buildModel(const torch::Tensor& weights) override;
-        void trainModel(const torch::Tensor& weights) override;
     private:
-        std::tuple<torch::Tensor&, double, bool> update_weights_block(int k, torch::Tensor& ytrain, torch::Tensor& weights);
-        std::vector<int> initializeModels();
         torch::Tensor X_train, y_train, X_test, y_test;
         // Hyperparameters
         bool bisection = true; // if true, use bisection stratety to add k models at once to the ensemble

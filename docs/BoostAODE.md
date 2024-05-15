@@ -27,4 +27,4 @@ The hyperparameters defined in the algorithm are:
 
 ## Operation
 
-### [Algorithm](./algorithm.md)
+### [Base Algorithm](./algorithm.md)
