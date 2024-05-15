@@ -4,6 +4,9 @@
 // SPDX-License-Identifier: MIT
 // ***************************************************************
 
+#include <map>
+#include <unordered_map>
+#include <tuple>
 #include "Mst.h"
 #include "BayesMetrics.h"
 namespace bayesnet {
@@ -105,6 +108,8 @@ namespace bayesnet {
         }
         return matrix;
     }
+    // Measured in nats (natural logarithm (log) base e)
+    // Elements of Information Theory, 2nd Edition, Thomas M. Cover, Joy A. Thomas p. 14
     double Metrics::entropy(const torch::Tensor& feature, const torch::Tensor& weights)
     {
         torch::Tensor counts = feature.bincount(weights);
@@ -143,10 +148,63 @@ namespace bayesnet {
         }
         return entropyValue;
     }
+    // H(Y|X,C) = sum_{x in X, c in C} p(x,c) H(Y|X=x,C=c)
+    double Metrics::conditionalEntropy(const torch::Tensor& firstFeature, const torch::Tensor& secondFeature, const torch::Tensor& labels, const torch::Tensor& weights)
+    {
+        // Ensure the tensors are of the same length
+        assert(firstFeature.size(0) == secondFeature.size(0) && firstFeature.size(0) == labels.size(0) && firstFeature.size(0) == weights.size(0));
+
+        // Convert tensors to vectors for easier processing
+        auto firstFeatureData = firstFeature.accessor<int, 1>();
+        auto secondFeatureData = secondFeature.accessor<int, 1>();
+        auto labelsData = labels.accessor<int, 1>();
+        auto weightsData = weights.accessor<double, 1>();
+
+        int numSamples = firstFeature.size(0);
+
+        // Maps for joint and marginal probabilities
+        std::map<std::tuple<int, int, int>, double> jointCount;
+        std::map<std::tuple<int, int>, double> marginalCount;
+
+        // Compute joint and marginal counts
+        for (int i = 0; i < numSamples; ++i) {
+            auto keyJoint = std::make_tuple(firstFeatureData[i], labelsData[i], secondFeatureData[i]);
+            auto keyMarginal = std::make_tuple(firstFeatureData[i], labelsData[i]);
+
+            jointCount[keyJoint] += weightsData[i];
+            marginalCount[keyMarginal] += weightsData[i];
+        }
+
+        // Total weight sum
+        double totalWeight = torch::sum(weights).item<double>();
+        if (totalWeight == 0)
+            return 0;
+
+        // Compute the conditional entropy
+        double conditionalEntropy = 0.0;
+
+        for (const auto& [keyJoint, jointFreq] : jointCount) {
+            auto [x, c, y] = keyJoint;
+            auto keyMarginal = std::make_tuple(x, c);
+
+            double p_xc = marginalCount[keyMarginal] / totalWeight;
+            double p_y_given_xc = jointFreq / marginalCount[keyMarginal];
+
+            if (p_y_given_xc > 0) {
+                conditionalEntropy -= (jointFreq / totalWeight) * std::log(p_y_given_xc);
+            }
+        }
+        return conditionalEntropy;
+    }
     // I(X;Y) = H(Y) - H(Y|X)
     double Metrics::mutualInformation(const torch::Tensor& firstFeature, const torch::Tensor& secondFeature, const torch::Tensor& weights)
     {
         return entropy(firstFeature, weights) - conditionalEntropy(firstFeature, secondFeature, weights);
+    }
+    // I(X;Y|C) = H(Y|C) - H(Y|X,C)
+    double Metrics::conditionalMutualInformation(const torch::Tensor& firstFeature, const torch::Tensor& secondFeature, const torch::Tensor& labels, const torch::Tensor& weights)
+    {
+        return std::max(conditionalEntropy(firstFeature, labels, weights) - conditionalEntropy(firstFeature, secondFeature, labels, weights), 0.0);
     }
     /*
     Compute the maximum spanning tree considering the weights as distances

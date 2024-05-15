@@ -9,7 +9,7 @@
 namespace bayesnet {
 
     Node::Node(const std::string& name)
-        : name(name), numStates(0), cpTable(torch::Tensor()), parents(std::vector<Node*>()), children(std::vector<Node*>())
+        : name(name)
     {
     }
     void Node::clear()
@@ -96,7 +96,6 @@ namespace bayesnet {
         // Get dimensions of the CPT
         dimensions.push_back(numStates);
         transform(parents.begin(), parents.end(), back_inserter(dimensions), [](const auto& parent) { return parent->getNumStates(); });
-
         // Create a tensor of zeros with the dimensions of the CPT
         cpTable = torch::zeros(dimensions, torch::kFloat) + laplaceSmoothing;
         // Fill table with counts

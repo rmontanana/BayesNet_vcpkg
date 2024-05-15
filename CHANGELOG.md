@@ -9,9 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Add the Library logo generated with <https://openart.ai> to README.md
-- Add link to the coverage report in the README.md coverage label.
-- Add the *convergence_best* hyperparameter to the BoostAODE class, to control the way the prior accuracy is computed if convergence is set. Default value is *false*.
+- Library logo generated with <https://openart.ai> to README.md
+- Link to the coverage report in the README.md coverage label.
+- *convergence_best* hyperparameter to the BoostAODE class, to control the way the prior accuracy is computed if convergence is set. Default value is *false*.
+- SPnDE model.
+- A2DE model.
+- A2DE & SPnDE tests.
+- Add tests to reach 99% of coverage.
+- Add tests to check the correct version of the mdlp, folding and json libraries.
 
 ### Internal
 
@@ -19,6 +24,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactor catch2 library location to test/lib
 - Refactor loadDataset function in tests.
 - Remove conditionalEdgeWeights method in BayesMetrics.
+- Refactor Coverage Report generation.
+- Add devcontainer to work on apple silicon.
+- Change build cmake folder names to Debug & Release.
 
 ## [1.0.5] 2024-04-20
 

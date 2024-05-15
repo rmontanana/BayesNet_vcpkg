@@ -9,6 +9,7 @@
 #include <catch2/generators/catch_generators.hpp>
 #include "bayesnet/utils/BayesMetrics.h"
 #include "TestUtils.h"
+#include "Timer.h"
 
 
 TEST_CASE("Metrics Test", "[Metrics]")
@@ -73,6 +74,47 @@ TEST_CASE("Metrics Test", "[Metrics]")
             auto resultv = metricsv.maximumSpanningTree(raw.features, weights_matrixv, i);
             REQUIRE(result == resultsMST.at({ file_name, i }));
             REQUIRE(resultv == resultsMST.at({ file_name, i }));
+        }
+    }
+}
+TEST_CASE("Select all features ordered by Mutual Information", "[Metrics]")
+{
+    auto raw = RawDatasets("iris", true);
+    bayesnet::Metrics metrics(raw.dataset, raw.features, raw.className, raw.classNumStates);
+    auto kBest = metrics.SelectKBestWeighted(raw.weights, true, 0);
+    REQUIRE(kBest.size() == raw.features.size());
+    REQUIRE(kBest == std::vector<int>({ 1, 0, 3, 2 }));
+}
+TEST_CASE("Entropy Test", "[Metrics]")
+{
+    auto raw = RawDatasets("iris", true);
+    bayesnet::Metrics metrics(raw.dataset, raw.features, raw.className, raw.classNumStates);
+    auto result = metrics.entropy(raw.dataset.index({ 0, "..." }), raw.weights);
+    REQUIRE(result == Catch::Approx(0.9848175048828125).epsilon(raw.epsilon));
+    auto data = torch::tensor({ 0, 0, 0, 0, 0, 0, 0, 1, 1, 1 }, torch::kInt32);
+    auto weights = torch::tensor({ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, torch::kFloat32);
+    result = metrics.entropy(data, weights);
+    REQUIRE(result == Catch::Approx(0.61086434125900269).epsilon(raw.epsilon));
+    data = torch::tensor({ 0, 0, 0, 0, 0, 1, 1, 1, 1, 1 }, torch::kInt32);
+    result = metrics.entropy(data, weights);
+    REQUIRE(result == Catch::Approx(0.693147180559945).epsilon(raw.epsilon));
+}
+TEST_CASE("Conditional Entropy", "[Metrics]")
+{
+    auto raw = RawDatasets("iris", true);
+    bayesnet::Metrics metrics(raw.dataset, raw.features, raw.className, raw.classNumStates);
+    auto expected = std::map<std::pair<int, int>, double>{
+        { { 0, 1 }, 0.0 },
+        { { 0, 2 }, 0.287696 },
+        { { 0, 3 }, 0.403749 },
+        { { 1, 2 }, 1.17112 },
+        { { 1, 3 }, 1.31852 },
+        { { 2, 3 }, 0.210068 },
+    };
+    for (int i = 0; i < raw.features.size() - 1; ++i) {
+        for (int j = i + 1; j < raw.features.size(); ++j) {
+            double result = metrics.conditionalMutualInformation(raw.dataset.index({ i, "..." }), raw.dataset.index({ j, "..." }), raw.yt, raw.weights);
+            REQUIRE(result == Catch::Approx(expected.at({ i, j })).epsilon(raw.epsilon));
         }
     }
 }
