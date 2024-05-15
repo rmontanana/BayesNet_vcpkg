@@ -204,7 +204,7 @@ namespace bayesnet {
     // I(X;Y|C) = H(Y|C) - H(Y|X,C)
     double Metrics::conditionalMutualInformation(const torch::Tensor& firstFeature, const torch::Tensor& secondFeature, const torch::Tensor& labels, const torch::Tensor& weights)
     {
-        return conditionalEntropy(firstFeature, labels, weights) - conditionalEntropy(firstFeature, secondFeature, labels, weights);
+        return std::max(conditionalEntropy(firstFeature, labels, weights) - conditionalEntropy(firstFeature, secondFeature, labels, weights), 0.0);
     }
     /*
     Compute the maximum spanning tree considering the weights as distances
