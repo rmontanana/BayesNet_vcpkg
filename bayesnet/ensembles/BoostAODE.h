@@ -17,7 +17,6 @@ namespace bayesnet {
         virtual ~BoostAODE() = default;
         std::vector<std::string> graph(const std::string& title = "BoostAODE") const override;
     protected:
-        void buildModel(const torch::Tensor& weights) override;
         void trainModel(const torch::Tensor& weights) override;
     private:
         std::vector<int> initializeModels();

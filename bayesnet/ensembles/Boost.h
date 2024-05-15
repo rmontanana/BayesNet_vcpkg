@@ -31,6 +31,7 @@ namespace bayesnet {
         void setHyperparameters(const nlohmann::json& hyperparameters_) override;
     protected:
         std::vector<int> featureSelection(torch::Tensor& weights_);
+        void buildModel(const torch::Tensor& weights) override;
         std::tuple<torch::Tensor&, double, bool> update_weights(torch::Tensor& ytrain, torch::Tensor& ypred, torch::Tensor& weights);
         std::tuple<torch::Tensor&, double, bool> update_weights_block(int k, torch::Tensor& ytrain, torch::Tensor& weights);
         torch::Tensor X_train, y_train, X_test, y_test;
