@@ -104,6 +104,25 @@ TEST_CASE("Conditional Entropy", "[Metrics]")
     auto raw = RawDatasets("iris", true);
     bayesnet::Metrics metrics(raw.dataset, raw.features, raw.className, raw.classNumStates);
     auto expected = std::map<std::pair<int, int>, double>{
+        { { 0, 1 }, 1.32674 },
+        { { 0, 2 }, 0.236253 },
+        { { 0, 3 }, 0.1202 },
+        { { 1, 2 }, 0.252551 },
+        { { 1, 3 }, 0.10515 },
+        { { 2, 3 }, 0.108323 },
+    };
+    for (int i = 0; i < raw.features.size() - 1; ++i) {
+        for (int j = i + 1; j < raw.features.size(); ++j) {
+            double result = metrics.conditionalEntropy(raw.dataset.index({ i, "..." }), raw.dataset.index({ j, "..." }), raw.yt, raw.weights);
+            REQUIRE(result == Catch::Approx(expected.at({ i, j })).epsilon(raw.epsilon));
+        }
+    }
+}
+TEST_CASE("Conditional Mutual Information", "[Metrics]")
+{
+    auto raw = RawDatasets("iris", true);
+    bayesnet::Metrics metrics(raw.dataset, raw.features, raw.className, raw.classNumStates);
+    auto expected = std::map<std::pair<int, int>, double>{
         { { 0, 1 }, 0.0 },
         { { 0, 2 }, 0.287696 },
         { { 0, 3 }, 0.403749 },
