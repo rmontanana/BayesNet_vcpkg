@@ -187,7 +187,7 @@ namespace bayesnet {
             auto [x, c, y] = keyJoint;
             auto keyMarginal = std::make_tuple(x, c);
 
-            double p_xc = marginalCount[keyMarginal] / totalWeight;
+            //double p_xc = marginalCount[keyMarginal] / totalWeight;
             double p_y_given_xc = jointFreq / marginalCount[keyMarginal];
 
             if (p_y_given_xc > 0) {
