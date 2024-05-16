@@ -34,38 +34,40 @@ namespace bayesnet {
     {
         // Return the K Best features 
         auto n = features.size();
-        if (k == 0) {
-            k = n;
-        }
         // compute scores
         scoresKPairs.clear();
         pairsKBest.clear();
-        auto label = samples.index({ -1, "..." });
-        // for (int i = 0; i < n; ++i) {
-        //     for (int j = i + 1; j < n; ++j) {
-        //         scoresKBest.push_back(mutualInformation(samples.index({ i, "..." }), samples.index({ j, "..." }), weights));
-        //         featuresKBest.push_back(i);
-        //         featuresKBest.push_back(j);
-        //     }
-        // }
-        // // sort & reduce scores and features
-        // if (ascending) {
-        //     sort(featuresKBest.begin(), featuresKBest.end(), [&](int i, int j)
-        //         { return scoresKBest[i] < scoresKBest[j]; });
-        //     sort(scoresKBest.begin(), scoresKBest.end(), std::less<double>());
-        //     if (k < n) {
-        //         for (int i = 0; i < n - k; ++i) {
-        //             featuresKBest.erase(featuresKBest.begin());
-        //             scoresKBest.erase(scoresKBest.begin());
-        //         }
-        //     }
-        // } else {
-        //     sort(featuresKBest.begin(), featuresKBest.end(), [&](int i, int j)
-        //         { return scoresKBest[i] > scoresKBest[j]; });
-        //     sort(scoresKBest.begin(), scoresKBest.end(), std::greater<double>());
-        //     featuresKBest.resize(k);
-        //     scoresKBest.resize(k);
-        // }
+        auto labels = samples.index({ -1, "..." });
+        for (int i = 0; i < n - 1; ++i) {
+            for (int j = i + 1; j < n; ++j) {
+                auto key = std::make_pair(i, j);
+                auto value = conditionalMutualInformation(samples.index({ i, "..." }), samples.index({ j, "..." }), labels, weights);
+                scoresKPairs.push_back({ key, value });
+            }
+        }
+        // sort scores
+        if (ascending) {
+            sort(scoresKPairs.begin(), scoresKPairs.end(), [](auto& a, auto& b)
+                { return a.second < b.second; });
+
+        } else {
+            sort(scoresKPairs.begin(), scoresKPairs.end(), [](auto& a, auto& b)
+                { return a.second > b.second; });
+        }
+        for (auto& [pairs, score] : scoresKPairs) {
+            pairsKBest.push_back(pairs);
+        }
+        if (k != 0) {
+            if (ascending) {
+                for (int i = 0; i < n - k; ++i) {
+                    pairsKBest.erase(pairsKBest.begin());
+                    scoresKPairs.erase(scoresKPairs.begin());
+                }
+            } else {
+                pairsKBest.resize(k);
+                scoresKPairs.resize(k);
+            }
+        }
         return pairsKBest;
     }
     std::vector<int> Metrics::SelectKBestWeighted(const torch::Tensor& weights, bool ascending, unsigned k)
@@ -107,7 +109,10 @@ namespace bayesnet {
     {
         return scoresKBest;
     }
-
+    std::vector<std::pair<std::pair<int, int>, double>> Metrics::getScoresKPairs() const
+    {
+        return scoresKPairs;
+    }
     torch::Tensor Metrics::conditionalEdge(const torch::Tensor& weights)
     {
         auto result = std::vector<double>();

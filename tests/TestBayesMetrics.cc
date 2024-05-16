@@ -137,3 +137,57 @@ TEST_CASE("Conditional Mutual Information", "[Metrics]")
         }
     }
 }
+TEST_CASE("Select K Pairs descending", "[Metrics]")
+{
+    auto raw = RawDatasets("iris", true);
+    bayesnet::Metrics metrics(raw.dataset, raw.features, raw.className, raw.classNumStates);
+    auto results = metrics.SelectKPairs(raw.weights, false);
+    auto expected = std::vector<std::pair<std::pair<int, int>, double>>{
+        { { 1, 3 }, 1.31852 },
+        { { 1, 2 }, 1.17112 },
+        { { 0, 3 }, 0.403749 },
+        { { 0, 2 }, 0.287696 },
+        { { 2, 3 }, 0.210068 },
+        { { 0, 1 }, 0.0 },
+    };
+    auto scores = metrics.getScoresKPairs();
+    for (int i = 0; i < results.size(); ++i) {
+        auto result = results[i];
+        auto expect = expected[i];
+        auto score = scores[i];
+        REQUIRE(result.first == expect.first.first);
+        REQUIRE(result.second == expect.first.second);
+        REQUIRE(score.first.first == expect.first.first);
+        REQUIRE(score.first.second == expect.first.second);
+        REQUIRE(score.second == Catch::Approx(expect.second).epsilon(raw.epsilon));
+    }
+    REQUIRE(results.size() == 6);
+    REQUIRE(scores.size() == 6);
+}
+TEST_CASE("Select K Pairs ascending", "[Metrics]")
+{
+    auto raw = RawDatasets("iris", true);
+    bayesnet::Metrics metrics(raw.dataset, raw.features, raw.className, raw.classNumStates);
+    auto results = metrics.SelectKPairs(raw.weights, true);
+    auto expected = std::vector<std::pair<std::pair<int, int>, double>>{
+        { { 0, 1 }, 0.0 },
+        { { 2, 3 }, 0.210068 },
+        { { 0, 2 }, 0.287696 },
+        { { 0, 3 }, 0.403749 },
+        { { 1, 2 }, 1.17112 },
+        { { 1, 3 }, 1.31852 },
+    };
+    auto scores = metrics.getScoresKPairs();
+    for (int i = 0; i < results.size(); ++i) {
+        auto result = results[i];
+        auto expect = expected[i];
+        auto score = scores[i];
+        REQUIRE(result.first == expect.first.first);
+        REQUIRE(result.second == expect.first.second);
+        REQUIRE(score.first.first == expect.first.first);
+        REQUIRE(score.first.second == expect.first.second);
+        REQUIRE(score.second == Catch::Approx(expect.second).epsilon(raw.epsilon));
+    }
+    REQUIRE(results.size() == 6);
+    REQUIRE(scores.size() == 6);
+}

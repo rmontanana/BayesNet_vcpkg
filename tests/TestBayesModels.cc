@@ -56,14 +56,14 @@ TEST_CASE("Test Bayesian Classifiers score & version", "[Models]")
             auto raw = RawDatasets(file_name, discretize);
             clf->fit(raw.Xt, raw.yt, raw.features, raw.className, raw.states);
             auto score = clf->score(raw.Xt, raw.yt);
-            INFO("Classifier: " + name + " File: " + file_name);
+            INFO("Classifier: " << name << " File: " << file_name);
             REQUIRE(score == Catch::Approx(scores[{file_name, name}]).epsilon(raw.epsilon));
             REQUIRE(clf->getStatus() == bayesnet::NORMAL);
         }
     }
     SECTION("Library check version")
     {
-        INFO("Checking version of " + name + " classifier");
+        INFO("Checking version of " << name << " classifier");
         REQUIRE(clf->getVersion() == ACTUAL_VERSION);
     }
     delete clf;
