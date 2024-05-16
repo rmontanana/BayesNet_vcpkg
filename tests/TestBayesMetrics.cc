@@ -141,7 +141,8 @@ TEST_CASE("Select K Pairs descending", "[Metrics]")
 {
     auto raw = RawDatasets("iris", true);
     bayesnet::Metrics metrics(raw.dataset, raw.features, raw.className, raw.classNumStates);
-    auto results = metrics.SelectKPairs(raw.weights, false);
+    std::vector<int> empty;
+    auto results = metrics.SelectKPairs(raw.weights, empty, false);
     auto expected = std::vector<std::pair<std::pair<int, int>, double>>{
         { { 1, 3 }, 1.31852 },
         { { 1, 2 }, 1.17112 },
@@ -168,7 +169,8 @@ TEST_CASE("Select K Pairs ascending", "[Metrics]")
 {
     auto raw = RawDatasets("iris", true);
     bayesnet::Metrics metrics(raw.dataset, raw.features, raw.className, raw.classNumStates);
-    auto results = metrics.SelectKPairs(raw.weights, true);
+    std::vector<int> empty;
+    auto results = metrics.SelectKPairs(raw.weights, empty, true);
     auto expected = std::vector<std::pair<std::pair<int, int>, double>>{
         { { 0, 1 }, 0.0 },
         { { 2, 3 }, 0.210068 },
@@ -190,4 +192,77 @@ TEST_CASE("Select K Pairs ascending", "[Metrics]")
     }
     REQUIRE(results.size() == 6);
     REQUIRE(scores.size() == 6);
+}
+TEST_CASE("Select K Pairs with features excluded", "[Metrics]")
+{
+    auto raw = RawDatasets("iris", true);
+    bayesnet::Metrics metrics(raw.dataset, raw.features, raw.className, raw.classNumStates);
+    std::vector<int> excluded = { 0, 3 };
+    auto results = metrics.SelectKPairs(raw.weights, excluded, true);
+    auto expected = std::vector<std::pair<std::pair<int, int>, double>>{
+        { { 1, 2 }, 1.17112 },
+    };
+    auto scores = metrics.getScoresKPairs();
+    for (int i = 0; i < results.size(); ++i) {
+        auto result = results[i];
+        auto expect = expected[i];
+        auto score = scores[i];
+        REQUIRE(result.first == expect.first.first);
+        REQUIRE(result.second == expect.first.second);
+        REQUIRE(score.first.first == expect.first.first);
+        REQUIRE(score.first.second == expect.first.second);
+        REQUIRE(score.second == Catch::Approx(expect.second).epsilon(raw.epsilon));
+    }
+    REQUIRE(results.size() == 1);
+    REQUIRE(scores.size() == 1);
+}
+TEST_CASE("Select K Pairs with number of pairs descending", "[Metrics]")
+{
+    auto raw = RawDatasets("iris", true);
+    bayesnet::Metrics metrics(raw.dataset, raw.features, raw.className, raw.classNumStates);
+    std::vector<int> empty;
+    auto results = metrics.SelectKPairs(raw.weights, empty, false, 3);
+    auto expected = std::vector<std::pair<std::pair<int, int>, double>>{
+        { { 1, 3 }, 1.31852 },
+        { { 1, 2 }, 1.17112 },
+        { { 0, 3 }, 0.403749 }
+    };
+    auto scores = metrics.getScoresKPairs();
+    REQUIRE(results.size() == 3);
+    REQUIRE(scores.size() == 3);
+    for (int i = 0; i < results.size(); ++i) {
+        auto result = results[i];
+        auto expect = expected[i];
+        auto score = scores[i];
+        REQUIRE(result.first == expect.first.first);
+        REQUIRE(result.second == expect.first.second);
+        REQUIRE(score.first.first == expect.first.first);
+        REQUIRE(score.first.second == expect.first.second);
+        REQUIRE(score.second == Catch::Approx(expect.second).epsilon(raw.epsilon));
+    }
+}
+TEST_CASE("Select K Pairs with number of pairs ascending", "[Metrics]")
+{
+    auto raw = RawDatasets("iris", true);
+    bayesnet::Metrics metrics(raw.dataset, raw.features, raw.className, raw.classNumStates);
+    std::vector<int> empty;
+    auto results = metrics.SelectKPairs(raw.weights, empty, true, 3);
+    auto expected = std::vector<std::pair<std::pair<int, int>, double>>{
+        { { 0, 3 }, 0.403749 },
+        { { 1, 2 }, 1.17112 },
+        { { 1, 3 }, 1.31852 }
+    };
+    auto scores = metrics.getScoresKPairs();
+    REQUIRE(results.size() == 3);
+    REQUIRE(scores.size() == 3);
+    for (int i = 0; i < results.size(); ++i) {
+        auto result = results[i];
+        auto expect = expected[i];
+        auto score = scores[i];
+        REQUIRE(result.first == expect.first.first);
+        REQUIRE(result.second == expect.first.second);
+        REQUIRE(score.first.first == expect.first.first);
+        REQUIRE(score.first.second == expect.first.second);
+        REQUIRE(score.second == Catch::Approx(expect.second).epsilon(raw.epsilon));
+    }
 }
