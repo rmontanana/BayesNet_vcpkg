@@ -10,6 +10,7 @@
 #include <vector>
 #include "bayesnet/classifiers/SPODE.h"
 #include "Boost.h"
+
 namespace bayesnet {
     class BoostAODE : public Boost {
     public:

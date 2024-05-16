@@ -8,21 +8,35 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include "bayesnet/utils/BayesMetrics.h"
 #include "bayesnet/ensembles/BoostA2DE.h"
 #include "TestUtils.h"
 
 
-TEST_CASE("Feature_select CFS", "[BoostA2DE]")
+TEST_CASE("Build basic model", "[BoostA2DE]")
 {
-    auto raw = RawDatasets("iris", true);
-    auto clf = bayesnet::BoostA2DE();
-    clf.setHyperparameters({ {"select_features", "CFS"} });
-    clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states);
-    REQUIRE(clf.getNumberOfNodes() == 0);
-    REQUIRE(clf.getNumberOfEdges() == 0);
-    // REQUIRE(clf.getNotes().size() == 2);
-    // REQUIRE(clf.getNotes()[0] == "Used features in initialization: 6 of 9 with CFS");
-    // REQUIRE(clf.getNotes()[1] == "Number of models: 9");
+    auto raw = RawDatasets("diabetes", true);
+    bayesnet::Metrics metrics(raw.dataset, raw.features, raw.className, raw.classNumStates);
+    auto expected = std::map<std::pair<int, int>, double>{
+        { { 0, 1 }, 0.0 },
+        { { 0, 2 }, 0.287696 },
+        { { 0, 3 }, 0.403749 },
+        { { 1, 2 }, 1.17112 },
+        { { 1, 3 }, 1.31852 },
+        { { 2, 3 }, 0.210068 },
+    };
+    for (int i = 0; i < raw.features.size() - 1; ++i) {
+        for (int j = i + 1; j < raw.features.size(); ++j) {
+            double result = metrics.conditionalMutualInformation(raw.dataset.index({ i, "..." }), raw.dataset.index({ j, "..." }), raw.yt, raw.weights);
+            // REQUIRE(result == Catch::Approx(expected.at({ i, j })).epsilon(raw.epsilon));
+            auto clf = bayesnet::SPnDE({ i, j });
+            clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states);
+            auto score = clf.score(raw.Xt, raw.yt);
+            std::cout << " i " << i << " j " << j << " cmi "
+                << std::setw(8) << std::setprecision(6) << fixed << result
+                << " score = " << score << std::endl;
+        }
+    }
 }
 // TEST_CASE("Feature_select IWSS", "[BoostAODE]")
 // {

@@ -18,6 +18,8 @@ namespace bayesnet {
         std::vector<std::string> graph(const std::string& title = "BoostA2DE") const override;
     protected:
         void trainModel(const torch::Tensor& weights) override;
+    private:
+        std::vector<int> initializeModels();
     };
 }
 #endif

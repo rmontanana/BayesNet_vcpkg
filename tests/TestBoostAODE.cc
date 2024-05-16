@@ -104,7 +104,7 @@ TEST_CASE("Order asc, desc & random", "[BoostAODE]")
         clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states);
         auto score = clf.score(raw.Xv, raw.yv);
         auto scoret = clf.score(raw.Xt, raw.yt);
-        INFO("BoostAODE order: " + order);
+        INFO("BoostAODE order: " << order);
         REQUIRE(score == Catch::Approx(scores[order]).epsilon(raw.epsilon));
         REQUIRE(scoret == Catch::Approx(scores[order]).epsilon(raw.epsilon));
     }
@@ -120,7 +120,7 @@ TEST_CASE("Oddities", "[BoostAODE]")
         { { "maxTolerance", 5 } },
     };
     for (const auto& hyper : bad_hyper.items()) {
-        INFO("BoostAODE hyper: " + hyper.value().dump());
+        INFO("BoostAODE hyper: " << hyper.value().dump());
         REQUIRE_THROWS_AS(clf.setHyperparameters(hyper.value()), std::invalid_argument);
     }
     REQUIRE_THROWS_AS(clf.setHyperparameters({ {"maxTolerance", 0 } }), std::invalid_argument);
@@ -131,7 +131,7 @@ TEST_CASE("Oddities", "[BoostAODE]")
         { { "select_features","FCBF" }, { "threshold", 1.01 } },
     };
     for (const auto& hyper : bad_hyper_fit.items()) {
-        INFO("BoostAODE hyper: " + hyper.value().dump());
+        INFO("BoostAODE hyper: " << hyper.value().dump());
         clf.setHyperparameters(hyper.value());
         REQUIRE_THROWS_AS(clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states), std::invalid_argument);
     }

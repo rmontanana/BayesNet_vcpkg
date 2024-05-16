@@ -16,6 +16,7 @@ namespace bayesnet {
         Metrics(const torch::Tensor& samples, const std::vector<std::string>& features, const std::string& className, const int classNumStates);
         Metrics(const std::vector<std::vector<int>>& vsamples, const std::vector<int>& labels, const std::vector<std::string>& features, const std::string& className, const int classNumStates);
         std::vector<int> SelectKBestWeighted(const torch::Tensor& weights, bool ascending = false, unsigned k = 0);
+        std::vector<std::pair<int, int>> SelectKPairs(const torch::Tensor& weights, bool ascending = false, unsigned k = 0);
         std::vector<double> getScoresKBest() const;
         double mutualInformation(const torch::Tensor& firstFeature, const torch::Tensor& secondFeature, const torch::Tensor& weights);
         double conditionalMutualInformation(const torch::Tensor& firstFeature, const torch::Tensor& secondFeature, const torch::Tensor& labels, const torch::Tensor& weights);
@@ -41,7 +42,7 @@ namespace bayesnet {
             }
             return result;
         }
-        template <class T>
+            template <class T>
         T pop_first(std::vector<T>& v)
         {
             T temp = v[0];
@@ -52,6 +53,8 @@ namespace bayesnet {
         int classNumStates = 0;
         std::vector<double> scoresKBest;
         std::vector<int> featuresKBest; // sorted indices of the features
+        std::vector<std::pair<int, int>> pairsKBest; // sorted indices of the pairs
+        std::map<std::pair<int, int>, double> scoresKPairs;
         double conditionalEntropy(const torch::Tensor& firstFeature, const torch::Tensor& secondFeature, const torch::Tensor& weights);
     };
 }

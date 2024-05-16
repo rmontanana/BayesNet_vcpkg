@@ -30,6 +30,44 @@ namespace bayesnet {
         }
         samples.index_put_({ -1, "..." }, torch::tensor(labels, torch::kInt32));
     }
+    std::vector<std::pair<int, int>> Metrics::SelectKPairs(const torch::Tensor& weights, bool ascending, unsigned k)
+    {
+        // Return the K Best features 
+        auto n = features.size();
+        if (k == 0) {
+            k = n;
+        }
+        // compute scores
+        scoresKPairs.clear();
+        pairsKBest.clear();
+        auto label = samples.index({ -1, "..." });
+        // for (int i = 0; i < n; ++i) {
+        //     for (int j = i + 1; j < n; ++j) {
+        //         scoresKBest.push_back(mutualInformation(samples.index({ i, "..." }), samples.index({ j, "..." }), weights));
+        //         featuresKBest.push_back(i);
+        //         featuresKBest.push_back(j);
+        //     }
+        // }
+        // // sort & reduce scores and features
+        // if (ascending) {
+        //     sort(featuresKBest.begin(), featuresKBest.end(), [&](int i, int j)
+        //         { return scoresKBest[i] < scoresKBest[j]; });
+        //     sort(scoresKBest.begin(), scoresKBest.end(), std::less<double>());
+        //     if (k < n) {
+        //         for (int i = 0; i < n - k; ++i) {
+        //             featuresKBest.erase(featuresKBest.begin());
+        //             scoresKBest.erase(scoresKBest.begin());
+        //         }
+        //     }
+        // } else {
+        //     sort(featuresKBest.begin(), featuresKBest.end(), [&](int i, int j)
+        //         { return scoresKBest[i] > scoresKBest[j]; });
+        //     sort(scoresKBest.begin(), scoresKBest.end(), std::greater<double>());
+        //     featuresKBest.resize(k);
+        //     scoresKBest.resize(k);
+        // }
+        return pairsKBest;
+    }
     std::vector<int> Metrics::SelectKBestWeighted(const torch::Tensor& weights, bool ascending, unsigned k)
     {
         // Return the K Best features 
