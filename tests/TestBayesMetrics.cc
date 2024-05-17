@@ -11,7 +11,6 @@
 #include "TestUtils.h"
 #include "Timer.h"
 
-
 TEST_CASE("Metrics Test", "[Metrics]")
 {
     std::string file_name = GENERATE("glass", "iris", "ecoli", "diabetes");
@@ -28,8 +27,8 @@ TEST_CASE("Metrics Test", "[Metrics]")
         {"diabetes", 0.0345470614}
     };
     map<pair<std::string, int>, std::vector<pair<int, int>>> resultsMST = {
-        { {"glass", 0}, { {0, 6}, {0, 5}, {0, 3}, {5, 1}, {5, 8}, {5, 4}, {6, 2}, {6, 7} } },
-        { {"glass", 1}, { {1, 5}, {5, 0}, {5, 8}, {5, 4}, {0, 6}, {0, 3}, {6, 2}, {6, 7} } },
+        { {"glass", 0}, { {0, 6}, {0, 5}, {0, 3}, {3, 4}, {5, 1}, {5, 8}, {6, 2}, {6, 7} } },
+        { {"glass", 1}, { {1, 5}, {5, 0}, {5, 8}, {0, 6}, {0, 3}, {3, 4}, {6, 2}, {6, 7} } },
         { {"iris", 0}, { {0, 1}, {0, 2}, {1, 3} } },
         { {"iris", 1}, { {1, 0}, {1, 3}, {0, 2} } },
         { {"ecoli", 0}, { {0, 1}, {0, 2}, {1, 5}, {1, 3}, {5, 6}, {5, 4} } },

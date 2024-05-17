@@ -155,7 +155,7 @@ namespace bayesnet {
             }
         }
         if (pairSelection.size() > 0) {
-            notes.push_back("Used pairs not used in train: " + std::to_string(pairSelection.size()));
+            notes.push_back("Pairs not used in train: " + std::to_string(pairSelection.size()));
             status = WARNING;
         }
         notes.push_back("Number of models: " + std::to_string(n_models));

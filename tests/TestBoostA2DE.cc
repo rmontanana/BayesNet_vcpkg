@@ -22,7 +22,7 @@ TEST_CASE("Build basic model", "[BoostA2DE]")
     REQUIRE(clf.getNumberOfEdges() == 684);
     REQUIRE(clf.getNotes().size() == 3);
     REQUIRE(clf.getNotes()[0] == "Convergence threshold reached & 15 models eliminated");
-    REQUIRE(clf.getNotes()[1] == "Used pairs not used in train: 20");
+    REQUIRE(clf.getNotes()[1] == "Pairs not used in train: 20");
     REQUIRE(clf.getNotes()[2] == "Number of models: 38");
     auto score = clf.score(raw.Xv, raw.yv);
     REQUIRE(score == Catch::Approx(0.919271).epsilon(raw.epsilon));
