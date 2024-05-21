@@ -1,0 +1,348 @@
+.TH "bayesnet::Ensemble" 3 "Version 1.0.5" "BayesNet" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+bayesnet::Ensemble
+.SH SYNOPSIS
+.br
+.PP
+.PP
+Inherits \fBbayesnet::Classifier\fP\&.
+.PP
+Inherited by \fBbayesnet::A2DE\fP, \fBbayesnet::AODE\fP, \fBbayesnet::AODELd\fP, and \fBbayesnet::Boost\fP\&.
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBEnsemble\fP (bool predict_voting=true)"
+.br
+.ti -1c
+.RI "torch::Tensor \fBpredict\fP (torch::Tensor &X) override"
+.br
+.ti -1c
+.RI "std::vector< int > \fBpredict\fP (std::vector< std::vector< int > > &X) override"
+.br
+.ti -1c
+.RI "torch::Tensor \fBpredict_proba\fP (torch::Tensor &X) override"
+.br
+.ti -1c
+.RI "std::vector< std::vector< double > > \fBpredict_proba\fP (std::vector< std::vector< int > > &X) override"
+.br
+.ti -1c
+.RI "float \fBscore\fP (torch::Tensor &X, torch::Tensor &y) override"
+.br
+.ti -1c
+.RI "float \fBscore\fP (std::vector< std::vector< int > > &X, std::vector< int > &y) override"
+.br
+.ti -1c
+.RI "int \fBgetNumberOfNodes\fP () const override"
+.br
+.ti -1c
+.RI "int \fBgetNumberOfEdges\fP () const override"
+.br
+.ti -1c
+.RI "int \fBgetNumberOfStates\fP () const override"
+.br
+.ti -1c
+.RI "std::vector< std::string > \fBshow\fP () const override"
+.br
+.ti -1c
+.RI "std::vector< std::string > \fBgraph\fP (const std::string &title) const override"
+.br
+.ti -1c
+.RI "std::vector< std::string > \fBtopological_order\fP () override"
+.br
+.ti -1c
+.RI "std::string \fBdump_cpt\fP () const override"
+.br
+.in -1c
+
+Public Member Functions inherited from \fBbayesnet::Classifier\fP
+.in +1c
+.ti -1c
+.RI "\fBClassifier\fP (\fBNetwork\fP model)"
+.br
+.ti -1c
+.RI "\fBClassifier\fP & \fBfit\fP (std::vector< std::vector< int > > &X, std::vector< int > &y, const std::vector< std::string > &features, const std::string &className, std::map< std::string, std::vector< int > > &states) override"
+.br
+.ti -1c
+.RI "\fBClassifier\fP & \fBfit\fP (torch::Tensor &X, torch::Tensor &y, const std::vector< std::string > &features, const std::string &className, std::map< std::string, std::vector< int > > &states) override"
+.br
+.ti -1c
+.RI "\fBClassifier\fP & \fBfit\fP (torch::Tensor &dataset, const std::vector< std::string > &features, const std::string &className, std::map< std::string, std::vector< int > > &states) override"
+.br
+.ti -1c
+.RI "\fBClassifier\fP & \fBfit\fP (torch::Tensor &dataset, const std::vector< std::string > &features, const std::string &className, std::map< std::string, std::vector< int > > &states, const torch::Tensor &weights) override"
+.br
+.ti -1c
+.RI "void \fBaddNodes\fP ()"
+.br
+.ti -1c
+.RI "int \fBgetClassNumStates\fP () const override"
+.br
+.ti -1c
+.RI "status_t \fBgetStatus\fP () const override"
+.br
+.ti -1c
+.RI "std::string \fBgetVersion\fP () override"
+.br
+.ti -1c
+.RI "std::vector< std::string > \fBgetNotes\fP () const override"
+.br
+.ti -1c
+.RI "void \fBsetHyperparameters\fP (const nlohmann::json &hyperparameters) override"
+.br
+.in -1c
+
+Public Member Functions inherited from \fBbayesnet::BaseClassifier\fP
+.in +1c
+.ti -1c
+.RI "std::vector< std::string > & \fBgetValidHyperparameters\fP ()"
+.br
+.in -1c
+.SS "Protected Member Functions"
+
+.in +1c
+.ti -1c
+.RI "torch::Tensor \fBpredict_average_voting\fP (torch::Tensor &X)"
+.br
+.ti -1c
+.RI "std::vector< std::vector< double > > \fBpredict_average_voting\fP (std::vector< std::vector< int > > &X)"
+.br
+.ti -1c
+.RI "torch::Tensor \fBpredict_average_proba\fP (torch::Tensor &X)"
+.br
+.ti -1c
+.RI "std::vector< std::vector< double > > \fBpredict_average_proba\fP (std::vector< std::vector< int > > &X)"
+.br
+.ti -1c
+.RI "torch::Tensor \fBcompute_arg_max\fP (torch::Tensor &X)"
+.br
+.ti -1c
+.RI "std::vector< int > \fBcompute_arg_max\fP (std::vector< std::vector< double > > &X)"
+.br
+.ti -1c
+.RI "torch::Tensor \fBvoting\fP (torch::Tensor &votes)"
+.br
+.ti -1c
+.RI "void \fBtrainModel\fP (const torch::Tensor &weights) override"
+.br
+.in -1c
+
+Protected Member Functions inherited from \fBbayesnet::Classifier\fP
+.in +1c
+.ti -1c
+.RI "void \fBcheckFitParameters\fP ()"
+.br
+.ti -1c
+.RI "virtual void \fBbuildModel\fP (const torch::Tensor &weights)=0"
+.br
+.ti -1c
+.RI "void \fBbuildDataset\fP (torch::Tensor &y)"
+.br
+.in -1c
+.SS "Protected Attributes"
+
+.in +1c
+.ti -1c
+.RI "unsigned \fBn_models\fP"
+.br
+.ti -1c
+.RI "std::vector< std::unique_ptr< \fBClassifier\fP > > \fBmodels\fP"
+.br
+.ti -1c
+.RI "std::vector< double > \fBsignificanceModels\fP"
+.br
+.ti -1c
+.RI "bool \fBpredict_voting\fP"
+.br
+.in -1c
+
+Protected Attributes inherited from \fBbayesnet::Classifier\fP
+.in +1c
+.ti -1c
+.RI "bool \fBfitted\fP"
+.br
+.ti -1c
+.RI "unsigned int \fBm\fP"
+.br
+.ti -1c
+.RI "unsigned int \fBn\fP"
+.br
+.ti -1c
+.RI "\fBNetwork\fP \fBmodel\fP"
+.br
+.ti -1c
+.RI "Metrics \fBmetrics\fP"
+.br
+.ti -1c
+.RI "std::vector< std::string > \fBfeatures\fP"
+.br
+.ti -1c
+.RI "std::string \fBclassName\fP"
+.br
+.ti -1c
+.RI "std::map< std::string, std::vector< int > > \fBstates\fP"
+.br
+.ti -1c
+.RI "torch::Tensor \fBdataset\fP"
+.br
+.ti -1c
+.RI "status_t \fBstatus\fP = NORMAL"
+.br
+.ti -1c
+.RI "std::vector< std::string > \fBnotes\fP"
+.br
+.in -1c
+
+Protected Attributes inherited from \fBbayesnet::BaseClassifier\fP
+.in +1c
+.ti -1c
+.RI "std::vector< std::string > \fBvalidHyperparameters\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Definition at line \fB15\fP of file \fBEnsemble\&.h\fP\&.
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "bayesnet::Ensemble::Ensemble (bool predict_voting = \fRtrue\fP)"
+
+.PP
+Definition at line \fB11\fP of file \fBEnsemble\&.cc\fP\&.
+.SH "Member Function Documentation"
+.PP 
+.SS "std::vector< int > bayesnet::Ensemble::compute_arg_max (std::vector< std::vector< double > > & X)\fR [protected]\fP"
+
+.PP
+Definition at line \fB24\fP of file \fBEnsemble\&.cc\fP\&.
+.SS "torch::Tensor bayesnet::Ensemble::compute_arg_max (torch::Tensor & X)\fR [protected]\fP"
+
+.PP
+Definition at line \fB33\fP of file \fBEnsemble\&.cc\fP\&.
+.SS "std::string bayesnet::Ensemble::dump_cpt () const\fR [inline]\fP, \fR [override]\fP, \fR [virtual]\fP"
+
+.PP
+Reimplemented from \fBbayesnet::Classifier\fP\&.
+.PP
+Definition at line \fB34\fP of file \fBEnsemble\&.h\fP\&.
+.SS "int bayesnet::Ensemble::getNumberOfEdges () const\fR [override]\fP, \fR [virtual]\fP"
+
+.PP
+Reimplemented from \fBbayesnet::Classifier\fP\&.
+.PP
+Definition at line \fB206\fP of file \fBEnsemble\&.cc\fP\&.
+.SS "int bayesnet::Ensemble::getNumberOfNodes () const\fR [override]\fP, \fR [virtual]\fP"
+
+.PP
+Reimplemented from \fBbayesnet::Classifier\fP\&.
+.PP
+Definition at line \fB198\fP of file \fBEnsemble\&.cc\fP\&.
+.SS "int bayesnet::Ensemble::getNumberOfStates () const\fR [override]\fP, \fR [virtual]\fP"
+
+.PP
+Reimplemented from \fBbayesnet::Classifier\fP\&.
+.PP
+Definition at line \fB214\fP of file \fBEnsemble\&.cc\fP\&.
+.SS "std::vector< std::string > bayesnet::Ensemble::graph (const std::string & title) const\fR [override]\fP, \fR [virtual]\fP"
+
+.PP
+Implements \fBbayesnet::BaseClassifier\fP\&.
+.PP
+Definition at line \fB189\fP of file \fBEnsemble\&.cc\fP\&.
+.SS "std::vector< int > bayesnet::Ensemble::predict (std::vector< std::vector< int > > & X)\fR [override]\fP, \fR [virtual]\fP"
+
+.PP
+Reimplemented from \fBbayesnet::Classifier\fP\&.
+.PP
+Definition at line \fB74\fP of file \fBEnsemble\&.cc\fP\&.
+.SS "torch::Tensor bayesnet::Ensemble::predict (torch::Tensor & X)\fR [override]\fP, \fR [virtual]\fP"
+
+.PP
+Reimplemented from \fBbayesnet::Classifier\fP\&.
+.PP
+Definition at line \fB79\fP of file \fBEnsemble\&.cc\fP\&.
+.SS "std::vector< std::vector< double > > bayesnet::Ensemble::predict_average_proba (std::vector< std::vector< int > > & X)\fR [protected]\fP"
+
+.PP
+Definition at line \fB104\fP of file \fBEnsemble\&.cc\fP\&.
+.SS "torch::Tensor bayesnet::Ensemble::predict_average_proba (torch::Tensor & X)\fR [protected]\fP"
+
+.PP
+Definition at line \fB84\fP of file \fBEnsemble\&.cc\fP\&.
+.SS "std::vector< std::vector< double > > bayesnet::Ensemble::predict_average_voting (std::vector< std::vector< int > > & X)\fR [protected]\fP"
+
+.PP
+Definition at line \fB133\fP of file \fBEnsemble\&.cc\fP\&.
+.SS "torch::Tensor bayesnet::Ensemble::predict_average_voting (torch::Tensor & X)\fR [protected]\fP"
+
+.PP
+Definition at line \fB140\fP of file \fBEnsemble\&.cc\fP\&.
+.SS "std::vector< std::vector< double > > bayesnet::Ensemble::predict_proba (std::vector< std::vector< int > > & X)\fR [override]\fP, \fR [virtual]\fP"
+
+.PP
+Reimplemented from \fBbayesnet::Classifier\fP\&.
+.PP
+Definition at line \fB60\fP of file \fBEnsemble\&.cc\fP\&.
+.SS "torch::Tensor bayesnet::Ensemble::predict_proba (torch::Tensor & X)\fR [override]\fP, \fR [virtual]\fP"
+
+.PP
+Reimplemented from \fBbayesnet::Classifier\fP\&.
+.PP
+Definition at line \fB67\fP of file \fBEnsemble\&.cc\fP\&.
+.SS "float bayesnet::Ensemble::score (std::vector< std::vector< int > > & X, std::vector< int > & y)\fR [override]\fP, \fR [virtual]\fP"
+
+.PP
+Reimplemented from \fBbayesnet::Classifier\fP\&.
+.PP
+Definition at line \fB169\fP of file \fBEnsemble\&.cc\fP\&.
+.SS "float bayesnet::Ensemble::score (torch::Tensor & X, torch::Tensor & y)\fR [override]\fP, \fR [virtual]\fP"
+
+.PP
+Reimplemented from \fBbayesnet::Classifier\fP\&.
+.PP
+Definition at line \fB158\fP of file \fBEnsemble\&.cc\fP\&.
+.SS "std::vector< std::string > bayesnet::Ensemble::show () const\fR [override]\fP, \fR [virtual]\fP"
+
+.PP
+Reimplemented from \fBbayesnet::Classifier\fP\&.
+.PP
+Definition at line \fB180\fP of file \fBEnsemble\&.cc\fP\&.
+.SS "std::vector< std::string > bayesnet::Ensemble::topological_order ()\fR [inline]\fP, \fR [override]\fP, \fR [virtual]\fP"
+
+.PP
+Reimplemented from \fBbayesnet::Classifier\fP\&.
+.PP
+Definition at line \fB30\fP of file \fBEnsemble\&.h\fP\&.
+.SS "void bayesnet::Ensemble::trainModel (const torch::Tensor & weights)\fR [override]\fP, \fR [protected]\fP, \fR [virtual]\fP"
+
+.PP
+Reimplemented from \fBbayesnet::Classifier\fP\&.
+.PP
+Definition at line \fB16\fP of file \fBEnsemble\&.cc\fP\&.
+.SS "torch::Tensor bayesnet::Ensemble::voting (torch::Tensor & votes)\fR [protected]\fP"
+
+.PP
+Definition at line \fB38\fP of file \fBEnsemble\&.cc\fP\&.
+.SH "Member Data Documentation"
+.PP 
+.SS "std::vector<std::unique_ptr<\fBClassifier\fP> > bayesnet::Ensemble::models\fR [protected]\fP"
+
+.PP
+Definition at line \fB47\fP of file \fBEnsemble\&.h\fP\&.
+.SS "unsigned bayesnet::Ensemble::n_models\fR [protected]\fP"
+
+.PP
+Definition at line \fB46\fP of file \fBEnsemble\&.h\fP\&.
+.SS "bool bayesnet::Ensemble::predict_voting\fR [protected]\fP"
+
+.PP
+Definition at line \fB50\fP of file \fBEnsemble\&.h\fP\&.
+.SS "std::vector<double> bayesnet::Ensemble::significanceModels\fR [protected]\fP"
+
+.PP
+Definition at line \fB48\fP of file \fBEnsemble\&.h\fP\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for BayesNet from the source code\&.

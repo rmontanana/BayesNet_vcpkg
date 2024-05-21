@@ -1,0 +1,9 @@
+<map id="bayesnet::KDB" name="bayesnet::KDB">
+<area shape="rect" id="Node000001" title=" " alt="" coords="34,153,144,178"/>
+<area shape="rect" id="Node000004" href="$classbayesnet_1_1_k_d_b_ld.html" title=" " alt="" coords="27,226,151,252"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="92,194,92,226,86,226,86,194"/>
+<area shape="rect" id="Node000002" href="$classbayesnet_1_1_classifier.html" title=" " alt="" coords="20,79,158,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="92,120,92,152,86,152,86,120"/>
+<area shape="rect" id="Node000003" href="$classbayesnet_1_1_base_classifier.html" title=" " alt="" coords="5,5,173,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="92,46,92,79,86,79,86,46"/>
+</map>

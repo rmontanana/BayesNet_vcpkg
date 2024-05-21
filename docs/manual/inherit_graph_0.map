@@ -1,0 +1,38 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" href="$classbayesnet_1_1_base_classifier.html" title=" " alt="" coords="5,177,173,203"/>
+<area shape="rect" id="Node000001" href="$classbayesnet_1_1_classifier.html" title=" " alt="" coords="221,177,358,203"/>
+<area shape="poly" id="edge1_Node000000_Node000001" title=" " alt="" coords="188,188,220,188,220,193,188,193"/>
+<area shape="rect" id="Node000002" href="$classbayesnet_1_1_ensemble.html" title=" " alt="" coords="406,128,546,154"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="355,170,424,152,425,157,356,175"/>
+<area shape="rect" id="Node000008" href="$classbayesnet_1_1_k_d_b.html" title=" " alt="" coords="421,177,531,203"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="373,188,421,188,421,193,373,193"/>
+<area shape="rect" id="Node000010" href="$classbayesnet_1_1_s_p_o_d_e.html" title=" " alt="" coords="412,276,541,302"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="322,210,362,237,407,262,432,273,430,278,405,267,359,241,319,214"/>
+<area shape="rect" id="Node000016" href="$classbayesnet_1_1_s_pn_d_e.html" title=" " alt="" coords="413,79,539,104"/>
+<area shape="poly" id="edge13_Node000001_Node000016" title=" " alt="" coords="319,166,359,139,405,113,430,102,432,107,407,118,362,144,322,170"/>
+<area shape="rect" id="Node000012" href="$classbayesnet_1_1_t_a_n.html" title=" " alt="" coords="422,325,530,351"/>
+<area shape="poly" id="edge14_Node000001_Node000012" title=" " alt="" coords="310,214,352,263,378,289,407,312,428,322,426,327,405,316,375,293,348,267,306,217"/>
+<area shape="rect" id="Node000003" href="$classbayesnet_1_1_a2_d_e.html" title=" " alt="" coords="607,79,725,104"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="543,121,613,102,614,108,544,126"/>
+<area shape="rect" id="Node000004" href="$classbayesnet_1_1_a_o_d_e.html" title=" " alt="" coords="606,128,726,154"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="562,138,606,138,606,144,562,144"/>
+<area shape="rect" id="Node000005" href="$classbayesnet_1_1_a_o_d_e_ld.html" title=" " alt="" coords="599,177,733,203"/>
+<area shape="poly" id="edge5_Node000002_Node000005" title=" " alt="" coords="544,156,614,174,613,179,543,161"/>
+<area shape="rect" id="Node000013" href="$classbayesnet_1_1_boost.html" title=" " alt="" coords="608,29,724,55"/>
+<area shape="poly" id="edge6_Node000002_Node000013" title=" " alt="" coords="538,119,545,115,559,102,568,90,578,77,593,64,614,53,616,58,596,68,581,81,572,93,563,106,548,119,540,124"/>
+<area shape="rect" id="Node000014" href="$classbayesnet_1_1_boost_a2_d_e.html" title=" " alt="" coords="787,5,939,31"/>
+<area shape="poly" id="edge7_Node000013_Node000014" title=" " alt="" coords="739,31,786,25,787,30,740,36"/>
+<area shape="rect" id="Node000015" href="$classbayesnet_1_1_boost_a_o_d_e.html" title=" " alt="" coords="786,55,940,80"/>
+<area shape="poly" id="edge8_Node000013_Node000015" title=" " alt="" coords="740,49,786,55,785,60,739,54"/>
+<area shape="rect" id="Node000007" href="$classbayesnet_1_1_k_d_b_ld.html" title=" " alt="" coords="604,227,728,252"/>
+<area shape="poly" id="edge10_Node000008_Node000007" title=" " alt="" coords="544,205,614,223,613,229,543,210"/>
+<area shape="rect" id="Node000009" href="$classbayesnet_1_1_s_p_o_d_e_ld.html" title=" " alt="" coords="594,276,738,302"/>
+<area shape="poly" id="edge12_Node000010_Node000009" title=" " alt="" coords="556,286,594,286,594,292,556,292"/>
+<area shape="rect" id="Node000011" href="$classbayesnet_1_1_t_a_n_ld.html" title=" " alt="" coords="605,325,727,351"/>
+<area shape="poly" id="edge15_Node000012_Node000011" title=" " alt="" coords="546,336,604,336,604,341,546,341"/>
+<area shape="rect" id="Node000006" href="$classbayesnet_1_1_proposal.html" title=" " alt="" coords="410,227,543,252"/>
+<area shape="poly" id="edge16_Node000006_Node000005" title=" " alt="" coords="543,220,613,201,614,206,544,225"/>
+<area shape="poly" id="edge17_Node000006_Node000007" title=" " alt="" coords="558,237,604,237,604,242,558,242"/>
+<area shape="poly" id="edge18_Node000006_Node000009" title=" " alt="" coords="544,254,614,273,613,278,543,259"/>
+<area shape="poly" id="edge19_Node000006_Node000011" title=" " alt="" coords="540,257,548,261,563,274,572,287,581,300,596,312,616,322,614,327,593,316,578,303,568,290,559,278,545,266,538,261"/>
+</map>

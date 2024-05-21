@@ -1,0 +1,135 @@
+.TH "bayesnet::Node" 3 "Version 1.0.5" "BayesNet" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+bayesnet::Node
+.SH SYNOPSIS
+.br
+.PP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBNode\fP (const std::string &)"
+.br
+.ti -1c
+.RI "void \fBclear\fP ()"
+.br
+.ti -1c
+.RI "void \fBaddParent\fP (\fBNode\fP *)"
+.br
+.ti -1c
+.RI "void \fBaddChild\fP (\fBNode\fP *)"
+.br
+.ti -1c
+.RI "void \fBremoveParent\fP (\fBNode\fP *)"
+.br
+.ti -1c
+.RI "void \fBremoveChild\fP (\fBNode\fP *)"
+.br
+.ti -1c
+.RI "std::string \fBgetName\fP () const"
+.br
+.ti -1c
+.RI "std::vector< \fBNode\fP * > & \fBgetParents\fP ()"
+.br
+.ti -1c
+.RI "std::vector< \fBNode\fP * > & \fBgetChildren\fP ()"
+.br
+.ti -1c
+.RI "torch::Tensor & \fBgetCPT\fP ()"
+.br
+.ti -1c
+.RI "void \fBcomputeCPT\fP (const torch::Tensor &dataset, const std::vector< std::string > &features, const double laplaceSmoothing, const torch::Tensor &weights)"
+.br
+.ti -1c
+.RI "int \fBgetNumStates\fP () const"
+.br
+.ti -1c
+.RI "void \fBsetNumStates\fP (int)"
+.br
+.ti -1c
+.RI "unsigned \fBminFill\fP ()"
+.br
+.ti -1c
+.RI "std::vector< std::string > \fBgraph\fP (const std::string &clasName)"
+.br
+.ti -1c
+.RI "float \fBgetFactorValue\fP (std::map< std::string, int > &)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Definition at line \fB14\fP of file \fBNode\&.h\fP\&.
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "bayesnet::Node::Node (const std::string & name)\fR [explicit]\fP"
+
+.PP
+Definition at line \fB11\fP of file \fBNode\&.cc\fP\&.
+.SH "Member Function Documentation"
+.PP 
+.SS "void bayesnet::Node::addChild (\fBNode\fP * child)"
+
+.PP
+Definition at line \fB39\fP of file \fBNode\&.cc\fP\&.
+.SS "void bayesnet::Node::addParent (\fBNode\fP * parent)"
+
+.PP
+Definition at line \fB27\fP of file \fBNode\&.cc\fP\&.
+.SS "void bayesnet::Node::clear ()"
+
+.PP
+Definition at line \fB15\fP of file \fBNode\&.cc\fP\&.
+.SS "void bayesnet::Node::computeCPT (const torch::Tensor & dataset, const std::vector< std::string > & features, const double laplaceSmoothing, const torch::Tensor & weights)"
+
+.PP
+Definition at line \fB93\fP of file \fBNode\&.cc\fP\&.
+.SS "std::vector< \fBNode\fP * > & bayesnet::Node::getChildren ()"
+
+.PP
+Definition at line \fB47\fP of file \fBNode\&.cc\fP\&.
+.SS "torch::Tensor & bayesnet::Node::getCPT ()"
+
+.PP
+Definition at line \fB59\fP of file \fBNode\&.cc\fP\&.
+.SS "float bayesnet::Node::getFactorValue (std::map< std::string, int > & evidence)"
+
+.PP
+Definition at line \fB124\fP of file \fBNode\&.cc\fP\&.
+.SS "std::string bayesnet::Node::getName () const"
+
+.PP
+Definition at line \fB23\fP of file \fBNode\&.cc\fP\&.
+.SS "int bayesnet::Node::getNumStates () const"
+
+.PP
+Definition at line \fB51\fP of file \fBNode\&.cc\fP\&.
+.SS "std::vector< \fBNode\fP * > & bayesnet::Node::getParents ()"
+
+.PP
+Definition at line \fB43\fP of file \fBNode\&.cc\fP\&.
+.SS "std::vector< std::string > bayesnet::Node::graph (const std::string & clasName)"
+
+.PP
+Definition at line \fB132\fP of file \fBNode\&.cc\fP\&.
+.SS "unsigned bayesnet::Node::minFill ()"
+
+.PP
+Definition at line \fB70\fP of file \fBNode\&.cc\fP\&.
+.SS "void bayesnet::Node::removeChild (\fBNode\fP * child)"
+
+.PP
+Definition at line \fB35\fP of file \fBNode\&.cc\fP\&.
+.SS "void bayesnet::Node::removeParent (\fBNode\fP * parent)"
+
+.PP
+Definition at line \fB31\fP of file \fBNode\&.cc\fP\&.
+.SS "void bayesnet::Node::setNumStates (int numStates)"
+
+.PP
+Definition at line \fB55\fP of file \fBNode\&.cc\fP\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for BayesNet from the source code\&.

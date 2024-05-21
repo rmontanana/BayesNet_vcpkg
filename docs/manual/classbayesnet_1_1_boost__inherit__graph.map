@@ -1,0 +1,13 @@
+<map id="bayesnet::Boost" name="bayesnet::Boost">
+<area shape="rect" id="Node000001" title=" " alt="" coords="111,226,227,252"/>
+<area shape="rect" id="Node000005" href="$classbayesnet_1_1_boost_a2_d_e.html" title=" " alt="" coords="5,300,157,326"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="144,264,97,302,94,298,141,260"/>
+<area shape="rect" id="Node000006" href="$classbayesnet_1_1_boost_a_o_d_e.html" title=" " alt="" coords="181,300,336,326"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="197,260,245,298,242,302,194,264"/>
+<area shape="rect" id="Node000002" href="$classbayesnet_1_1_ensemble.html" title=" " alt="" coords="99,153,239,178"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="172,194,172,226,166,226,166,194"/>
+<area shape="rect" id="Node000003" href="$classbayesnet_1_1_classifier.html" title=" " alt="" coords="100,79,238,105"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="172,120,172,152,166,152,166,120"/>
+<area shape="rect" id="Node000004" href="$classbayesnet_1_1_base_classifier.html" title=" " alt="" coords="85,5,253,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="172,46,172,79,166,79,166,46"/>
+</map>
