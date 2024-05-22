@@ -67,9 +67,13 @@ make sample fname=tests/data/glass.arff
 
 #### - SPODE
 
+#### - SPnDE
+
 #### - AODE
 
 #### - [BoostAODE](docs/BoostAODE.md)
+
+#### - BoostA2DE
 
 ### With Local Discretization
 
@@ -81,6 +85,12 @@ make sample fname=tests/data/glass.arff
 
 #### - AODELd
 
+## Documentation
+
+### [Manual](https://rmontanana.github.io/bayesnet/)
+
+### [Coverage report](docs/coverage.pdf)
+
 ## Diagrams
 
 ### UML Class Diagram
@@ -90,7 +100,3 @@ make sample fname=tests/data/glass.arff
 ### Dependency Diagram
 
 ![BayesNet Dependency Diagram](diagrams/dependency.svg)
-
-## Coverage report
-
-### [Coverage report](docs/coverage.pdf)
