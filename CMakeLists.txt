@@ -89,3 +89,17 @@ install(TARGETS BayesNet
         CONFIGURATIONS Release)
 install(DIRECTORY bayesnet/ DESTINATION include/bayesnet FILES_MATCHING CONFIGURATIONS Release PATTERN "*.h")
 install(FILES ${CMAKE_BINARY_DIR}/configured_files/include/bayesnet/config.h DESTINATION include/bayesnet CONFIGURATIONS Release)
+
+# Documentation
+# -------------
+set(doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/doxygen/Doxyfile.in)
+set(doxyfile ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+configure_file(${doxyfile_in} ${doxyfile} @ONLY)
+
+# doc build only target, target is not in default build, so it must be
+# triggered explicitly
+add_custom_target(doc
+    COMMAND ${DOXYGEN_EXECUTABLE} ${doxyfile}
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    COMMENT "Generating API documentation with Doxygen"
+    VERBATIM)
