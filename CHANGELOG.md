@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A2DE & SPnDE tests.
 - Add tests to reach 99% of coverage.
 - Add tests to check the correct version of the mdlp, folding and json libraries.
+- Library documentation generated with Doxygen.
+- Link to documentation in the README.md.
 
 ### Internal
 
@@ -27,6 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactor Coverage Report generation.
 - Add devcontainer to work on apple silicon.
 - Change build cmake folder names to Debug & Release.
+- Add a Makefile target (doc) to generate the documentation.
+- Add a Makefile target (doc-install) to install the documentation.
 
 ## [1.0.5] 2024-04-20
 

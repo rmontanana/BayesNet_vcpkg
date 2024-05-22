@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
-.PHONY: viewcoverage coverage setup help install uninstall diagrams buildr buildd test clean debug release sample updatebadge doc
+.PHONY: viewcoverage coverage setup help install uninstall diagrams buildr buildd test clean debug release sample updatebadge doc doc-install
 
 f_release = build_Release
 f_debug = build_Debug
@@ -13,6 +13,9 @@ lcov = lcov
 genhtml = genhtml
 dot = dot
 n_procs = -j 16
+docsrcdir = docs/manual
+mansrcdir = docs/man3
+mandestdir = /usr/local/share/man
 
 define ClearTests
 	@for t in $(test_targets); do \
@@ -148,6 +151,20 @@ updatebadge: ## Update the coverage badge in README.md
 doc: ## Generate documentation
 	@echo ">>> Generating documentation..."
 	@cmake --build $(f_release) -t doxygen
+	@echo ">>> Done";
+
+docdir = ""
+doc-install: ## Install documentation
+	@echo ">>> Installing documentation..."
+	@if [ "$(docdir)" = "" ]; then \
+		echo "docdir parameter has to be set when calling doc-install"; \
+		exit 1; \
+	fi
+	@if [ ! -d $(docdir) ]; then \
+		@$(MAKE) doc; \
+	fi
+	@cp -rp $(docsrcdir)/* $(docdir)
+	@sudo cp -rp $(mansrcdir) $(mandestdir)
 	@echo ">>> Done";
 
 help: ## Show help message
