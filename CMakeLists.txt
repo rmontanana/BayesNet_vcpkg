@@ -92,14 +92,11 @@ install(FILES ${CMAKE_BINARY_DIR}/configured_files/include/bayesnet/config.h DES
 
 # Documentation
 # -------------
-set(doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/doxygen/Doxyfile.in)
-set(doxyfile ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+find_package(Doxygen REQUIRED dot)
+set(DOC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/docs)
+set(doxyfile_in ${DOC_DIR}/Doxyfile.in)
+set(doxyfile ${DOC_DIR}/Doxyfile)
 configure_file(${doxyfile_in} ${doxyfile} @ONLY)
-
-# doc build only target, target is not in default build, so it must be
-# triggered explicitly
-add_custom_target(doc
-    COMMAND ${DOXYGEN_EXECUTABLE} ${doxyfile}
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    COMMENT "Generating API documentation with Doxygen"
-    VERBATIM)
+doxygen_add_docs(doxygen
+    WORKING_DIRECTORY ${DOC_DIR}
+    CONFIG_FILE ${doxyfile})

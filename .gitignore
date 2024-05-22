@@ -40,4 +40,8 @@ puml/**
 .vscode/settings.json
 sample/build
 **/.DS_Store
+docs/manual
+docs/man3
+docs/man
+docs/Doxyfile
 

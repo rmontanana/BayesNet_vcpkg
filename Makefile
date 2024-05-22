@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
-.PHONY: viewcoverage coverage setup help install uninstall diagrams buildr buildd test clean debug release sample updatebadge
+.PHONY: viewcoverage coverage setup help install uninstall diagrams buildr buildd test clean debug release sample updatebadge doc
 
 f_release = build_Release
 f_debug = build_Debug
@@ -143,6 +143,11 @@ updatebadge: ## Update the coverage badge in README.md
 	fi
 	@echo ">>> Updating coverage badge..."
 	@env python update_coverage.py $(f_debug)/tests
+	@echo ">>> Done";
+
+doc: ## Generate documentation
+	@echo ">>> Generating documentation..."
+	@cmake --build $(f_release) -t doxygen
 	@echo ">>> Done";
 
 help: ## Show help message
