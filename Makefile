@@ -16,6 +16,7 @@ n_procs = -j 16
 docsrcdir = docs/manual
 mansrcdir = docs/man3
 mandestdir = /usr/local/share/man
+sed_command = 's/e">LCOV -/e"><a href="https:\/\/rmontanana.github.io\/bayesnet">Back to manual<\/a> LCOV -/g'
 
 define ClearTests
 	@for t in $(test_targets); do \
@@ -157,6 +158,12 @@ doc: ## Generate documentation
 	@echo ">>> Generating documentation..."
 	@cmake --build $(f_release) -t doxygen
 	@cp -rp diagrams $(docsrcdir)
+	@
+	@if [ "$(shell uname)" = "Darwin" ]; then \
+		sed -i "" $(sed_command) $(docsrcdir)/coverage/index.html ; \
+	else \
+		sed -i $(sed_command) $(docsrcdir)/coverage/index.html ; \
+	fi
 	@echo ">>> Done";
 
 docdir = ""
