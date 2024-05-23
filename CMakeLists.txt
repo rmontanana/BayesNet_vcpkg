@@ -92,7 +92,7 @@ install(FILES ${CMAKE_BINARY_DIR}/configured_files/include/bayesnet/config.h DES
 
 # Documentation
 # -------------
-find_package(Doxygen REQUIRED dot)
+find_package(Doxygen)
 set(DOC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/docs)
 set(doxyfile_in ${DOC_DIR}/Doxyfile.in)
 set(doxyfile ${DOC_DIR}/Doxyfile)

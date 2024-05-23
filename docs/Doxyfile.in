@@ -61,7 +61,7 @@ PROJECT_BRIEF          = "@CMAKE_PROJECT_DESCRIPTION@"
 # pixels and the maximum width should not exceed 200 pixels. Doxygen will copy
 # the logo to the output directory.
 
-PROJECT_LOGO           = /Users/rmontanana/Code/BayesNet/docs/logo_small.png
+PROJECT_LOGO           = logo_small.png
 
 # With the PROJECT_ICON tag one can specify an icon that is included in the tabs
 # when the HTML document is shown. Doxygen will copy the logo to the output
@@ -74,7 +74,7 @@ PROJECT_ICON           =
 # entered, it will be relative to the location where doxygen was started. If
 # left blank the current directory will be used.
 
-OUTPUT_DIRECTORY       = /Users/rmontanana/Code/BayesNet/docs
+OUTPUT_DIRECTORY       = 
 
 # If the CREATE_SUBDIRS tag is set to YES then doxygen will create up to 4096
 # sub-directories (in 2 levels) under the output directory of each output format
@@ -949,8 +949,8 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = /Users/rmontanana/Code/BayesNet/bayesnet
-INPUT                  += /Users/rmontanana/Code/BayesNet/README.md
+INPUT                  = ../bayesnet
+INPUT                  += ../README.md
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -1425,8 +1425,7 @@ HTML_EXTRA_STYLESHEET  =
 # files will be copied as-is; there are no commands or markers available.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_FILES       = /Users/rmontanana/Code/BayesNet/diagrams
-HTML_EXTRA_FILES       += /Users/rmontanana/Code/BayesNet/logo.png
+HTML_EXTRA_FILES       = ../logo.png
 
 # The HTML_COLORSTYLE tag can be used to specify if the generated HTML output
 # should be rendered with a dark or light theme.
@@ -2264,7 +2263,7 @@ GENERATE_MAN           = YES
 # The default directory is: man.
 # This tag requires that the tag GENERATE_MAN is set to YES.
 
-MAN_OUTPUT             = /Users/rmontanana/Code/BayesNet/docs
+MAN_OUTPUT             = ./
 
 # The MAN_EXTENSION tag determines the extension that is added to the generated
 # man pages. In case the manual section does not start with a number, the number

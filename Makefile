@@ -140,7 +140,7 @@ viewcoverage: ## View the html coverage report
 		exit 1; \
 	fi
 	@$(genhtml) $(f_debug)/tests/coverage.info --demangle-cpp --output-directory $(docsrcdir)/coverage --title "BayesNet Coverage Report" -s -k -f --legend >/dev/null 2>&1;
-	@xdg-open html/index.html || open html/index.html 2>/dev/null
+	@xdg-open $(docsrcdir)/coverage/index.html || open $(docsrcdir)/coverage/index.html 2>/dev/null
 	@echo ">>> Done";
 
 updatebadge: ## Update the coverage badge in README.md
