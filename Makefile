@@ -133,8 +133,13 @@ coverage: ## Run tests and generate coverage report (build/index.html)
 	@echo ">>> Done";	
 
 viewcoverage: ## View the html coverage report
-	@which $(genhtml) || (echo ">>> Please install lcov (genhtml not found)"; exit 1)
-	@$(genhtml) $(f_debug)/tests/coverage.info --demangle-cpp --output-directory html --title "BayesNet Coverage Report" -s -k -f --legend >/dev/null 2>&1;
+	@which $(genhtml) >/dev/null || (echo ">>> Please install lcov (genhtml not found)"; exit 1)
+	@if [ ! -d $(docsrcdir)/coverage ]; then mkdir -p $(docsrcdir)/coverage; fi
+	@if [ ! -f $(f_debug)/tests/coverage.info ]; then \
+		echo ">>> No coverage.info file found. Run make coverage first!"; \
+		exit 1; \
+	fi
+	@$(genhtml) $(f_debug)/tests/coverage.info --demangle-cpp --output-directory $(docsrcdir)/coverage --title "BayesNet Coverage Report" -s -k -f --legend >/dev/null 2>&1;
 	@xdg-open html/index.html || open html/index.html 2>/dev/null
 	@echo ">>> Done";
 
@@ -151,6 +156,7 @@ updatebadge: ## Update the coverage badge in README.md
 doc: ## Generate documentation
 	@echo ">>> Generating documentation..."
 	@cmake --build $(f_release) -t doxygen
+	@cp -rp diagrams $(docsrcdir)
 	@echo ">>> Done";
 
 docdir = ""

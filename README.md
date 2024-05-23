@@ -89,7 +89,7 @@ make sample fname=tests/data/glass.arff
 
 ### [Manual](https://rmontanana.github.io/bayesnet/)
 
-### [Coverage report](docs/coverage.pdf)
+### [Coverage report](https://rmontanana.github.io/bayesnet/coverage/index.html)
 
 ## Diagrams
 
