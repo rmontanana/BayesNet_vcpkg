@@ -16,7 +16,8 @@ n_procs = -j 16
 docsrcdir = docs/manual
 mansrcdir = docs/man3
 mandestdir = /usr/local/share/man
-sed_command = 's/e">LCOV -/e"><a href="https:\/\/rmontanana.github.io\/bayesnet">Back to manual<\/a> LCOV -/g'
+sed_command_link = 's/e">LCOV -/e"><a href="https:\/\/rmontanana.github.io\/bayesnet">Back to manual<\/a> LCOV -/g'
+sed_command_diagram = 's/Diagram"/Diagram" width="100%" height="100%" /g'
 
 define ClearTests
 	@for t in $(test_targets); do \
@@ -160,9 +161,11 @@ doc: ## Generate documentation
 	@cp -rp diagrams $(docsrcdir)
 	@
 	@if [ "$(shell uname)" = "Darwin" ]; then \
-		sed -i "" $(sed_command) $(docsrcdir)/coverage/index.html ; \
+		sed -i "" $(sed_command_link) $(docsrcdir)/coverage/index.html ; \
+		sed -i "" $(sed_command_diagram) $(docsrcdir)/index.html ; \
 	else \
-		sed -i $(sed_command) $(docsrcdir)/coverage/index.html ; \
+		sed -i $(sed_command_link) $(docsrcdir)/coverage/index.html ; \
+		sed -i $(sed_command_diagram) $(docsrcdir)/index.html ; \
 	fi
 	@echo ">>> Done";
 
