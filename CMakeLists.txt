@@ -25,8 +25,11 @@ set(CMAKE_CXX_EXTENSIONS                  OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS          ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage -fno-elide-constructors -fno-default-inline")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage -fno-elide-constructors")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
+if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-default-inline")
+endif()
 
 # Options
 # -------
@@ -63,7 +66,6 @@ endif (ENABLE_CLANG_TIDY)
 # include(FetchContent)
 add_git_submodule("lib/json")
 add_git_submodule("lib/mdlp")
-add_subdirectory("lib/Files")
 
 # Subdirectories
 # --------------
@@ -87,3 +89,14 @@ install(TARGETS BayesNet
         CONFIGURATIONS Release)
 install(DIRECTORY bayesnet/ DESTINATION include/bayesnet FILES_MATCHING CONFIGURATIONS Release PATTERN "*.h")
 install(FILES ${CMAKE_BINARY_DIR}/configured_files/include/bayesnet/config.h DESTINATION include/bayesnet CONFIGURATIONS Release)
+
+# Documentation
+# -------------
+find_package(Doxygen)
+set(DOC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/docs)
+set(doxyfile_in ${DOC_DIR}/Doxyfile.in)
+set(doxyfile ${DOC_DIR}/Doxyfile)
+configure_file(${doxyfile_in} ${doxyfile} @ONLY)
+doxygen_add_docs(doxygen
+    WORKING_DIRECTORY ${DOC_DIR}
+    CONFIG_FILE ${doxyfile})

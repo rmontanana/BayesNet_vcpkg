@@ -27,6 +27,7 @@ namespace bayesnet {
         torch::Tensor y; // y discrete nx1 tensor
         map<std::string, mdlp::CPPFImdlp*> discretizers;
     private:
+        std::vector<int> factorize(const std::vector<std::string>& labels_t);
         torch::Tensor& pDataset; // (n+1)xm tensor
         std::vector<std::string>& pFeatures;
         std::string& pClassName;

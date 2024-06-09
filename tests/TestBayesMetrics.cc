@@ -11,7 +11,6 @@
 #include "TestUtils.h"
 #include "Timer.h"
 
-
 TEST_CASE("Metrics Test", "[Metrics]")
 {
     std::string file_name = GENERATE("glass", "iris", "ecoli", "diabetes");
@@ -28,8 +27,8 @@ TEST_CASE("Metrics Test", "[Metrics]")
         {"diabetes", 0.0345470614}
     };
     map<pair<std::string, int>, std::vector<pair<int, int>>> resultsMST = {
-        { {"glass", 0}, { {0, 6}, {0, 5}, {0, 3}, {5, 1}, {5, 8}, {5, 4}, {6, 2}, {6, 7} } },
-        { {"glass", 1}, { {1, 5}, {5, 0}, {5, 8}, {5, 4}, {0, 6}, {0, 3}, {6, 2}, {6, 7} } },
+        { {"glass", 0}, { {0, 6}, {0, 5}, {0, 3}, {3, 4}, {5, 1}, {5, 8}, {6, 2}, {6, 7} } },
+        { {"glass", 1}, { {1, 5}, {5, 0}, {5, 8}, {0, 6}, {0, 3}, {3, 4}, {6, 2}, {6, 7} } },
         { {"iris", 0}, { {0, 1}, {0, 2}, {1, 3} } },
         { {"iris", 1}, { {1, 0}, {1, 3}, {0, 2} } },
         { {"ecoli", 0}, { {0, 1}, {0, 2}, {1, 5}, {1, 3}, {5, 6}, {5, 4} } },
@@ -104,6 +103,25 @@ TEST_CASE("Conditional Entropy", "[Metrics]")
     auto raw = RawDatasets("iris", true);
     bayesnet::Metrics metrics(raw.dataset, raw.features, raw.className, raw.classNumStates);
     auto expected = std::map<std::pair<int, int>, double>{
+        { { 0, 1 }, 1.32674 },
+        { { 0, 2 }, 0.236253 },
+        { { 0, 3 }, 0.1202 },
+        { { 1, 2 }, 0.252551 },
+        { { 1, 3 }, 0.10515 },
+        { { 2, 3 }, 0.108323 },
+    };
+    for (int i = 0; i < raw.features.size() - 1; ++i) {
+        for (int j = i + 1; j < raw.features.size(); ++j) {
+            double result = metrics.conditionalEntropy(raw.dataset.index({ i, "..." }), raw.dataset.index({ j, "..." }), raw.yt, raw.weights);
+            REQUIRE(result == Catch::Approx(expected.at({ i, j })).epsilon(raw.epsilon));
+        }
+    }
+}
+TEST_CASE("Conditional Mutual Information", "[Metrics]")
+{
+    auto raw = RawDatasets("iris", true);
+    bayesnet::Metrics metrics(raw.dataset, raw.features, raw.className, raw.classNumStates);
+    auto expected = std::map<std::pair<int, int>, double>{
         { { 0, 1 }, 0.0 },
         { { 0, 2 }, 0.287696 },
         { { 0, 3 }, 0.403749 },
@@ -116,5 +134,134 @@ TEST_CASE("Conditional Entropy", "[Metrics]")
             double result = metrics.conditionalMutualInformation(raw.dataset.index({ i, "..." }), raw.dataset.index({ j, "..." }), raw.yt, raw.weights);
             REQUIRE(result == Catch::Approx(expected.at({ i, j })).epsilon(raw.epsilon));
         }
+    }
+}
+TEST_CASE("Select K Pairs descending", "[Metrics]")
+{
+    auto raw = RawDatasets("iris", true);
+    bayesnet::Metrics metrics(raw.dataset, raw.features, raw.className, raw.classNumStates);
+    std::vector<int> empty;
+    auto results = metrics.SelectKPairs(raw.weights, empty, false);
+    auto expected = std::vector<std::pair<std::pair<int, int>, double>>{
+        { { 1, 3 }, 1.31852 },
+        { { 1, 2 }, 1.17112 },
+        { { 0, 3 }, 0.403749 },
+        { { 0, 2 }, 0.287696 },
+        { { 2, 3 }, 0.210068 },
+        { { 0, 1 }, 0.0 },
+    };
+    auto scores = metrics.getScoresKPairs();
+    for (int i = 0; i < results.size(); ++i) {
+        auto result = results[i];
+        auto expect = expected[i];
+        auto score = scores[i];
+        REQUIRE(result.first == expect.first.first);
+        REQUIRE(result.second == expect.first.second);
+        REQUIRE(score.first.first == expect.first.first);
+        REQUIRE(score.first.second == expect.first.second);
+        REQUIRE(score.second == Catch::Approx(expect.second).epsilon(raw.epsilon));
+    }
+    REQUIRE(results.size() == 6);
+    REQUIRE(scores.size() == 6);
+}
+TEST_CASE("Select K Pairs ascending", "[Metrics]")
+{
+    auto raw = RawDatasets("iris", true);
+    bayesnet::Metrics metrics(raw.dataset, raw.features, raw.className, raw.classNumStates);
+    std::vector<int> empty;
+    auto results = metrics.SelectKPairs(raw.weights, empty, true);
+    auto expected = std::vector<std::pair<std::pair<int, int>, double>>{
+        { { 0, 1 }, 0.0 },
+        { { 2, 3 }, 0.210068 },
+        { { 0, 2 }, 0.287696 },
+        { { 0, 3 }, 0.403749 },
+        { { 1, 2 }, 1.17112 },
+        { { 1, 3 }, 1.31852 },
+    };
+    auto scores = metrics.getScoresKPairs();
+    for (int i = 0; i < results.size(); ++i) {
+        auto result = results[i];
+        auto expect = expected[i];
+        auto score = scores[i];
+        REQUIRE(result.first == expect.first.first);
+        REQUIRE(result.second == expect.first.second);
+        REQUIRE(score.first.first == expect.first.first);
+        REQUIRE(score.first.second == expect.first.second);
+        REQUIRE(score.second == Catch::Approx(expect.second).epsilon(raw.epsilon));
+    }
+    REQUIRE(results.size() == 6);
+    REQUIRE(scores.size() == 6);
+}
+TEST_CASE("Select K Pairs with features excluded", "[Metrics]")
+{
+    auto raw = RawDatasets("iris", true);
+    bayesnet::Metrics metrics(raw.dataset, raw.features, raw.className, raw.classNumStates);
+    std::vector<int> excluded = { 0, 3 };
+    auto results = metrics.SelectKPairs(raw.weights, excluded, true);
+    auto expected = std::vector<std::pair<std::pair<int, int>, double>>{
+        { { 1, 2 }, 1.17112 },
+    };
+    auto scores = metrics.getScoresKPairs();
+    for (int i = 0; i < results.size(); ++i) {
+        auto result = results[i];
+        auto expect = expected[i];
+        auto score = scores[i];
+        REQUIRE(result.first == expect.first.first);
+        REQUIRE(result.second == expect.first.second);
+        REQUIRE(score.first.first == expect.first.first);
+        REQUIRE(score.first.second == expect.first.second);
+        REQUIRE(score.second == Catch::Approx(expect.second).epsilon(raw.epsilon));
+    }
+    REQUIRE(results.size() == 1);
+    REQUIRE(scores.size() == 1);
+}
+TEST_CASE("Select K Pairs with number of pairs descending", "[Metrics]")
+{
+    auto raw = RawDatasets("iris", true);
+    bayesnet::Metrics metrics(raw.dataset, raw.features, raw.className, raw.classNumStates);
+    std::vector<int> empty;
+    auto results = metrics.SelectKPairs(raw.weights, empty, false, 3);
+    auto expected = std::vector<std::pair<std::pair<int, int>, double>>{
+        { { 1, 3 }, 1.31852 },
+        { { 1, 2 }, 1.17112 },
+        { { 0, 3 }, 0.403749 }
+    };
+    auto scores = metrics.getScoresKPairs();
+    REQUIRE(results.size() == 3);
+    REQUIRE(scores.size() == 3);
+    for (int i = 0; i < results.size(); ++i) {
+        auto result = results[i];
+        auto expect = expected[i];
+        auto score = scores[i];
+        REQUIRE(result.first == expect.first.first);
+        REQUIRE(result.second == expect.first.second);
+        REQUIRE(score.first.first == expect.first.first);
+        REQUIRE(score.first.second == expect.first.second);
+        REQUIRE(score.second == Catch::Approx(expect.second).epsilon(raw.epsilon));
+    }
+}
+TEST_CASE("Select K Pairs with number of pairs ascending", "[Metrics]")
+{
+    auto raw = RawDatasets("iris", true);
+    bayesnet::Metrics metrics(raw.dataset, raw.features, raw.className, raw.classNumStates);
+    std::vector<int> empty;
+    auto results = metrics.SelectKPairs(raw.weights, empty, true, 3);
+    auto expected = std::vector<std::pair<std::pair<int, int>, double>>{
+        { { 0, 3 }, 0.403749 },
+        { { 1, 2 }, 1.17112 },
+        { { 1, 3 }, 1.31852 }
+    };
+    auto scores = metrics.getScoresKPairs();
+    REQUIRE(results.size() == 3);
+    REQUIRE(scores.size() == 3);
+    for (int i = 0; i < results.size(); ++i) {
+        auto result = results[i];
+        auto expect = expected[i];
+        auto score = scores[i];
+        REQUIRE(result.first == expect.first.first);
+        REQUIRE(result.second == expect.first.second);
+        REQUIRE(score.first.first == expect.first.first);
+        REQUIRE(score.first.second == expect.first.second);
+        REQUIRE(score.second == Catch::Approx(expect.second).epsilon(raw.epsilon));
     }
 }

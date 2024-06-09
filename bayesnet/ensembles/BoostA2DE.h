@@ -4,19 +4,18 @@
 // SPDX-License-Identifier: MIT
 // ***************************************************************
 
-#ifndef BOOSTAODE_H
-#define BOOSTAODE_H
+#ifndef BOOSTA2DE_H
+#define BOOSTA2DE_H
 #include <string>
 #include <vector>
-#include "bayesnet/classifiers/SPODE.h"
+#include "bayesnet/classifiers/SPnDE.h"
 #include "Boost.h"
-
 namespace bayesnet {
-    class BoostAODE : public Boost {
+    class BoostA2DE : public Boost {
     public:
-        explicit BoostAODE(bool predict_voting = false);
-        virtual ~BoostAODE() = default;
-        std::vector<std::string> graph(const std::string& title = "BoostAODE") const override;
+        explicit BoostA2DE(bool predict_voting = false);
+        virtual ~BoostA2DE() = default;
+        std::vector<std::string> graph(const std::string& title = "BoostA2DE") const override;
     protected:
         void trainModel(const torch::Tensor& weights) override;
     private:

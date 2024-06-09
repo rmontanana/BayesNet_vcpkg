@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
-.PHONY: viewcoverage coverage setup help install uninstall diagrams buildr buildd test clean debug release sample updatebadge
+.PHONY: viewcoverage coverage setup help install uninstall diagrams buildr buildd test clean debug release sample updatebadge doc doc-install
 
 f_release = build_Release
 f_debug = build_Debug
@@ -13,6 +13,11 @@ lcov = lcov
 genhtml = genhtml
 dot = dot
 n_procs = -j 16
+docsrcdir = docs/manual
+mansrcdir = docs/man3
+mandestdir = /usr/local/share/man
+sed_command_link = 's/e">LCOV -/e"><a href="https:\/\/rmontanana.github.io\/bayesnet">Back to manual<\/a> LCOV -/g'
+sed_command_diagram = 's/Diagram"/Diagram" width="100%" height="100%" /g'
 
 define ClearTests
 	@for t in $(test_targets); do \
@@ -130,9 +135,14 @@ coverage: ## Run tests and generate coverage report (build/index.html)
 	@echo ">>> Done";	
 
 viewcoverage: ## View the html coverage report
-	@which $(genhtml) || (echo ">>> Please install lcov (genhtml not found)"; exit 1)
-	@$(genhtml) $(f_debug)/tests/coverage.info --demangle-cpp --output-directory html --title "BayesNet Coverage Report" -s -k -f --legend >/dev/null 2>&1;
-	@xdg-open html/index.html || open html/index.html 2>/dev/null
+	@which $(genhtml) >/dev/null || (echo ">>> Please install lcov (genhtml not found)"; exit 1)
+	@if [ ! -d $(docsrcdir)/coverage ]; then mkdir -p $(docsrcdir)/coverage; fi
+	@if [ ! -f $(f_debug)/tests/coverage.info ]; then \
+		echo ">>> No coverage.info file found. Run make coverage first!"; \
+		exit 1; \
+	fi
+	@$(genhtml) $(f_debug)/tests/coverage.info --demangle-cpp --output-directory $(docsrcdir)/coverage --title "BayesNet Coverage Report" -s -k -f --legend >/dev/null 2>&1;
+	@xdg-open $(docsrcdir)/coverage/index.html || open $(docsrcdir)/coverage/index.html 2>/dev/null
 	@echo ">>> Done";
 
 updatebadge: ## Update the coverage badge in README.md
@@ -143,6 +153,34 @@ updatebadge: ## Update the coverage badge in README.md
 	fi
 	@echo ">>> Updating coverage badge..."
 	@env python update_coverage.py $(f_debug)/tests
+	@echo ">>> Done";
+
+doc: ## Generate documentation
+	@echo ">>> Generating documentation..."
+	@cmake --build $(f_release) -t doxygen
+	@cp -rp diagrams $(docsrcdir)
+	@
+	@if [ "$(shell uname)" = "Darwin" ]; then \
+		sed -i "" $(sed_command_link) $(docsrcdir)/coverage/index.html ; \
+		sed -i "" $(sed_command_diagram) $(docsrcdir)/index.html ; \
+	else \
+		sed -i $(sed_command_link) $(docsrcdir)/coverage/index.html ; \
+		sed -i $(sed_command_diagram) $(docsrcdir)/index.html ; \
+	fi
+	@echo ">>> Done";
+
+docdir = ""
+doc-install: ## Install documentation
+	@echo ">>> Installing documentation..."
+	@if [ "$(docdir)" = "" ]; then \
+		echo "docdir parameter has to be set when calling doc-install"; \
+		exit 1; \
+	fi
+	@if [ ! -d $(docdir) ]; then \
+		@$(MAKE) doc; \
+	fi
+	@cp -rp $(docsrcdir)/* $(docdir)
+	@sudo cp -rp $(mansrcdir) $(mandestdir)
 	@echo ">>> Done";
 
 help: ## Show help message

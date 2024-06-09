@@ -14,7 +14,6 @@ include_directories(
     /usr/local/include
 )
 
-add_subdirectory(lib/Files)
 add_subdirectory(lib/mdlp)
 add_executable(bayesnet_sample sample.cc) 
-target_link_libraries(bayesnet_sample ArffFiles mdlp "${TORCH_LIBRARIES}" "${BayesNet}")
+target_link_libraries(bayesnet_sample mdlp "${TORCH_LIBRARIES}" "${BayesNet}")

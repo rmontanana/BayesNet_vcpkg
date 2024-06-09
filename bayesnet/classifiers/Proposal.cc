@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: MIT
 // ***************************************************************
 
-#include <ArffFiles.h>
 #include "Proposal.h"
 
 namespace bayesnet {
@@ -54,8 +53,7 @@ namespace bayesnet {
                     yJoinParents[i] += to_string(pDataset.index({ idx, i }).item<int>());
                 }
             }
-            auto arff = ArffFiles();
-            auto yxv = arff.factorize(yJoinParents);
+            auto yxv = factorize(yJoinParents);
             auto xvf_ptr = Xf.index({ index }).data_ptr<float>();
             auto xvf = std::vector<mdlp::precision_t>(xvf_ptr, xvf_ptr + Xf.size(1));
             discretizers[feature]->fit(xvf, yxv);
@@ -112,5 +110,20 @@ namespace bayesnet {
             Xtd.index_put_({ i }, torch::tensor(Xd, torch::kInt32));
         }
         return Xtd;
+    }
+    std::vector<int> Proposal::factorize(const std::vector<std::string>& labels_t)
+    {
+        std::vector<int> yy;
+        yy.reserve(labels_t.size());
+        std::map<std::string, int> labelMap;
+        int i = 0;
+        for (const std::string& label : labels_t) {
+            if (labelMap.find(label) == labelMap.end()) {
+                labelMap[label] = i++;
+                bool allDigits = std::all_of(label.begin(), label.end(), ::isdigit);
+            }
+            yy.push_back(labelMap[label]);
+        }
+        return yy;
     }
 }

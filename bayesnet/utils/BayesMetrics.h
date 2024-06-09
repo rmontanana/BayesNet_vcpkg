@@ -16,7 +16,9 @@ namespace bayesnet {
         Metrics(const torch::Tensor& samples, const std::vector<std::string>& features, const std::string& className, const int classNumStates);
         Metrics(const std::vector<std::vector<int>>& vsamples, const std::vector<int>& labels, const std::vector<std::string>& features, const std::string& className, const int classNumStates);
         std::vector<int> SelectKBestWeighted(const torch::Tensor& weights, bool ascending = false, unsigned k = 0);
+        std::vector<std::pair<int, int>> SelectKPairs(const torch::Tensor& weights, std::vector<int>& featuresExcluded, bool ascending = false, unsigned k = 0);
         std::vector<double> getScoresKBest() const;
+        std::vector<std::pair<std::pair<int, int>, double>> getScoresKPairs() const;
         double mutualInformation(const torch::Tensor& firstFeature, const torch::Tensor& secondFeature, const torch::Tensor& weights);
         double conditionalMutualInformation(const torch::Tensor& firstFeature, const torch::Tensor& secondFeature, const torch::Tensor& labels, const torch::Tensor& weights);
         torch::Tensor conditionalEdge(const torch::Tensor& weights);
@@ -33,7 +35,7 @@ namespace bayesnet {
         std::vector<std::pair<T, T>> doCombinations(const std::vector<T>& source)
         {
             std::vector<std::pair<T, T>> result;
-            for (int i = 0; i < source.size(); ++i) {
+            for (int i = 0; i < source.size() - 1; ++i) {
                 T temp = source[i];
                 for (int j = i + 1; j < source.size(); ++j) {
                     result.push_back({ temp, source[j] });
@@ -52,6 +54,8 @@ namespace bayesnet {
         int classNumStates = 0;
         std::vector<double> scoresKBest;
         std::vector<int> featuresKBest; // sorted indices of the features
+        std::vector<std::pair<int, int>> pairsKBest; // sorted indices of the pairs
+        std::vector<std::pair<std::pair<int, int>, double>> scoresKPairs;
         double conditionalEntropy(const torch::Tensor& firstFeature, const torch::Tensor& secondFeature, const torch::Tensor& weights);
     };
 }

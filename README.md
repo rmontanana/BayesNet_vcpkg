@@ -7,7 +7,7 @@
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=rmontanana_BayesNet&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=rmontanana_BayesNet)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=rmontanana_BayesNet&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=rmontanana_BayesNet)
 ![Gitea Last Commit](https://img.shields.io/gitea/last-commit/rmontanana/bayesnet?gitea_url=https://gitea.rmontanana.es:3000&logo=gitea)
-[![Coverage Badge](https://img.shields.io/badge/Coverage-99,0%25-green)](html/index.html)
+[![Coverage Badge](https://img.shields.io/badge/Coverage-97,3%25-green)](html/index.html)
 
 Bayesian Network Classifiers using libtorch from scratch
 
@@ -67,9 +67,13 @@ make sample fname=tests/data/glass.arff
 
 #### - SPODE
 
+#### - SPnDE
+
 #### - AODE
 
 #### - [BoostAODE](docs/BoostAODE.md)
+
+#### - BoostA2DE
 
 ### With Local Discretization
 
@@ -81,6 +85,12 @@ make sample fname=tests/data/glass.arff
 
 #### - AODELd
 
+## Documentation
+
+### [Manual](https://rmontanana.github.io/bayesnet/)
+
+### [Coverage report](https://rmontanana.github.io/bayesnet/coverage/index.html)
+
 ## Diagrams
 
 ### UML Class Diagram
@@ -90,7 +100,3 @@ make sample fname=tests/data/glass.arff
 ### Dependency Diagram
 
 ![BayesNet Dependency Diagram](diagrams/dependency.svg)
-
-## Coverage report
-
-### [Coverage report](docs/coverage.pdf)
