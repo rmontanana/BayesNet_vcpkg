@@ -23,7 +23,7 @@ namespace bayesnet {
         std::vector<Node*>& getParents();
         std::vector<Node*>& getChildren();
         torch::Tensor& getCPT();
-        void computeCPT(const torch::Tensor& dataset, const std::vector<std::string>& features, const double laplaceSmoothing, const torch::Tensor& weights);
+        void computeCPT(const torch::Tensor& dataset, const std::vector<std::string>& features, const double smoothing, const torch::Tensor& weights);
         int getNumStates() const;
         void setNumStates(int);
         unsigned minFill();

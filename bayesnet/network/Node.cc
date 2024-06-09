@@ -90,14 +90,14 @@ namespace bayesnet {
         }
         return result;
     }
-    void Node::computeCPT(const torch::Tensor& dataset, const std::vector<std::string>& features, const double laplaceSmoothing, const torch::Tensor& weights)
+    void Node::computeCPT(const torch::Tensor& dataset, const std::vector<std::string>& features, const double smoothing, const torch::Tensor& weights)
     {
         dimensions.clear();
         // Get dimensions of the CPT
         dimensions.push_back(numStates);
         transform(parents.begin(), parents.end(), back_inserter(dimensions), [](const auto& parent) { return parent->getNumStates(); });
         // Create a tensor of zeros with the dimensions of the CPT
-        cpTable = torch::zeros(dimensions, torch::kFloat) + laplaceSmoothing;
+        cpTable = torch::zeros(dimensions, torch::kFloat) + smoothing;
         // Fill table with counts
         auto pos = find(features.begin(), features.end(), name);
         if (pos == features.end()) {
