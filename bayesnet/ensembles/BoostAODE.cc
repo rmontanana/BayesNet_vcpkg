@@ -22,6 +22,7 @@ namespace bayesnet {
         std::vector<int> featuresSelected = featureSelection(weights_);
         for (const int& feature : featuresSelected) {
             std::unique_ptr<Classifier> model = std::make_unique<SPODE>(feature);
+            model->setSmoothing(smoothing);
             model->fit(dataset, features, className, states, weights_);
             models.push_back(std::move(model));
             significanceModels.push_back(1.0); // They will be updated later in trainModel
@@ -89,6 +90,7 @@ namespace bayesnet {
                 featureSelection.erase(featureSelection.begin());
                 std::unique_ptr<Classifier> model;
                 model = std::make_unique<SPODE>(feature);
+                model->setSmoothing(smoothing);
                 model->fit(dataset, features, className, states, weights_);
                 alpha_t = 0.0;
                 if (!block_update) {

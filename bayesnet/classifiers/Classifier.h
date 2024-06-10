@@ -8,7 +8,6 @@
 #define CLASSIFIER_H
 #include <torch/torch.h>
 #include "bayesnet/utils/BayesMetrics.h"
-#include "bayesnet/network/Network.h"
 #include "bayesnet/BaseClassifier.h"
 
 namespace bayesnet {

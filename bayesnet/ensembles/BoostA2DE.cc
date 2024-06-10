@@ -32,6 +32,7 @@ namespace bayesnet {
             for (int j = i + 1; j < featuresSelected.size(); j++) {
                 auto parents = { featuresSelected[i], featuresSelected[j] };
                 std::unique_ptr<Classifier> model = std::make_unique<SPnDE>(parents);
+                model->setSmoothing(smoothing);
                 model->fit(dataset, features, className, states, weights_);
                 models.push_back(std::move(model));
                 significanceModels.push_back(1.0); // They will be updated later in trainModel
@@ -96,6 +97,7 @@ namespace bayesnet {
                 pairSelection.erase(pairSelection.begin());
                 std::unique_ptr<Classifier> model;
                 model = std::make_unique<SPnDE>(std::vector<int>({ feature_pair.first, feature_pair.second }));
+                model->setSmoothing(smoothing);
                 model->fit(dataset, features, className, states, weights_);
                 alpha_t = 0.0;
                 if (!block_update) {

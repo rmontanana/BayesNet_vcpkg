@@ -22,6 +22,7 @@ namespace bayesnet {
         auto n_classes = states.at(className).size();
         metrics = Metrics(dataset, features, className, n_classes);
         model.initialize();
+        model.setSmoothing(smoothing);
         buildModel(weights);
         trainModel(weights);
         fitted = true;

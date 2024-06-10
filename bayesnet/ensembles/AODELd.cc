@@ -37,6 +37,7 @@ namespace bayesnet {
     void AODELd::trainModel(const torch::Tensor& weights)
     {
         for (const auto& model : models) {
+            model->setSmoothing(smoothing);
             model->fit(Xf, y, features, className, states);
         }
     }

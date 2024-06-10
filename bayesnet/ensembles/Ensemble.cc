@@ -18,6 +18,7 @@ namespace bayesnet {
         n_models = models.size();
         for (auto i = 0; i < n_models; ++i) {
             // fit with std::vectors
+            models[i]->setSmoothing(smoothing);
             models[i]->fit(dataset, features, className, states);
         }
     }
