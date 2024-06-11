@@ -54,7 +54,7 @@ TEST_CASE("Test Bayesian Classifiers score & version", "[Models]")
             auto clf = models[name];
             auto discretize = name.substr(name.length() - 2) != "Ld";
             auto raw = RawDatasets(file_name, discretize);
-            clf->fit(raw.Xt, raw.yt, raw.features, raw.className, raw.states);
+            clf->fit(raw.Xt, raw.yt, raw.features, raw.className, raw.states, raw.smoothing);
             auto score = clf->score(raw.Xt, raw.yt);
             INFO("Classifier: " << name << " File: " << file_name);
             REQUIRE(score == Catch::Approx(scores[{file_name, name}]).epsilon(raw.epsilon));
@@ -81,7 +81,7 @@ TEST_CASE("Models features & Graph", "[Models]")
     {
         auto raw = RawDatasets("iris", true);
         auto clf = bayesnet::TAN();
-        clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states);
+        clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing);
         REQUIRE(clf.getNumberOfNodes() == 5);
         REQUIRE(clf.getNumberOfEdges() == 7);
         REQUIRE(clf.getNumberOfStates() == 19);
@@ -93,7 +93,7 @@ TEST_CASE("Models features & Graph", "[Models]")
     {
         auto clf = bayesnet::TANLd();
         auto raw = RawDatasets("iris", false);
-        clf.fit(raw.Xt, raw.yt, raw.features, raw.className, raw.states);
+        clf.fit(raw.Xt, raw.yt, raw.features, raw.className, raw.states, raw.smoothing);
         REQUIRE(clf.getNumberOfNodes() == 5);
         REQUIRE(clf.getNumberOfEdges() == 7);
         REQUIRE(clf.getNumberOfStates() == 19);
@@ -106,7 +106,7 @@ TEST_CASE("Get num features & num edges", "[Models]")
 {
     auto raw = RawDatasets("iris", true);
     auto clf = bayesnet::KDB(2);
-    clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states);
+    clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing);
     REQUIRE(clf.getNumberOfNodes() == 5);
     REQUIRE(clf.getNumberOfEdges() == 8);
 }
@@ -166,7 +166,7 @@ TEST_CASE("Model predict_proba", "[Models]")
     SECTION("Test " + model + " predict_proba")
     {
         auto clf = models[model];
-        clf->fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states);
+        clf->fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing);
         auto y_pred_proba = clf->predict_proba(raw.Xv);
         auto yt_pred_proba = clf->predict_proba(raw.Xt);
         auto y_pred = clf->predict(raw.Xv);
@@ -203,7 +203,7 @@ TEST_CASE("AODE voting-proba", "[Models]")
 {
     auto raw = RawDatasets("glass", true);
     auto clf = bayesnet::AODE(false);
-    clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states);
+    clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing);
     auto score_proba = clf.score(raw.Xv, raw.yv);
     auto pred_proba = clf.predict_proba(raw.Xv);
     clf.setHyperparameters({
@@ -222,9 +222,9 @@ TEST_CASE("SPODELd dataset", "[Models]")
     auto raw = RawDatasets("iris", false);
     auto clf = bayesnet::SPODELd(0);
     // raw.dataset.to(torch::kFloat32);
-    clf.fit(raw.dataset, raw.features, raw.className, raw.states);
+    clf.fit(raw.dataset, raw.features, raw.className, raw.states, raw.smoothing);
     auto score = clf.score(raw.Xt, raw.yt);
-    clf.fit(raw.Xt, raw.yt, raw.features, raw.className, raw.states);
+    clf.fit(raw.Xt, raw.yt, raw.features, raw.className, raw.states, raw.smoothing);
     auto scoret = clf.score(raw.Xt, raw.yt);
     REQUIRE(score == Catch::Approx(0.97333f).epsilon(raw.epsilon));
     REQUIRE(scoret == Catch::Approx(0.97333f).epsilon(raw.epsilon));
@@ -233,13 +233,13 @@ TEST_CASE("KDB with hyperparameters", "[Models]")
 {
     auto raw = RawDatasets("glass", true);
     auto clf = bayesnet::KDB(2);
-    clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states);
+    clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing);
     auto score = clf.score(raw.Xv, raw.yv);
     clf.setHyperparameters({
         {"k", 3},
         {"theta", 0.7},
         });
-    clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states);
+    clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing);
     auto scoret = clf.score(raw.Xv, raw.yv);
     REQUIRE(score == Catch::Approx(0.827103).epsilon(raw.epsilon));
     REQUIRE(scoret == Catch::Approx(0.761682).epsilon(raw.epsilon));
@@ -248,7 +248,7 @@ TEST_CASE("Incorrect type of data for SPODELd", "[Models]")
 {
     auto raw = RawDatasets("iris", true);
     auto clf = bayesnet::SPODELd(0);
-    REQUIRE_THROWS_AS(clf.fit(raw.dataset, raw.features, raw.className, raw.states), std::runtime_error);
+    REQUIRE_THROWS_AS(clf.fit(raw.dataset, raw.features, raw.className, raw.states, raw.smoothing), std::runtime_error);
 }
 TEST_CASE("Predict, predict_proba & score without fitting", "[Models]")
 {

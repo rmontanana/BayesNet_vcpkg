@@ -10,7 +10,7 @@ namespace bayesnet {
     AODELd::AODELd(bool predict_voting) : Ensemble(predict_voting), Proposal(dataset, features, className)
     {
     }
-    AODELd& AODELd::fit(torch::Tensor& X_, torch::Tensor& y_, const std::vector<std::string>& features_, const std::string& className_, map<std::string, std::vector<int>>& states_)
+    AODELd& AODELd::fit(torch::Tensor& X_, torch::Tensor& y_, const std::vector<std::string>& features_, const std::string& className_, map<std::string, std::vector<int>>& states_, const Smoothing_t smoothing)
     {
         checkInput(X_, y_);
         features = features_;
@@ -21,7 +21,7 @@ namespace bayesnet {
         states = fit_local_discretization(y);
         // We have discretized the input data
         // 1st we need to fit the model to build the normal TAN structure, TAN::fit initializes the base Bayesian network
-        Ensemble::fit(dataset, features, className, states);
+        Ensemble::fit(dataset, features, className, states, smoothing);
         return *this;
 
     }
@@ -34,11 +34,10 @@ namespace bayesnet {
         n_models = models.size();
         significanceModels = std::vector<double>(n_models, 1.0);
     }
-    void AODELd::trainModel(const torch::Tensor& weights)
+    void AODELd::trainModel(const torch::Tensor& weights, const Smoothing_t smoothing)
     {
         for (const auto& model : models) {
-            model->setSmoothing(smoothing);
-            model->fit(Xf, y, features, className, states);
+            model->fit(Xf, y, features, className, states, smoothing);
         }
     }
     std::vector<std::string> AODELd::graph(const std::string& name) const

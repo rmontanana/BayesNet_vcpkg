@@ -16,14 +16,13 @@ namespace bayesnet {
     BoostAODE::BoostAODE(bool predict_voting) : Boost(predict_voting)
     {
     }
-    std::vector<int> BoostAODE::initializeModels()
+    std::vector<int> BoostAODE::initializeModels(const Smoothing_t smoothing)
     {
         torch::Tensor weights_ = torch::full({ m }, 1.0 / m, torch::kFloat64);
         std::vector<int> featuresSelected = featureSelection(weights_);
         for (const int& feature : featuresSelected) {
             std::unique_ptr<Classifier> model = std::make_unique<SPODE>(feature);
-            model->setSmoothing(smoothing);
-            model->fit(dataset, features, className, states, weights_);
+            model->fit(dataset, features, className, states, weights_, smoothing);
             models.push_back(std::move(model));
             significanceModels.push_back(1.0); // They will be updated later in trainModel
             n_models++;
@@ -31,7 +30,7 @@ namespace bayesnet {
         notes.push_back("Used features in initialization: " + std::to_string(featuresSelected.size()) + " of " + std::to_string(features.size()) + " with " + select_features_algorithm);
         return featuresSelected;
     }
-    void BoostAODE::trainModel(const torch::Tensor& weights)
+    void BoostAODE::trainModel(const torch::Tensor& weights, const Smoothing_t smoothing)
     {
         //
         // Logging setup
@@ -48,7 +47,7 @@ namespace bayesnet {
         bool finished = false;
         std::vector<int> featuresUsed;
         if (selectFeatures) {
-            featuresUsed = initializeModels();
+            featuresUsed = initializeModels(smoothing);
             auto ypred = predict(X_train);
             std::tie(weights_, alpha_t, finished) = update_weights(y_train, ypred, weights_);
             // Update significance of the models
@@ -90,8 +89,7 @@ namespace bayesnet {
                 featureSelection.erase(featureSelection.begin());
                 std::unique_ptr<Classifier> model;
                 model = std::make_unique<SPODE>(feature);
-                model->setSmoothing(smoothing);
-                model->fit(dataset, features, className, states, weights_);
+                model->fit(dataset, features, className, states, weights_, smoothing);
                 alpha_t = 0.0;
                 if (!block_update) {
                     auto ypred = model->predict(X_train);

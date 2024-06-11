@@ -17,7 +17,7 @@ TEST_CASE("Build basic model", "[BoostA2DE]")
 {
     auto raw = RawDatasets("diabetes", true);
     auto clf = bayesnet::BoostA2DE();
-    clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states);
+    clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing);
     REQUIRE(clf.getNumberOfNodes() == 342);
     REQUIRE(clf.getNumberOfEdges() == 684);
     REQUIRE(clf.getNotes().size() == 3);
@@ -32,7 +32,7 @@ TEST_CASE("Build basic model", "[BoostA2DE]")
 //     auto raw = RawDatasets("glass", true);
 //     auto clf = bayesnet::BoostAODE();
 //     clf.setHyperparameters({ {"select_features", "IWSS"}, {"threshold", 0.5 } });
-//     clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states);
+//     clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing);
 //     REQUIRE(clf.getNumberOfNodes() == 90);
 //     REQUIRE(clf.getNumberOfEdges() == 153);
 //     REQUIRE(clf.getNotes().size() == 2);
@@ -44,7 +44,7 @@ TEST_CASE("Build basic model", "[BoostA2DE]")
 //     auto raw = RawDatasets("glass", true);
 //     auto clf = bayesnet::BoostAODE();
 //     clf.setHyperparameters({ {"select_features", "FCBF"}, {"threshold", 1e-7 } });
-//     clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states);
+//     clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing);
 //     REQUIRE(clf.getNumberOfNodes() == 90);
 //     REQUIRE(clf.getNumberOfEdges() == 153);
 //     REQUIRE(clf.getNotes().size() == 2);
@@ -60,7 +60,7 @@ TEST_CASE("Build basic model", "[BoostA2DE]")
 //         {"convergence", true},
 //         {"select_features","CFS"},
 //         });
-//     clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states);
+//     clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing);
 //     REQUIRE(clf.getNumberOfNodes() == 72);
 //     REQUIRE(clf.getNumberOfEdges() == 120);
 //     REQUIRE(clf.getNotes().size() == 2);
@@ -75,7 +75,7 @@ TEST_CASE("Build basic model", "[BoostA2DE]")
 // {
 //     auto raw = RawDatasets("iris", true);
 //     auto clf = bayesnet::BoostAODE(false);
-//     clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states);
+//     clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing);
 //     auto score_proba = clf.score(raw.Xv, raw.yv);
 //     auto pred_proba = clf.predict_proba(raw.Xv);
 //     clf.setHyperparameters({
@@ -104,7 +104,7 @@ TEST_CASE("Build basic model", "[BoostA2DE]")
 //             {"maxTolerance", 1},
 //             {"convergence", false},
 //             });
-//         clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states);
+//         clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing);
 //         auto score = clf.score(raw.Xv, raw.yv);
 //         auto scoret = clf.score(raw.Xt, raw.yt);
 //         INFO("BoostAODE order: " + order);
@@ -136,7 +136,7 @@ TEST_CASE("Build basic model", "[BoostA2DE]")
 //     for (const auto& hyper : bad_hyper_fit.items()) {
 //         INFO("BoostAODE hyper: " + hyper.value().dump());
 //         clf.setHyperparameters(hyper.value());
-//         REQUIRE_THROWS_AS(clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states), std::invalid_argument);
+//         REQUIRE_THROWS_AS(clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing, std::invalid_argument);
 //     }
 // }
 
@@ -151,7 +151,7 @@ TEST_CASE("Build basic model", "[BoostA2DE]")
 //         {"block_update", false},
 //         {"convergence_best", false},
 //         });
-//     clf.fit(raw.X_train, raw.y_train, raw.features, raw.className, raw.states);
+//     clf.fit(raw.X_train, raw.y_train, raw.features, raw.className, raw.states, raw.smoothing);
 //     REQUIRE(clf.getNumberOfNodes() == 210);
 //     REQUIRE(clf.getNumberOfEdges() == 378);
 //     REQUIRE(clf.getNotes().size() == 1);
@@ -172,13 +172,13 @@ TEST_CASE("Build basic model", "[BoostA2DE]")
 //         {"convergence_best", true},
 //     };
 //     clf.setHyperparameters(hyperparameters);
-//     clf.fit(raw.X_train, raw.y_train, raw.features, raw.className, raw.states);
+//     clf.fit(raw.X_train, raw.y_train, raw.features, raw.className, raw.states, raw.smoothing);
 //     auto score_best = clf.score(raw.X_test, raw.y_test);
 //     REQUIRE(score_best == Catch::Approx(0.980000019f).epsilon(raw.epsilon));
 //     // Now we will set the hyperparameter to use the last accuracy
 //     hyperparameters["convergence_best"] = false;
 //     clf.setHyperparameters(hyperparameters);
-//     clf.fit(raw.X_train, raw.y_train, raw.features, raw.className, raw.states);
+//     clf.fit(raw.X_train, raw.y_train, raw.features, raw.className, raw.states, raw.smoothing);
 //     auto score_last = clf.score(raw.X_test, raw.y_test);
 //     REQUIRE(score_last == Catch::Approx(0.976666689f).epsilon(raw.epsilon));
 // }
@@ -193,7 +193,7 @@ TEST_CASE("Build basic model", "[BoostA2DE]")
 //         {"maxTolerance", 3},
 //         {"convergence", true},
 //         });
-//     clf.fit(raw.X_train, raw.y_train, raw.features, raw.className, raw.states);
+//     clf.fit(raw.X_train, raw.y_train, raw.features, raw.className, raw.states, raw.smoothing);
 //     REQUIRE(clf.getNumberOfNodes() == 868);
 //     REQUIRE(clf.getNumberOfEdges() == 1724);
 //     REQUIRE(clf.getNotes().size() == 3);

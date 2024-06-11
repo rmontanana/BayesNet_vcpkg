@@ -19,7 +19,7 @@ namespace bayesnet {
     BoostA2DE::BoostA2DE(bool predict_voting) : Boost(predict_voting)
     {
     }
-    std::vector<int> BoostA2DE::initializeModels()
+    std::vector<int> BoostA2DE::initializeModels(const Smoothing_t smoothing)
     {
         torch::Tensor weights_ = torch::full({ m }, 1.0 / m, torch::kFloat64);
         std::vector<int> featuresSelected = featureSelection(weights_);
@@ -32,8 +32,7 @@ namespace bayesnet {
             for (int j = i + 1; j < featuresSelected.size(); j++) {
                 auto parents = { featuresSelected[i], featuresSelected[j] };
                 std::unique_ptr<Classifier> model = std::make_unique<SPnDE>(parents);
-                model->setSmoothing(smoothing);
-                model->fit(dataset, features, className, states, weights_);
+                model->fit(dataset, features, className, states, weights_, smoothing);
                 models.push_back(std::move(model));
                 significanceModels.push_back(1.0); // They will be updated later in trainModel
                 n_models++;
@@ -42,7 +41,7 @@ namespace bayesnet {
         notes.push_back("Used features in initialization: " + std::to_string(featuresSelected.size()) + " of " + std::to_string(features.size()) + " with " + select_features_algorithm);
         return featuresSelected;
     }
-    void BoostA2DE::trainModel(const torch::Tensor& weights)
+    void BoostA2DE::trainModel(const torch::Tensor& weights, const Smoothing_t smoothing)
     {
         //
         // Logging setup
@@ -59,7 +58,7 @@ namespace bayesnet {
         bool finished = false;
         std::vector<int> featuresUsed;
         if (selectFeatures) {
-            featuresUsed = initializeModels();
+            featuresUsed = initializeModels(smoothing);
             auto ypred = predict(X_train);
             std::tie(weights_, alpha_t, finished) = update_weights(y_train, ypred, weights_);
             // Update significance of the models
@@ -97,8 +96,7 @@ namespace bayesnet {
                 pairSelection.erase(pairSelection.begin());
                 std::unique_ptr<Classifier> model;
                 model = std::make_unique<SPnDE>(std::vector<int>({ feature_pair.first, feature_pair.second }));
-                model->setSmoothing(smoothing);
-                model->fit(dataset, features, className, states, weights_);
+                model->fit(dataset, features, className, states, weights_, smoothing);
                 alpha_t = 0.0;
                 if (!block_update) {
                     auto ypred = model->predict(X_train);

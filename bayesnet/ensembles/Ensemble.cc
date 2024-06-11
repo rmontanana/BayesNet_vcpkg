@@ -13,13 +13,12 @@ namespace bayesnet {
 
     };
     const std::string ENSEMBLE_NOT_FITTED = "Ensemble has not been fitted";
-    void Ensemble::trainModel(const torch::Tensor& weights)
+    void Ensemble::trainModel(const torch::Tensor& weights, const Smoothing_t smoothing)
     {
         n_models = models.size();
         for (auto i = 0; i < n_models; ++i) {
             // fit with std::vectors
-            models[i]->setSmoothing(smoothing);
-            models[i]->fit(dataset, features, className, states);
+            models[i]->fit(dataset, features, className, states, smoothing);
         }
     }
     std::vector<int> Ensemble::compute_arg_max(std::vector<std::vector<double>>& X)

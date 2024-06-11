@@ -15,10 +15,10 @@ namespace bayesnet {
     public:
         Classifier(Network model);
         virtual ~Classifier() = default;
-        Classifier& fit(std::vector<std::vector<int>>& X, std::vector<int>& y, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states) override;
-        Classifier& fit(torch::Tensor& X, torch::Tensor& y, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states) override;
-        Classifier& fit(torch::Tensor& dataset, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states) override;
-        Classifier& fit(torch::Tensor& dataset, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights) override;
+        Classifier& fit(std::vector<std::vector<int>>& X, std::vector<int>& y, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const Smoothing_t smoothing) override;
+        Classifier& fit(torch::Tensor& X, torch::Tensor& y, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const Smoothing_t smoothing) override;
+        Classifier& fit(torch::Tensor& dataset, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const Smoothing_t smoothing) override;
+        Classifier& fit(torch::Tensor& dataset, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights, const Smoothing_t smoothing) override;
         void addNodes();
         int getNumberOfNodes() const override;
         int getNumberOfEdges() const override;
@@ -50,10 +50,10 @@ namespace bayesnet {
         std::vector<std::string> notes; // Used to store messages occurred during the fit process
         void checkFitParameters();
         virtual void buildModel(const torch::Tensor& weights) = 0;
-        void trainModel(const torch::Tensor& weights) override;
+        void trainModel(const torch::Tensor& weights, const Smoothing_t smoothing) override;
         void buildDataset(torch::Tensor& y);
     private:
-        Classifier& build(const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights);
+        Classifier& build(const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights, const Smoothing_t smoothing);
     };
 }
 #endif

@@ -11,14 +11,14 @@
 #include "Network.h"
 #include "bayesnet/utils/bayesnetUtils.h"
 namespace bayesnet {
-    Network::Network() : fitted{ false }, maxThreads{ 0.95 }, classNumStates{ 0 }, smoothing{ Smoothing_t::LAPLACE }
+    Network::Network() : fitted{ false }, maxThreads{ 0.95 }, classNumStates{ 0 }
     {
     }
-    Network::Network(float maxT) : fitted{ false }, maxThreads{ maxT }, classNumStates{ 0 }, smoothing{ Smoothing_t::LAPLACE }
+    Network::Network(float maxT) : fitted{ false }, maxThreads{ maxT }, classNumStates{ 0 }
     {
 
     }
-    Network::Network(const Network& other) : smoothing(other.smoothing), features(other.features), className(other.className), classNumStates(other.getClassNumStates()),
+    Network::Network(const Network& other) : features(other.features), className(other.className), classNumStates(other.getClassNumStates()),
         maxThreads(other.getMaxThreads()), fitted(other.fitted), samples(other.samples)
     {
         if (samples.defined())
@@ -156,7 +156,7 @@ namespace bayesnet {
         classNumStates = nodes.at(className)->getNumStates();
     }
     // X comes in nxm, where n is the number of features and m the number of samples
-    void Network::fit(const torch::Tensor& X, const torch::Tensor& y, const torch::Tensor& weights, const std::vector<std::string>& featureNames, const std::string& className, const std::map<std::string, std::vector<int>>& states)
+    void Network::fit(const torch::Tensor& X, const torch::Tensor& y, const torch::Tensor& weights, const std::vector<std::string>& featureNames, const std::string& className, const std::map<std::string, std::vector<int>>& states, const Smoothing_t smoothing)
     {
         checkFitData(X.size(1), X.size(0), y.size(0), featureNames, className, states, weights);
         this->className = className;
@@ -165,17 +165,17 @@ namespace bayesnet {
         for (int i = 0; i < featureNames.size(); ++i) {
             auto row_feature = X.index({ i, "..." });
         }
-        completeFit(states, weights);
+        completeFit(states, weights, smoothing);
     }
-    void Network::fit(const torch::Tensor& samples, const torch::Tensor& weights, const std::vector<std::string>& featureNames, const std::string& className, const std::map<std::string, std::vector<int>>& states)
+    void Network::fit(const torch::Tensor& samples, const torch::Tensor& weights, const std::vector<std::string>& featureNames, const std::string& className, const std::map<std::string, std::vector<int>>& states, const Smoothing_t smoothing)
     {
         checkFitData(samples.size(1), samples.size(0) - 1, samples.size(1), featureNames, className, states, weights);
         this->className = className;
         this->samples = samples;
-        completeFit(states, weights);
+        completeFit(states, weights, smoothing);
     }
     // input_data comes in nxm, where n is the number of features and m the number of samples
-    void Network::fit(const std::vector<std::vector<int>>& input_data, const std::vector<int>& labels, const std::vector<double>& weights_, const std::vector<std::string>& featureNames, const std::string& className, const std::map<std::string, std::vector<int>>& states)
+    void Network::fit(const std::vector<std::vector<int>>& input_data, const std::vector<int>& labels, const std::vector<double>& weights_, const std::vector<std::string>& featureNames, const std::string& className, const std::map<std::string, std::vector<int>>& states, const Smoothing_t smoothing)
     {
         const torch::Tensor weights = torch::tensor(weights_, torch::kFloat64);
         checkFitData(input_data[0].size(), input_data.size(), labels.size(), featureNames, className, states, weights);
@@ -186,15 +186,15 @@ namespace bayesnet {
             samples.index_put_({ i, "..." }, torch::tensor(input_data[i], torch::kInt32));
         }
         samples.index_put_({ -1, "..." }, torch::tensor(labels, torch::kInt32));
-        completeFit(states, weights);
+        completeFit(states, weights, smoothing);
     }
-    void Network::completeFit(const std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights)
+    void Network::completeFit(const std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights, const Smoothing_t smoothing)
     {
         setStates(states);
         std::vector<std::thread> threads;
         const double n_samples = static_cast<double>(samples.size(1));
         for (auto& node : nodes) {
-            threads.emplace_back([this, &node, &weights, n_samples]() {
+            threads.emplace_back([this, &node, &weights, n_samples, smoothing]() {
                 double numStates = static_cast<double>(node.second->getNumStates());
                 double smoothing_factor = 0.0;
                 switch (smoothing) {

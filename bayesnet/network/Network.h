@@ -38,10 +38,9 @@ namespace bayesnet {
         /*
         Notice: Nodes have to be inserted in the same order as they are in the dataset, i.e., first node is first column and so on.
         */
-        void setSmoothing(Smoothing_t smoothing) { this->smoothing = smoothing; };
-        void fit(const std::vector<std::vector<int>>& input_data, const std::vector<int>& labels, const std::vector<double>& weights, const std::vector<std::string>& featureNames, const std::string& className, const std::map<std::string, std::vector<int>>& states);
-        void fit(const torch::Tensor& X, const torch::Tensor& y, const torch::Tensor& weights, const std::vector<std::string>& featureNames, const std::string& className, const std::map<std::string, std::vector<int>>& states);
-        void fit(const torch::Tensor& samples, const torch::Tensor& weights, const std::vector<std::string>& featureNames, const std::string& className, const std::map<std::string, std::vector<int>>& states);
+        void fit(const std::vector<std::vector<int>>& input_data, const std::vector<int>& labels, const std::vector<double>& weights, const std::vector<std::string>& featureNames, const std::string& className, const std::map<std::string, std::vector<int>>& states, const Smoothing_t smoothing);
+        void fit(const torch::Tensor& X, const torch::Tensor& y, const torch::Tensor& weights, const std::vector<std::string>& featureNames, const std::string& className, const std::map<std::string, std::vector<int>>& states, const Smoothing_t smoothing);
+        void fit(const torch::Tensor& samples, const torch::Tensor& weights, const std::vector<std::string>& featureNames, const std::string& className, const std::map<std::string, std::vector<int>>& states, const Smoothing_t smoothing);
         std::vector<int> predict(const std::vector<std::vector<int>>&); // Return mx1 std::vector of predictions
         torch::Tensor predict(const torch::Tensor&); // Return mx1 tensor of predictions
         torch::Tensor predict_tensor(const torch::Tensor& samples, const bool proba);
@@ -61,14 +60,13 @@ namespace bayesnet {
         int classNumStates;
         std::vector<std::string> features; // Including classname
         std::string className;
-        Smoothing_t smoothing;
         torch::Tensor samples; // n+1xm tensor used to fit the model
         bool isCyclic(const std::string&, std::unordered_set<std::string>&, std::unordered_set<std::string>&);
         std::vector<double> predict_sample(const std::vector<int>&);
         std::vector<double> predict_sample(const torch::Tensor&);
         std::vector<double> exactInference(std::map<std::string, int>&);
         double computeFactor(std::map<std::string, int>&);
-        void completeFit(const std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights);
+        void completeFit(const std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights, const Smoothing_t smoothing);
         void checkFitData(int n_samples, int n_features, int n_samples_y, const std::vector<std::string>& featureNames, const std::string& className, const std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights);
         void setStates(const std::map<std::string, std::vector<int>>&);
     };
