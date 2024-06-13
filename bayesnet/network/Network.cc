@@ -204,8 +204,8 @@ namespace bayesnet {
                     case Smoothing_t::LAPLACE:
                         smoothing_factor = 1.0;
                         break;
-                    case Smoothing_t::CESTNIK:
-                        smoothing_factor = n_samples / numStates;
+                    case Smoothing_t::CESTNIK: // Considering m=1 pa = 1/numStates
+                        smoothing_factor = 1 / numStates;
                         break;
                     default:
                         throw std::invalid_argument("Smoothing method not recognized " + std::to_string(static_cast<int>(smoothing)));
