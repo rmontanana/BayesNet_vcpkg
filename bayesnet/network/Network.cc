@@ -198,7 +198,7 @@ namespace bayesnet {
                 double numStates = static_cast<double>(node.second->getNumStates());
                 double smoothing_factor = 0.0;
                 switch (smoothing) {
-                    case Smoothing_t::OLD_LAPLACE:
+                    case Smoothing_t::ORIGINAL:
                         smoothing_factor = 1.0 / n_samples;
                         break;
                     case Smoothing_t::LAPLACE:

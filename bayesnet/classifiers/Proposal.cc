@@ -70,7 +70,7 @@ namespace bayesnet {
                 states[pFeatures[index]] = xStates;
             }
             const torch::Tensor weights = torch::full({ pDataset.size(1) }, 1.0 / pDataset.size(1), torch::kDouble);
-            model.fit(pDataset, weights, pFeatures, pClassName, states, Smoothing_t::OLD_LAPLACE);
+            model.fit(pDataset, weights, pFeatures, pClassName, states, Smoothing_t::ORIGINAL);
         }
         return states;
     }

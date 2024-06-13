@@ -14,7 +14,7 @@
 namespace bayesnet {
     enum class Smoothing_t {
         NONE = -1,
-        OLD_LAPLACE = 0,
+        ORIGINAL = 0,
         LAPLACE,
         CESTNIK
     };
