@@ -5,29 +5,25 @@
 // ***************************************************************
 
 #include <thread>
-#include <mutex>
-#include <semaphore>
 #include <sstream>
 #include <numeric>
+#include <algorithm>
+#include "CountingSemaphore.h"
 #include "Network.h"
 #include "bayesnet/utils/bayesnetUtils.h"
 namespace bayesnet {
     Network::Network() : fitted{ false }, maxThreads{ 0.95 }, classNumStates{ 0 }
     {
-        maxThreadsRunning = static_cast<int>(std::thread::hardware_concurrency() * maxThreads);
-        if (maxThreadsRunning < 1) {
-            maxThreadsRunning = 1;
-        }
+        maxThreadsRunning = std::max(1, static_cast<int>(std::thread::hardware_concurrency() * maxThreads));
+        maxThreadsRunning = std::min(maxThreadsRunning, static_cast<int>(std::thread::hardware_concurrency()));
     }
     Network::Network(float maxT) : fitted{ false }, maxThreads{ maxT }, classNumStates{ 0 }
     {
-        maxThreadsRunning = static_cast<int>(std::thread::hardware_concurrency() * maxThreads);
-        if (maxThreadsRunning < 1 || maxT > 1) {
-            maxThreadsRunning = 1;
-        }
+        maxThreadsRunning = std::max(1, static_cast<int>(std::thread::hardware_concurrency() * maxThreads));
+        maxThreadsRunning = std::min(maxThreadsRunning, static_cast<int>(std::thread::hardware_concurrency()));
     }
     Network::Network(const Network& other) : features(other.features), className(other.className), classNumStates(other.getClassNumStates()),
-        maxThreads(other.getMaxThreads()), fitted(other.fitted), samples(other.samples)
+        maxThreads(other.getMaxThreads()), fitted(other.fitted), samples(other.samples), maxThreadsRunning(other.maxThreadsRunning)
     {
         if (samples.defined())
             samples = samples.clone();
@@ -200,21 +196,12 @@ namespace bayesnet {
     {
         setStates(states);
         std::vector<std::thread> threads;
-        std::mutex mtx;
-        std::condition_variable cv;
-        size_t activeThreads = 0;
+        CountingSemaphore semaphore(maxThreadsRunning);
         const double n_samples = static_cast<double>(samples.size(1));
-
         auto worker = [&](std::pair<const std::string, std::unique_ptr<Node>>& node) {
-            {
-                std::unique_lock<std::mutex> lock(mtx);
-                cv.wait(lock, [&] { return activeThreads < maxThreadsRunning; });
-                ++activeThreads;
-            }
-
+            semaphore.acquire();
             double numStates = static_cast<double>(node.second->getNumStates());
             double smoothing_factor = 0.0;
-
             switch (smoothing) {
                 case Smoothing_t::ORIGINAL:
                     smoothing_factor = 1.0 / n_samples;
@@ -228,24 +215,15 @@ namespace bayesnet {
                 default:
                     throw std::invalid_argument("Smoothing method not recognized " + std::to_string(static_cast<int>(smoothing)));
             }
-
             node.second->computeCPT(samples, features, smoothing_factor, weights);
-
-            {
-                std::lock_guard<std::mutex> lock(mtx);
-                --activeThreads;
-            }
-            cv.notify_one();
+            semaphore.release();
             };
-
         for (auto& node : nodes) {
             threads.emplace_back(worker, std::ref(node));
         }
-
         for (auto& thread : threads) {
             thread.join();
         }
-
         fitted = true;
     }
     torch::Tensor Network::predict_tensor(const torch::Tensor& samples, const bool proba)
@@ -370,32 +348,21 @@ namespace bayesnet {
         std::vector<double> result(classNumStates, 0.0);
         std::vector<std::thread> threads;
         std::mutex mtx;
-        std::condition_variable cv;
-        size_t activeThreads = 0;
-
+        CountingSemaphore semaphore(maxThreadsRunning);
         auto worker = [&](int i) {
-            {
-                std::unique_lock<std::mutex> lock(mtx);
-                cv.wait(lock, [&] { return activeThreads < maxThreadsRunning; });
-                ++activeThreads;
-            }
-
+            semaphore.acquire();
             auto completeEvidence = std::map<std::string, int>(evidence);
             completeEvidence[getClassName()] = i;
             double factor = computeFactor(completeEvidence);
-
             {
                 std::lock_guard<std::mutex> lock(mtx);
                 result[i] = factor;
-                --activeThreads;
             }
-            cv.notify_one();
+            semaphore.release();
             };
-
         for (int i = 0; i < classNumStates; ++i) {
             threads.emplace_back(worker, i);
         }
-
         for (auto& thread : threads) {
             thread.join();
         }
