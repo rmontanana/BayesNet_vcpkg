@@ -56,8 +56,6 @@ namespace bayesnet {
     private:
         std::map<std::string, std::unique_ptr<Node>> nodes;
         bool fitted;
-        float maxThreads = 0.95; // Coefficient to multiply by the number of threads available
-        int maxThreadsRunning; // Effective max number of threads running
         int classNumStates;
         std::vector<std::string> features; // Including classname
         std::string className;
