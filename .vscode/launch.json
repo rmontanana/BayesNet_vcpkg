@@ -14,11 +14,11 @@
             "type": "lldb",
             "request": "launch",
             "name": "test",
-            "program": "${workspaceFolder}/build_debug/tests/TestBayesNet",
+            "program": "${workspaceFolder}/build_Debug/tests/TestBayesNet",
             "args": [
-                "[Node]"
+                "[Network]"
             ],
-            "cwd": "${workspaceFolder}/build_debug/tests"
+            "cwd": "${workspaceFolder}/build_Debug/tests"
         },
         {
             "name": "(gdb) Launch",
