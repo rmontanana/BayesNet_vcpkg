@@ -8,7 +8,7 @@ find_package(Torch REQUIRED)
 find_library(BayesNet NAMES BayesNet.a libBayesNet.a REQUIRED)
 
 include_directories(
-    lib/Files
+    ../tests/lib/Files
     lib/mdlp
     lib/json/include
     /usr/local/include
