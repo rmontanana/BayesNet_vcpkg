@@ -16,7 +16,7 @@
 #include "TestUtils.h"
 
 std::map<std::string, std::string> modules = {
-    { "mdlp", "1.2.1" },
+    { "mdlp", "1.2.2" },
     { "Folding", "1.1.0" },
     { "json", "3.11" },
     { "ArffFiles", "1.1.0" }
