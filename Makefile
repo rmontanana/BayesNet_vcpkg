@@ -119,7 +119,7 @@ test: ## Run tests (opt="-s") to verbose output the tests, (opt="-c='Test Maximu
 
 coverage: ## Run tests and generate coverage report (build/index.html)
 	@echo ">>> Building tests with coverage..."
-	@which $(lcov) || (echo ">>> Please install lcov"; exit 1)
+	@which $(lcov) || (echo ">>ease install lcov"; exit 1)
 	@if [ ! -f $(f_debug)/tests/coverage.info ] ; then $(MAKE) test ; fi
 	@echo ">>> Building report..."
 	@cd $(f_debug)/tests; \

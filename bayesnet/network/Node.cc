@@ -119,6 +119,7 @@ namespace bayesnet {
             cpTable.index_put_({ coordinates }, cpTable.index({ coordinates }) + weights.index({ n_sample }).item<double>());
         }
         // Normalize the counts
+        // Divide each row by the sum of the row
         cpTable = cpTable / cpTable.sum(0);
     }
     float Node::getFactorValue(std::map<std::string, int>& evidence)

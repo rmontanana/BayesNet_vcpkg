@@ -95,6 +95,12 @@ namespace bayesnet {
         if (nodes.find(child) == nodes.end()) {
             throw std::invalid_argument("Child node " + child + " does not exist");
         }
+        // Check if the edge is already in the graph
+        for (auto& node : nodes[parent]->getChildren()) {
+            if (node->getName() == child) {
+                throw std::invalid_argument("Edge " + parent + " -> " + child + " already exists");
+            }
+        }
         // Temporarily add edge to check for cycles
         nodes[parent]->addChild(nodes[child].get());
         nodes[child]->addParent(nodes[parent].get());

@@ -358,6 +358,9 @@ TEST_CASE("Edges troubles", "[Network]")
     REQUIRE_THROWS_WITH(net.addEdge("A", "C"), "Child node C does not exist");
     REQUIRE_THROWS_AS(net.addEdge("C", "A"), std::invalid_argument);
     REQUIRE_THROWS_WITH(net.addEdge("C", "A"), "Parent node C does not exist");
+    net.addEdge("A", "B");
+    REQUIRE_THROWS_AS(net.addEdge("A", "B"), std::invalid_argument);
+    REQUIRE_THROWS_WITH(net.addEdge("A", "B"), "Edge A -> B already exists");
 }
 TEST_CASE("Dump CPT", "[Network]")
 {
@@ -457,10 +460,9 @@ TEST_CASE("Dump CPT", "[Network]")
     REQUIRE(res == expected);
 }
 
-TEST_CASE("Test Smoothing", "[Network]")
+TEST_CASE("Test Smoothing A", "[Network]")
 {
     /*
-
     Tomando m = 1 Pa = 0.5
     Si estoy calculando P(A | C), con C en{ 0,1,2 } y tengo :
     AC = { 11, 12, 11, 10, 10, 12, 10, 01, 00, 02 }
@@ -522,4 +524,44 @@ TEST_CASE("Test Smoothing", "[Network]")
             REQUIRE(cpt_a_cestnik.index({ i, j }).item<float>() == Catch::Approx(cestnik_a[i][j]).margin(threshold));
         }
     }
+}
+TEST_CASE("Test Smoothing B", "[Network]")
+{
+    auto net = bayesnet::Network();
+    net.addNode("X");
+    net.addNode("Y");
+    net.addNode("Z");
+    net.addNode("C");
+    net.addEdge("C", "X");
+    net.addEdge("C", "Y");
+    net.addEdge("C", "Z");
+    net.addEdge("Y", "Z");
+    std::vector<int> C = { 0, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1 };
+    std::vector<std::vector<int>> Data = {
+        { 0,0,1,1,0,1,0,1,0,1,0,0,0,1,0,1,0,0},
+        { 1,2,0,2,2,2,1,0,0,1,1,1,0,1,2,1,0,2},
+        { 2,1,3,3,2,0,0,1,3,2,1,2,2,3,0,0,1,2}
+    };
+    std::map<std::string, std::vector<int>> states = {
+        { "X", {0, 1} },
+        { "Y", {0, 1, 2} },
+        { "Z", {0, 1, 2, 3} },
+        { "C", {0, 1} }
+    };
+    auto weights = std::vector<double>(C.size(), 1);
+    // Simple
+    std::cout << "LAPLACE\n";
+    net.fit(Data, C, weights, { "X", "Y", "Z" }, "C", states, bayesnet::Smoothing_t::LAPLACE);
+    std::cout << net.dump_cpt();
+    std::cout << "Predict proba of {0, 1, 2} y {1, 2, 3} = " << net.predict_proba({ {0, 1}, {1, 2}, {2, 3} }) << std::endl;
+    std::cout << "ORIGINAL\n";
+    net.fit(Data, C, weights, { "X", "Y", "Z" }, "C", states, bayesnet::Smoothing_t::ORIGINAL);
+    std::cout << net.dump_cpt();
+    std::cout << "Predict proba of {0, 1, 2} y {1, 2, 3} = " << net.predict_proba({ {0, 1}, {1, 2}, {2, 3} }) << std::endl;
+    std::cout << "CESTNIK\n";
+    net.fit(Data, C, weights, { "X", "Y", "Z" }, "C", states, bayesnet::Smoothing_t::CESTNIK);
+    std::cout << net.dump_cpt();
+    std::cout << "Predict proba of {0, 1, 2} y {1, 2, 3} = " << net.predict_proba({ {0, 1}, {1, 2}, {2, 3} }) << std::endl;
+
+
 }
