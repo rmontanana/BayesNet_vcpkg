@@ -104,16 +104,18 @@ namespace bayesnet {
             throw std::logic_error("Feature " + name + " not found in dataset");
         }
         int name_index = pos - features.begin();
+        c10::List<c10::optional<at::Tensor>> coordinates;
         for (int n_sample = 0; n_sample < dataset.size(1); ++n_sample) {
-            c10::List<c10::optional<at::Tensor>> coordinates;
-            coordinates.push_back(dataset.index({ name_index, n_sample }));
+            coordinates.clear();
+            auto sample = dataset.index({ "...", n_sample });
+            coordinates.push_back(sample[name_index]);
             for (auto parent : parents) {
                 pos = find(features.begin(), features.end(), parent->getName());
                 if (pos == features.end()) {
                     throw std::logic_error("Feature parent " + parent->getName() + " not found in dataset");
                 }
                 int parent_index = pos - features.begin();
-                coordinates.push_back(dataset.index({ parent_index, n_sample }));
+                coordinates.push_back(sample[parent_index]);
             }
             // Increment the count of the corresponding coordinate
             cpTable.index_put_({ coordinates }, cpTable.index({ coordinates }) + weights.index({ n_sample }).item<double>());
@@ -134,8 +136,8 @@ namespace bayesnet {
     {
         auto output = std::vector<std::string>();
         auto suffix = name == className ? ", fontcolor=red, fillcolor=lightblue, style=filled " : "";
-        output.push_back(name + " [shape=circle" + suffix + "] \n");
-        transform(children.begin(), children.end(), back_inserter(output), [this](const auto& child) { return name + " -> " + child->getName(); });
+        output.push_back("\"" + name + "\" [shape=circle" + suffix + "] \n");
+        transform(children.begin(), children.end(), back_inserter(output), [this](const auto& child) { return "\"" + name + "\" -> \"" + child->getName() + "\""; });
         return output;
     }
 }

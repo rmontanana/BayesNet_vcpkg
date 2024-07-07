@@ -12,6 +12,7 @@
 #include "bayesnet/utils/bayesnetUtils.h"
 #include "bayesnet/utils/CountingSemaphore.h"
 #include <pthread.h>
+#include <fstream>
 namespace bayesnet {
     Network::Network() : fitted{ false }, classNumStates{ 0 }
     {
@@ -40,6 +41,9 @@ namespace bayesnet {
     }
     void Network::addNode(const std::string& name)
     {
+        if (fitted) {
+            throw std::invalid_argument("Cannot add node to a fitted network. Initialize first.");
+        }
         if (name == "") {
             throw std::invalid_argument("Node name cannot be empty");
         }
@@ -89,6 +93,9 @@ namespace bayesnet {
     }
     void Network::addEdge(const std::string& parent, const std::string& child)
     {
+        if (fitted) {
+            throw std::invalid_argument("Cannot add edge to a fitted network. Initialize first.");
+        }
         if (nodes.find(parent) == nodes.end()) {
             throw std::invalid_argument("Parent node " + parent + " does not exist");
         }
@@ -227,6 +234,16 @@ namespace bayesnet {
         for (auto& thread : threads) {
             thread.join();
         }
+        // std::fstream file;
+        // file.open("cpt.txt", std::fstream::out | std::fstream::app);
+        // file << std::string(80, '*') << std::endl;
+        // for (const auto& item : graph("Test")) {
+        //     file << item << std::endl;
+        // }
+        // file << std::string(80, '-') << std::endl;
+        // file << dump_cpt() << std::endl;
+        // file << std::string(80, '=') << std::endl;
+        // file.close();
         fitted = true;
     }
     torch::Tensor Network::predict_tensor(const torch::Tensor& samples, const bool proba)
