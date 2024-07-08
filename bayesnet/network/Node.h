@@ -28,7 +28,7 @@ namespace bayesnet {
         void setNumStates(int);
         unsigned minFill();
         std::vector<std::string> graph(const std::string& clasName); // Returns a std::vector of std::strings representing the graph in graphviz format
-        float getFactorValue(std::map<std::string, int>&);
+        double getFactorValue(std::map<std::string, int>&);
     private:
         std::string name;
         std::vector<Node*> parents;
