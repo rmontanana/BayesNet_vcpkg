@@ -5,20 +5,20 @@
 // ***************************************************************
 
 #include <thread>
-#include <mutex>
 #include <sstream>
+#include <numeric>
+#include <algorithm>
 #include "Network.h"
 #include "bayesnet/utils/bayesnetUtils.h"
+#include "bayesnet/utils/CountingSemaphore.h"
+#include <pthread.h>
+#include <fstream>
 namespace bayesnet {
-    Network::Network() : fitted{ false }, maxThreads{ 0.95 }, classNumStates{ 0 }, laplaceSmoothing{ 0 }
+    Network::Network() : fitted{ false }, classNumStates{ 0 }
     {
     }
-    Network::Network(float maxT) : fitted{ false }, maxThreads{ maxT }, classNumStates{ 0 }, laplaceSmoothing{ 0 }
-    {
-
-    }
-    Network::Network(const Network& other) : laplaceSmoothing(other.laplaceSmoothing), features(other.features), className(other.className), classNumStates(other.getClassNumStates()),
-        maxThreads(other.getMaxThreads()), fitted(other.fitted), samples(other.samples)
+    Network::Network(const Network& other) : features(other.features), className(other.className), classNumStates(other.getClassNumStates()),
+        fitted(other.fitted), samples(other.samples)
     {
         if (samples.defined())
             samples = samples.clone();
@@ -35,16 +35,15 @@ namespace bayesnet {
         nodes.clear();
         samples = torch::Tensor();
     }
-    float Network::getMaxThreads() const
-    {
-        return maxThreads;
-    }
     torch::Tensor& Network::getSamples()
     {
         return samples;
     }
     void Network::addNode(const std::string& name)
     {
+        if (fitted) {
+            throw std::invalid_argument("Cannot add node to a fitted network. Initialize first.");
+        }
         if (name == "") {
             throw std::invalid_argument("Node name cannot be empty");
         }
@@ -94,11 +93,20 @@ namespace bayesnet {
     }
     void Network::addEdge(const std::string& parent, const std::string& child)
     {
+        if (fitted) {
+            throw std::invalid_argument("Cannot add edge to a fitted network. Initialize first.");
+        }
         if (nodes.find(parent) == nodes.end()) {
             throw std::invalid_argument("Parent node " + parent + " does not exist");
         }
         if (nodes.find(child) == nodes.end()) {
             throw std::invalid_argument("Child node " + child + " does not exist");
+        }
+        // Check if the edge is already in the graph
+        for (auto& node : nodes[parent]->getChildren()) {
+            if (node->getName() == child) {
+                throw std::invalid_argument("Edge " + parent + " -> " + child + " already exists");
+            }
         }
         // Temporarily add edge to check for cycles
         nodes[parent]->addChild(nodes[child].get());
@@ -155,7 +163,7 @@ namespace bayesnet {
         classNumStates = nodes.at(className)->getNumStates();
     }
     // X comes in nxm, where n is the number of features and m the number of samples
-    void Network::fit(const torch::Tensor& X, const torch::Tensor& y, const torch::Tensor& weights, const std::vector<std::string>& featureNames, const std::string& className, const std::map<std::string, std::vector<int>>& states)
+    void Network::fit(const torch::Tensor& X, const torch::Tensor& y, const torch::Tensor& weights, const std::vector<std::string>& featureNames, const std::string& className, const std::map<std::string, std::vector<int>>& states, const Smoothing_t smoothing)
     {
         checkFitData(X.size(1), X.size(0), y.size(0), featureNames, className, states, weights);
         this->className = className;
@@ -164,17 +172,17 @@ namespace bayesnet {
         for (int i = 0; i < featureNames.size(); ++i) {
             auto row_feature = X.index({ i, "..." });
         }
-        completeFit(states, weights);
+        completeFit(states, weights, smoothing);
     }
-    void Network::fit(const torch::Tensor& samples, const torch::Tensor& weights, const std::vector<std::string>& featureNames, const std::string& className, const std::map<std::string, std::vector<int>>& states)
+    void Network::fit(const torch::Tensor& samples, const torch::Tensor& weights, const std::vector<std::string>& featureNames, const std::string& className, const std::map<std::string, std::vector<int>>& states, const Smoothing_t smoothing)
     {
         checkFitData(samples.size(1), samples.size(0) - 1, samples.size(1), featureNames, className, states, weights);
         this->className = className;
         this->samples = samples;
-        completeFit(states, weights);
+        completeFit(states, weights, smoothing);
     }
     // input_data comes in nxm, where n is the number of features and m the number of samples
-    void Network::fit(const std::vector<std::vector<int>>& input_data, const std::vector<int>& labels, const std::vector<double>& weights_, const std::vector<std::string>& featureNames, const std::string& className, const std::map<std::string, std::vector<int>>& states)
+    void Network::fit(const std::vector<std::vector<int>>& input_data, const std::vector<int>& labels, const std::vector<double>& weights_, const std::vector<std::string>& featureNames, const std::string& className, const std::map<std::string, std::vector<int>>& states, const Smoothing_t smoothing)
     {
         const torch::Tensor weights = torch::tensor(weights_, torch::kFloat64);
         checkFitData(input_data[0].size(), input_data.size(), labels.size(), featureNames, className, states, weights);
@@ -185,21 +193,57 @@ namespace bayesnet {
             samples.index_put_({ i, "..." }, torch::tensor(input_data[i], torch::kInt32));
         }
         samples.index_put_({ -1, "..." }, torch::tensor(labels, torch::kInt32));
-        completeFit(states, weights);
+        completeFit(states, weights, smoothing);
     }
-    void Network::completeFit(const std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights)
+    void Network::completeFit(const std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights, const Smoothing_t smoothing)
     {
         setStates(states);
-        laplaceSmoothing = 1.0 / samples.size(1); // To use in CPT computation
         std::vector<std::thread> threads;
+        auto& semaphore = CountingSemaphore::getInstance();
+        const double n_samples = static_cast<double>(samples.size(1));
+        auto worker = [&](std::pair<const std::string, std::unique_ptr<Node>>& node, int i) {
+            std::string threadName = "FitWorker-" + std::to_string(i);
+#if defined(__linux__)
+            pthread_setname_np(pthread_self(), threadName.c_str());
+#else
+            pthread_setname_np(threadName.c_str());
+#endif
+            double numStates = static_cast<double>(node.second->getNumStates());
+            double smoothing_factor = 0.0;
+            switch (smoothing) {
+                case Smoothing_t::ORIGINAL:
+                    smoothing_factor = 1.0 / n_samples;
+                    break;
+                case Smoothing_t::LAPLACE:
+                    smoothing_factor = 1.0;
+                    break;
+                case Smoothing_t::CESTNIK:
+                    smoothing_factor = 1 / numStates;
+                    break;
+                default:
+                    throw std::invalid_argument("Smoothing method not recognized " + std::to_string(static_cast<int>(smoothing)));
+            }
+            node.second->computeCPT(samples, features, smoothing_factor, weights);
+            semaphore.release();
+            };
+        int i = 0;
         for (auto& node : nodes) {
-            threads.emplace_back([this, &node, &weights]() {
-                node.second->computeCPT(samples, features, laplaceSmoothing, weights);
-                });
+            semaphore.acquire();
+            threads.emplace_back(worker, std::ref(node), i++);
         }
         for (auto& thread : threads) {
             thread.join();
         }
+        // std::fstream file;
+        // file.open("cpt.txt", std::fstream::out | std::fstream::app);
+        // file << std::string(80, '*') << std::endl;
+        // for (const auto& item : graph("Test")) {
+        //     file << item << std::endl;
+        // }
+        // file << std::string(80, '-') << std::endl;
+        // file << dump_cpt() << std::endl;
+        // file << std::string(80, '=') << std::endl;
+        // file.close();
         fitted = true;
     }
     torch::Tensor Network::predict_tensor(const torch::Tensor& samples, const bool proba)
@@ -207,14 +251,38 @@ namespace bayesnet {
         if (!fitted) {
             throw std::logic_error("You must call fit() before calling predict()");
         }
+        // Ensure the sample size is equal to the number of features
+        if (samples.size(0) != features.size() - 1) {
+            throw std::invalid_argument("(T) Sample size (" + std::to_string(samples.size(0)) +
+                ") does not match the number of features (" + std::to_string(features.size() - 1) + ")");
+        }
         torch::Tensor result;
+        std::vector<std::thread> threads;
+        std::mutex mtx;
+        auto& semaphore = CountingSemaphore::getInstance();
         result = torch::zeros({ samples.size(1), classNumStates }, torch::kFloat64);
-        for (int i = 0; i < samples.size(1); ++i) {
-            const torch::Tensor sample = samples.index({ "...", i });
+        auto worker = [&](const torch::Tensor& sample, int i) {
+            std::string threadName = "PredictWorker-" + std::to_string(i);
+#if defined(__linux__)
+            pthread_setname_np(pthread_self(), threadName.c_str());
+#else
+            pthread_setname_np(threadName.c_str());
+#endif
             auto psample = predict_sample(sample);
             auto temp = torch::tensor(psample, torch::kFloat64);
-            //            result.index_put_({ i, "..." }, torch::tensor(predict_sample(sample), torch::kFloat64));
-            result.index_put_({ i, "..." }, temp);
+            {
+                std::lock_guard<std::mutex> lock(mtx);
+                result.index_put_({ i, "..." }, temp);
+            }
+            semaphore.release();
+            };
+        for (int i = 0; i < samples.size(1); ++i) {
+            semaphore.acquire();
+            const torch::Tensor sample = samples.index({ "...", i });
+            threads.emplace_back(worker, sample, i);
+        }
+        for (auto& thread : threads) {
+            thread.join();
         }
         if (proba)
             return result;
@@ -239,18 +307,38 @@ namespace bayesnet {
         if (!fitted) {
             throw std::logic_error("You must call fit() before calling predict()");
         }
-        std::vector<int> predictions;
+        // Ensure the sample size is equal to the number of features
+        if (tsamples.size() != features.size() - 1) {
+            throw std::invalid_argument("(V) Sample size (" + std::to_string(tsamples.size()) +
+                ") does not match the number of features (" + std::to_string(features.size() - 1) + ")");
+        }
+        std::vector<int> predictions(tsamples[0].size(), 0);
         std::vector<int> sample;
+        std::vector<std::thread> threads;
+        auto& semaphore = CountingSemaphore::getInstance();
+        auto worker = [&](const std::vector<int>& sample, const int row, int& prediction) {
+            std::string threadName = "(V)PWorker-" + std::to_string(row);
+#if defined(__linux__)
+            pthread_setname_np(pthread_self(), threadName.c_str());
+#else
+            pthread_setname_np(threadName.c_str());
+#endif
+            auto classProbabilities = predict_sample(sample);
+            auto maxElem = max_element(classProbabilities.begin(), classProbabilities.end());
+            int predictedClass = distance(classProbabilities.begin(), maxElem);
+            prediction = predictedClass;
+            semaphore.release();
+            };
         for (int row = 0; row < tsamples[0].size(); ++row) {
             sample.clear();
             for (int col = 0; col < tsamples.size(); ++col) {
                 sample.push_back(tsamples[col][row]);
             }
-            std::vector<double> classProbabilities = predict_sample(sample);
-            // Find the class with the maximum posterior probability
-            auto maxElem = max_element(classProbabilities.begin(), classProbabilities.end());
-            int predictedClass = distance(classProbabilities.begin(), maxElem);
-            predictions.push_back(predictedClass);
+            semaphore.acquire();
+            threads.emplace_back(worker, sample, row, std::ref(predictions[row]));
+        }
+        for (auto& thread : threads) {
+            thread.join();
         }
         return predictions;
     }
@@ -261,14 +349,36 @@ namespace bayesnet {
         if (!fitted) {
             throw std::logic_error("You must call fit() before calling predict_proba()");
         }
-        std::vector<std::vector<double>> predictions;
+        // Ensure the sample size is equal to the number of features
+        if (tsamples.size() != features.size() - 1) {
+            throw std::invalid_argument("(V) Sample size (" + std::to_string(tsamples.size()) +
+                ") does not match the number of features (" + std::to_string(features.size() - 1) + ")");
+        }
+        std::vector<std::vector<double>> predictions(tsamples[0].size(), std::vector<double>(classNumStates, 0.0));
         std::vector<int> sample;
+        std::vector<std::thread> threads;
+        auto& semaphore = CountingSemaphore::getInstance();
+        auto worker = [&](const std::vector<int>& sample, int row, std::vector<double>& predictions) {
+            std::string threadName = "(V)PWorker-" + std::to_string(row);
+#if defined(__linux__)
+            pthread_setname_np(pthread_self(), threadName.c_str());
+#else
+            pthread_setname_np(threadName.c_str());
+#endif
+            std::vector<double> classProbabilities = predict_sample(sample);
+            predictions = classProbabilities;
+            semaphore.release();
+            };
         for (int row = 0; row < tsamples[0].size(); ++row) {
             sample.clear();
             for (int col = 0; col < tsamples.size(); ++col) {
                 sample.push_back(tsamples[col][row]);
             }
-            predictions.push_back(predict_sample(sample));
+            semaphore.acquire();
+            threads.emplace_back(worker, sample, row, std::ref(predictions[row]));
+        }
+        for (auto& thread : threads) {
+            thread.join();
         }
         return predictions;
     }
@@ -286,11 +396,6 @@ namespace bayesnet {
     // Return 1xn std::vector of probabilities
     std::vector<double> Network::predict_sample(const std::vector<int>& sample)
     {
-        // Ensure the sample size is equal to the number of features
-        if (sample.size() != features.size() - 1) {
-            throw std::invalid_argument("Sample size (" + std::to_string(sample.size()) +
-                ") does not match the number of features (" + std::to_string(features.size() - 1) + ")");
-        }
         std::map<std::string, int> evidence;
         for (int i = 0; i < sample.size(); ++i) {
             evidence[features[i]] = sample[i];
@@ -300,44 +405,26 @@ namespace bayesnet {
     // Return 1xn std::vector of probabilities
     std::vector<double> Network::predict_sample(const torch::Tensor& sample)
     {
-        // Ensure the sample size is equal to the number of features
-        if (sample.size(0) != features.size() - 1) {
-            throw std::invalid_argument("Sample size (" + std::to_string(sample.size(0)) +
-                ") does not match the number of features (" + std::to_string(features.size() - 1) + ")");
-        }
         std::map<std::string, int> evidence;
         for (int i = 0; i < sample.size(0); ++i) {
             evidence[features[i]] = sample[i].item<int>();
         }
         return exactInference(evidence);
     }
-    double Network::computeFactor(std::map<std::string, int>& completeEvidence)
-    {
-        double result = 1.0;
-        for (auto& node : getNodes()) {
-            result *= node.second->getFactorValue(completeEvidence);
-        }
-        return result;
-    }
     std::vector<double> Network::exactInference(std::map<std::string, int>& evidence)
     {
         std::vector<double> result(classNumStates, 0.0);
-        std::vector<std::thread> threads;
-        std::mutex mtx;
+        auto completeEvidence = std::map<std::string, int>(evidence);
         for (int i = 0; i < classNumStates; ++i) {
-            threads.emplace_back([this, &result, &evidence, i, &mtx]() {
-                auto completeEvidence = std::map<std::string, int>(evidence);
-                completeEvidence[getClassName()] = i;
-                double factor = computeFactor(completeEvidence);
-                std::lock_guard<std::mutex> lock(mtx);
-                result[i] = factor;
-                });
-        }
-        for (auto& thread : threads) {
-            thread.join();
+            completeEvidence[getClassName()] = i;
+            double partial = 1.0;
+            for (auto& node : getNodes()) {
+                partial *= node.second->getFactorValue(completeEvidence);
+            }
+            result[i] = partial;
         }
         // Normalize result
-        double sum = accumulate(result.begin(), result.end(), 0.0);
+        double sum = std::accumulate(result.begin(), result.end(), 0.0);
         transform(result.begin(), result.end(), result.begin(), [sum](const double& value) { return value / sum; });
         return result;
     }

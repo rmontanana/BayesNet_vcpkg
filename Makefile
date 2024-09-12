@@ -12,7 +12,6 @@ plantuml = plantuml
 lcov = lcov
 genhtml = genhtml
 dot = dot
-n_procs = -j 16
 docsrcdir = docs/manual
 mansrcdir = docs/man3
 mandestdir = /usr/local/share/man
@@ -59,10 +58,10 @@ diagrams: ## Create an UML class diagram & depnendency of the project (diagrams/
 	@$(dot) -Tsvg $(f_debug)/dependency.dot.BayesNet -o $(f_diagrams)/dependency.svg
 
 buildd: ## Build the debug targets
-	cmake --build $(f_debug) -t $(app_targets) $(n_procs)
+	cmake --build $(f_debug) -t $(app_targets) --parallel
 
 buildr: ## Build the release targets
-	cmake --build $(f_release) -t $(app_targets) $(n_procs)
+	cmake --build $(f_release) -t $(app_targets) --parallel
 
 clean: ## Clean the tests info
 	@echo ">>> Cleaning Debug BayesNet tests...";
@@ -106,7 +105,7 @@ opt = ""
 test: ## Run tests (opt="-s") to verbose output the tests, (opt="-c='Test Maximum Spanning Tree'") to run only that section
 	@echo ">>> Running BayesNet tests...";
 	@$(MAKE) clean
-	@cmake --build $(f_debug) -t $(test_targets) $(n_procs)
+	@cmake --build $(f_debug) -t $(test_targets) --parallel
 	@for t in $(test_targets); do \
 		echo ">>> Running $$t...";\
 		if [ -f $(f_debug)/tests/$$t ]; then \
@@ -119,7 +118,7 @@ test: ## Run tests (opt="-s") to verbose output the tests, (opt="-c='Test Maximu
 
 coverage: ## Run tests and generate coverage report (build/index.html)
 	@echo ">>> Building tests with coverage..."
-	@which $(lcov) || (echo ">>> Please install lcov"; exit 1)
+	@which $(lcov) || (echo ">>ease install lcov"; exit 1)
 	@if [ ! -f $(f_debug)/tests/coverage.info ] ; then $(MAKE) test ; fi
 	@echo ">>> Building report..."
 	@cd $(f_debug)/tests; \

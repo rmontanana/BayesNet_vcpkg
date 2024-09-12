@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add tests to check the correct version of the mdlp, folding and json libraries.
 - Library documentation generated with Doxygen.
 - Link to documentation in the README.md.
+- Three types of smoothing the Bayesian Network OLD_LAPLACE, LAPLACE and CESTNIK.
 
 ### Internal
 

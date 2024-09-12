@@ -11,7 +11,7 @@
 namespace bayesnet {
     Classifier::Classifier(Network model) : model(model), m(0), n(0), metrics(Metrics()), fitted(false) {}
     const std::string CLASSIFIER_NOT_FITTED = "Classifier has not been fitted";
-    Classifier& Classifier::build(const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights)
+    Classifier& Classifier::build(const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights, const Smoothing_t smoothing)
     {
         this->features = features;
         this->className = className;
@@ -23,7 +23,7 @@ namespace bayesnet {
         metrics = Metrics(dataset, features, className, n_classes);
         model.initialize();
         buildModel(weights);
-        trainModel(weights);
+        trainModel(weights, smoothing);
         fitted = true;
         return *this;
     }
@@ -41,20 +41,20 @@ namespace bayesnet {
             throw std::runtime_error(oss.str());
         }
     }
-    void Classifier::trainModel(const torch::Tensor& weights)
+    void Classifier::trainModel(const torch::Tensor& weights, Smoothing_t smoothing)
     {
-        model.fit(dataset, weights, features, className, states);
+        model.fit(dataset, weights, features, className, states, smoothing);
     }
     // X is nxm where n is the number of features and m the number of samples
-    Classifier& Classifier::fit(torch::Tensor& X, torch::Tensor& y, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states)
+    Classifier& Classifier::fit(torch::Tensor& X, torch::Tensor& y, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const Smoothing_t smoothing)
     {
         dataset = X;
         buildDataset(y);
         const torch::Tensor weights = torch::full({ dataset.size(1) }, 1.0 / dataset.size(1), torch::kDouble);
-        return build(features, className, states, weights);
+        return build(features, className, states, weights, smoothing);
     }
     // X is nxm where n is the number of features and m the number of samples
-    Classifier& Classifier::fit(std::vector<std::vector<int>>& X, std::vector<int>& y, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states)
+    Classifier& Classifier::fit(std::vector<std::vector<int>>& X, std::vector<int>& y, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const Smoothing_t smoothing)
     {
         dataset = torch::zeros({ static_cast<int>(X.size()), static_cast<int>(X[0].size()) }, torch::kInt32);
         for (int i = 0; i < X.size(); ++i) {
@@ -63,18 +63,18 @@ namespace bayesnet {
         auto ytmp = torch::tensor(y, torch::kInt32);
         buildDataset(ytmp);
         const torch::Tensor weights = torch::full({ dataset.size(1) }, 1.0 / dataset.size(1), torch::kDouble);
-        return build(features, className, states, weights);
+        return build(features, className, states, weights, smoothing);
     }
-    Classifier& Classifier::fit(torch::Tensor& dataset, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states)
+    Classifier& Classifier::fit(torch::Tensor& dataset, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const Smoothing_t smoothing)
     {
         this->dataset = dataset;
         const torch::Tensor weights = torch::full({ dataset.size(1) }, 1.0 / dataset.size(1), torch::kDouble);
-        return build(features, className, states, weights);
+        return build(features, className, states, weights, smoothing);
     }
-    Classifier& Classifier::fit(torch::Tensor& dataset, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights)
+    Classifier& Classifier::fit(torch::Tensor& dataset, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights, const Smoothing_t smoothing)
     {
         this->dataset = dataset;
-        return build(features, className, states, weights);
+        return build(features, className, states, weights, smoothing);
     }
     void Classifier::checkFitParameters()
     {

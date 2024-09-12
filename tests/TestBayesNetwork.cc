@@ -15,6 +15,7 @@
 #include "bayesnet/network/Node.h"
 #include "bayesnet/utils/bayesnetUtils.h"
 
+const double threshold = 1e-4;
 void buildModel(bayesnet::Network& net, const std::vector<std::string>& features, const std::string& className)
 {
     std::vector<pair<int, int>> network = { {0, 1}, {0, 2}, {1, 3} };
@@ -29,13 +30,11 @@ void buildModel(bayesnet::Network& net, const std::vector<std::string>& features
         net.addEdge(className, feature);
     }
 }
-
 TEST_CASE("Test Bayesian Network", "[Network]")
 {
 
     auto raw = RawDatasets("iris", true);
     auto net = bayesnet::Network();
-    double threshold = 1e-4;
 
     SECTION("Test get features")
     {
@@ -115,9 +114,9 @@ TEST_CASE("Test Bayesian Network", "[Network]")
             REQUIRE(children == children3);
         }
         // Fit networks
-        net.fit(raw.Xv, raw.yv, raw.weightsv, raw.features, raw.className, raw.states);
-        net2.fit(raw.dataset, raw.weights, raw.features, raw.className, raw.states);
-        net3.fit(raw.Xt, raw.yt, raw.weights, raw.features, raw.className, raw.states);
+        net.fit(raw.Xv, raw.yv, raw.weightsv, raw.features, raw.className, raw.states, raw.smoothing);
+        net2.fit(raw.dataset, raw.weights, raw.features, raw.className, raw.states, raw.smoothing);
+        net3.fit(raw.Xt, raw.yt, raw.weights, raw.features, raw.className, raw.states, raw.smoothing);
         REQUIRE(net.getStates() == net2.getStates());
         REQUIRE(net.getStates() == net3.getStates());
         REQUIRE(net.getFeatures() == net2.getFeatures());
@@ -150,6 +149,7 @@ TEST_CASE("Test Bayesian Network", "[Network]")
     }
     SECTION("Test show")
     {
+        INFO("Test show");
         net.addNode("A");
         net.addNode("B");
         net.addNode("C");
@@ -163,6 +163,7 @@ TEST_CASE("Test Bayesian Network", "[Network]")
     }
     SECTION("Test topological_sort")
     {
+        INFO("Test topological sort");
         net.addNode("A");
         net.addNode("B");
         net.addNode("C");
@@ -176,6 +177,7 @@ TEST_CASE("Test Bayesian Network", "[Network]")
     }
     SECTION("Test graph")
     {
+        INFO("Test graph");
         net.addNode("A");
         net.addNode("B");
         net.addNode("C");
@@ -193,8 +195,9 @@ TEST_CASE("Test Bayesian Network", "[Network]")
     }
     SECTION("Test predict")
     {
+        INFO("Test predict");
         buildModel(net, raw.features, raw.className);
-        net.fit(raw.Xv, raw.yv, raw.weightsv, raw.features, raw.className, raw.states);
+        net.fit(raw.Xv, raw.yv, raw.weightsv, raw.features, raw.className, raw.states, raw.smoothing);
         std::vector<std::vector<int>> test = { {1, 2, 0, 1, 1}, {0, 1, 2, 0, 1}, {0, 0, 0, 0, 1}, {2, 2, 2, 2, 1} };
         std::vector<int> y_test = { 2, 2, 0, 2, 1 };
         auto y_pred = net.predict(test);
@@ -202,8 +205,9 @@ TEST_CASE("Test Bayesian Network", "[Network]")
     }
     SECTION("Test predict_proba")
     {
+        INFO("Test predict_proba");
         buildModel(net, raw.features, raw.className);
-        net.fit(raw.Xv, raw.yv, raw.weightsv, raw.features, raw.className, raw.states);
+        net.fit(raw.Xv, raw.yv, raw.weightsv, raw.features, raw.className, raw.states, raw.smoothing);
         std::vector<std::vector<int>> test = { {1, 2, 0, 1, 1}, {0, 1, 2, 0, 1}, {0, 0, 0, 0, 1}, {2, 2, 2, 2, 1} };
         std::vector<std::vector<double>> y_test = {
             {0.450237, 0.0866621, 0.463101},
@@ -223,15 +227,17 @@ TEST_CASE("Test Bayesian Network", "[Network]")
     }
     SECTION("Test score")
     {
+        INFO("Test score");
         buildModel(net, raw.features, raw.className);
-        net.fit(raw.Xv, raw.yv, raw.weightsv, raw.features, raw.className, raw.states);
+        net.fit(raw.Xv, raw.yv, raw.weightsv, raw.features, raw.className, raw.states, raw.smoothing);
         auto score = net.score(raw.Xv, raw.yv);
         REQUIRE(score == Catch::Approx(0.97333333).margin(threshold));
     }
     SECTION("Copy constructor")
     {
+        INFO("Test copy constructor");
         buildModel(net, raw.features, raw.className);
-        net.fit(raw.Xv, raw.yv, raw.weightsv, raw.features, raw.className, raw.states);
+        net.fit(raw.Xv, raw.yv, raw.weightsv, raw.features, raw.className, raw.states, raw.smoothing);
         auto net2 = bayesnet::Network(net);
         REQUIRE(net.getFeatures() == net2.getFeatures());
         REQUIRE(net.getEdges() == net2.getEdges());
@@ -253,6 +259,7 @@ TEST_CASE("Test Bayesian Network", "[Network]")
     }
     SECTION("Test oddities")
     {
+        INFO("Test oddities");
         buildModel(net, raw.features, raw.className);
         // predict without fitting
         std::vector<std::vector<int>> test = { {1, 2, 0, 1, 1}, {0, 1, 2, 0, 1}, {0, 0, 0, 0, 1}, {2, 2, 2, 2, 1} };
@@ -268,27 +275,27 @@ TEST_CASE("Test Bayesian Network", "[Network]")
         // predict with wrong data
         auto netx = bayesnet::Network();
         buildModel(netx, raw.features, raw.className);
-        netx.fit(raw.Xv, raw.yv, raw.weightsv, raw.features, raw.className, raw.states);
+        netx.fit(raw.Xv, raw.yv, raw.weightsv, raw.features, raw.className, raw.states, raw.smoothing);
         std::vector<std::vector<int>> test2 = { {1, 2, 0, 1, 1}, {0, 1, 2, 0, 1}, {0, 0, 0, 0, 1} };
         auto test_tensor2 = bayesnet::vectorToTensor(test2, false);
-        REQUIRE_THROWS_AS(netx.predict(test2), std::logic_error);
-        REQUIRE_THROWS_WITH(netx.predict(test2), "Sample size (3) does not match the number of features (4)");
-        REQUIRE_THROWS_AS(netx.predict(test_tensor2), std::logic_error);
-        REQUIRE_THROWS_WITH(netx.predict(test_tensor2), "Sample size (3) does not match the number of features (4)");
+        REQUIRE_THROWS_AS(netx.predict(test2), std::invalid_argument);
+        REQUIRE_THROWS_WITH(netx.predict(test2), "(V) Sample size (3) does not match the number of features (4)");
+        REQUIRE_THROWS_AS(netx.predict(test_tensor2), std::invalid_argument);
+        REQUIRE_THROWS_WITH(netx.predict(test_tensor2), "(T) Sample size (3) does not match the number of features (4)");
         // fit with wrong data
         // Weights
         auto net2 = bayesnet::Network();
-        REQUIRE_THROWS_AS(net2.fit(raw.Xv, raw.yv, std::vector<double>(), raw.features, raw.className, raw.states), std::invalid_argument);
+        REQUIRE_THROWS_AS(net2.fit(raw.Xv, raw.yv, std::vector<double>(), raw.features, raw.className, raw.states, raw.smoothing), std::invalid_argument);
         std::string invalid_weights = "Weights (0) must have the same number of elements as samples (150) in Network::fit";
-        REQUIRE_THROWS_WITH(net2.fit(raw.Xv, raw.yv, std::vector<double>(), raw.features, raw.className, raw.states), invalid_weights);
+        REQUIRE_THROWS_WITH(net2.fit(raw.Xv, raw.yv, std::vector<double>(), raw.features, raw.className, raw.states, raw.smoothing), invalid_weights);
         // X & y
         std::string invalid_labels = "X and y must have the same number of samples in Network::fit (150 != 0)";
-        REQUIRE_THROWS_AS(net2.fit(raw.Xv, std::vector<int>(), raw.weightsv, raw.features, raw.className, raw.states), std::invalid_argument);
-        REQUIRE_THROWS_WITH(net2.fit(raw.Xv, std::vector<int>(), raw.weightsv, raw.features, raw.className, raw.states), invalid_labels);
+        REQUIRE_THROWS_AS(net2.fit(raw.Xv, std::vector<int>(), raw.weightsv, raw.features, raw.className, raw.states, raw.smoothing), std::invalid_argument);
+        REQUIRE_THROWS_WITH(net2.fit(raw.Xv, std::vector<int>(), raw.weightsv, raw.features, raw.className, raw.states, raw.smoothing), invalid_labels);
         // Features
         std::string invalid_features = "X and features must have the same number of features in Network::fit (4 != 0)";
-        REQUIRE_THROWS_AS(net2.fit(raw.Xv, raw.yv, raw.weightsv, std::vector<std::string>(), raw.className, raw.states), std::invalid_argument);
-        REQUIRE_THROWS_WITH(net2.fit(raw.Xv, raw.yv, raw.weightsv, std::vector<std::string>(), raw.className, raw.states), invalid_features);
+        REQUIRE_THROWS_AS(net2.fit(raw.Xv, raw.yv, raw.weightsv, std::vector<std::string>(), raw.className, raw.states, raw.smoothing), std::invalid_argument);
+        REQUIRE_THROWS_WITH(net2.fit(raw.Xv, raw.yv, raw.weightsv, std::vector<std::string>(), raw.className, raw.states, raw.smoothing), invalid_features);
         // Different number of features
         auto net3 = bayesnet::Network();
         auto test2y = { 1, 2, 3, 4, 5 };
@@ -296,23 +303,23 @@ TEST_CASE("Test Bayesian Network", "[Network]")
         auto features3 = raw.features;
         features3.pop_back();
         std::string invalid_features2 = "X and local features must have the same number of features in Network::fit (3 != 4)";
-        REQUIRE_THROWS_AS(net3.fit(test2, test2y, std::vector<double>(5, 0), features3, raw.className, raw.states), std::invalid_argument);
-        REQUIRE_THROWS_WITH(net3.fit(test2, test2y, std::vector<double>(5, 0), features3, raw.className, raw.states), invalid_features2);
+        REQUIRE_THROWS_AS(net3.fit(test2, test2y, std::vector<double>(5, 0), features3, raw.className, raw.states, raw.smoothing), std::invalid_argument);
+        REQUIRE_THROWS_WITH(net3.fit(test2, test2y, std::vector<double>(5, 0), features3, raw.className, raw.states, raw.smoothing), invalid_features2);
         // Uninitialized network
         std::string network_invalid = "The network has not been initialized. You must call addNode() before calling fit()";
-        REQUIRE_THROWS_AS(net2.fit(raw.Xv, raw.yv, raw.weightsv, raw.features, "duck", raw.states), std::invalid_argument);
-        REQUIRE_THROWS_WITH(net2.fit(raw.Xv, raw.yv, raw.weightsv, raw.features, "duck", raw.states), network_invalid);
+        REQUIRE_THROWS_AS(net2.fit(raw.Xv, raw.yv, raw.weightsv, raw.features, "duck", raw.states, raw.smoothing), std::invalid_argument);
+        REQUIRE_THROWS_WITH(net2.fit(raw.Xv, raw.yv, raw.weightsv, raw.features, "duck", raw.states, raw.smoothing), network_invalid);
         // Classname
         std::string invalid_classname = "Class Name not found in Network::features";
-        REQUIRE_THROWS_AS(net.fit(raw.Xv, raw.yv, raw.weightsv, raw.features, "duck", raw.states), std::invalid_argument);
-        REQUIRE_THROWS_WITH(net.fit(raw.Xv, raw.yv, raw.weightsv, raw.features, "duck", raw.states), invalid_classname);
+        REQUIRE_THROWS_AS(net.fit(raw.Xv, raw.yv, raw.weightsv, raw.features, "duck", raw.states, raw.smoothing), std::invalid_argument);
+        REQUIRE_THROWS_WITH(net.fit(raw.Xv, raw.yv, raw.weightsv, raw.features, "duck", raw.states, raw.smoothing), invalid_classname);
         // Invalid feature
         auto features2 = raw.features;
         features2.pop_back();
         features2.push_back("duck");
         std::string invalid_feature = "Feature duck not found in Network::features";
-        REQUIRE_THROWS_AS(net.fit(raw.Xv, raw.yv, raw.weightsv, features2, raw.className, raw.states), std::invalid_argument);
-        REQUIRE_THROWS_WITH(net.fit(raw.Xv, raw.yv, raw.weightsv, features2, raw.className, raw.states), invalid_feature);
+        REQUIRE_THROWS_AS(net.fit(raw.Xv, raw.yv, raw.weightsv, features2, raw.className, raw.states, raw.smoothing), std::invalid_argument);
+        REQUIRE_THROWS_WITH(net.fit(raw.Xv, raw.yv, raw.weightsv, features2, raw.className, raw.states, raw.smoothing), invalid_feature);
         // Add twice the same node name to the network => Nothing should happen
         net.addNode("A");
         net.addNode("A");
@@ -320,8 +327,8 @@ TEST_CASE("Test Bayesian Network", "[Network]")
         auto net4 = bayesnet::Network();
         buildModel(net4, raw.features, raw.className);
         std::string invalid_state = "Feature sepallength not found in states";
-        REQUIRE_THROWS_AS(net4.fit(raw.Xv, raw.yv, raw.weightsv, raw.features, raw.className, std::map<std::string, std::vector<int>>()), std::invalid_argument);
-        REQUIRE_THROWS_WITH(net4.fit(raw.Xv, raw.yv, raw.weightsv, raw.features, raw.className, std::map<std::string, std::vector<int>>()), invalid_state);
+        REQUIRE_THROWS_AS(net4.fit(raw.Xv, raw.yv, raw.weightsv, raw.features, raw.className, std::map<std::string, std::vector<int>>(), raw.smoothing), std::invalid_argument);
+        REQUIRE_THROWS_WITH(net4.fit(raw.Xv, raw.yv, raw.weightsv, raw.features, raw.className, std::map<std::string, std::vector<int>>(), raw.smoothing), invalid_state);
     }
 
 }
@@ -342,15 +349,6 @@ TEST_CASE("Cicle in Network", "[Network]")
     REQUIRE_THROWS_AS(net.addEdge("C", "A"), std::invalid_argument);
     REQUIRE_THROWS_WITH(net.addEdge("C", "A"), "Adding this edge forms a cycle in the graph.");
 }
-TEST_CASE("Test max threads constructor", "[Network]")
-{
-    auto net = bayesnet::Network();
-    REQUIRE(net.getMaxThreads() == 0.95f);
-    auto net2 = bayesnet::Network(4);
-    REQUIRE(net2.getMaxThreads() == 4);
-    auto net3 = bayesnet::Network(1.75);
-    REQUIRE(net3.getMaxThreads() == 1.75);
-}
 TEST_CASE("Edges troubles", "[Network]")
 {
     auto net = bayesnet::Network();
@@ -360,13 +358,16 @@ TEST_CASE("Edges troubles", "[Network]")
     REQUIRE_THROWS_WITH(net.addEdge("A", "C"), "Child node C does not exist");
     REQUIRE_THROWS_AS(net.addEdge("C", "A"), std::invalid_argument);
     REQUIRE_THROWS_WITH(net.addEdge("C", "A"), "Parent node C does not exist");
+    net.addEdge("A", "B");
+    REQUIRE_THROWS_AS(net.addEdge("A", "B"), std::invalid_argument);
+    REQUIRE_THROWS_WITH(net.addEdge("A", "B"), "Edge A -> B already exists");
 }
 TEST_CASE("Dump CPT", "[Network]")
 {
     auto net = bayesnet::Network();
     auto raw = RawDatasets("iris", true);
     buildModel(net, raw.features, raw.className);
-    net.fit(raw.Xv, raw.yv, raw.weightsv, raw.features, raw.className, raw.states);
+    net.fit(raw.Xv, raw.yv, raw.weightsv, raw.features, raw.className, raw.states, raw.smoothing);
     auto res = net.dump_cpt();
     std::string expected = R"(* class: (3) : [3]
  0.3333
@@ -459,3 +460,108 @@ TEST_CASE("Dump CPT", "[Network]")
     REQUIRE(res == expected);
 }
 
+TEST_CASE("Test Smoothing A", "[Network]")
+{
+    /*
+    Tomando m = 1 Pa = 0.5
+    Si estoy calculando P(A | C), con C en{ 0,1,2 } y tengo :
+    AC = { 11, 12, 11, 10, 10, 12, 10, 01, 00, 02 }
+    Entonces:
+    P(A = 1 | C = 0) = (3 + 1 / 2 * 1) / (4 + 1) = 3.5 / 5
+    P(A = 0 | C = 0) = (1 + 1 / 2 * 1) / (4 + 1) = 1.5 / 5
+    Donde m aquí es el número de veces de C = 0 que es la que condiciona y la a priori vuelve a ser sobre A que es sobre las que estaríamos calculando esas marginales.
+    P(A = 1 | C = 1) = (2 + 1 / 2 * 1) / (3 + 1) = 2.5 / 4
+    P(A = 0 | C = 1) = (1 + 1 / 2 * 1) / (3 + 1) = 1.5 / 4
+    P(A = 1 | C = 2) = (2 + 1 / 2 * 1) / (3 + 1) = 2.5 / 5
+    P(A = 0 | C = 2) = (1 + 1 / 2 * 1) / (3 + 1) = 1.5 / 5
+    En realidad es parecido a Laplace, que en este caso p.e.con C = 0 sería
+    P(A = 1 | C = 0) = (3 + 1) / (4 + 2) = 4 / 6
+    P(A = 0 | C = 0) = (1 + 1) / (4 + 2) = 2 / 6
+    */
+    auto net = bayesnet::Network();
+    net.addNode("A");
+    net.addNode("C");
+    net.addEdge("C", "A");
+    std::vector<int> C = { 1, 2, 1, 0, 0, 2, 0, 1, 0, 2 };
+    std::vector<std::vector<int>> A = { { 1, 1, 1, 1, 1, 1, 1, 0, 0, 0 } };
+    std::map<std::string, std::vector<int>> states = { { "A", {0, 1} }, { "C", {0, 1, 2} } };
+    auto weights = std::vector<double>(C.size(), 1);
+    //
+    // Laplace
+    //
+    net.fit(A, C, weights, { "A" }, "C", states, bayesnet::Smoothing_t::LAPLACE);
+    auto cpt_c_laplace = net.getNodes().at("C")->getCPT();
+    REQUIRE(cpt_c_laplace.size(0) == 3);
+    auto laplace_c = std::vector<float>({ 0.3846, 0.3077, 0.3077 });
+    for (int i = 0; i < laplace_c.size(); ++i) {
+        REQUIRE(cpt_c_laplace.index({ i }).item<float>() == Catch::Approx(laplace_c[i]).margin(threshold));
+    }
+    auto cpt_a_laplace = net.getNodes().at("A")->getCPT();
+    REQUIRE(cpt_a_laplace.size(0) == 2);
+    REQUIRE(cpt_a_laplace.size(1) == 3);
+    auto laplace_a = std::vector<std::vector<float>>({ {0.3333, 0.4000,0.4000}, {0.6667,  0.6000,  0.6000} });
+    for (int i = 0; i < 2; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            REQUIRE(cpt_a_laplace.index({ i, j }).item<float>() == Catch::Approx(laplace_a[i][j]).margin(threshold));
+        }
+    }
+    //
+    // Cestnik
+    //
+    net.fit(A, C, weights, { "A" }, "C", states, bayesnet::Smoothing_t::CESTNIK);
+    auto cpt_c_cestnik = net.getNodes().at("C")->getCPT();
+    REQUIRE(cpt_c_cestnik.size(0) == 3);
+    auto cestnik_c = std::vector<float>({ 0.3939, 0.3030, 0.3030 });
+    for (int i = 0; i < laplace_c.size(); ++i) {
+        REQUIRE(cpt_c_cestnik.index({ i }).item<float>() == Catch::Approx(cestnik_c[i]).margin(threshold));
+    }
+    auto cpt_a_cestnik = net.getNodes().at("A")->getCPT();
+    REQUIRE(cpt_a_cestnik.size(0) == 2);
+    REQUIRE(cpt_a_cestnik.size(1) == 3);
+    auto cestnik_a = std::vector<std::vector<float>>({ {0.3000, 0.3750, 0.3750}, {0.7000, 0.6250, 0.6250} });
+    for (int i = 0; i < 2; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            REQUIRE(cpt_a_cestnik.index({ i, j }).item<float>() == Catch::Approx(cestnik_a[i][j]).margin(threshold));
+        }
+    }
+}
+TEST_CASE("Test Smoothing B", "[Network]")
+{
+    auto net = bayesnet::Network();
+    net.addNode("X");
+    net.addNode("Y");
+    net.addNode("Z");
+    net.addNode("C");
+    net.addEdge("C", "X");
+    net.addEdge("C", "Y");
+    net.addEdge("C", "Z");
+    net.addEdge("Y", "Z");
+    std::vector<int> C = { 0, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1 };
+    std::vector<std::vector<int>> Data = {
+        { 0,0,1,1,0,1,0,1,0,1,0,0,0,1,0,1,0,0},
+        { 1,2,0,2,2,2,1,0,0,1,1,1,0,1,2,1,0,2},
+        { 2,1,3,3,2,0,0,1,3,2,1,2,2,3,0,0,1,2}
+    };
+    std::map<std::string, std::vector<int>> states = {
+        { "X", {0, 1} },
+        { "Y", {0, 1, 2} },
+        { "Z", {0, 1, 2, 3} },
+        { "C", {0, 1} }
+    };
+    auto weights = std::vector<double>(C.size(), 1);
+    // Simple
+    std::cout << "LAPLACE\n";
+    net.fit(Data, C, weights, { "X", "Y", "Z" }, "C", states, bayesnet::Smoothing_t::LAPLACE);
+    std::cout << net.dump_cpt();
+    std::cout << "Predict proba of {0, 1, 2} y {1, 2, 3} = " << net.predict_proba({ {0, 1}, {1, 2}, {2, 3} }) << std::endl;
+    std::cout << "ORIGINAL\n";
+    net.fit(Data, C, weights, { "X", "Y", "Z" }, "C", states, bayesnet::Smoothing_t::ORIGINAL);
+    std::cout << net.dump_cpt();
+    std::cout << "Predict proba of {0, 1, 2} y {1, 2, 3} = " << net.predict_proba({ {0, 1}, {1, 2}, {2, 3} }) << std::endl;
+    std::cout << "CESTNIK\n";
+    net.fit(Data, C, weights, { "X", "Y", "Z" }, "C", states, bayesnet::Smoothing_t::CESTNIK);
+    std::cout << net.dump_cpt();
+    std::cout << "Predict proba of {0, 1, 2} y {1, 2, 3} = " << net.predict_proba({ {0, 1}, {1, 2}, {2, 3} }) << std::endl;
+
+
+}

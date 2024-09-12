@@ -14,6 +14,7 @@
 #include <ArffFiles.hpp>
 #include <CPPFImdlp.h>
 #include <folding.hpp>
+#include <bayesnet/network/Network.h>
 
 
 class RawDatasets {
@@ -32,6 +33,7 @@ public:
     bool discretize;
     int num_samples = 0;
     bool shuffle = false;
+    bayesnet::Smoothing_t smoothing = bayesnet::Smoothing_t::ORIGINAL;
 private:
     std::string to_string()
     {

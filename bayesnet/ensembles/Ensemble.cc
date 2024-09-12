@@ -3,22 +3,21 @@
 // SPDX-FileType: SOURCE
 // SPDX-License-Identifier: MIT
 // ***************************************************************
-
 #include "Ensemble.h"
+#include "bayesnet/utils/CountingSemaphore.h"
 
 namespace bayesnet {
 
     Ensemble::Ensemble(bool predict_voting) : Classifier(Network()), n_models(0), predict_voting(predict_voting)
     {
-
     };
     const std::string ENSEMBLE_NOT_FITTED = "Ensemble has not been fitted";
-    void Ensemble::trainModel(const torch::Tensor& weights)
+    void Ensemble::trainModel(const torch::Tensor& weights, const Smoothing_t smoothing)
     {
         n_models = models.size();
         for (auto i = 0; i < n_models; ++i) {
             // fit with std::vectors
-            models[i]->fit(dataset, features, className, states);
+            models[i]->fit(dataset, features, className, states, smoothing);
         }
     }
     std::vector<int> Ensemble::compute_arg_max(std::vector<std::vector<double>>& X)
@@ -85,17 +84,9 @@ namespace bayesnet {
     {
         auto n_states = models[0]->getClassNumStates();
         torch::Tensor y_pred = torch::zeros({ X.size(1), n_states }, torch::kFloat32);
-        auto threads{ std::vector<std::thread>() };
-        std::mutex mtx;
         for (auto i = 0; i < n_models; ++i) {
-            threads.push_back(std::thread([&, i]() {
-                auto ypredict = models[i]->predict_proba(X);
-                std::lock_guard<std::mutex> lock(mtx);
-                y_pred += ypredict * significanceModels[i];
-                }));
-        }
-        for (auto& thread : threads) {
-            thread.join();
+            auto ypredict = models[i]->predict_proba(X);
+            y_pred += ypredict * significanceModels[i];
         }
         auto sum = std::reduce(significanceModels.begin(), significanceModels.end());
         y_pred /= sum;
@@ -105,23 +96,15 @@ namespace bayesnet {
     {
         auto n_states = models[0]->getClassNumStates();
         std::vector<std::vector<double>> y_pred(X[0].size(), std::vector<double>(n_states, 0.0));
-        auto threads{ std::vector<std::thread>() };
-        std::mutex mtx;
         for (auto i = 0; i < n_models; ++i) {
-            threads.push_back(std::thread([&, i]() {
-                auto ypredict = models[i]->predict_proba(X);
-                assert(ypredict.size() == y_pred.size());
-                assert(ypredict[0].size() == y_pred[0].size());
-                std::lock_guard<std::mutex> lock(mtx);
-                // Multiply each prediction by the significance of the model and then add it to the final prediction
-                for (auto j = 0; j < ypredict.size(); ++j) {
-                    std::transform(y_pred[j].begin(), y_pred[j].end(), ypredict[j].begin(), y_pred[j].begin(),
-                        [significanceModels = significanceModels[i]](double x, double y) { return x + y * significanceModels; });
-                }
-                }));
-        }
-        for (auto& thread : threads) {
-            thread.join();
+            auto ypredict = models[i]->predict_proba(X);
+            assert(ypredict.size() == y_pred.size());
+            assert(ypredict[0].size() == y_pred[0].size());
+            // Multiply each prediction by the significance of the model and then add it to the final prediction
+            for (auto j = 0; j < ypredict.size(); ++j) {
+                std::transform(y_pred[j].begin(), y_pred[j].end(), ypredict[j].begin(), y_pred[j].begin(),
+                    [significanceModels = significanceModels[i]](double x, double y) { return x + y * significanceModels; });
+            }
         }
         auto sum = std::reduce(significanceModels.begin(), significanceModels.end());
         //Divide each element of the prediction by the sum of the significances
@@ -141,17 +124,9 @@ namespace bayesnet {
     {
         // Build a m x n_models tensor with the predictions of each model
         torch::Tensor y_pred = torch::zeros({ X.size(1), n_models }, torch::kInt32);
-        auto threads{ std::vector<std::thread>() };
-        std::mutex mtx;
         for (auto i = 0; i < n_models; ++i) {
-            threads.push_back(std::thread([&, i]() {
-                auto ypredict = models[i]->predict(X);
-                std::lock_guard<std::mutex> lock(mtx);
-                y_pred.index_put_({ "...", i }, ypredict);
-                }));
-        }
-        for (auto& thread : threads) {
-            thread.join();
+            auto ypredict = models[i]->predict(X);
+            y_pred.index_put_({ "...", i }, ypredict);
         }
         return voting(y_pred);
     }

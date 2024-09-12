@@ -90,51 +90,54 @@ namespace bayesnet {
         }
         return result;
     }
-    void Node::computeCPT(const torch::Tensor& dataset, const std::vector<std::string>& features, const double laplaceSmoothing, const torch::Tensor& weights)
+    void Node::computeCPT(const torch::Tensor& dataset, const std::vector<std::string>& features, const double smoothing, const torch::Tensor& weights)
     {
         dimensions.clear();
         // Get dimensions of the CPT
         dimensions.push_back(numStates);
         transform(parents.begin(), parents.end(), back_inserter(dimensions), [](const auto& parent) { return parent->getNumStates(); });
         // Create a tensor of zeros with the dimensions of the CPT
-        cpTable = torch::zeros(dimensions, torch::kFloat) + laplaceSmoothing;
+        cpTable = torch::zeros(dimensions, torch::kDouble) + smoothing;
         // Fill table with counts
         auto pos = find(features.begin(), features.end(), name);
         if (pos == features.end()) {
             throw std::logic_error("Feature " + name + " not found in dataset");
         }
         int name_index = pos - features.begin();
+        c10::List<c10::optional<at::Tensor>> coordinates;
         for (int n_sample = 0; n_sample < dataset.size(1); ++n_sample) {
-            c10::List<c10::optional<at::Tensor>> coordinates;
-            coordinates.push_back(dataset.index({ name_index, n_sample }));
+            coordinates.clear();
+            auto sample = dataset.index({ "...", n_sample });
+            coordinates.push_back(sample[name_index]);
             for (auto parent : parents) {
                 pos = find(features.begin(), features.end(), parent->getName());
                 if (pos == features.end()) {
                     throw std::logic_error("Feature parent " + parent->getName() + " not found in dataset");
                 }
                 int parent_index = pos - features.begin();
-                coordinates.push_back(dataset.index({ parent_index, n_sample }));
+                coordinates.push_back(sample[parent_index]);
             }
             // Increment the count of the corresponding coordinate
-            cpTable.index_put_({ coordinates }, cpTable.index({ coordinates }) + weights.index({ n_sample }).item<double>());
+            cpTable.index_put_({ coordinates }, weights.index({ n_sample }), true);
         }
         // Normalize the counts
+        // Divide each row by the sum of the row
         cpTable = cpTable / cpTable.sum(0);
     }
-    float Node::getFactorValue(std::map<std::string, int>& evidence)
+    double Node::getFactorValue(std::map<std::string, int>& evidence)
     {
         c10::List<c10::optional<at::Tensor>> coordinates;
         // following predetermined order of indices in the cpTable (see Node.h)
         coordinates.push_back(at::tensor(evidence[name]));
         transform(parents.begin(), parents.end(), std::back_inserter(coordinates), [&evidence](const auto& parent) { return at::tensor(evidence[parent->getName()]); });
-        return cpTable.index({ coordinates }).item<float>();
+        return cpTable.index({ coordinates }).item<double>();
     }
     std::vector<std::string> Node::graph(const std::string& className)
     {
         auto output = std::vector<std::string>();
         auto suffix = name == className ? ", fontcolor=red, fillcolor=lightblue, style=filled " : "";
-        output.push_back(name + " [shape=circle" + suffix + "] \n");
-        transform(children.begin(), children.end(), back_inserter(output), [this](const auto& child) { return name + " -> " + child->getName(); });
+        output.push_back("\"" + name + "\" [shape=circle" + suffix + "] \n");
+        transform(children.begin(), children.end(), back_inserter(output), [this](const auto& child) { return "\"" + name + "\" -> \"" + child->getName() + "\""; });
         return output;
     }
 }

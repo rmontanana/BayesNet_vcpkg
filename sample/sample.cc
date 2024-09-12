@@ -60,9 +60,9 @@ int main(int argc, char* argv[])
     auto clf = bayesnet::BoostAODE(false); // false for not using voting in predict
     std::cout << "Library version: " << clf.getVersion() << std::endl;
     tie(X, y, features, className, states) = loadDataset(file_name, true);
-    clf.fit(X, y, features, className, states);
+    clf.fit(X, y, features, className, states, bayesnet::Smoothing_t::LAPLACE);
     auto score = clf.score(X, y);
-    std::cout << "File: " << file_name << " score: " << score << std::endl;
+    std::cout << "File: " << file_name << " Model: BoostAODE score: " << score << std::endl;
     return 0;
 }
 

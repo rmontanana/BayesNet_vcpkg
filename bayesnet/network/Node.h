@@ -23,12 +23,12 @@ namespace bayesnet {
         std::vector<Node*>& getParents();
         std::vector<Node*>& getChildren();
         torch::Tensor& getCPT();
-        void computeCPT(const torch::Tensor& dataset, const std::vector<std::string>& features, const double laplaceSmoothing, const torch::Tensor& weights);
+        void computeCPT(const torch::Tensor& dataset, const std::vector<std::string>& features, const double smoothing, const torch::Tensor& weights);
         int getNumStates() const;
         void setNumStates(int);
         unsigned minFill();
         std::vector<std::string> graph(const std::string& clasName); // Returns a std::vector of std::strings representing the graph in graphviz format
-        float getFactorValue(std::map<std::string, int>&);
+        double getFactorValue(std::map<std::string, int>&);
     private:
         std::string name;
         std::vector<Node*> parents;

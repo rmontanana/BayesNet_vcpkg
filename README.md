@@ -7,7 +7,7 @@
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=rmontanana_BayesNet&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=rmontanana_BayesNet)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=rmontanana_BayesNet&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=rmontanana_BayesNet)
 ![Gitea Last Commit](https://img.shields.io/gitea/last-commit/rmontanana/bayesnet?gitea_url=https://gitea.rmontanana.es:3000&logo=gitea)
-[![Coverage Badge](https://img.shields.io/badge/Coverage-97,3%25-green)](html/index.html)
+[![Coverage Badge](https://img.shields.io/badge/Coverage-97,1%25-green)](html/index.html)
 
 Bayesian Network Classifiers using libtorch from scratch
 

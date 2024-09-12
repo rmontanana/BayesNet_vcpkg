@@ -46,7 +46,7 @@ namespace bayesnet {
         unsigned n_models;
         std::vector<std::unique_ptr<Classifier>> models;
         std::vector<double> significanceModels;
-        void trainModel(const torch::Tensor& weights) override;
+        void trainModel(const torch::Tensor& weights, const Smoothing_t smoothing) override;
         bool predict_voting;
     };
 }
