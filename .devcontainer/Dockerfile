@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/devcontainers/cpp:ubuntu22.04
 
-ARG REINSTALL_CMAKE_VERSION_FROM_SOURCE="3.22.2"
+ARG REINSTALL_CMAKE_VERSION_FROM_SOURCE="3.29.3"
 
 # Optionally install the cmake for vcpkg
 COPY ./reinstall-cmake.sh /tmp/
@@ -23,7 +23,7 @@ RUN add-apt-repository ppa:ubuntu-toolchain-r/test
 RUN apt-get update
 
 # Install GCC 13.1
-RUN apt-get install -y gcc-13 g++-13
+RUN apt-get install -y gcc-13 g++-13 doxygen
 
 # Install lcov 2.1
 RUN wget --quiet https://github.com/linux-test-project/lcov/releases/download/v2.1/lcov-2.1.tar.gz && \
