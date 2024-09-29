@@ -93,10 +93,14 @@ install(FILES ${CMAKE_BINARY_DIR}/configured_files/include/bayesnet/config.h DES
 # Documentation
 # -------------
 find_package(Doxygen)
-set(DOC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/docs)
-set(doxyfile_in ${DOC_DIR}/Doxyfile.in)
-set(doxyfile ${DOC_DIR}/Doxyfile)
-configure_file(${doxyfile_in} ${doxyfile} @ONLY)
-doxygen_add_docs(doxygen
-    WORKING_DIRECTORY ${DOC_DIR}
+if (Doxygen_FOUND)
+  set(DOC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/docs)
+  set(doxyfile_in ${DOC_DIR}/Doxyfile.in)
+  set(doxyfile ${DOC_DIR}/Doxyfile)
+  configure_file(${doxyfile_in} ${doxyfile} @ONLY)
+  doxygen_add_docs(doxygen
+      WORKING_DIRECTORY ${DOC_DIR}
     CONFIG_FILE ${doxyfile})
+else (Doxygen_FOUND) 
+  MESSAGE("* Doxygen not found")
+endif (Doxygen_FOUND)
