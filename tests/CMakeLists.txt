@@ -6,6 +6,7 @@ if(ENABLE_TESTING)
         ${BayesNet_SOURCE_DIR}/lib/json/include
         ${BayesNet_SOURCE_DIR}
         ${CMAKE_BINARY_DIR}/configured_files/include
+        ${FImdlp_INCLUDE_DIRS}
     )
     file(GLOB_RECURSE BayesNet_SOURCES "${BayesNet_SOURCE_DIR}/bayesnet/*.cc")
     add_executable(TestBayesNet TestBayesNetwork.cc TestBayesNode.cc TestBayesClassifier.cc 

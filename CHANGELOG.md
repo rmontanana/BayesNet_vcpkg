@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Internal
 
+- Ignore CUDA language in CMake CodeCoverage module.
+- Remove mdlp library from submodules and add it as a dependency.
 - Create library ShuffleArffFile to limit the number of samples with a parameter and shuffle them.
 - Refactor catch2 library location to test/lib
 - Refactor loadDataset function in tests.

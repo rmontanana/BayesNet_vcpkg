@@ -49,11 +49,12 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
   set(CODE_COVERAGE ON)
 endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
 
-
+get_property(LANGUAGES GLOBAL PROPERTY ENABLED_LANGUAGES)
+message(STATUS "Languages=${LANGUAGES}")
 if (CODE_COVERAGE)
   enable_testing()
   include(CodeCoverage)
-  MESSAGE("Code coverage enabled")
+  MESSAGE(STATUS "Code coverage enabled")
   SET(GCC_COVERAGE_LINK_FLAGS " ${GCC_COVERAGE_LINK_FLAGS} -lgcov --coverage")
 endif (CODE_COVERAGE)
 
@@ -63,9 +64,16 @@ endif (ENABLE_CLANG_TIDY)
 
 # External libraries - dependencies of BayesNet
 # ---------------------------------------------
+
+find_library(FImdlp NAMES libfimdlp.a REQUIRED)
+find_path(FImdlp_INCLUDE_DIRS REQUIRED NAMES fimdlp)
+
+message(STATUS "FImdlp=${FImdlp}")
+message(STATUS "FImdlp_INCLUDE_DIRS=${FImdlp_INCLUDE_DIRS}")
+
+
 # include(FetchContent)
 add_git_submodule("lib/json")
-add_git_submodule("lib/mdlp")
 
 # Subdirectories
 # --------------
@@ -75,7 +83,7 @@ add_subdirectory(bayesnet)
 # Testing
 # -------
 if (ENABLE_TESTING)
-MESSAGE("Testing enabled")
+MESSAGE(STATUS "Testing enabled")
   add_subdirectory(tests/lib/catch2)
   include(CTest)
   add_subdirectory(tests)
