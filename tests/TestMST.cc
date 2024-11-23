@@ -48,7 +48,7 @@ TEST_CASE("MST::reorder tests", "[MST]")
     }
     SECTION("Reorder with disconnected graph")
     {
-        std::vector<std::pair<float, std::pair<int, int>>> T = { {2.0, {1, 2}}, {1.0, {0, 1}} };
+        std::vector<std::pair<float, std::pair<int, int>>> T = { {2.0, {2, 3}}, {1.0, {0, 1}} };
         auto result = mst.reorder(T, 0);
         REQUIRE(result == std::vector<std::pair<int, int>>{{0, 1}, { 2, 3 }});
     }
