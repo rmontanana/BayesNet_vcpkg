@@ -7,7 +7,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <string>
-#include <fimdlp/CPPFImdlp.h>
+#include <CPPFImdlp.h>
 #include <folding.hpp>
 #include <nlohmann/json.hpp>
 #define TO_STR2(x) #x
@@ -16,7 +16,7 @@
 #include "TestUtils.h"
 
 std::map<std::string, std::string> modules = {
-    { "mdlp", "2.0.0" },
+    { "mdlp", "2.0.1" },
     { "Folding", "1.1.0" },
     { "json", "3.11" },
     { "ArffFiles", "1.1.0" }

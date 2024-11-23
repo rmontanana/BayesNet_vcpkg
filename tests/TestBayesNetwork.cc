@@ -186,11 +186,11 @@ TEST_CASE("Test Bayesian Network", "[Network]")
         auto str = net.graph("Test Graph");
         REQUIRE(str.size() == 7);
         REQUIRE(str[0] == "digraph BayesNet {\nlabel=<BayesNet Test Graph>\nfontsize=30\nfontcolor=blue\nlabelloc=t\nlayout=circo\n");
-        REQUIRE(str[1] == "A [shape=circle] \n");
-        REQUIRE(str[2] == "A -> B");
-        REQUIRE(str[3] == "A -> C");
-        REQUIRE(str[4] == "B [shape=circle] \n");
-        REQUIRE(str[5] == "C [shape=circle] \n");
+        REQUIRE(str[1] == "\"A\" [shape=circle] \n");
+        REQUIRE(str[2] == "\"A\" -> \"B\"");
+        REQUIRE(str[3] == "\"A\" -> \"C\"");
+        REQUIRE(str[4] == "\"B\" [shape=circle] \n");
+        REQUIRE(str[5] == "\"C\" [shape=circle] \n");
         REQUIRE(str[6] == "}\n");
     }
     SECTION("Test predict")
@@ -257,9 +257,9 @@ TEST_CASE("Test Bayesian Network", "[Network]")
             REQUIRE(node->getCPT().equal(node2->getCPT()));
         }
     }
-    SECTION("Test oddities")
+    SECTION("Network oddities")
     {
-        INFO("Test oddities");
+        INFO("Network oddities");
         buildModel(net, raw.features, raw.className);
         // predict without fitting
         std::vector<std::vector<int>> test = { {1, 2, 0, 1, 1}, {0, 1, 2, 0, 1}, {0, 0, 0, 0, 1}, {2, 2, 2, 2, 1} };
@@ -329,6 +329,14 @@ TEST_CASE("Test Bayesian Network", "[Network]")
         std::string invalid_state = "Feature sepallength not found in states";
         REQUIRE_THROWS_AS(net4.fit(raw.Xv, raw.yv, raw.weightsv, raw.features, raw.className, std::map<std::string, std::vector<int>>(), raw.smoothing), std::invalid_argument);
         REQUIRE_THROWS_WITH(net4.fit(raw.Xv, raw.yv, raw.weightsv, raw.features, raw.className, std::map<std::string, std::vector<int>>(), raw.smoothing), invalid_state);
+        // Try to add node or edge to a fitted network
+        auto net5 = bayesnet::Network();
+        buildModel(net5, raw.features, raw.className);
+        net5.fit(raw.Xv, raw.yv, raw.weightsv, raw.features, raw.className, raw.states, raw.smoothing);
+        REQUIRE_THROWS_AS(net5.addNode("A"), std::logic_error);
+        REQUIRE_THROWS_WITH(net5.addNode("A"), "Cannot add node to a fitted network. Initialize first.");
+        REQUIRE_THROWS_AS(net5.addEdge("A", "B"), std::logic_error);
+        REQUIRE_THROWS_WITH(net5.addEdge("A", "B"), "Cannot add edge to a fitted network. Initialize first.");
     }
 
 }
@@ -373,7 +381,7 @@ TEST_CASE("Dump CPT", "[Network]")
  0.3333
  0.3333
  0.3333
-[ CPUFloatType{3} ]
+[ CPUDoubleType{3} ]
 * petallength: (4) : [4, 3, 3]
 (1,.,.) = 
   0.9388  0.1000  0.2000
@@ -394,7 +402,7 @@ TEST_CASE("Dump CPT", "[Network]")
   0.0204  0.1000  0.2000
   0.1250  0.0526  0.1667
   0.2000  0.0606  0.8235
-[ CPUFloatType{4,3,3} ]
+[ CPUDoubleType{4,3,3} ]
 * petalwidth: (3) : [3, 6, 3]
 (1,.,.) = 
   0.5000  0.0417  0.0714
@@ -419,12 +427,12 @@ TEST_CASE("Dump CPT", "[Network]")
   0.1111  0.0909  0.8000
   0.0667  0.2000  0.8667
   0.0303  0.2500  0.7500
-[ CPUFloatType{3,6,3} ]
+[ CPUDoubleType{3,6,3} ]
 * sepallength: (3) : [3, 3]
  0.8679  0.1321  0.0377
  0.0943  0.3019  0.0566
  0.0377  0.5660  0.9057
-[ CPUFloatType{3,3} ]
+[ CPUDoubleType{3,3} ]
 * sepalwidth: (6) : [6, 3, 3]
 (1,.,.) = 
   0.0392  0.5000  0.2857
@@ -455,7 +463,7 @@ TEST_CASE("Dump CPT", "[Network]")
   0.5098  0.0833  0.1429
   0.5000  0.0476  0.1250
   0.2857  0.0571  0.1132
-[ CPUFloatType{6,3,3} ]
+[ CPUDoubleType{6,3,3} ]
 )";
     REQUIRE(res == expected);
 }
@@ -525,6 +533,7 @@ TEST_CASE("Test Smoothing A", "[Network]")
         }
     }
 }
+
 TEST_CASE("Test Smoothing B", "[Network]")
 {
     auto net = bayesnet::Network();
@@ -549,19 +558,41 @@ TEST_CASE("Test Smoothing B", "[Network]")
         { "C", {0, 1} }
     };
     auto weights = std::vector<double>(C.size(), 1);
-    // Simple
-    std::cout << "LAPLACE\n";
+    // See https://www.overleaf.com/read/tfnhpfysfkfx#2d576c example for calculations
+    INFO("Test Smoothing B - Laplace");
     net.fit(Data, C, weights, { "X", "Y", "Z" }, "C", states, bayesnet::Smoothing_t::LAPLACE);
-    std::cout << net.dump_cpt();
-    std::cout << "Predict proba of {0, 1, 2} y {1, 2, 3} = " << net.predict_proba({ {0, 1}, {1, 2}, {2, 3} }) << std::endl;
-    std::cout << "ORIGINAL\n";
+    auto laplace_values = std::vector<std::vector<float>>({ {0.377418, 0.622582}, {0.217821, 0.782179} });
+    auto laplace_score = net.predict_proba({ {0, 1}, {1, 2}, {2, 3} });
+    for (auto i = 0; i < 2; ++i) {
+        for (auto j = 0; j < 2; ++j) {
+            REQUIRE(laplace_score.at(i).at(j) == Catch::Approx(laplace_values.at(i).at(j)).margin(threshold));
+        }
+    }
+    INFO("Test Smoothing B - Original");
     net.fit(Data, C, weights, { "X", "Y", "Z" }, "C", states, bayesnet::Smoothing_t::ORIGINAL);
-    std::cout << net.dump_cpt();
-    std::cout << "Predict proba of {0, 1, 2} y {1, 2, 3} = " << net.predict_proba({ {0, 1}, {1, 2}, {2, 3} }) << std::endl;
-    std::cout << "CESTNIK\n";
+    auto original_values = std::vector<std::vector<float>>({ {0.344769, 0.655231}, {0.0421263, 0.957874} });
+    auto original_score = net.predict_proba({ {0, 1}, {1, 2}, {2, 3} });
+    for (auto i = 0; i < 2; ++i) {
+        for (auto j = 0; j < 2; ++j) {
+            REQUIRE(original_score.at(i).at(j) == Catch::Approx(original_values.at(i).at(j)).margin(threshold));
+        }
+    }
+    INFO("Test Smoothing B - Cestnik");
     net.fit(Data, C, weights, { "X", "Y", "Z" }, "C", states, bayesnet::Smoothing_t::CESTNIK);
-    std::cout << net.dump_cpt();
-    std::cout << "Predict proba of {0, 1, 2} y {1, 2, 3} = " << net.predict_proba({ {0, 1}, {1, 2}, {2, 3} }) << std::endl;
-
-
+    auto cestnik_values = std::vector<std::vector<float>>({ {0.353422, 0.646578}, {0.12364, 0.87636} });
+    auto cestnik_score = net.predict_proba({ {0, 1}, {1, 2}, {2, 3} });
+    for (auto i = 0; i < 2; ++i) {
+        for (auto j = 0; j < 2; ++j) {
+            REQUIRE(cestnik_score.at(i).at(j) == Catch::Approx(cestnik_values.at(i).at(j)).margin(threshold));
+        }
+    }
+    INFO("Test Smoothing B - No smoothing");
+    net.fit(Data, C, weights, { "X", "Y", "Z" }, "C", states, bayesnet::Smoothing_t::NONE);
+    auto nosmooth_values = std::vector<std::vector<float>>({ {0.342465753, 0.65753424}, {0.0, 1.0} });
+    auto nosmooth_score = net.predict_proba({ {0, 1}, {1, 2}, {2, 3} });
+    for (auto i = 0; i < 2; ++i) {
+        for (auto j = 0; j < 2; ++j) {
+            REQUIRE(nosmooth_score.at(i).at(j) == Catch::Approx(nosmooth_values.at(i).at(j)).margin(threshold));
+        }
+    }
 }

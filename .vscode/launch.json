@@ -16,7 +16,7 @@
             "name": "test",
             "program": "${workspaceFolder}/build_Debug/tests/TestBayesNet",
             "args": [
-                "[Network]"
+                "No features selected"
             ],
             "cwd": "${workspaceFolder}/build_Debug/tests"
         },

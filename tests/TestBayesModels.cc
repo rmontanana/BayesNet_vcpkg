@@ -27,13 +27,13 @@ TEST_CASE("Test Bayesian Classifiers score & version", "[Models]")
     map <pair<std::string, std::string>, float> scores{
         // Diabetes
         {{"diabetes", "AODE"}, 0.82161}, {{"diabetes", "KDB"}, 0.852865}, {{"diabetes", "SPODE"}, 0.802083}, {{"diabetes", "TAN"}, 0.821615},
-        {{"diabetes", "AODELd"}, 0.8138f}, {{"diabetes", "KDBLd"}, 0.80208f}, {{"diabetes", "SPODELd"}, 0.78646f}, {{"diabetes", "TANLd"}, 0.8099f},  {{"diabetes", "BoostAODE"}, 0.83984f},
+        {{"diabetes", "AODELd"}, 0.8125f}, {{"diabetes", "KDBLd"}, 0.80208f}, {{"diabetes", "SPODELd"}, 0.7890625f}, {{"diabetes", "TANLd"}, 0.803385437f},  {{"diabetes", "BoostAODE"}, 0.83984f},
         // Ecoli
         {{"ecoli", "AODE"}, 0.889881}, {{"ecoli", "KDB"}, 0.889881}, {{"ecoli", "SPODE"}, 0.880952}, {{"ecoli", "TAN"}, 0.892857},
-        {{"ecoli", "AODELd"}, 0.8869f}, {{"ecoli", "KDBLd"}, 0.875f}, {{"ecoli", "SPODELd"}, 0.84226f}, {{"ecoli", "TANLd"}, 0.86905f}, {{"ecoli", "BoostAODE"}, 0.89583f},
+        {{"ecoli", "AODELd"}, 0.875f}, {{"ecoli", "KDBLd"}, 0.880952358f}, {{"ecoli", "SPODELd"}, 0.839285731f}, {{"ecoli", "TANLd"}, 0.848214269f}, {{"ecoli", "BoostAODE"}, 0.89583f},
         // Glass
         {{"glass", "AODE"}, 0.79439}, {{"glass", "KDB"}, 0.827103}, {{"glass", "SPODE"}, 0.775701}, {{"glass", "TAN"}, 0.827103},
-        {{"glass", "AODELd"}, 0.79439f}, {{"glass", "KDBLd"}, 0.85047f}, {{"glass", "SPODELd"}, 0.79439f}, {{"glass", "TANLd"}, 0.86449f}, {{"glass", "BoostAODE"}, 0.84579f},
+        {{"glass", "AODELd"}, 0.799065411f}, {{"glass", "KDBLd"}, 0.82710278f}, {{"glass", "SPODELd"}, 0.780373812f}, {{"glass", "TANLd"}, 0.869158864f}, {{"glass", "BoostAODE"}, 0.84579f},
         // Iris
         {{"iris", "AODE"}, 0.973333}, {{"iris", "KDB"}, 0.973333}, {{"iris", "SPODE"}, 0.973333}, {{"iris", "TAN"}, 0.973333},
         {{"iris", "AODELd"}, 0.973333}, {{"iris", "KDBLd"}, 0.973333}, {{"iris", "SPODELd"}, 0.96f}, {{"iris", "TANLd"}, 0.97333f}, {{"iris", "BoostAODE"}, 0.98f}
@@ -71,10 +71,10 @@ TEST_CASE("Test Bayesian Classifiers score & version", "[Models]")
 TEST_CASE("Models features & Graph", "[Models]")
 {
     auto graph = std::vector<std::string>({ "digraph BayesNet {\nlabel=<BayesNet Test>\nfontsize=30\nfontcolor=blue\nlabelloc=t\nlayout=circo\n",
-        "class [shape=circle, fontcolor=red, fillcolor=lightblue, style=filled ] \n",
-        "class -> sepallength", "class -> sepalwidth", "class -> petallength", "class -> petalwidth", "petallength [shape=circle] \n",
-        "petallength -> sepallength", "petalwidth [shape=circle] \n", "sepallength [shape=circle] \n",
-        "sepallength -> sepalwidth", "sepalwidth [shape=circle] \n", "sepalwidth -> petalwidth", "}\n"
+        "\"class\" [shape=circle, fontcolor=red, fillcolor=lightblue, style=filled ] \n",
+        "\"class\" -> \"sepallength\"", "\"class\" -> \"sepalwidth\"", "\"class\" -> \"petallength\"", "\"class\" -> \"petalwidth\"", "\"petallength\" [shape=circle] \n",
+        "\"petallength\" -> \"sepallength\"", "\"petalwidth\" [shape=circle] \n", "\"sepallength\" [shape=circle] \n",
+        "\"sepallength\" -> \"sepalwidth\"", "\"sepalwidth\" [shape=circle] \n", "\"sepalwidth\" -> \"petalwidth\"", "}\n"
         }
     );
     SECTION("Test TAN")
@@ -96,7 +96,7 @@ TEST_CASE("Models features & Graph", "[Models]")
         clf.fit(raw.Xt, raw.yt, raw.features, raw.className, raw.states, raw.smoothing);
         REQUIRE(clf.getNumberOfNodes() == 5);
         REQUIRE(clf.getNumberOfEdges() == 7);
-        REQUIRE(clf.getNumberOfStates() == 19);
+        REQUIRE(clf.getNumberOfStates() == 27);
         REQUIRE(clf.getClassNumStates() == 3);
         REQUIRE(clf.show() == std::vector<std::string>{"class -> sepallength, sepalwidth, petallength, petalwidth, ", "petallength -> sepallength, ", "petalwidth -> ", "sepallength -> sepalwidth, ", "sepalwidth -> petalwidth, "});
         REQUIRE(clf.graph("Test") == graph);

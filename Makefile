@@ -43,7 +43,7 @@ setup: ## Install dependencies for tests and coverage
 	fi
 	@echo "* You should install plantuml & graphviz for the diagrams"
 
-diagrams: ## Create an UML class diagram & depnendency of the project (diagrams/BayesNet.png)
+diagrams: ## Create an UML class diagram & dependency of the project (diagrams/BayesNet.png)
 	@which $(plantuml) || (echo ">>> Please install plantuml"; exit 1)
 	@which $(dot) || (echo ">>> Please install graphviz"; exit 1)
 	@which $(clang-uml) || (echo ">>> Please install clang-uml"; exit 1)

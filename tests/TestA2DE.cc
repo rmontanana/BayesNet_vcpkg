@@ -45,5 +45,5 @@ TEST_CASE("Test graph", "[A2DE]")
     auto graph = clf.graph();
     REQUIRE(graph.size() == 78);
     REQUIRE(graph[0] == "digraph BayesNet {\nlabel=<BayesNet A2DE_0>\nfontsize=30\nfontcolor=blue\nlabelloc=t\nlayout=circo\n");
-    REQUIRE(graph[1] == "class [shape=circle, fontcolor=red, fillcolor=lightblue, style=filled ] \n");
+    REQUIRE(graph[1] == "\"class\" [shape=circle, fontcolor=red, fillcolor=lightblue, style=filled ] \n");
 }

@@ -59,6 +59,9 @@ namespace bayesnet {
         std::vector<int> featuresUsed;
         if (selectFeatures) {
             featuresUsed = initializeModels(smoothing);
+            if (featuresUsed.size() == 0) {
+                return;
+            }
             auto ypred = predict(X_train);
             std::tie(weights_, alpha_t, finished) = update_weights(y_train, ypred, weights_);
             // Update significance of the models

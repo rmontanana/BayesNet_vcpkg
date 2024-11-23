@@ -62,15 +62,17 @@ TEST_CASE("Test Node computeCPT", "[Node]")
     // Create a vector with the names of the classes
     auto className = std::string("Class");
     // weights
-    auto weights = torch::tensor({ 1.0, 1.0, 1.0, 1.0 });
+    auto weights = torch::tensor({ 1.0, 1.0, 1.0, 1.0 }, torch::kDouble);
     std::vector<bayesnet::Node> nodes;
     for (int i = 0; i < features.size(); i++) {
         auto node = bayesnet::Node(features[i]);
         node.setNumStates(states[i]);
         nodes.push_back(node);
     }
+    // Create node class with 2 states
     nodes.push_back(bayesnet::Node(className));
     nodes[features.size()].setNumStates(2);
+    // The network is c->f1, f2, f3 y f1->f2, f3 
     for (int i = 0; i < features.size(); i++) {
         // Add class node as parent of all feature nodes
         nodes[i].addParent(&nodes[features.size()]);

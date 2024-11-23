@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Prevent existing edges to be added to the network in the `add_edge` method.
+- Don't allow to add nodes or edges on already fiited networks.
+- Number of threads spawned
+- Network class tests
+
 ### Added
 
 - Library logo generated with <https://openart.ai> to README.md
@@ -19,12 +26,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add tests to check the correct version of the mdlp, folding and json libraries.
 - Library documentation generated with Doxygen.
 - Link to documentation in the README.md.
-- Three types of smoothing the Bayesian Network OLD_LAPLACE, LAPLACE and CESTNIK.
+- Three types of smoothing the Bayesian Network ORIGINAL, LAPLACE and CESTNIK.
 
 ### Internal
 
+- Fixed doxygen optional dependency
+- Add env parallel variable to Makefile
+- Add CountingSemaphore class to manage the number of threads spawned.
 - Ignore CUDA language in CMake CodeCoverage module.
-- Remove mdlp library from submodules and add it as a dependency.
+- Update mdlp library as a git submodule.
 - Create library ShuffleArffFile to limit the number of samples with a parameter and shuffle them.
 - Refactor catch2 library location to test/lib
 - Refactor loadDataset function in tests.

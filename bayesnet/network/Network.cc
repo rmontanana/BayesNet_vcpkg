@@ -209,7 +209,7 @@ namespace bayesnet {
             pthread_setname_np(threadName.c_str());
 #endif
             double numStates = static_cast<double>(node.second->getNumStates());
-            double smoothing_factor = 0.0;
+            double smoothing_factor;
             switch (smoothing) {
                 case Smoothing_t::ORIGINAL:
                     smoothing_factor = 1.0 / n_samples;
@@ -221,7 +221,7 @@ namespace bayesnet {
                     smoothing_factor = 1 / numStates;
                     break;
                 default:
-                    throw std::invalid_argument("Smoothing method not recognized " + std::to_string(static_cast<int>(smoothing)));
+                    smoothing_factor = 0.0; // No smoothing 
             }
             node.second->computeCPT(samples, features, smoothing_factor, weights);
             semaphore.release();
@@ -234,16 +234,6 @@ namespace bayesnet {
         for (auto& thread : threads) {
             thread.join();
         }
-        // std::fstream file;
-        // file.open("cpt.txt", std::fstream::out | std::fstream::app);
-        // file << std::string(80, '*') << std::endl;
-        // for (const auto& item : graph("Test")) {
-        //     file << item << std::endl;
-        // }
-        // file << std::string(80, '-') << std::endl;
-        // file << dump_cpt() << std::endl;
-        // file << std::string(80, '=') << std::endl;
-        // file.close();
         fitted = true;
     }
     torch::Tensor Network::predict_tensor(const torch::Tensor& samples, const bool proba)

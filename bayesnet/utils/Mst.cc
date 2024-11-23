@@ -53,14 +53,14 @@ namespace bayesnet {
         }
     }
 
-    void insertElement(std::list<int>& variables, int variable)
+    void MST::insertElement(std::list<int>& variables, int variable)
     {
         if (std::find(variables.begin(), variables.end(), variable) == variables.end()) {
             variables.push_front(variable);
         }
     }
 
-    std::vector<std::pair<int, int>> reorder(std::vector<std::pair<float, std::pair<int, int>>> T, int root_original)
+    std::vector<std::pair<int, int>> MST::reorder(std::vector<std::pair<float, std::pair<int, int>>> T, int root_original)
     {
         // Create the edges of a DAG from the MST
         // replacing unordered_set with list because unordered_set cannot guarantee the order of the elements inserted

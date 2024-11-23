@@ -5,7 +5,7 @@
 // ***************************************************************
 
 #include <ArffFiles.hpp>
-#include <fimdlp/CPPFImdlp.h>
+#include <CPPFImdlp.h>
 #include <bayesnet/ensembles/BoostAODE.h>
 
 std::vector<mdlp::labels_t> discretizeDataset(std::vector<mdlp::samples_t>& X, mdlp::labels_t& y)

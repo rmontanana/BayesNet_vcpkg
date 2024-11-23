@@ -8,7 +8,6 @@ find_package(Torch REQUIRED)
 find_library(BayesNet NAMES libBayesNet BayesNet libBayesNet.a  REQUIRED)
 find_path(Bayesnet_INCLUDE_DIRS REQUIRED NAMES bayesnet)
 find_library(FImdlp NAMES libfimdlp.a  PATHS REQUIRED)
-find_path(FImdlp_INCLUDE_DIRS REQUIRED NAMES fimdlp)
 
 message(STATUS "FImdlp=${FImdlp}")
 message(STATUS "FImdlp_INCLUDE_DIRS=${FImdlp_INCLUDE_DIRS}")
@@ -23,4 +22,4 @@ include_directories(
 )
 
 add_executable(bayesnet_sample sample.cc) 
-target_link_libraries(bayesnet_sample ${FImdlp} "${TORCH_LIBRARIES}" "${BayesNet}")
+target_link_libraries(bayesnet_sample fimdlp "${TORCH_LIBRARIES}" "${BayesNet}")

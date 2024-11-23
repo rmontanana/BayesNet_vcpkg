@@ -14,6 +14,8 @@ namespace bayesnet {
     public:
         MST() = default;
         MST(const std::vector<std::string>& features, const torch::Tensor& weights, const int root);
+        void insertElement(std::list<int>& variables, int variable);
+        std::vector<std::pair<int, int>> reorder(std::vector<std::pair<float, std::pair<int, int>>> T, int root_original);
         std::vector<std::pair<int, int>> maximumSpanningTree();
     private:
         torch::Tensor weights;

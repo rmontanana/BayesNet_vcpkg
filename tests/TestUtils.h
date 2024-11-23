@@ -12,7 +12,7 @@
 #include <map>
 #include <tuple>
 #include <ArffFiles.hpp>
-#include <fimdlp/CPPFImdlp.h>
+#include <CPPFImdlp.h>
 #include <folding.hpp>
 #include <bayesnet/network/Network.h>
 

@@ -4,10 +4,9 @@ include_directories(
     ${BayesNet_SOURCE_DIR}/lib/json/include
     ${BayesNet_SOURCE_DIR}
     ${CMAKE_BINARY_DIR}/configured_files/include
-    ${FImdlp_INCLUDE_DIRS}
 )
 
 file(GLOB_RECURSE Sources "*.cc")
 
 add_library(BayesNet ${Sources})
-target_link_libraries(BayesNet ${FImdlp} "${TORCH_LIBRARIES}")
+target_link_libraries(BayesNet fimdlp "${TORCH_LIBRARIES}")

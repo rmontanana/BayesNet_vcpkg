@@ -9,7 +9,7 @@
 #include <string>
 #include <map>
 #include <torch/torch.h>
-#include <fimdlp/CPPFImdlp.h>
+#include <CPPFImdlp.h>
 #include "bayesnet/network/Network.h"
 #include "Classifier.h"
 

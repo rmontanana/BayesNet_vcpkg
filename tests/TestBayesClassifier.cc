@@ -85,7 +85,7 @@ TEST_CASE("Dump_cpt", "[Classifier]")
     auto raw = RawDatasets("iris", true);
     model.fit(raw.Xt, raw.yt, raw.features, raw.className, raw.states, raw.smoothing);
     auto cpt = model.dump_cpt();
-    REQUIRE(cpt.size() == 1713);
+    REQUIRE(cpt.size() == 1718);
 }
 TEST_CASE("Not fitted model", "[Classifier]")
 {

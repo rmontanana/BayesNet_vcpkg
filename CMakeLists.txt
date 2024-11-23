@@ -65,15 +65,9 @@ endif (ENABLE_CLANG_TIDY)
 # External libraries - dependencies of BayesNet
 # ---------------------------------------------
 
-find_library(FImdlp NAMES libfimdlp.a REQUIRED)
-find_path(FImdlp_INCLUDE_DIRS REQUIRED NAMES fimdlp)
-
-message(STATUS "FImdlp=${FImdlp}")
-message(STATUS "FImdlp_INCLUDE_DIRS=${FImdlp_INCLUDE_DIRS}")
-
-
 # include(FetchContent)
 add_git_submodule("lib/json")
+add_git_submodule("lib/mdlp")
 
 # Subdirectories
 # --------------

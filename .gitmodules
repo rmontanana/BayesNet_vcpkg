@@ -16,3 +16,6 @@
 [submodule "tests/lib/Files"]
 	path = tests/lib/Files
 	url = https://github.com/rmontanana/ArffFiles
+[submodule "lib/mdlp"]
+	path = lib/mdlp
+	url = https://github.com/rmontanana/mdlp
