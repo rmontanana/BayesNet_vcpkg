@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - *convergence_best* hyperparameter to the BoostAODE class, to control the way the prior accuracy is computed if convergence is set. Default value is *false*.
 - SPnDE model.
 - A2DE model.
+- BoostA2DE model.
 - A2DE & SPnDE tests.
 - Add tests to reach 99% of coverage.
 - Add tests to check the correct version of the mdlp, folding and json libraries.
