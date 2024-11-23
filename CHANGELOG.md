@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.6] 2024-11-23
+
 ### Fixed
 
 - Prevent existing edges to be added to the network in the `add_edge` method.
@@ -44,6 +46,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Change build cmake folder names to Debug & Release.
 - Add a Makefile target (doc) to generate the documentation.
 - Add a Makefile target (doc-install) to install the documentation.
+
+### Libraries versions
+
+- mdlp: 2.0.1
+- Folding: 1.1.0
+- json: 3.11
+- ArffFiles: 1.1.0
 
 ## [1.0.5] 2024-04-20
 
