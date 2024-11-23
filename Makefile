@@ -172,7 +172,7 @@ docdir = ""
 doc-install: ## Install documentation
 	@echo ">>> Installing documentation..."
 	@if [ "$(docdir)" = "" ]; then \
-		echo "docdir parameter has to be set when calling doc-install"; \
+		echo "docdir parameter has to be set when calling doc-install, i.e. docdir=../bayesnet_help"; \
 		exit 1; \
 	fi
 	@if [ ! -d $(docdir) ]; then \
