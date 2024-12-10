@@ -20,7 +20,8 @@ namespace bayesnet {
         // Fills std::vectors Xv & yv with the data from tensors X_ (discretized) & y
         states = fit_local_discretization(y);
         // We have discretized the input data
-        // 1st we need to fit the model to build the normal TAN structure, TAN::fit initializes the base Bayesian network
+        // 1st we need to fit the model to build the normal AODE structure, Ensemble::fit  
+        // calls buildModel to initialize the base models
         Ensemble::fit(dataset, features, className, states, smoothing);
         return *this;
 
