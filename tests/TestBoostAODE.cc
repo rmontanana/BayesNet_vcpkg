@@ -130,13 +130,20 @@ TEST_CASE("Oddities", "[BoostAODE]")
         { { "select_features","IWSS" }, { "threshold", 0.51 } },
         { { "select_features","FCBF" }, { "threshold", 1e-8 } },
         { { "select_features","FCBF" }, { "threshold", 1.01 } },
-        { { "alpha_block", true }, { "block_update", true } },
-        { { "bisection", false }, { "block_update", true } },
     };
     for (const auto& hyper : bad_hyper_fit.items()) {
         INFO("BoostAODE hyper: " << hyper.value().dump());
         clf.setHyperparameters(hyper.value());
         REQUIRE_THROWS_AS(clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing), std::invalid_argument);
+    }
+
+    auto bad_hyper_fit2 = nlohmann::json{
+        { { "alpha_block", true }, { "block_update", true } },
+        { { "bisection", false }, { "block_update", true } },
+    };
+    for (const auto& hyper : bad_hyper_fit2.items()) {
+        INFO("BoostAODE hyper: " << hyper.value().dump());
+        REQUIRE_THROWS_AS(clf.setHyperparameters(hyper.value()), std::invalid_argument);
     }
 }
 TEST_CASE("Bisection Best", "[BoostAODE]")
