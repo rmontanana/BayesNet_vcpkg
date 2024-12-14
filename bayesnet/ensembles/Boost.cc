@@ -12,7 +12,7 @@
 namespace bayesnet {
     Boost::Boost(bool predict_voting) : Ensemble(predict_voting)
     {
-        validHyperparameters = { "order", "convergence", "convergence_best", "bisection", "threshold", "maxTolerance",
+        validHyperparameters = { "alpha_block", "order", "convergence", "convergence_best", "bisection", "threshold", "maxTolerance",
         "predict_voting", "select_features", "block_update" };
     }
     void Boost::setHyperparameters(const nlohmann::json& hyperparameters_)
@@ -25,6 +25,10 @@ namespace bayesnet {
                 throw std::invalid_argument("Invalid order algorithm, valid values [" + Orders.ASC + ", " + Orders.DESC + ", " + Orders.RAND + "]");
             }
             hyperparameters.erase("order");
+        }
+        if (hyperparameters.contains("alpha_block")) {
+            alpha_block = hyperparameters["alpha_block"];
+            hyperparameters.erase("alpha_block");
         }
         if (hyperparameters.contains("convergence")) {
             convergence = hyperparameters["convergence"];
@@ -65,6 +69,12 @@ namespace bayesnet {
         if (hyperparameters.contains("block_update")) {
             block_update = hyperparameters["block_update"];
             hyperparameters.erase("block_update");
+        }
+        if (block_update && alpha_block) {
+            throw std::invalid_argument("alpha_block and block_update cannot be true at the same time");
+        }
+        if (block_update && !bisection) {
+            throw std::invalid_argument("block_update needs bisection to be true");
         }
         Classifier::setHyperparameters(hyperparameters);
     }

@@ -45,8 +45,8 @@ namespace bayesnet {
         std::string select_features_algorithm = Orders.DESC; // Selected feature selection algorithm
         FeatureSelect* featureSelector = nullptr;
         double threshold = -1;
-        bool block_update = false;
-
+        bool block_update = false; // if true, use block update algorithm, only meaningful if bisection is true
+        bool alpha_block = false; // if true, the alpha is computed with the ensemble built so far and the new model
     };
 }
 #endif

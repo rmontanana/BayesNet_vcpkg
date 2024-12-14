@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add a new hyperparameter to the BoostAODE class, *alphablock*, to control the way &alpha; is computed, with the last model or with the ensmble built so far. Default value is *false*.
+
 ## [1.0.6] 2024-11-23
 
 ### Fixed
