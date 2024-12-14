@@ -130,6 +130,8 @@ TEST_CASE("Oddities", "[BoostAODE]")
         { { "select_features","IWSS" }, { "threshold", 0.51 } },
         { { "select_features","FCBF" }, { "threshold", 1e-8 } },
         { { "select_features","FCBF" }, { "threshold", 1.01 } },
+        { { "alpha_block", true }, { "block_update", true } },
+        { { "bisection", false }, { "block_update", true } },
     };
     for (const auto& hyper : bad_hyper_fit.items()) {
         INFO("BoostAODE hyper: " << hyper.value().dump());
@@ -137,7 +139,6 @@ TEST_CASE("Oddities", "[BoostAODE]")
         REQUIRE_THROWS_AS(clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing), std::invalid_argument);
     }
 }
-
 TEST_CASE("Bisection Best", "[BoostAODE]")
 {
     auto clf = bayesnet::BoostAODE();
@@ -180,7 +181,6 @@ TEST_CASE("Bisection Best vs Last", "[BoostAODE]")
     auto score_last = clf.score(raw.X_test, raw.y_test);
     REQUIRE(score_last == Catch::Approx(0.976666689f).epsilon(raw.epsilon));
 }
-
 TEST_CASE("Block Update", "[BoostAODE]")
 {
     auto clf = bayesnet::BoostAODE();
@@ -210,4 +210,19 @@ TEST_CASE("Block Update", "[BoostAODE]")
     //     std::cout << note << std::endl;
     // }
     // std::cout << "Score " << score << std::endl;
+}
+TEST_CASE("Alphablock", "[BoostAODE]")
+{
+    auto clf_alpha = bayesnet::BoostAODE();
+    auto clf_no_alpha = bayesnet::BoostAODE();
+    auto raw = RawDatasets("diabetes", true);
+    clf_alpha.setHyperparameters({
+        {"alpha_block", true},
+        });
+    clf_alpha.fit(raw.X_train, raw.y_train, raw.features, raw.className, raw.states, raw.smoothing);
+    clf_no_alpha.fit(raw.X_train, raw.y_train, raw.features, raw.className, raw.states, raw.smoothing);
+    auto score_alpha = clf_alpha.score(raw.X_test, raw.y_test);
+    auto score_no_alpha = clf_no_alpha.score(raw.X_test, raw.y_test);
+    REQUIRE(score_alpha == Catch::Approx(0.720779f).epsilon(raw.epsilon));
+    REQUIRE(score_no_alpha == Catch::Approx(0.733766f).epsilon(raw.epsilon));
 }
