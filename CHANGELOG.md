@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add a new hyperparameter to the BoostAODE class, *alphablock*, to control the way &alpha; is computed, with the last model or with the ensmble built so far. Default value is *false*.
+- Add a new hyperparameter to the SPODE class, *parent*, to set the root node of the model. If not value is set the root parameter of the constructor is used.
+- Add a new hyperparameter to the TAN class, *parent*, to set the root node of the model. If not set the first feature is used as root.
 
 ## [1.0.6] 2024-11-23
 

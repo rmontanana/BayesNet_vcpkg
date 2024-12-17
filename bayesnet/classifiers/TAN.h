@@ -9,13 +9,15 @@
 #include "Classifier.h"
 namespace bayesnet {
     class TAN : public Classifier {
-    private:
-    protected:
-        void buildModel(const torch::Tensor& weights) override;
     public:
         TAN();
         virtual ~TAN() = default;
+        void setHyperparameters(const nlohmann::json& hyperparameters_) override;
         std::vector<std::string> graph(const std::string& name = "TAN") const override;
+    protected:
+        void buildModel(const torch::Tensor& weights) override;
+    private:
+        int parent = -1;
     };
 }
 #endif

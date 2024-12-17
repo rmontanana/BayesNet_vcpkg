@@ -268,3 +268,35 @@ TEST_CASE("Predict, predict_proba & score without fitting", "[Models]")
     REQUIRE_THROWS_WITH(clf.score(raw.Xv, raw.yv), message);
     REQUIRE_THROWS_WITH(clf.score(raw.Xt, raw.yt), message);
 }
+TEST_CASE("TAN & SPODE with hyperparameters", "[Models]")
+{
+    auto raw = RawDatasets("iris", true);
+    auto clf = bayesnet::TAN();
+    clf.setHyperparameters({
+        {"parent", 1},
+        });
+    clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing);
+    auto score = clf.score(raw.Xv, raw.yv);
+    REQUIRE(score == Catch::Approx(0.973333).epsilon(raw.epsilon));
+    auto clf2 = bayesnet::SPODE(0);
+    clf2.setHyperparameters({
+        {"parent", 1},
+        });
+    clf2.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing);
+    auto score2 = clf2.score(raw.Xv, raw.yv);
+    REQUIRE(score2 == Catch::Approx(0.973333).epsilon(raw.epsilon));
+}
+TEST_CASE("TAN & SPODE with invalid hyperparameters", "[Models]")
+{
+    auto raw = RawDatasets("iris", true);
+    auto clf = bayesnet::TAN();
+    clf.setHyperparameters({
+        {"parent", 5},
+        });
+    REQUIRE_THROWS_AS(clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing), std::invalid_argument);
+    auto clf2 = bayesnet::SPODE(0);
+    clf2.setHyperparameters({
+        {"parent", 5},
+        });
+    REQUIRE_THROWS_AS(clf2.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing), std::invalid_argument);
+}

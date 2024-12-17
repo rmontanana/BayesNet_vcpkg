@@ -10,14 +10,15 @@
 
 namespace bayesnet {
     class SPODE : public Classifier {
-    private:
-        int root;
-    protected:
-        void buildModel(const torch::Tensor& weights) override;
     public:
         explicit SPODE(int root);
         virtual ~SPODE() = default;
+        void setHyperparameters(const nlohmann::json& hyperparameters_) override;
         std::vector<std::string> graph(const std::string& name = "SPODE") const override;
+    protected:
+        void buildModel(const torch::Tensor& weights) override;
+    private:
+        int root;
     };
 }
 #endif
