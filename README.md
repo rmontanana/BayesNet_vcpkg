@@ -18,7 +18,7 @@ The only external dependency is [libtorch](https://pytorch.org/cppdocs/installin
 
 ```bash
 wget https://download.pytorch.org/libtorch/nightly/cpu/libtorch-shared-with-deps-latest.zip
-unzip libtorch-shared-with-deps-latest.zips
+unzip libtorch-shared-with-deps-latest.zip
 ```
 
 ## Setup
