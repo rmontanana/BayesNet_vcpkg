@@ -118,7 +118,7 @@ TEST_CASE("Oddities", "[BoostAODE]")
         { { "order", "duck" } },
         { { "select_features", "duck" } },
         { { "maxTolerance", 0 } },
-        { { "maxTolerance", 5 } },
+        { { "maxTolerance", 7 } },
     };
     for (const auto& hyper : bad_hyper.items()) {
         INFO("BoostAODE hyper: " << hyper.value().dump());

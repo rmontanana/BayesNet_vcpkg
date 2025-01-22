@@ -48,8 +48,8 @@ namespace bayesnet {
         }
         if (hyperparameters.contains("maxTolerance")) {
             maxTolerance = hyperparameters["maxTolerance"];
-            if (maxTolerance < 1 || maxTolerance > 4)
-                throw std::invalid_argument("Invalid maxTolerance value, must be greater in [1, 4]");
+            if (maxTolerance < 1 || maxTolerance > 6)
+                throw std::invalid_argument("Invalid maxTolerance value, must be greater in [1, 6]");
             hyperparameters.erase("maxTolerance");
         }
         if (hyperparameters.contains("predict_voting")) {

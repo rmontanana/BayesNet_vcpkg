@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add a new hyperparameter to the SPODE class, *parent*, to set the root node of the model. If no value is set the root parameter of the constructor is used.
 - Add a new hyperparameter to the TAN class, *parent*, to set the root node of the model. If not set the first feature is used as root.
 
+### Changed
+
+- Hyperparameter *maxTolerance* in the BoostAODE class is now in [1, 6] range (it was in [1, 4] range before).
+
 ## [1.0.6] 2024-11-23
 
 ### Fixed
