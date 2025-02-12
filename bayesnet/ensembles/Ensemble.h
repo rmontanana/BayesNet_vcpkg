@@ -33,7 +33,12 @@ namespace bayesnet {
         }
         std::string dump_cpt() const override
         {
-            return "";
+            std::string output;
+            for (auto& model : models) {
+                output += model->dump_cpt();
+                output += std::string(80, '-') + "\n";
+            }
+            return output;
         }
     protected:
         torch::Tensor predict_average_voting(torch::Tensor& X);

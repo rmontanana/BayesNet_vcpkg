@@ -28,8 +28,8 @@ namespace bayesnet {
         status_t virtual getStatus() const = 0;
         float virtual score(std::vector<std::vector<int>>& X, std::vector<int>& y) = 0;
         float virtual score(torch::Tensor& X, torch::Tensor& y) = 0;
-        int virtual getNumberOfNodes()const = 0;
-        int virtual getNumberOfEdges()const = 0;
+        int virtual getNumberOfNodes() const = 0;
+        int virtual getNumberOfEdges() const = 0;
         int virtual getNumberOfStates() const = 0;
         int virtual getClassNumStates() const = 0;
         std::vector<std::string> virtual show() const = 0;
@@ -37,7 +37,7 @@ namespace bayesnet {
         virtual std::string getVersion() = 0;
         std::vector<std::string> virtual topological_order() = 0;
         std::vector<std::string> virtual getNotes() const = 0;
-        std::string virtual dump_cpt()const = 0;
+        std::string virtual dump_cpt() const = 0;
         virtual void setHyperparameters(const nlohmann::json& hyperparameters) = 0;
         std::vector<std::string>& getValidHyperparameters() { return validHyperparameters; }
     protected:
