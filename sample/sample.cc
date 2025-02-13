@@ -60,7 +60,21 @@ int main(int argc, char* argv[])
     auto clf = bayesnet::BoostAODE(false); // false for not using voting in predict
     std::cout << "Library version: " << clf.getVersion() << std::endl;
     tie(X, y, features, className, states) = loadDataset(file_name, true);
-    clf.fit(X, y, features, className, states, bayesnet::Smoothing_t::LAPLACE);
+    torch::Tensor weights = torch::full({ X.size(1) }, 15, torch::kDouble);
+    torch::Tensor dataset;
+    try {
+        auto yresized = torch::transpose(y.view({ y.size(0), 1 }), 0, 1);
+        dataset = torch::cat({ X, yresized }, 0);
+    }
+    catch (const std::exception& e) {
+        std::stringstream oss;
+        oss << "* Error in X and y dimensions *\n";
+        oss << "X dimensions: " << dataset.sizes() << "\n";
+        oss << "y dimensions: " << y.sizes();
+        throw std::runtime_error(oss.str());
+    }
+    //Classifier& fit(torch::Tensor& dataset, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights, const Smoothing_t smoothing) override;
+    clf.fit(dataset, features, className, states, weights, bayesnet::Smoothing_t::LAPLACE);
     auto score = clf.score(X, y);
     std::cout << "File: " << file_name << " Model: BoostAODE score: " << score << std::endl;
     return 0;

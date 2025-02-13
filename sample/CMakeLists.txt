@@ -18,7 +18,7 @@ include_directories(
     ../tests/lib/Files
     lib/json/include
     /usr/local/include
-    ${FImdlp_INCLUDE_DIRS}
+    /usr/local/include/fimdlp/
 )
 
 add_executable(bayesnet_sample sample.cc) 
