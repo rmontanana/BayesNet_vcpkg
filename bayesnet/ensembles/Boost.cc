@@ -138,6 +138,7 @@ namespace bayesnet {
         auto mask_right = ypred == ytrain;
         auto masked_weights = weights * mask_wrong.to(weights.dtype());
         double epsilon_t = masked_weights.sum().item<double>();
+        // std::cout << "epsilon_t: " << epsilon_t << " count wrong: " << mask_wrong.sum().item<int>() << " count right: " << mask_right.sum().item<int>() << std::endl;
         if (epsilon_t > 0.5) {
             // Inverse the weights policy (plot ln(wt))
             // "In each round of AdaBoost, there is a sanity check to ensure that the current base 

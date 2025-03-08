@@ -14,13 +14,13 @@ namespace bayesnet {
     enum status_t { NORMAL, WARNING, ERROR };
     class BaseClassifier {
     public:
+        virtual ~BaseClassifier() = default;
         // X is nxm std::vector, y is nx1 std::vector
         virtual BaseClassifier& fit(std::vector<std::vector<int>>& X, std::vector<int>& y, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const Smoothing_t smoothing) = 0;
         // X is nxm tensor, y is nx1 tensor
         virtual BaseClassifier& fit(torch::Tensor& X, torch::Tensor& y, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const Smoothing_t smoothing) = 0;
         virtual BaseClassifier& fit(torch::Tensor& dataset, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const Smoothing_t smoothing) = 0;
         virtual BaseClassifier& fit(torch::Tensor& dataset, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights, const Smoothing_t smoothing) = 0;
-        virtual ~BaseClassifier() = default;
         torch::Tensor virtual predict(torch::Tensor& X) = 0;
         std::vector<int> virtual predict(std::vector<std::vector<int >>& X) = 0;
         torch::Tensor virtual predict_proba(torch::Tensor& X) = 0;
@@ -43,5 +43,7 @@ namespace bayesnet {
     protected:
         virtual void trainModel(const torch::Tensor& weights, const Smoothing_t smoothing) = 0;
         std::vector<std::string> validHyperparameters;
+        std::vector<std::string> notes; // Used to store messages occurred during the fit process
+        status_t status = NORMAL;
     };
 }
