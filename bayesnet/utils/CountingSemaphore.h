@@ -32,6 +32,14 @@ public:
             cv_.notify_one();
         }
     }
+    uint getCount() const
+    {
+        return count_;
+    }
+    uint getMaxCount() const
+    {
+        return max_count_;
+    }
 private:
     CountingSemaphore()
         : max_count_(std::max(1u, static_cast<uint>(0.95 * std::thread::hardware_concurrency()))),

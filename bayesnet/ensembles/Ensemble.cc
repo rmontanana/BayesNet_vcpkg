@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: MIT
 // ***************************************************************
 #include "Ensemble.h"
-#include "bayesnet/utils/CountingSemaphore.h"
 
 namespace bayesnet {
 
