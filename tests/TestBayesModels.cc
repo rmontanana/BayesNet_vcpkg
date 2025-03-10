@@ -58,10 +58,12 @@ TEST_CASE("Test Bayesian Classifiers score & version", "[Models]")
             auto raw = RawDatasets(file_name, discretize);
             if (name == "XSPODE") {
                 std::cout << "Fitting XSPODE" << std::endl;
+            } else {
+                std::cout << "Fitting something else [" << name << "]" << std::endl;
             }
-            clf->fit(raw.Xt, raw.yt, raw.features, raw.className, raw.states, raw.smoothing);
+            clf->fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing);
             auto score = clf->score(raw.Xt, raw.yt);
-            std::cout << "Classifier: " << name << " File: " << file_name << " Score: " << score <<  " expected = " << scores[{file_name, name}] << std::endl;
+            std::cout << "Classifier: " << name << " File: " << file_name << " Score: " << score << " expected = " << scores[{file_name, name}] << std::endl;
             INFO("Classifier: " << name << " File: " << file_name);
             REQUIRE(score == Catch::Approx(scores[{file_name, name}]).epsilon(raw.epsilon));
             REQUIRE(clf->getStatus() == bayesnet::NORMAL);

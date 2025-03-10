@@ -51,8 +51,6 @@ namespace bayesnet {
         int statesClass_;
         std::vector<int> states_;          // [states_feat0, ..., states_feat(N-1)] (class not included in this array)
 
-        const std::string CLASSIFIER_NOT_FITTED = "Classifier has not been fitted";
-
         // Class counts
         std::vector<double> classCounts_;  // [c], accumulative
         std::vector<double> classPriors_;  // [c], after normalization

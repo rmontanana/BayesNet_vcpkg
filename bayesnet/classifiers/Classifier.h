@@ -50,6 +50,7 @@ namespace bayesnet {
         virtual void buildModel(const torch::Tensor& weights) = 0;
         void trainModel(const torch::Tensor& weights, const Smoothing_t smoothing) override;
         void buildDataset(torch::Tensor& y);
+        const std::string CLASSIFIER_NOT_FITTED = "Classifier has not been fitted";
     private:
         Classifier& build(const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights, const Smoothing_t smoothing);
     };

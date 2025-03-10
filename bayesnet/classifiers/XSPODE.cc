@@ -110,7 +110,6 @@ namespace bayesnet {
             instance[nFeatures_] = dataset[-1][i].item<int>();
             addSample(instance, weights[i].item<double>());
         }
-
         switch (smoothing) {
             case bayesnet::Smoothing_t::ORIGINAL:
                 alpha_ = 1.0 / m;
@@ -414,9 +413,6 @@ namespace bayesnet {
     }
     float XSpode::score(std::vector<std::vector<int>>& X, std::vector<int>& y)
     {
-        if (!fitted) {
-            throw std::logic_error(CLASSIFIER_NOT_FITTED);
-        }
         auto y_pred = this->predict(X);
         int correct = 0;
         for (int i = 0; i < y_pred.size(); ++i) {
