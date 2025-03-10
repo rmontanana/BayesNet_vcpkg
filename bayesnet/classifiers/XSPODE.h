@@ -38,6 +38,8 @@ namespace bayesnet {
         torch::Tensor predict(torch::Tensor& X) override;
         std::vector<int> predict(std::vector<std::vector<int>>& X) override;
         torch::Tensor predict_proba(torch::Tensor& X) override;
+        float score(torch::Tensor& X, torch::Tensor& y) override;
+        float score(std::vector<std::vector<int>>& X, std::vector<int>& y) override;
     protected:
         void buildModel(const torch::Tensor& weights) override;
         void trainModel(const torch::Tensor& weights, const bayesnet::Smoothing_t smoothing) override;
