@@ -23,3 +23,5 @@ include_directories(
 
 add_executable(bayesnet_sample sample.cc) 
 target_link_libraries(bayesnet_sample ${FImdlp} "${TORCH_LIBRARIES}" "${BayesNet}")
+add_executable(bayesnet_sample_xspode sample_xspode.cc) 
+target_link_libraries(bayesnet_sample_xspode ${FImdlp} "${TORCH_LIBRARIES}" "${BayesNet}")
