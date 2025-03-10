@@ -18,7 +18,7 @@ namespace bayesnet {
     public:
         explicit XSpode(int spIndex);
         std::vector<double> predict_proba(const std::vector<int>& instance) const;
-        std::vector<std::vector<double>> predict_proba(const std::vector<std::vector<int>>& test_data);
+        std::vector<std::vector<double>> predict_proba(std::vector<std::vector<int>>& X) override;
         int predict(const std::vector<int>& instance) const;
         void normalize(std::vector<double>& v) const;
         std::string to_string() const;

@@ -264,7 +264,7 @@ namespace bayesnet {
         normalize(probs);
         return probs;
     }
-    std::vector<std::vector<double>> XSpode::predict_proba(const std::vector<std::vector<int>>& test_data)
+    std::vector<std::vector<double>> XSpode::predict_proba(std::vector<std::vector<int>>& test_data) 
     {
         int test_size = test_data[0].size();
         int sample_size = test_data.size();
@@ -390,14 +390,22 @@ namespace bayesnet {
     torch::Tensor XSpode::predict(torch::Tensor& X)
     {
         auto X_ = TensorUtils::to_matrix(X);
-        auto result = predict(X_);
-        return TensorUtils::to_tensor(result);
+        auto result_v = predict(X_);
+        torch::Tensor result;
+        for (int i = 0; i < result_v.size(); ++i) {
+            result.index_put_({ i, "..." }, torch::tensor(result_v[i], torch::kInt32));
+        }
+        return result;
     }
     torch::Tensor XSpode::predict_proba(torch::Tensor& X) 
     {
        auto X_ = TensorUtils::to_matrix(X);
-       auto result = predict_proba(X_);
-       return TensorUtils::to_tensor<double>(result);
+       auto result_v = predict_proba(X_);
+       torch::Tensor result;
+       for (int i = 0; i < result_v.size(); ++i) {
+           result.index_put_({ i, "..." }, torch::tensor(result_v[i], torch::kDouble));
+       }
+       return result;
     }
     torch::Tensor XSpode::predict(torch::Tensor& X)
     {
