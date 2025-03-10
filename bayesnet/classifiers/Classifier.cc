@@ -22,8 +22,11 @@ namespace bayesnet {
         auto n_classes = states.at(className).size();
         metrics = Metrics(dataset, features, className, n_classes);
         model.initialize();
+        std::cout << "Ahora buildmodel"<< std::endl;
         buildModel(weights);
+        std::cout << "Ahora trainmodel"<< std::endl;
         trainModel(weights, smoothing);
+        std::cout << "Después de trainmodel"<< std::endl;
         fitted = true;
         return *this;
     }
