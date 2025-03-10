@@ -1,5 +1,5 @@
-#ifndef TENSORUTILS_HPP
-#define TENSORUTILS_HPP
+#ifndef TENSORUTILS_H
+#define TENSORUTILS_H
 #include <torch/torch.h>
 #include <vector>
 namespace bayesnet {
@@ -48,4 +48,4 @@ namespace bayesnet {
     };
 }
 
-#endif // TENSORUTILS_HPP
+#endif // TENSORUTILS_H

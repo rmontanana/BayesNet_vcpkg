@@ -10,7 +10,7 @@
 #include <tuple>
 #include "XBAODE.h"
 #include "bayesnet/classifiers/XSPODE.h"
-#include "bayesnet/utils/TensorUtils.hpp"
+#include "bayesnet/utils/TensorUtils.h"
 
 namespace bayesnet {
     XBAODE::XBAODE()

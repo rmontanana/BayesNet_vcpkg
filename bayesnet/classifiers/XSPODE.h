@@ -20,7 +20,6 @@ namespace bayesnet {
         std::vector<double> predict_proba(const std::vector<int>& instance) const;
         std::vector<std::vector<double>> predict_proba(const std::vector<std::vector<int>>& test_data);
         int predict(const std::vector<int>& instance) const;
-        std::vector<int> predict(std::vector<std::vector<int>>& test_data);
         void normalize(std::vector<double>& v) const;
         std::string to_string() const;
         int getNFeatures() const;
