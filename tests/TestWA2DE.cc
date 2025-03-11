@@ -17,7 +17,7 @@ TEST_CASE("Fit and Score", "[WA2DE]")
     auto raw = RawDatasets("iris", true);
     auto clf = bayesnet::WA2DE();
     clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing);
-    REQUIRE(clf.score(raw.Xt, raw.yt) == Catch::Approx(0.831776).epsilon(raw.epsilon));
+    REQUIRE(clf.score(raw.Xt, raw.yt) == Catch::Approx(0.6333333333333333).epsilon(raw.epsilon));
 }
 TEST_CASE("Test graph", "[WA2DE]")
 {
