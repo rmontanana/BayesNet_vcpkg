@@ -6,7 +6,7 @@
 
 #include <ArffFiles.hpp>
 #include <CPPFImdlp.h>
-#include <bayesnet/ensembles/BoostAODE.h>
+#include <bayesnet/ensembles/XBAODE.h>
 
 std::vector<mdlp::labels_t> discretizeDataset(std::vector<mdlp::samples_t>& X, mdlp::labels_t& y)
 {
@@ -57,7 +57,7 @@ int main(int argc, char* argv[])
     std::vector<std::string> features;
     std::string className;
     map<std::string, std::vector<int>> states;
-    auto clf = bayesnet::BoostAODE(false); // false for not using voting in predict
+    auto clf = bayesnet::XBAODE(); // false for not using voting in predict
     std::cout << "Library version: " << clf.getVersion() << std::endl;
     tie(X, y, features, className, states) = loadDataset(file_name, true);
     torch::Tensor weights = torch::full({ X.size(1) }, 15, torch::kDouble);
@@ -73,7 +73,6 @@ int main(int argc, char* argv[])
         oss << "y dimensions: " << y.sizes();
         throw std::runtime_error(oss.str());
     }
-    //Classifier& fit(torch::Tensor& dataset, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights, const Smoothing_t smoothing) override;
     clf.fit(dataset, features, className, states, weights, bayesnet::Smoothing_t::LAPLACE);
     auto score = clf.score(X, y);
     std::cout << "File: " << file_name << " Model: BoostAODE score: " << score << std::endl;

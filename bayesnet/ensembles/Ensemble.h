@@ -41,6 +41,7 @@ namespace bayesnet {
             return output;
         }
     protected:
+        void trainModel(const torch::Tensor& weights, const Smoothing_t smoothing) override;
         torch::Tensor predict_average_voting(torch::Tensor& X);
         std::vector<std::vector<double>> predict_average_voting(std::vector<std::vector<int>>& X);
         torch::Tensor predict_average_proba(torch::Tensor& X);
@@ -48,10 +49,10 @@ namespace bayesnet {
         torch::Tensor compute_arg_max(torch::Tensor& X);
         std::vector<int> compute_arg_max(std::vector<std::vector<double>>& X);
         torch::Tensor voting(torch::Tensor& votes);
+        // Attributes
         unsigned n_models;
         std::vector<std::unique_ptr<Classifier>> models;
         std::vector<double> significanceModels;
-        void trainModel(const torch::Tensor& weights, const Smoothing_t smoothing) override;
         bool predict_voting;
     };
 }

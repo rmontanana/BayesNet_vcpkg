@@ -9,7 +9,7 @@
 
 #include <vector>
 #include <torch/torch.h>
-#include  "Classifier.h"
+#include "Classifier.h"
 #include "bayesnet/utils/CountingSemaphore.h"
 
 namespace bayesnet {
@@ -29,7 +29,7 @@ namespace bayesnet {
         int getClassNumStates() const override;
         std::vector<int>& getStates();
         std::vector<std::string> graph(const std::string& title) const override { return std::vector<std::string>({ title }); }
-        void fit(std::vector<std::vector<int>>& X, std::vector<int>& y, torch::Tensor& weights_, const Smoothing_t smoothing);
+        void fit(torch::Tensor& X, torch::Tensor& y, torch::Tensor& weights_, const Smoothing_t smoothing);
         void setHyperparameters(const nlohmann::json& hyperparameters_) override;
 
         //

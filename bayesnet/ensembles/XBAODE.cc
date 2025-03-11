@@ -36,7 +36,8 @@ namespace bayesnet {
         std::vector<int> featuresSelected = featureSelection(weights_);
         for (const int& feature : featuresSelected) {
             std::unique_ptr<Classifier> model = std::make_unique<XSpode>(feature);
-            model->fit(dataset, features, className, states, weights_, smoothing);
+            // model->fit(dataset, features, className, states, weights_, smoothing);
+            dynamic_cast<XSpode*>(model.get())->fit(X_train, y_train, weights_, smoothing);
             add_model(std::move(model), 1.0);
         }
         notes.push_back("Used features in initialization: " + std::to_string(featuresSelected.size()) + " of " + std::to_string(features.size()) + " with " + select_features_algorithm);
@@ -57,6 +58,7 @@ namespace bayesnet {
         n_models = 0;
         if (selectFeatures) {
             featuresUsed = initializeModels(smoothing);
+            std::cout << "features used: " << featuresUsed.size() << std::endl;
             auto ypred = predict(X_train_);
             auto ypred_t = torch::tensor(ypred);
             std::tie(weights_, alpha_t, finished) = update_weights(y_train, ypred_t, weights_);
@@ -103,7 +105,11 @@ namespace bayesnet {
                 featureSelection.erase(featureSelection.begin());
                 std::unique_ptr<Classifier> model;
                 model = std::make_unique<XSpode>(feature);
-                dynamic_cast<XSpode*>(model.get())->fit(X_train_, y_train_, weights_, smoothing); // using exclusive XSpode fit method
+                dynamic_cast<XSpode*>(model.get())->fit(X_train, y_train, weights_, smoothing); // using exclusive XSpode fit method
+                // DEBUG
+                std::cout << "Model fitted." << std::endl;
+                std::cout << dynamic_cast<XSpode*>(model.get())->to_string() << std::endl;
+                // DEBUG
                 std::vector<int> ypred;
                 if (alpha_block) {
                     //
