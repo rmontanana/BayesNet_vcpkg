@@ -85,6 +85,7 @@ namespace bayesnet {
         torch::Tensor y_pred = torch::zeros({ X.size(1), n_states }, torch::kFloat32);
         for (auto i = 0; i < n_models; ++i) {
             auto ypredict = models[i]->predict_proba(X);
+            /*std::cout << "model " << i << " prediction: " << ypredict << " significance " << significanceModels[i] << std::endl;*/
             y_pred += ypredict * significanceModels[i];
         }
         auto sum = std::reduce(significanceModels.begin(), significanceModels.end());

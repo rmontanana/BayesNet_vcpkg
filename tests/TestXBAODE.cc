@@ -4,88 +4,94 @@
 // SPDX-License-Identifier: MIT
 // ***************************************************************
 
-#include <type_traits>
-#include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
-#include <catch2/generators/catch_generators.hpp> 
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
-#include "bayesnet/ensembles/XBAODE.h"
 #include "TestUtils.h"
+#include "bayesnet/ensembles/XBAODE.h"
 
-
-TEST_CASE("Normal test", "[XBAODE]")
-{
-    auto raw = RawDatasets("iris", true);
-    auto clf = bayesnet::XBAODE();
-    clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing);
-    REQUIRE(clf.getNumberOfNodes() == 20);
-    REQUIRE(clf.getNumberOfEdges() == 112);
-    REQUIRE(clf.getNotes().size() == 1);
+TEST_CASE("Normal test", "[XBAODE]") {
+  auto raw = RawDatasets("iris", true);
+  auto clf = bayesnet::XBAODE();
+  clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states,
+          raw.smoothing);
+  REQUIRE(clf.getNumberOfNodes() == 20);
+  REQUIRE(clf.getNumberOfEdges() == 36);
+  REQUIRE(clf.getNotes().size() == 1);
+  REQUIRE(clf.getVersion() == "0.9.7");
+  REQUIRE(clf.getNotes()[0] == "Number of models: 4");
+  REQUIRE(clf.getNumberOfStates() == 256);
+  REQUIRE(clf.score(raw.X_test, raw.y_test) == Catch::Approx(0.933333));
 }
-//TEST_CASE("Feature_select CFS", "[XBAODE]")
-//{
-//    auto raw = RawDatasets("glass", true);
-//    auto clf = bayesnet::XBAODE();
-//    clf.setHyperparameters({ {"select_features", "CFS"} });
-//    clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing);
-//    REQUIRE(clf.getNumberOfNodes() == 97);
-//    REQUIRE(clf.getNumberOfEdges() == 153);
-//    REQUIRE(clf.getNotes().size() == 2);
-//    REQUIRE(clf.getNotes()[0] == "Used features in initialization: 6 of 9 with CFS");
-//    REQUIRE(clf.getNotes()[1] == "Number of models: 9");
-//}
-// TEST_CASE("Feature_select IWSS", "[XBAODE]")
-// {
-//     auto raw = RawDatasets("glass", true);
-//     auto clf = bayesnet::XBAODE();
-//     clf.setHyperparameters({ {"select_features", "IWSS"}, {"threshold", 0.5 } });
-//     clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing);
-//     REQUIRE(clf.getNumberOfNodes() == 90);
-//     REQUIRE(clf.getNumberOfEdges() == 153);
-//     REQUIRE(clf.getNotes().size() == 2);
-//     REQUIRE(clf.getNotes()[0] == "Used features in initialization: 4 of 9 with IWSS");
-//     REQUIRE(clf.getNotes()[1] == "Number of models: 9");
-// }
-// TEST_CASE("Feature_select FCBF", "[XBAODE]")
-// {
-//     auto raw = RawDatasets("glass", true);
-//     auto clf = bayesnet::XBAODE();
-//     clf.setHyperparameters({ {"select_features", "FCBF"}, {"threshold", 1e-7 } });
-//     clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing);
-//     REQUIRE(clf.getNumberOfNodes() == 90);
-//     REQUIRE(clf.getNumberOfEdges() == 153);
-//     REQUIRE(clf.getNotes().size() == 2);
-//     REQUIRE(clf.getNotes()[0] == "Used features in initialization: 4 of 9 with FCBF");
-//     REQUIRE(clf.getNotes()[1] == "Number of models: 9");
-// }
-// TEST_CASE("Test used features in train note and score", "[XBAODE]")
-// {
-//     auto raw = RawDatasets("diabetes", true);
-//     auto clf = bayesnet::XBAODE(true);
-//     clf.setHyperparameters({
-//         {"order", "asc"},
-//         {"convergence", true},
-//         {"select_features","CFS"},
-//         });
-//     clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing);
-//     REQUIRE(clf.getNumberOfNodes() == 72);
-//     REQUIRE(clf.getNumberOfEdges() == 120);
-//     REQUIRE(clf.getNotes().size() == 2);
-//     REQUIRE(clf.getNotes()[0] == "Used features in initialization: 6 of 8 with CFS");
-//     REQUIRE(clf.getNotes()[1] == "Number of models: 8");
-//     auto score = clf.score(raw.Xv, raw.yv);
-//     auto scoret = clf.score(raw.Xt, raw.yt);
-//     REQUIRE(score == Catch::Approx(0.809895813).epsilon(raw.epsilon));
-//     REQUIRE(scoret == Catch::Approx(0.809895813).epsilon(raw.epsilon));
-// }
+TEST_CASE("Feature_select CFS", "[XBAODE]") {
+  auto raw = RawDatasets("glass", true);
+  auto clf = bayesnet::XBAODE();
+  clf.setHyperparameters({{"select_features", "CFS"}});
+  clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states,
+          raw.smoothing);
+  REQUIRE(clf.getNumberOfNodes() == 90);
+  REQUIRE(clf.getNumberOfEdges() == 171);
+  REQUIRE(clf.getNotes().size() == 2);
+  REQUIRE(clf.getNotes()[0] ==
+          "Used features in initialization: 6 of 9 with CFS");
+  REQUIRE(clf.getNotes()[1] == "Number of models: 9");
+  REQUIRE(clf.score(raw.X_test, raw.y_test) == Catch::Approx(0.720930219));
+}
+TEST_CASE("Feature_select IWSS", "[XBAODE]") {
+  auto raw = RawDatasets("glass", true);
+  auto clf = bayesnet::XBAODE();
+  clf.setHyperparameters({{"select_features", "IWSS"}, {"threshold", 0.5}});
+  clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states,
+          raw.smoothing);
+  REQUIRE(clf.getNumberOfNodes() == 90);
+  REQUIRE(clf.getNumberOfEdges() == 171);
+  REQUIRE(clf.getNotes().size() == 2);
+  REQUIRE(clf.getNotes()[0] ==
+          "Used features in initialization: 4 of 9 with IWSS");
+  REQUIRE(clf.getNotes()[1] == "Number of models: 9");
+  REQUIRE(clf.score(raw.X_test, raw.y_test) == Catch::Approx(0.697674394));
+}
+TEST_CASE("Feature_select FCBF", "[XBAODE]") {
+  auto raw = RawDatasets("glass", true);
+  auto clf = bayesnet::XBAODE();
+  clf.setHyperparameters({{"select_features", "FCBF"}, {"threshold", 1e-7}});
+  clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states,
+          raw.smoothing);
+  REQUIRE(clf.getNumberOfNodes() == 90);
+  REQUIRE(clf.getNumberOfEdges() == 171);
+  REQUIRE(clf.getNotes().size() == 2);
+  REQUIRE(clf.getNotes()[0] ==
+          "Used features in initialization: 4 of 9 with FCBF");
+  REQUIRE(clf.getNotes()[1] == "Number of models: 9");
+  REQUIRE(clf.score(raw.X_test, raw.y_test) == Catch::Approx(0.720930219));
+}
+ TEST_CASE("Test used features in train note and score", "[XBAODE]")
+ {
+     auto raw = RawDatasets("diabetes", true);
+     auto clf = bayesnet::XBAODE();
+     clf.setHyperparameters({
+         {"order", "asc"},
+         {"convergence", true},
+         {"select_features","CFS"},
+         });
+     clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states,
+     raw.smoothing); REQUIRE(clf.getNumberOfNodes() == 72);
+     REQUIRE(clf.getNumberOfEdges() == 136);
+     REQUIRE(clf.getNotes().size() == 2);
+     REQUIRE(clf.getNotes()[0] == "Used features in initialization: 6 of 8 with CFS");
+     REQUIRE(clf.getNotes()[1] == "Number of models: 8"); 
+     auto score = clf.score(raw.Xv, raw.yv); auto scoret = clf.score(raw.Xt, raw.yt);
+     REQUIRE(score == Catch::Approx(0.819010437f).epsilon(raw.epsilon));
+     REQUIRE(scoret == Catch::Approx(0.819010437f).epsilon(raw.epsilon));
+ }
 // TEST_CASE("Voting vs proba", "[XBAODE]")
 // {
 //     auto raw = RawDatasets("iris", true);
 //     auto clf = bayesnet::XBAODE(false);
-//     clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing);
-//     auto score_proba = clf.score(raw.Xv, raw.yv);
-//     auto pred_proba = clf.predict_proba(raw.Xv);
-//     clf.setHyperparameters({
+//     clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states,
+//     raw.smoothing); auto score_proba = clf.score(raw.Xv, raw.yv); auto
+//     pred_proba = clf.predict_proba(raw.Xv); clf.setHyperparameters({
 //         {"predict_voting",true},
 //         });
 //     auto score_voting = clf.score(raw.Xv, raw.yv);
@@ -93,9 +99,9 @@ TEST_CASE("Normal test", "[XBAODE]")
 //     REQUIRE(score_proba == Catch::Approx(0.97333).epsilon(raw.epsilon));
 //     REQUIRE(score_voting == Catch::Approx(0.98).epsilon(raw.epsilon));
 //     REQUIRE(pred_voting[83][2] == Catch::Approx(1.0).epsilon(raw.epsilon));
-//     REQUIRE(pred_proba[83][2] == Catch::Approx(0.86121525).epsilon(raw.epsilon));
-//     REQUIRE(clf.dump_cpt() == "");
-//     REQUIRE(clf.topological_order() == std::vector<std::string>());
+//     REQUIRE(pred_proba[83][2] ==
+//     Catch::Approx(0.86121525).epsilon(raw.epsilon)); REQUIRE(clf.dump_cpt()
+//     == ""); REQUIRE(clf.topological_order() == std::vector<std::string>());
 // }
 // TEST_CASE("Order asc, desc & random", "[XBAODE]")
 // {
@@ -111,10 +117,9 @@ TEST_CASE("Normal test", "[XBAODE]")
 //             {"maxTolerance", 1},
 //             {"convergence", false},
 //             });
-//         clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing);
-//         auto score = clf.score(raw.Xv, raw.yv);
-//         auto scoret = clf.score(raw.Xt, raw.yt);
-//         INFO("XBAODE order: " << order);
+//         clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states,
+//         raw.smoothing); auto score = clf.score(raw.Xv, raw.yv); auto scoret =
+//         clf.score(raw.Xt, raw.yt); INFO("XBAODE order: " << order);
 //         REQUIRE(score == Catch::Approx(scores[order]).epsilon(raw.epsilon));
 //         REQUIRE(scoret == Catch::Approx(scores[order]).epsilon(raw.epsilon));
 //     }
@@ -131,10 +136,11 @@ TEST_CASE("Normal test", "[XBAODE]")
 //     };
 //     for (const auto& hyper : bad_hyper.items()) {
 //         INFO("XBAODE hyper: " << hyper.value().dump());
-//         REQUIRE_THROWS_AS(clf.setHyperparameters(hyper.value()), std::invalid_argument);
+//         REQUIRE_THROWS_AS(clf.setHyperparameters(hyper.value()),
+//         std::invalid_argument);
 //     }
-//     REQUIRE_THROWS_AS(clf.setHyperparameters({ {"maxTolerance", 0 } }), std::invalid_argument);
-//     auto bad_hyper_fit = nlohmann::json{
+//     REQUIRE_THROWS_AS(clf.setHyperparameters({ {"maxTolerance", 0 } }),
+//     std::invalid_argument); auto bad_hyper_fit = nlohmann::json{
 //         { { "select_features","IWSS" }, { "threshold", -0.01 } },
 //         { { "select_features","IWSS" }, { "threshold", 0.51 } },
 //         { { "select_features","FCBF" }, { "threshold", 1e-8 } },
@@ -143,7 +149,8 @@ TEST_CASE("Normal test", "[XBAODE]")
 //     for (const auto& hyper : bad_hyper_fit.items()) {
 //         INFO("XBAODE hyper: " << hyper.value().dump());
 //         clf.setHyperparameters(hyper.value());
-//         REQUIRE_THROWS_AS(clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing), std::invalid_argument);
+//         REQUIRE_THROWS_AS(clf.fit(raw.Xv, raw.yv, raw.features,
+//         raw.className, raw.states, raw.smoothing), std::invalid_argument);
 //     }
 
 //     auto bad_hyper_fit2 = nlohmann::json{
@@ -152,7 +159,8 @@ TEST_CASE("Normal test", "[XBAODE]")
 //     };
 //     for (const auto& hyper : bad_hyper_fit2.items()) {
 //         INFO("XBAODE hyper: " << hyper.value().dump());
-//         REQUIRE_THROWS_AS(clf.setHyperparameters(hyper.value()), std::invalid_argument);
+//         REQUIRE_THROWS_AS(clf.setHyperparameters(hyper.value()),
+//         std::invalid_argument);
 //     }
 // }
 // TEST_CASE("Bisection Best", "[XBAODE]")
@@ -165,8 +173,8 @@ TEST_CASE("Normal test", "[XBAODE]")
 //         {"convergence", true},
 //         {"convergence_best", false},
 //         });
-//     clf.fit(raw.X_train, raw.y_train, raw.features, raw.className, raw.states, raw.smoothing);
-//     REQUIRE(clf.getNumberOfNodes() == 210);
+//     clf.fit(raw.X_train, raw.y_train, raw.features, raw.className,
+//     raw.states, raw.smoothing); REQUIRE(clf.getNumberOfNodes() == 210);
 //     REQUIRE(clf.getNumberOfEdges() == 378);
 //     REQUIRE(clf.getNotes().size() == 1);
 //     REQUIRE(clf.getNotes().at(0) == "Number of models: 14");
@@ -186,15 +194,17 @@ TEST_CASE("Normal test", "[XBAODE]")
 //         {"convergence_best", true},
 //     };
 //     clf.setHyperparameters(hyperparameters);
-//     clf.fit(raw.X_train, raw.y_train, raw.features, raw.className, raw.states, raw.smoothing);
-//     auto score_best = clf.score(raw.X_test, raw.y_test);
-//     REQUIRE(score_best == Catch::Approx(0.980000019f).epsilon(raw.epsilon));
+//     clf.fit(raw.X_train, raw.y_train, raw.features, raw.className,
+//     raw.states, raw.smoothing); auto score_best = clf.score(raw.X_test,
+//     raw.y_test); REQUIRE(score_best ==
+//     Catch::Approx(0.980000019f).epsilon(raw.epsilon));
 //     // Now we will set the hyperparameter to use the last accuracy
 //     hyperparameters["convergence_best"] = false;
 //     clf.setHyperparameters(hyperparameters);
-//     clf.fit(raw.X_train, raw.y_train, raw.features, raw.className, raw.states, raw.smoothing);
-//     auto score_last = clf.score(raw.X_test, raw.y_test);
-//     REQUIRE(score_last == Catch::Approx(0.976666689f).epsilon(raw.epsilon));
+//     clf.fit(raw.X_train, raw.y_train, raw.features, raw.className,
+//     raw.states, raw.smoothing); auto score_last = clf.score(raw.X_test,
+//     raw.y_test); REQUIRE(score_last ==
+//     Catch::Approx(0.976666689f).epsilon(raw.epsilon));
 // }
 // TEST_CASE("Block Update", "[XBAODE]")
 // {
@@ -206,20 +216,21 @@ TEST_CASE("Normal test", "[XBAODE]")
 //         {"maxTolerance", 3},
 //         {"convergence", true},
 //         });
-//     clf.fit(raw.X_train, raw.y_train, raw.features, raw.className, raw.states, raw.smoothing);
-//     REQUIRE(clf.getNumberOfNodes() == 868);
+//     clf.fit(raw.X_train, raw.y_train, raw.features, raw.className,
+//     raw.states, raw.smoothing); REQUIRE(clf.getNumberOfNodes() == 868);
 //     REQUIRE(clf.getNumberOfEdges() == 1724);
 //     REQUIRE(clf.getNotes().size() == 3);
-//     REQUIRE(clf.getNotes()[0] == "Convergence threshold reached & 15 models eliminated");
-//     REQUIRE(clf.getNotes()[1] == "Used features in train: 19 of 216");
-//     REQUIRE(clf.getNotes()[2] == "Number of models: 4");
-//     auto score = clf.score(raw.X_test, raw.y_test);
-//     auto scoret = clf.score(raw.X_test, raw.y_test);
-//     REQUIRE(score == Catch::Approx(0.99f).epsilon(raw.epsilon));
+//     REQUIRE(clf.getNotes()[0] == "Convergence threshold reached & 15 models
+//     eliminated"); REQUIRE(clf.getNotes()[1] == "Used features in train: 19 of
+//     216"); REQUIRE(clf.getNotes()[2] == "Number of models: 4"); auto score =
+//     clf.score(raw.X_test, raw.y_test); auto scoret = clf.score(raw.X_test,
+//     raw.y_test); REQUIRE(score == Catch::Approx(0.99f).epsilon(raw.epsilon));
 //     REQUIRE(scoret == Catch::Approx(0.99f).epsilon(raw.epsilon));
 //     //
-//     // std::cout << "Number of nodes " << clf.getNumberOfNodes() << std::endl;
-//     // std::cout << "Number of edges " << clf.getNumberOfEdges() << std::endl;
+//     // std::cout << "Number of nodes " << clf.getNumberOfNodes() <<
+//     std::endl;
+//     // std::cout << "Number of edges " << clf.getNumberOfEdges() <<
+//     std::endl;
 //     // std::cout << "Notes size " << clf.getNotes().size() << std::endl;
 //     // for (auto note : clf.getNotes()) {
 //     //     std::cout << note << std::endl;
@@ -234,10 +245,11 @@ TEST_CASE("Normal test", "[XBAODE]")
 //     clf_alpha.setHyperparameters({
 //         {"alpha_block", true},
 //         });
-//     clf_alpha.fit(raw.X_train, raw.y_train, raw.features, raw.className, raw.states, raw.smoothing);
-//     clf_no_alpha.fit(raw.X_train, raw.y_train, raw.features, raw.className, raw.states, raw.smoothing);
-//     auto score_alpha = clf_alpha.score(raw.X_test, raw.y_test);
-//     auto score_no_alpha = clf_no_alpha.score(raw.X_test, raw.y_test);
-//     REQUIRE(score_alpha == Catch::Approx(0.720779f).epsilon(raw.epsilon));
-//     REQUIRE(score_no_alpha == Catch::Approx(0.733766f).epsilon(raw.epsilon));
+//     clf_alpha.fit(raw.X_train, raw.y_train, raw.features, raw.className,
+//     raw.states, raw.smoothing); clf_no_alpha.fit(raw.X_train, raw.y_train,
+//     raw.features, raw.className, raw.states, raw.smoothing); auto score_alpha
+//     = clf_alpha.score(raw.X_test, raw.y_test); auto score_no_alpha =
+//     clf_no_alpha.score(raw.X_test, raw.y_test); REQUIRE(score_alpha ==
+//     Catch::Approx(0.720779f).epsilon(raw.epsilon)); REQUIRE(score_no_alpha ==
+//     Catch::Approx(0.733766f).epsilon(raw.epsilon));
 // }
