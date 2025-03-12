@@ -4,87 +4,80 @@
 // SPDX-License-Identifier: MIT
 // ***************************************************************
 
+#include "TestUtils.h"
+#include "bayesnet/ensembles/XBAODE.h"
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
-#include "TestUtils.h"
-#include "bayesnet/ensembles/XBAODE.h"
 
 TEST_CASE("Normal test", "[XBAODE]") {
-  auto raw = RawDatasets("iris", true);
-  auto clf = bayesnet::XBAODE();
-  clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states,
-          raw.smoothing);
-  REQUIRE(clf.getNumberOfNodes() == 20);
-  REQUIRE(clf.getNumberOfEdges() == 36);
-  REQUIRE(clf.getNotes().size() == 1);
-  REQUIRE(clf.getVersion() == "0.9.7");
-  REQUIRE(clf.getNotes()[0] == "Number of models: 4");
-  REQUIRE(clf.getNumberOfStates() == 256);
-  REQUIRE(clf.score(raw.X_test, raw.y_test) == Catch::Approx(0.933333));
+    auto raw = RawDatasets("iris", true);
+    auto clf = bayesnet::XBAODE();
+    clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing);
+    REQUIRE(clf.getNumberOfNodes() == 20);
+    REQUIRE(clf.getNumberOfEdges() == 36);
+    REQUIRE(clf.getNotes().size() == 1);
+    REQUIRE(clf.getVersion() == "0.9.7");
+    REQUIRE(clf.getNotes()[0] == "Number of models: 4");
+    REQUIRE(clf.getNumberOfStates() == 256);
+    REQUIRE(clf.score(raw.X_test, raw.y_test) == Catch::Approx(0.933333));
 }
 TEST_CASE("Feature_select CFS", "[XBAODE]") {
-  auto raw = RawDatasets("glass", true);
-  auto clf = bayesnet::XBAODE();
-  clf.setHyperparameters({{"select_features", "CFS"}});
-  clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states,
-          raw.smoothing);
-  REQUIRE(clf.getNumberOfNodes() == 90);
-  REQUIRE(clf.getNumberOfEdges() == 171);
-  REQUIRE(clf.getNotes().size() == 2);
-  REQUIRE(clf.getNotes()[0] ==
-          "Used features in initialization: 6 of 9 with CFS");
-  REQUIRE(clf.getNotes()[1] == "Number of models: 9");
-  REQUIRE(clf.score(raw.X_test, raw.y_test) == Catch::Approx(0.720930219));
+    auto raw = RawDatasets("glass", true);
+    auto clf = bayesnet::XBAODE();
+    clf.setHyperparameters({{"select_features", "CFS"}});
+    clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing);
+    REQUIRE(clf.getNumberOfNodes() == 90);
+    REQUIRE(clf.getNumberOfEdges() == 171);
+    REQUIRE(clf.getNotes().size() == 2);
+    REQUIRE(clf.getNotes()[0] == "Used features in initialization: 6 of 9 with CFS");
+    REQUIRE(clf.getNotes()[1] == "Number of models: 9");
+    REQUIRE(clf.score(raw.X_test, raw.y_test) == Catch::Approx(0.720930219));
 }
 TEST_CASE("Feature_select IWSS", "[XBAODE]") {
-  auto raw = RawDatasets("glass", true);
-  auto clf = bayesnet::XBAODE();
-  clf.setHyperparameters({{"select_features", "IWSS"}, {"threshold", 0.5}});
-  clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states,
-          raw.smoothing);
-  REQUIRE(clf.getNumberOfNodes() == 90);
-  REQUIRE(clf.getNumberOfEdges() == 171);
-  REQUIRE(clf.getNotes().size() == 2);
-  REQUIRE(clf.getNotes()[0] ==
-          "Used features in initialization: 4 of 9 with IWSS");
-  REQUIRE(clf.getNotes()[1] == "Number of models: 9");
-  REQUIRE(clf.score(raw.X_test, raw.y_test) == Catch::Approx(0.697674394));
+    auto raw = RawDatasets("glass", true);
+    auto clf = bayesnet::XBAODE();
+    clf.setHyperparameters({{"select_features", "IWSS"}, {"threshold", 0.5}});
+    clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing);
+    REQUIRE(clf.getNumberOfNodes() == 90);
+    REQUIRE(clf.getNumberOfEdges() == 171);
+    REQUIRE(clf.getNotes().size() == 2);
+    REQUIRE(clf.getNotes()[0] == "Used features in initialization: 4 of 9 with IWSS");
+    REQUIRE(clf.getNotes()[1] == "Number of models: 9");
+    REQUIRE(clf.score(raw.X_test, raw.y_test) == Catch::Approx(0.697674394));
 }
 TEST_CASE("Feature_select FCBF", "[XBAODE]") {
-  auto raw = RawDatasets("glass", true);
-  auto clf = bayesnet::XBAODE();
-  clf.setHyperparameters({{"select_features", "FCBF"}, {"threshold", 1e-7}});
-  clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states,
-          raw.smoothing);
-  REQUIRE(clf.getNumberOfNodes() == 90);
-  REQUIRE(clf.getNumberOfEdges() == 171);
-  REQUIRE(clf.getNotes().size() == 2);
-  REQUIRE(clf.getNotes()[0] ==
-          "Used features in initialization: 4 of 9 with FCBF");
-  REQUIRE(clf.getNotes()[1] == "Number of models: 9");
-  REQUIRE(clf.score(raw.X_test, raw.y_test) == Catch::Approx(0.720930219));
+    auto raw = RawDatasets("glass", true);
+    auto clf = bayesnet::XBAODE();
+    clf.setHyperparameters({{"select_features", "FCBF"}, {"threshold", 1e-7}});
+    clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing);
+    REQUIRE(clf.getNumberOfNodes() == 90);
+    REQUIRE(clf.getNumberOfEdges() == 171);
+    REQUIRE(clf.getNotes().size() == 2);
+    REQUIRE(clf.getNotes()[0] == "Used features in initialization: 4 of 9 with FCBF");
+    REQUIRE(clf.getNotes()[1] == "Number of models: 9");
+    REQUIRE(clf.score(raw.X_test, raw.y_test) == Catch::Approx(0.720930219));
 }
- TEST_CASE("Test used features in train note and score", "[XBAODE]")
- {
-     auto raw = RawDatasets("diabetes", true);
-     auto clf = bayesnet::XBAODE();
-     clf.setHyperparameters({
-         {"order", "asc"},
-         {"convergence", true},
-         {"select_features","CFS"},
-         });
-     clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states,
-     raw.smoothing); REQUIRE(clf.getNumberOfNodes() == 72);
-     REQUIRE(clf.getNumberOfEdges() == 136);
-     REQUIRE(clf.getNotes().size() == 2);
-     REQUIRE(clf.getNotes()[0] == "Used features in initialization: 6 of 8 with CFS");
-     REQUIRE(clf.getNotes()[1] == "Number of models: 8"); 
-     auto score = clf.score(raw.Xv, raw.yv); auto scoret = clf.score(raw.Xt, raw.yt);
-     REQUIRE(score == Catch::Approx(0.819010437f).epsilon(raw.epsilon));
-     REQUIRE(scoret == Catch::Approx(0.819010437f).epsilon(raw.epsilon));
- }
+TEST_CASE("Test used features in train note and score", "[XBAODE]") {
+    auto raw = RawDatasets("diabetes", true);
+    auto clf = bayesnet::XBAODE();
+    clf.setHyperparameters({
+        {"order", "asc"},
+        {"convergence", true},
+        {"select_features", "CFS"},
+    });
+    clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing);
+    REQUIRE(clf.getNumberOfNodes() == 72);
+    REQUIRE(clf.getNumberOfEdges() == 136);
+    REQUIRE(clf.getNotes().size() == 2);
+    REQUIRE(clf.getNotes()[0] == "Used features in initialization: 6 of 8 with CFS");
+    REQUIRE(clf.getNotes()[1] == "Number of models: 8");
+    auto score = clf.score(raw.Xv, raw.yv);
+    auto scoret = clf.score(raw.Xt, raw.yt);
+    REQUIRE(score == Catch::Approx(0.819010437f).epsilon(raw.epsilon));
+    REQUIRE(scoret == Catch::Approx(0.819010437f).epsilon(raw.epsilon));
+}
 // TEST_CASE("Voting vs proba", "[XBAODE]")
 // {
 //     auto raw = RawDatasets("iris", true);
