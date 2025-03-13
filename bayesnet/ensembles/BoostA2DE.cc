@@ -4,14 +4,9 @@
 // SPDX-License-Identifier: MIT
 // ***************************************************************
 
-#include <set>
-#include <functional>
 #include <limits.h>
 #include <tuple>
 #include <folding.hpp>
-#include "bayesnet/feature_selection/CFS.h"
-#include "bayesnet/feature_selection/FCBF.h"
-#include "bayesnet/feature_selection/IWSS.h"
 #include "BoostA2DE.h"
 
 namespace bayesnet {

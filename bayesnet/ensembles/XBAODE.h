@@ -8,17 +8,10 @@
 #define XBAODE_H
 #include <vector>
 #include <cmath>
-#include <algorithm>
-
-#include <limits>
-#include "bayesnet/classifiers/XSPODE.h"
 #include "Boost.h"
 
 namespace bayesnet {
     class XBAODE : public Boost {
-
-        // Hay que hacer un vector de modelos entrenados y hacer un predict ensemble con todos ellos
-        // Probar XA1DE con smooth original y laplace y comprobar diferencias si se pasan pesos a 1 o a 1/m
     public:
         XBAODE();
         std::string getVersion() override { return version; };
