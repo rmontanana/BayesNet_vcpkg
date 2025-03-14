@@ -37,16 +37,12 @@ static void check_spnde_pair(
 
   // Basic checks
   REQUIRE(clf.getNumberOfNodes() == 5);  // for iris: 4 features + 1 class
-  // For XSpnde, edges are often computed as 3*nFeatures - 4. For iris nFeatures=4 => 3*4 -4 = 8
   REQUIRE(clf.getNumberOfEdges() == 8);
   REQUIRE(clf.getNotes().size() == 0);
 
   // Evaluate on test set
   float sc = clf.score(raw.X_test, raw.y_test);
-  // If you know the exact expected accuracy for each pair, use:
-  // REQUIRE(sc == Catch::Approx(someValue));
-  // Otherwise, just check it's > some threshold:
-  REQUIRE(sc >= 0.90f);  // placeholder; you can pick your own threshold
+  REQUIRE(sc >= 0.93f);  
 }
 
 // ------------------------------------------------------------
@@ -55,13 +51,10 @@ static void check_spnde_pair(
 TEST_CASE("fit vector test (XSPNDE)", "[XSPNDE]") {
   auto raw = RawDatasets("iris", true);
 
-  // We’ll test a couple of two-superparent pairs, e.g. (0,1) and (2,3).
-  // You can add more if you like, e.g. (0,2), (1,3), etc.
   std::vector<std::pair<int,int>> parentPairs = {
     {0,1}, {2,3}
   };
   for (auto &p : parentPairs) {
-    // We’re doing the “vector” version
     check_spnde_pair(p.first, p.second, raw, /*fitVector=*/true, /*fitTensor=*/false);
   }
 }
@@ -77,7 +70,6 @@ TEST_CASE("fit dataset test (XSPNDE)", "[XSPNDE]") {
     {0,2}, {1,3}
   };
   for (auto &p : parentPairs) {
-    // Now do the “dataset” version
     check_spnde_pair(p.first, p.second, raw, /*fitVector=*/false, /*fitTensor=*/false);
   }
 }
@@ -88,14 +80,12 @@ TEST_CASE("fit dataset test (XSPNDE)", "[XSPNDE]") {
 TEST_CASE("tensors dataset predict & predict_proba (XSPNDE)", "[XSPNDE]") {
   auto raw = RawDatasets("iris", true);
 
-  // Let’s test a single pair or multiple pairs. For brevity:
   std::vector<std::pair<int,int>> parentPairs = {
-    {0,3}
+    {0,3}, {1,2}
   };
 
   for (auto &p : parentPairs) {
     bayesnet::XSpnde clf(p.first, p.second);
-    // Fit using the “tensor” approach
     clf.fit(raw.Xt, raw.yt, raw.features, raw.className, raw.states, raw.smoothing);
 
     REQUIRE(clf.getNumberOfNodes() == 5);
@@ -106,15 +96,46 @@ TEST_CASE("tensors dataset predict & predict_proba (XSPNDE)", "[XSPNDE]") {
     float sc = clf.score(raw.X_test, raw.y_test);
     REQUIRE(sc >= 0.90f);
 
-    // You can also test predict_proba on a small slice:
-    // e.g. the first 3 samples in X_test
     auto X_reduced = raw.X_test.slice(1, 0, 3); 
     auto proba = clf.predict_proba(X_reduced);
-
-    // If you know exact probabilities, compare them with Catch::Approx.
-    // For example:
-    // REQUIRE(proba[0][0].item<double>() == Catch::Approx(0.98));
-    // etc.
   }
 }
+TEST_CASE("Check hyperparameters", "[XSPNDE]")
+{
+  auto raw = RawDatasets("iris", true);
 
+  auto clf = bayesnet::XSpnde(0, 1);
+  clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing);
+  auto clf2 = bayesnet::XSpnde(2, 3);
+  clf2.setHyperparameters({{"parent1", 0}, {"parent2", 1}});
+  clf2.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, raw.smoothing);
+  REQUIRE(clf.to_string() == clf2.to_string());
+}
+TEST_CASE("Check different smoothing", "[XSPNDE]")
+{
+  auto raw = RawDatasets("iris", true);
+
+  auto clf = bayesnet::XSpnde(0, 1);
+  clf.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, bayesnet::Smoothing_t::ORIGINAL);
+  auto clf2 = bayesnet::XSpnde(0, 1);
+  clf2.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, bayesnet::Smoothing_t::LAPLACE);
+  auto clf3 = bayesnet::XSpnde(0, 1);
+  clf3.fit(raw.Xv, raw.yv, raw.features, raw.className, raw.states, bayesnet::Smoothing_t::NONE);
+  auto score = clf.score(raw.X_test, raw.y_test);
+  auto score2 = clf2.score(raw.X_test, raw.y_test);
+  auto score3 = clf3.score(raw.X_test, raw.y_test);
+  REQUIRE(score == Catch::Approx(1.0).epsilon(raw.epsilon));
+  REQUIRE(score2 == Catch::Approx(0.7333333).epsilon(raw.epsilon));
+  REQUIRE(score3 == Catch::Approx(0.966667).epsilon(raw.epsilon));
+}
+TEST_CASE("Check rest", "[XSPNDE]")
+{
+  auto raw = RawDatasets("iris", true);
+  auto clf = bayesnet::XSpnde(0, 1);
+  REQUIRE_THROWS_AS(clf.predict_proba(std::vector<int>({1,2,3,4})), std::logic_error);
+  clf.fitx(raw.Xt, raw.yt, raw.weights, bayesnet::Smoothing_t::ORIGINAL);
+  REQUIRE(clf.getNFeatures() == 4);
+  REQUIRE(clf.score(raw.Xv, raw.yv) == Catch::Approx(0.973333359f).epsilon(raw.epsilon));
+  REQUIRE(clf.predict({1,2,3,4}) == 1);
+
+}

@@ -15,16 +15,6 @@ XBAODE::XBAODE() : Boost(false) {
     validHyperparameters = {"alpha_block", "order",        "convergence",    "convergence_best", "bisection",
                             "threshold",   "maxTolerance", "predict_voting", "select_features"};
 }
-void XBAODE::add_model(std::unique_ptr<Classifier> model, double significance) {
-    models.push_back(std::move(model));
-    n_models++;
-    significanceModels.push_back(significance);
-}
-void XBAODE::remove_last_model() {
-    models.pop_back();
-    significanceModels.pop_back();
-    n_models--;
-}
 std::vector<int> XBAODE::initializeModels(const Smoothing_t smoothing) {
     torch::Tensor weights_ = torch::full({m}, 1.0 / m, torch::kFloat64);
     std::vector<int> featuresSelected = featureSelection(weights_);

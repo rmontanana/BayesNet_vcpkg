@@ -8,7 +8,6 @@
 #define BOOSTAODE_H
 #include <string>
 #include <vector>
-#include "bayesnet/classifiers/SPODE.h"
 #include "Boost.h"
 
 namespace bayesnet {

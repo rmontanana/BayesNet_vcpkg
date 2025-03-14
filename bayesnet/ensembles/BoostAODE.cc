@@ -6,10 +6,10 @@
 
 #include <random> 
 #include <set>
-#include <functional>
 #include <limits.h>
 #include <tuple>
 #include "BoostAODE.h"
+#include "bayesnet/classifiers/SPODE.h"
 #include <loguru.hpp>
 #include <loguru.cpp>
 
