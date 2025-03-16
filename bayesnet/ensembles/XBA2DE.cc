@@ -7,7 +7,7 @@
 #include <folding.hpp>
 #include <limits.h>
 #include "XBA2DE.h"
-#include "bayesnet/classifiers/XSPnDE.h"
+#include "bayesnet/classifiers/XSP2DE.h"
 #include "bayesnet/utils/TensorUtils.h"
 
 namespace bayesnet {
@@ -23,7 +23,7 @@ std::vector<int> XBA2DE::initializeModels(const Smoothing_t smoothing) {
     }
     for (int i = 0; i < featuresSelected.size() - 1; i++) {
         for (int j = i + 1; j < featuresSelected.size(); j++) {
-            std::unique_ptr<Classifier> model = std::make_unique<XSpnde>(featuresSelected[i], featuresSelected[j]);
+            std::unique_ptr<Classifier> model = std::make_unique<XSp2de>(featuresSelected[i], featuresSelected[j]);
             model->fit(dataset, features, className, states, weights_, smoothing);
             add_model(std::move(model), 1.0);
         }
@@ -94,7 +94,7 @@ void XBA2DE::trainModel(const torch::Tensor &weights, const Smoothing_t smoothin
             auto feature_pair = pairSelection[0];
             pairSelection.erase(pairSelection.begin());
             std::unique_ptr<Classifier> model;
-            model = std::make_unique<XSpnde>(feature_pair.first, feature_pair.second);
+            model = std::make_unique<XSp2de>(feature_pair.first, feature_pair.second);
             model->fit(dataset, features, className, states, weights_, smoothing);
             alpha_t = 0.0;
             if (!block_update) {

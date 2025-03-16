@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: MIT
 // ***************************************************************
 
-#include "XSPnDE.h"
+#include "XSP2DE.h"
 #include <pthread.h>   // for pthread_setname_np on linux
 #include <cassert>
 #include <cmath>
@@ -18,7 +18,7 @@ namespace bayesnet {
 // --------------------------------------
 // Constructor
 // --------------------------------------
-XSpnde::XSpnde(int spIndex1, int spIndex2)
+XSp2de::XSp2de(int spIndex1, int spIndex2)
   : superParent1_{ spIndex1 }
   , superParent2_{ spIndex2 }
   , nFeatures_{0}
@@ -34,7 +34,7 @@ XSpnde::XSpnde(int spIndex1, int spIndex2)
 // --------------------------------------
 // setHyperparameters
 // --------------------------------------
-void XSpnde::setHyperparameters(const nlohmann::json &hyperparameters_)
+void XSp2de::setHyperparameters(const nlohmann::json &hyperparameters_)
 {
   auto hyperparameters = hyperparameters_;
   if (hyperparameters.contains("parent1")) {
@@ -52,7 +52,7 @@ void XSpnde::setHyperparameters(const nlohmann::json &hyperparameters_)
 // --------------------------------------
 // fitx
 // --------------------------------------
-void XSpnde::fitx(torch::Tensor & X, torch::Tensor & y, 
+void XSp2de::fitx(torch::Tensor & X, torch::Tensor & y, 
                   torch::Tensor & weights_, const Smoothing_t smoothing)
 {
   m = X.size(1);  // number of samples
@@ -73,7 +73,7 @@ void XSpnde::fitx(torch::Tensor & X, torch::Tensor & y,
 // --------------------------------------
 // buildModel
 // --------------------------------------
-void XSpnde::buildModel(const torch::Tensor &weights)
+void XSp2de::buildModel(const torch::Tensor &weights)
 {
   nFeatures_ = n;
 
@@ -122,7 +122,7 @@ void XSpnde::buildModel(const torch::Tensor &weights)
 // --------------------------------------
 // trainModel
 // --------------------------------------
-void XSpnde::trainModel(const torch::Tensor &weights, 
+void XSp2de::trainModel(const torch::Tensor &weights, 
                         const bayesnet::Smoothing_t smoothing)
 {
   // Accumulate raw counts
@@ -158,7 +158,7 @@ void XSpnde::trainModel(const torch::Tensor &weights,
 // --------------------------------------
 // addSample
 // --------------------------------------
-void XSpnde::addSample(const std::vector<int> &instance, double weight)
+void XSp2de::addSample(const std::vector<int> &instance, double weight)
 {
   if (weight <= 0.0)
     return;
@@ -205,7 +205,7 @@ void XSpnde::addSample(const std::vector<int> &instance, double weight)
 // --------------------------------------
 // computeProbabilities
 // --------------------------------------
-void XSpnde::computeProbabilities()
+void XSp2de::computeProbabilities()
 {
   double totalCount = std::accumulate(classCounts_.begin(), 
                                       classCounts_.end(), 0.0);
@@ -305,7 +305,7 @@ void XSpnde::computeProbabilities()
 // --------------------------------------
 // predict_proba (single instance)
 // --------------------------------------
-std::vector<double> XSpnde::predict_proba(const std::vector<int> &instance) const
+std::vector<double> XSp2de::predict_proba(const std::vector<int> &instance) const
 {
   if (!fitted) {
     throw std::logic_error(CLASSIFIER_NOT_FITTED);
@@ -355,7 +355,7 @@ std::vector<double> XSpnde::predict_proba(const std::vector<int> &instance) cons
 // --------------------------------------
 // predict_proba (batch)
 // --------------------------------------
-std::vector<std::vector<double>> XSpnde::predict_proba(std::vector<std::vector<int>> &test_data)
+std::vector<std::vector<double>> XSp2de::predict_proba(std::vector<std::vector<int>> &test_data)
 {
   int test_size = test_data[0].size();  // each feature is test_data[f], size = #samples
   int sample_size = test_data.size();   // = nFeatures_
@@ -372,7 +372,7 @@ std::vector<std::vector<double>> XSpnde::predict_proba(std::vector<std::vector<i
                     int sample_size, 
                     std::vector<std::vector<double>> &predictions) {
     std::string threadName =
-      "XSpnde-" + std::to_string(begin) + "-" + std::to_string(chunk);
+      "XSp2de-" + std::to_string(begin) + "-" + std::to_string(chunk);
 #if defined(__linux__)
     pthread_setname_np(pthread_self(), threadName.c_str());
 #else
@@ -404,7 +404,7 @@ std::vector<std::vector<double>> XSpnde::predict_proba(std::vector<std::vector<i
 // --------------------------------------
 // predict (single instance)
 // --------------------------------------
-int XSpnde::predict(const std::vector<int> &instance) const
+int XSp2de::predict(const std::vector<int> &instance) const
 {
   auto p = predict_proba(instance);
   return static_cast<int>(
@@ -415,7 +415,7 @@ int XSpnde::predict(const std::vector<int> &instance) const
 // --------------------------------------
 // predict (batch of data)
 // --------------------------------------
-std::vector<int> XSpnde::predict(std::vector<std::vector<int>> &test_data)
+std::vector<int> XSp2de::predict(std::vector<std::vector<int>> &test_data)
 {
   auto probabilities = predict_proba(test_data);
   std::vector<int> predictions(probabilities.size(), 0);
@@ -433,7 +433,7 @@ std::vector<int> XSpnde::predict(std::vector<std::vector<int>> &test_data)
 // --------------------------------------
 // predict (torch::Tensor version)
 // --------------------------------------
-torch::Tensor XSpnde::predict(torch::Tensor &X)
+torch::Tensor XSp2de::predict(torch::Tensor &X)
 {
   auto X_ = TensorUtils::to_matrix(X);
   auto result_v = predict(X_);
@@ -443,7 +443,7 @@ torch::Tensor XSpnde::predict(torch::Tensor &X)
 // --------------------------------------
 // predict_proba (torch::Tensor version)
 // --------------------------------------
-torch::Tensor XSpnde::predict_proba(torch::Tensor &X)
+torch::Tensor XSp2de::predict_proba(torch::Tensor &X)
 {
   auto X_ = TensorUtils::to_matrix(X);
   auto result_v = predict_proba(X_);
@@ -459,7 +459,7 @@ torch::Tensor XSpnde::predict_proba(torch::Tensor &X)
 // --------------------------------------
 // score (torch::Tensor version)
 // --------------------------------------
-float XSpnde::score(torch::Tensor &X, torch::Tensor &y)
+float XSp2de::score(torch::Tensor &X, torch::Tensor &y)
 {
   torch::Tensor y_pred = predict(X);
   return (y_pred == y).sum().item<float>() / y.size(0);
@@ -468,7 +468,7 @@ float XSpnde::score(torch::Tensor &X, torch::Tensor &y)
 // --------------------------------------
 // score (vector version)
 // --------------------------------------
-float XSpnde::score(std::vector<std::vector<int>> &X, std::vector<int> &y)
+float XSp2de::score(std::vector<std::vector<int>> &X, std::vector<int> &y)
 {
   auto y_pred = predict(X);
   int correct = 0;
@@ -483,7 +483,7 @@ float XSpnde::score(std::vector<std::vector<int>> &X, std::vector<int> &y)
 // --------------------------------------
 // Utility: normalize
 // --------------------------------------
-void XSpnde::normalize(std::vector<double> &v) const
+void XSp2de::normalize(std::vector<double> &v) const
 {
   double sum = 0.0;
   for (auto &val : v) {
@@ -499,10 +499,10 @@ void XSpnde::normalize(std::vector<double> &v) const
 // --------------------------------------
 // to_string
 // --------------------------------------
-std::string XSpnde::to_string() const
+std::string XSp2de::to_string() const
 {
   std::ostringstream oss;
-  oss << "----- XSpnde Model -----\n"
+  oss << "----- XSp2de Model -----\n"
       << "nFeatures_    = " << nFeatures_    << "\n"
       << "superParent1_ = " << superParent1_ << "\n"
       << "superParent2_ = " << superParent2_ << "\n"
@@ -533,30 +533,30 @@ std::string XSpnde::to_string() const
 // --------------------------------------
 // Some introspection about the graph
 // --------------------------------------
-int XSpnde::getNumberOfNodes() const 
+int XSp2de::getNumberOfNodes() const 
 {
   // nFeatures + 1 class node
   return nFeatures_ + 1;
 }
 
-int XSpnde::getClassNumStates() const 
+int XSp2de::getClassNumStates() const 
 { 
   return statesClass_; 
 }
 
-int XSpnde::getNFeatures() const 
+int XSp2de::getNFeatures() const 
 { 
   return nFeatures_; 
 }
 
-int XSpnde::getNumberOfStates() const
+int XSp2de::getNumberOfStates() const
 {
   // purely an example. Possibly you want to sum up actual 
   // cardinalities or something else. 
   return std::accumulate(states_.begin(), states_.end(), 0) * nFeatures_;
 }
 
-int XSpnde::getNumberOfEdges() const
+int XSp2de::getNumberOfEdges() const
 {
   // In an SPNDE with n=2, for each feature we have edges from class, sp1, sp2. 
   // So that’s 3*(nFeatures_) edges, minus the ones for the superparents themselves, 

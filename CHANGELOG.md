@@ -7,15 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.7] 2025-03-16
+
+
 ### Added
 
-- Add a new hyperparameter to the BoostAODE class, *alphablock*, to control the way &alpha; is computed, with the last model or with the ensmble built so far. Default value is *false*.
-- Add a new hyperparameter to the SPODE class, *parent*, to set the root node of the model. If no value is set the root parameter of the constructor is used.
-- Add a new hyperparameter to the TAN class, *parent*, to set the root node of the model. If not set the first feature is used as root.
+- A new hyperparameter to the BoostAODE class, *alphablock*, to control the way &alpha; is computed, with the last model or with the ensmble built so far. Default value is *false*.
+- A new hyperparameter to the SPODE class, *parent*, to set the root node of the model. If no value is set the root parameter of the constructor is used.
+- A new hyperparameter to the TAN class, *parent*, to set the root node of the model. If not set the first feature is used as root.
+- A new model named XSPODE, an optimized for speed averaged one dependence estimator.
+- A new model named XSP2DE, an optimized for speed averaged two dependence estimator.
+- A new model named XBAODE, an optimized for speed BoostAODE model.
+- A new model named XBA2DE, an optimized for speed BoostA2DE model.
 
 ### Internal
 
 - Optimize ComputeCPT method in the Node class.
+- Add methods getCount and getMaxCount to the CountingSemaphore class, returning the current count and the maximum count of threads respectively.
 
 ### Changed
 

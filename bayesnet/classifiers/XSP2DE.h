@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: MIT
 // ***************************************************************
 
-#ifndef XSPNDE_H
-#define XSPNDE_H
+#ifndef XSP2DE_H
+#define XSP2DE_H
 
 #include "Classifier.h"
 #include "bayesnet/utils/CountingSemaphore.h"
@@ -14,9 +14,9 @@
 
 namespace bayesnet {
 
-class XSpnde : public Classifier {
+class XSp2de : public Classifier {
   public:
-    XSpnde(int spIndex1, int spIndex2);
+    XSp2de(int spIndex1, int spIndex2);
     void setHyperparameters(const nlohmann::json &hyperparameters_) override;
     void fitx(torch::Tensor &X, torch::Tensor &y, torch::Tensor &weights_, const Smoothing_t smoothing);
     std::vector<double> predict_proba(const std::vector<int> &instance) const;
@@ -72,4 +72,4 @@ class XSpnde : public Classifier {
 };
 
 } // namespace bayesnet
-#endif // XSPNDE_H
+#endif // XSP2DE_H
