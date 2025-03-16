@@ -46,12 +46,11 @@ namespace bayesnet {
         std::string className;
         std::map<std::string, std::vector<int>> states;
         torch::Tensor dataset; // (n+1)xm tensor
-        status_t status = NORMAL;
-        std::vector<std::string> notes; // Used to store messages occurred during the fit process
         void checkFitParameters();
         virtual void buildModel(const torch::Tensor& weights) = 0;
         void trainModel(const torch::Tensor& weights, const Smoothing_t smoothing) override;
         void buildDataset(torch::Tensor& y);
+        const std::string CLASSIFIER_NOT_FITTED = "Classifier has not been fitted";
     private:
         Classifier& build(const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights, const Smoothing_t smoothing);
     };

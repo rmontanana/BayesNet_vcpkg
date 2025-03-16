@@ -18,8 +18,10 @@ include_directories(
     ../tests/lib/Files
     lib/json/include
     /usr/local/include
-    ${FImdlp_INCLUDE_DIRS}
+    /usr/local/include/fimdlp/
 )
 
 add_executable(bayesnet_sample sample.cc) 
-target_link_libraries(bayesnet_sample fimdlp "${TORCH_LIBRARIES}" "${BayesNet}")
+target_link_libraries(bayesnet_sample ${FImdlp} "${TORCH_LIBRARIES}" "${BayesNet}")
+add_executable(bayesnet_sample_xspode sample_xspode.cc) 
+target_link_libraries(bayesnet_sample_xspode ${FImdlp} "${TORCH_LIBRARIES}" "${BayesNet}")

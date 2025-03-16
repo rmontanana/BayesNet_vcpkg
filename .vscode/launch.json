@@ -5,7 +5,7 @@
             "type": "lldb",
             "request": "launch",
             "name": "sample",
-            "program": "${workspaceFolder}/build_release/sample/bayesnet_sample",
+            "program": "${workspaceFolder}/sample/build/bayesnet_sample",
             "args": [
                 "${workspaceFolder}/tests/data/glass.arff"
             ]
@@ -16,7 +16,7 @@
             "name": "test",
             "program": "${workspaceFolder}/build_Debug/tests/TestBayesNet",
             "args": [
-                "No features selected"
+                "[XBAODE]"
             ],
             "cwd": "${workspaceFolder}/build_Debug/tests"
         },

@@ -10,7 +10,6 @@
 
 namespace bayesnet {
     Classifier::Classifier(Network model) : model(model), m(0), n(0), metrics(Metrics()), fitted(false) {}
-    const std::string CLASSIFIER_NOT_FITTED = "Classifier has not been fitted";
     Classifier& Classifier::build(const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights, const Smoothing_t smoothing)
     {
         this->features = features;

@@ -6,7 +6,8 @@
 
 #include <ArffFiles.hpp>
 #include <CPPFImdlp.h>
-#include <bayesnet/ensembles/XBAODE.h>
+#include <bayesnet/ensembles/BoostAODE.h>
+#include <bayesnet/classifiers/XSPODE.h>
 
 std::vector<mdlp::labels_t> discretizeDataset(std::vector<mdlp::samples_t>& X, mdlp::labels_t& y)
 {
@@ -19,13 +20,13 @@ std::vector<mdlp::labels_t> discretizeDataset(std::vector<mdlp::samples_t>& X, m
     }
     return Xd;
 }
-tuple<torch::Tensor, torch::Tensor, std::vector<std::string>, std::string, map<std::string, std::vector<int>>> loadDataset(const std::string& name, bool class_last)
+tuple<std::vector<std::vector<int>>, std::vector<int>, std::vector<std::string>, std::string, map<std::string, std::vector<int>>> loadDataset(const std::string& name, bool class_last)
 {
     auto handler = ArffFiles();
     handler.load(name, class_last);
     // Get Dataset X, y
     std::vector<mdlp::samples_t>& X = handler.getX();
-    mdlp::labels_t& y = handler.getY();
+    mdlp::labels_t y = handler.getY();
     // Get className & Features
     auto className = handler.getClassName();
     std::vector<std::string> features;
@@ -34,16 +35,14 @@ tuple<torch::Tensor, torch::Tensor, std::vector<std::string>, std::string, map<s
     torch::Tensor Xd;
     auto states = map<std::string, std::vector<int>>();
     auto Xr = discretizeDataset(X, y);
-    Xd = torch::zeros({ static_cast<int>(Xr.size()), static_cast<int>(Xr[0].size()) }, torch::kInt32);
     for (int i = 0; i < features.size(); ++i) {
         states[features[i]] = std::vector<int>(*max_element(Xr[i].begin(), Xr[i].end()) + 1);
         auto item = states.at(features[i]);
         iota(begin(item), end(item), 0);
-        Xd.index_put_({ i, "..." }, torch::tensor(Xr[i], torch::kInt32));
     }
     states[className] = std::vector<int>(*max_element(y.begin(), y.end()) + 1);
     iota(begin(states.at(className)), end(states.at(className)), 0);
-    return { Xd, torch::tensor(y, torch::kInt32), features, className, states };
+    return { Xr, y, features, className, states };
 }
 
 int main(int argc, char* argv[])
@@ -53,29 +52,14 @@ int main(int argc, char* argv[])
         return 1;
     }
     std::string file_name = argv[1];
-    torch::Tensor X, y;
-    std::vector<std::string> features;
-    std::string className;
-    map<std::string, std::vector<int>> states;
-    auto clf = bayesnet::XBAODE(); // false for not using voting in predict
-    std::cout << "Library version: " << clf.getVersion() << std::endl;
-    tie(X, y, features, className, states) = loadDataset(file_name, true);
-    torch::Tensor weights = torch::full({ X.size(1) }, 15, torch::kDouble);
-    torch::Tensor dataset;
-    try {
-        auto yresized = torch::transpose(y.view({ y.size(0), 1 }), 0, 1);
-        dataset = torch::cat({ X, yresized }, 0);
-    }
-    catch (const std::exception& e) {
-        std::stringstream oss;
-        oss << "* Error in X and y dimensions *\n";
-        oss << "X dimensions: " << dataset.sizes() << "\n";
-        oss << "y dimensions: " << y.sizes();
-        throw std::runtime_error(oss.str());
-    }
-    clf.fit(dataset, features, className, states, weights, bayesnet::Smoothing_t::LAPLACE);
-    auto score = clf.score(X, y);
-    std::cout << "File: " << file_name << " Model: BoostAODE score: " << score << std::endl;
+    bayesnet::BaseClassifier* clf = new bayesnet::XSpode(0);
+    std::cout << "Library version: " << clf->getVersion() << std::endl;
+    auto [X, y, features, className, states] = loadDataset(file_name, true);
+    torch::Tensor weights = torch::full({ static_cast<long>(X[0].size()) }, 1.0 / X[0].size(), torch::kDouble);
+    clf->fit(X, y, features, className, states, bayesnet::Smoothing_t::ORIGINAL);
+    auto score = clf->score(X, y);
+    std::cout << "File: " << file_name << " Model: XSpode(0) score: " << score << std::endl;
+    delete clf;
     return 0;
 }
 

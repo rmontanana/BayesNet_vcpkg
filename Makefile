@@ -97,9 +97,17 @@ fname = "tests/data/iris.arff"
 sample: ## Build sample
 	@echo ">>> Building Sample...";
 	@if [ -d ./sample/build ]; then rm -rf ./sample/build; fi
-	@cd sample && cmake -B build -S . && cmake --build build -t bayesnet_sample
+	@cd sample && cmake -B build -S . -D CMAKE_BUILD_TYPE=Debug && cmake --build build -t bayesnet_sample
 	sample/build/bayesnet_sample $(fname)
-	@echo ">>> Done";	
+	@echo ">>> Done";
+
+fname = "tests/data/iris.arff"
+sample2: ## Build sample2
+	@echo ">>> Building Sample...";
+	@if [ -d ./sample/build ]; then rm -rf ./sample/build; fi
+	@cd sample && cmake -B build -S . -D CMAKE_BUILD_TYPE=Debug && cmake --build build -t bayesnet_sample_xspode
+	sample/build/bayesnet_sample_xspode $(fname)
+	@echo ">>> Done";		
 
 opt = ""
 test: ## Run tests (opt="-s") to verbose output the tests, (opt="-c='Test Maximum Spanning Tree'") to run only that section

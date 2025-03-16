@@ -3,7 +3,7 @@
 // SPDX-FileType: SOURCE
 // SPDX-License-Identifier: MIT
 // ***************************************************************
-
+#include "bayesnet/utils/bayesnetUtils.h"
 #include "KDB.h"
 
 namespace bayesnet {

@@ -6,10 +6,12 @@
 
 #include <random> 
 #include <set>
-#include <functional>
 #include <limits.h>
 #include <tuple>
 #include "BoostAODE.h"
+#include "bayesnet/classifiers/SPODE.h"
+#include <loguru.hpp>
+#include <loguru.cpp>
 
 namespace bayesnet {
 
@@ -46,14 +48,16 @@ namespace bayesnet {
         torch::Tensor weights_ = torch::full({ m }, 1.0 / m, torch::kFloat64);
         bool finished = false;
         std::vector<int> featuresUsed;
+        n_models = 0;
         if (selectFeatures) {
             featuresUsed = initializeModels(smoothing);
             auto ypred = predict(X_train);
             std::tie(weights_, alpha_t, finished) = update_weights(y_train, ypred, weights_);
             // Update significance of the models
             for (int i = 0; i < n_models; ++i) {
-                significanceModels[i] = alpha_t;
+                significanceModels.push_back(alpha_t);
             }
+            // VLOG_SCOPE_F(1, "SelectFeatures. alpha_t: %f n_models: %d", alpha_t, n_models);
             if (finished) {
                 return;
             }
@@ -120,7 +124,7 @@ namespace bayesnet {
                 models.push_back(std::move(model));
                 significanceModels.push_back(alpha_t);
                 n_models++;
-                // VLOG_SCOPE_F(2, "numItemsPack: %d n_models: %d featuresUsed: %zu", numItemsPack, n_models, featuresUsed.size());
+                // VLOG_SCOPE_F(2, "finished: %d numItemsPack: %d n_models: %d featuresUsed: %zu", finished, numItemsPack, n_models, featuresUsed.size());
             }
             if (block_update) {
                 std::tie(weights_, alpha_t, finished) = update_weights_block(k, y_train, weights_);
@@ -163,7 +167,7 @@ namespace bayesnet {
                 }
             } else {
                 notes.push_back("Convergence threshold reached & 0 models eliminated");
-                // VLOG_SCOPE_F(4, "Convergence threshold reached & 0 models eliminated n_models=%d numItemsPack=%d", n_models, numItemsPack);
+                // VLG_SCOPE_F(4, "Convergence threshold reached & 0 models eliminated n_models=%d numItemsPack=%d", n_models, numItemsPack);
             }
         }
         if (featuresUsed.size() != features.size()) {

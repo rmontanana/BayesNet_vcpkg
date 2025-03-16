@@ -10,14 +10,10 @@
 #include <vector>
 #include "bayesnet/config.h"
 #include "Node.h"
+#include "Smoothing.h"
 
 namespace bayesnet {
-    enum class Smoothing_t {
-        NONE = -1,
-        ORIGINAL = 0,
-        LAPLACE,
-        CESTNIK
-    };
+
     class Network {
     public:
         Network();

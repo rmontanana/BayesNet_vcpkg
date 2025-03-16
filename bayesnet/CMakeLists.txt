@@ -1,4 +1,5 @@
 include_directories(
+    ${BayesNet_SOURCE_DIR}/lib/log
     ${BayesNet_SOURCE_DIR}/lib/mdlp/src
     ${BayesNet_SOURCE_DIR}/lib/folding
     ${BayesNet_SOURCE_DIR}/lib/json/include
