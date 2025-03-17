@@ -162,7 +162,7 @@ TEST_CASE("Bisection Best", "[BoostA2DE]")
         {"maxTolerance", 3},
         {"convergence", true},
         {"block_update", false},
-        {"convergence_best", false},
+        {"convergence_best", true},
         });
     clf.fit(raw.X_train, raw.y_train, raw.features, raw.className, raw.states, raw.smoothing);
     REQUIRE(clf.getNumberOfNodes() == 480);

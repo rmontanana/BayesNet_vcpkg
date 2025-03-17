@@ -7,8 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.0.7] 2025-03-16
+### Internal
 
+- Add changes to .clang-format to ajust to vscode format style thanks to https://clang-format-configurator.site/
+
+## [1.0.7] 2025-03-16
 
 ### Added
 
