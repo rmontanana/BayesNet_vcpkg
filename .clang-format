@@ -1,4 +1,10 @@
 # .clang-format
+---
 BasedOnStyle: LLVM
+AccessModifierOffset: -4
+BreakBeforeBraces: Allman
+ColumnLimit: 0
+FixNamespaceComments: false
 IndentWidth: 4
-ColumnLimit: 120
+NamespaceIndentation: All
+TabWidth: 4
