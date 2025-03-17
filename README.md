@@ -76,7 +76,11 @@ make sample fname=tests/data/glass.arff
 
 #### - [BoostAODE](docs/BoostAODE.md)
 
+#### - XBAODE
+
 #### - BoostA2DE
+
+#### - XBA2DE
 
 ### With Local Discretization
 
