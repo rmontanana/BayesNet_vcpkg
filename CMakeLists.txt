@@ -41,7 +41,6 @@ option(INSTALL_GTEST "Enable installation of googletest."         OFF)
 # CMakes modules
 # --------------
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
-include(AddGitSubmodule)
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
   MESSAGE("Debug mode")
@@ -64,10 +63,6 @@ endif (ENABLE_CLANG_TIDY)
 
 # External libraries - dependencies of BayesNet
 # ---------------------------------------------
-
-# include(FetchContent)
-add_git_submodule("lib/json")
-add_git_submodule("lib/mdlp")
 
 # Subdirectories
 # --------------
